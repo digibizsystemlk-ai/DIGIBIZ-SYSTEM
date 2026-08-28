@@ -1,5 +1,5 @@
 // Madawala Tea Shop - Service Worker (PWA)
-const CACHE_NAME = 'madawala-pwa-v8';
+const CACHE_NAME = 'madawala-pwa-v9';
 const ASSETS = [
     '/clients/madawalateashop/',
     '/clients/madawalateashop/index.html',
@@ -12,13 +12,11 @@ self.addEventListener('install', function(event) {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then(function(cache) {
-            return Promise.allSettled(
-                ASSETS.map(function(url) {
-                    return cache.add(url).catch(function(err) {
-                        console.warn('[SW] Cache add skipped:', url);
-                    });
-                })
-            );
+            return Promise.all(ASSETS.map(function(url) {
+                return cache.add(url).catch(function(err) {
+                    console.warn('[SW] Cache add skipped:', url);
+                });
+            }));
         })
     );
 });

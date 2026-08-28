@@ -37,7 +37,7 @@
     </script>
 
     <!-- PWA Meta - Fixed Relative Paths -->
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="/clients/madawalateashop/manifest.json">
     <meta name="theme-color" content="#064e3b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -5471,8 +5471,8 @@
         // 10. APP STARTUP & SERVICE WORKER
         // ==========================================
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=20260828_pwa_v8', {
-                scope: './',
+            navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260828_pwa_v9', {
+                scope: '/clients/madawalateashop/',
                 updateViaCache: 'none'
             })
                 .then(function (reg) {

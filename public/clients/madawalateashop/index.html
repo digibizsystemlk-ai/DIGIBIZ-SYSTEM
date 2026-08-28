@@ -3645,7 +3645,7 @@
             }
         }
 
-        function installPWA() {
+        async function installPWA() {
             if (checkPWAInstalled()) {
                 showToast('✅ MADAWALA Tea Shop App is already installed!');
                 closePWAInstallBanner();
@@ -3653,8 +3653,10 @@
             }
 
             if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function (choiceResult) {
+                const installPrompt = deferredPrompt;
+                deferredPrompt = null;
+                installPrompt.prompt();
+                installPrompt.userChoice.then(function (choiceResult) {
                     if (choiceResult.outcome === 'accepted') {
                         console.log('[PWA] User accepted install');
                         isPWAInstalled = true;
@@ -3664,15 +3666,9 @@
                     } else {
                         console.log('[PWA] User dismissed install');
                     }
-                    deferredPrompt = null;
                 });
             } else {
-                showToast('📲 Preparing Native Installer...');
-                setTimeout(function () {
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                    }
-                }, 800);
+                showToast('📲 Browser install is not ready. Use the browser menu: Install app / Add to Home screen.');
             }
         }
 
@@ -5472,7 +5468,7 @@
         // ==========================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
-                navigator.serviceWorker.register('./sw.js?v=20260828_fixed', {
+                navigator.serviceWorker.register('./sw.js?v=20260828_pwa_v7', {
                     scope: './',
                     updateViaCache: 'none'
                 })
@@ -5544,20 +5540,6 @@
                 setTimeout(showPWAInstallBanner, 2000);
             });
 
-            window.addEventListener('beforeinstallprompt', function (e) {
-                e.preventDefault();
-                deferredPrompt = e;
-                if (localStorage.getItem('madawala_auth_active') === 'true') {
-                    // showPWAInstallBanner will trigger on beforeinstallprompt
-                }
-            });
-
-            window.addEventListener('appinstalled', function () {
-                isPWAInstalled = true;
-                localStorage.setItem('pwa_installed', 'true');
-                closePWAInstallBanner();
-                showToast('✅ MADAWALA App installed successfully!');
-            });
         });
     </script>
 </body>

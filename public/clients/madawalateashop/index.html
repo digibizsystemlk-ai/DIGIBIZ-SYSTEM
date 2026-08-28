@@ -1768,10 +1768,6 @@
                             onclick="openWizard('banking')">
                             <i class="fa-solid fa-vault"></i> <span>Record Movement</span>
                         </button>
-                        <button class="btn-primary-action" style="background: var(--red-text);"
-                            onclick="resetTransactionData()" title="Clear transactions and banking data">
-                            <i class="fa-solid fa-rotate-left"></i> <span>Reset Data</span>
-                        </button>
                     </div>
                 </div>
 
@@ -2121,6 +2117,20 @@
                         </div>
                         <button type="submit" class="btn-wizard-submit btn-green" id="btnSaveProf">
                             <i class="fa-solid fa-floppy-disk"></i> <span>Save Profile</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div style="background: #fff7f7; padding: 22px; border-radius: 16px; border: 1px solid #fecaca; margin-top: 16px;">
+                    <h3 style="color: var(--red-text); margin-bottom: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> Reset Transaction Data</h3>
+                    <p style="font-size: 12.5px; color: #7f1d1d; margin-bottom: 14px;">This clears credits, repayments, bank transactions, and bank accounts. Customer profiles will be kept.</p>
+                    <form onsubmit="resetTransactionData(event)">
+                        <div class="form-group-large">
+                            <label for="resetDataPassword">Current Password</label>
+                            <input type="password" class="form-control-large" id="resetDataPassword" autocomplete="current-password" required placeholder="Enter your current password">
+                        </div>
+                        <button type="submit" class="btn-wizard-submit" style="background: var(--red-text);" id="btnResetData">
+                            <i class="fa-solid fa-rotate-left"></i> <span>Reset Data</span>
                         </button>
                     </form>
                 </div>
@@ -4833,14 +4843,37 @@
             }
         }
 
-        async function resetTransactionData() {
+        async function resetTransactionData(e) {
+            if (e) e.preventDefault();
             if (!currentBusinessId) return;
+
+            const passwordInput = document.getElementById('resetDataPassword');
+            const password = passwordInput?.value || '';
+            const user = auth.currentUser;
+            if (!user || !user.email) {
+                alert('User session not found. Please log in again.');
+                return;
+            }
+            if (!password) {
+                alert('Enter your current password to continue.');
+                return;
+            }
+
             const confirmed = confirm(
                 'Reset all credit, repayment, bank transaction, and bank account data? Customer profiles will be kept, but their balances will be reset to zero.'
             );
             if (!confirmed) return;
 
+            const btn = document.getElementById('btnResetData');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Verifying...</span>';
+            }
+
             try {
+                const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+                await user.reauthenticateWithCredential(credential);
+
                 const businessRef = db.collection('businesses').doc(currentBusinessId);
                 const collectionsToClear = ['credits', 'bank_transactions', 'bank_accounts'];
 
@@ -4888,11 +4921,19 @@
                 renderBankTransactionsTable();
                 if (currentActiveTab === 'credits') renderCreditsTable();
                 if (currentActiveTab === 'customers') renderCustomersTable();
+                if (passwordInput) passwordInput.value = '';
                 showToast('✅ All transaction and banking data was reset. Customers were kept.');
             } catch (err) {
                 console.error('[Reset Data Error]', err);
-                alert('Reset failed: ' + err.message);
+                alert(err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'
+                    ? 'Incorrect password. No data was reset.'
+                    : 'Reset failed: ' + err.message);
                 await refreshAllData();
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> <span>Reset Data</span>';
+                }
             }
         }
 

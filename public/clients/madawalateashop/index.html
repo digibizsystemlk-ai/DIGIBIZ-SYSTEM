@@ -1768,6 +1768,10 @@
                             onclick="openWizard('banking')">
                             <i class="fa-solid fa-vault"></i> <span>Record Movement</span>
                         </button>
+                        <button class="btn-primary-action" style="background: var(--red-text);"
+                            onclick="resetTransactionData()" title="Clear transactions and banking data">
+                            <i class="fa-solid fa-rotate-left"></i> <span>Reset Data</span>
+                        </button>
                     </div>
                 </div>
 
@@ -3658,6 +3662,23 @@
         // 7. FIRESTORE DATA SYNC & LOCAL CACHE
         // ==========================================
         function updateCreditSummaryCards() {
+            const ids = {
+                totalCredit: document.getElementById('creditSummaryTotalCredit'),
+                collected: document.getElementById('creditSummaryCollected'),
+                outstanding: document.getElementById('creditSummaryOutstanding'),
+                recovery: document.getElementById('creditSummaryRecovery'),
+                debtors: document.getElementById('creditSummaryDebtors')
+            };
+
+            if (!allCredits.length) {
+                if (ids.totalCredit) ids.totalCredit.textContent = '';
+                if (ids.collected) ids.collected.textContent = '';
+                if (ids.outstanding) ids.outstanding.textContent = '';
+                if (ids.recovery) ids.recovery.textContent = '';
+                if (ids.debtors) ids.debtors.textContent = '';
+                return;
+            }
+
             // Calculate totals from all credits
             let totalCredit = 0;
             let totalCollected = 0;
@@ -3689,15 +3710,6 @@
 
             const recoveryRate = totalCredit > 0 ? ((totalCollected / totalCredit) * 100) : 0;
             const activeDebtors = activeDebtorsSet.size;
-
-            // Update DOM
-            const ids = {
-                totalCredit: document.getElementById('creditSummaryTotalCredit'),
-                collected: document.getElementById('creditSummaryCollected'),
-                outstanding: document.getElementById('creditSummaryOutstanding'),
-                recovery: document.getElementById('creditSummaryRecovery'),
-                debtors: document.getElementById('creditSummaryDebtors')
-            };
 
             if (ids.totalCredit) ids.totalCredit.textContent = formatRs(totalCredit);
             if (ids.collected) ids.collected.textContent = formatRs(totalCollected);
@@ -4818,6 +4830,69 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-vault"></i> <span>Confirm & Record Banking</span>';
+            }
+        }
+
+        async function resetTransactionData() {
+            if (!currentBusinessId) return;
+            const confirmed = confirm(
+                'Reset all credit, repayment, bank transaction, and bank account data? Customer profiles will be kept, but their balances will be reset to zero.'
+            );
+            if (!confirmed) return;
+
+            try {
+                const businessRef = db.collection('businesses').doc(currentBusinessId);
+                const collectionsToClear = ['credits', 'bank_transactions', 'bank_accounts'];
+
+                for (const collectionName of collectionsToClear) {
+                    const snapshot = await businessRef.collection(collectionName).get();
+                    let batch = db.batch();
+                    let operationCount = 0;
+
+                    for (const doc of snapshot.docs) {
+                        batch.delete(doc.ref);
+                        operationCount++;
+                        if (operationCount === 450) {
+                            await batch.commit();
+                            batch = db.batch();
+                            operationCount = 0;
+                        }
+                    }
+
+                    if (operationCount) await batch.commit();
+                }
+
+                let customerBatch = db.batch();
+                let customerOperationCount = 0;
+                for (const customer of allCustomers) {
+                    customerBatch.update(businessRef.collection('customers').doc(customer.id), {
+                        totalDue: 0,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    customer.totalDue = 0;
+                    customerOperationCount++;
+                    if (customerOperationCount === 450) {
+                        await customerBatch.commit();
+                        customerBatch = db.batch();
+                        customerOperationCount = 0;
+                    }
+                }
+                if (customerOperationCount) await customerBatch.commit();
+
+                allCredits = [];
+                allBankTransactions = [];
+                allBankAccounts = [];
+                saveLocalCache();
+                updateCreditSummaryCards();
+                renderBankCards();
+                renderBankTransactionsTable();
+                if (currentActiveTab === 'credits') renderCreditsTable();
+                if (currentActiveTab === 'customers') renderCustomersTable();
+                showToast('✅ All transaction and banking data was reset. Customers were kept.');
+            } catch (err) {
+                console.error('[Reset Data Error]', err);
+                alert('Reset failed: ' + err.message);
+                await refreshAllData();
             }
         }
 

@@ -1652,11 +1652,7 @@
 
                     <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
                         <button class="btn btn-secondary btn-sm" onclick="filterPOS('ALL')">All</button>
-                        <button class="btn btn-secondary btn-sm" onclick="filterPOS('Memory Cards')">Memory</button>
-                        <button class="btn btn-secondary btn-sm" onclick="filterPOS('Accessories')">Accessories</button>
-                        <button class="btn btn-secondary btn-sm" onclick="filterPOS('Spares')">Spares</button>
-                        <button class="btn btn-secondary btn-sm" onclick="filterPOS('Paper')">Paper</button>
-                        <button class="btn btn-secondary btn-sm" onclick="filterPOS('SERVICES')">Services</button>
+                        <span id="posCategoryFilters"></span>
                     </div>
 
                     <div class="pos-grid" id="posProductGrid">
@@ -1820,6 +1816,7 @@
                     <h1>Services <span class="sub">| Photocopy · Printing · Lamination</span></h1>
                 </div>
                 <div class="actions">
+                    <button class="btn btn-secondary" onclick="openCategoryManager('service')"><i class="fas fa-tags"></i> Service Categories</button>
                     <button class="btn btn-primary" onclick="openModal('printModal')"><i class="fas fa-plus"></i> New Service Order</button>
                 </div>
             </div>
@@ -2100,6 +2097,7 @@
                     <h1>Inventory <span class="sub">| Stock Management</span></h1>
                 </div>
                 <div class="actions">
+                    <button class="btn btn-secondary" onclick="openCategoryManager('product')"><i class="fas fa-tags"></i> Categories</button>
                     <button class="btn btn-primary" onclick="openModal('inventoryModal')"><i class="fas fa-plus"></i> Add Product</button>
                     <button class="btn btn-secondary" onclick="document.getElementById('excelFileInput').click()">
                         <i class="fas fa-file-excel" style="color:#067d62;"></i> Import Excel
@@ -2142,15 +2140,16 @@
                                 <th>Category</th>
                                 <th class="text-right">Cost</th>
                                 <th class="text-right">Price</th>
-                                <th class="text-right">Discount</th>
+                                <th class="text-right">Discount Price</th>
                                 <th class="text-right">Stock</th>
+                                <th class="text-right">Min Stock</th>
                                 <th>Warranty</th>
                                 <th>Status</th>
                                 <th class="text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody id="inventoryTable">
-                            <tr><td colspan="9" style="text-align:center; color:#999; padding:30px 0;">No items in inventory. Add products or import Excel.</td></tr>
+                            <tr><td colspan="11" style="text-align:center; color:#999; padding:30px 0;">No items in inventory. Add products or import Excel.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -3517,6 +3516,31 @@
     </div>
 
     <!-- Inventory Modal -->
+    <div class="modal-overlay" id="categoryManagerModal">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-tags"></i> <span id="categoryManagerTitle">Manage Categories</span></h3>
+                <button class="modal-close" onclick="closeModal('categoryManagerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>New Category</label>
+                        <input type="text" class="form-control" id="newCategoryName" placeholder="e.g. Tyres">
+                    </div>
+                    <div class="form-group" style="align-self:end;">
+                        <button class="btn btn-primary" onclick="addManagedCategory()"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                </div>
+                <div id="categoryManagerList" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('categoryManagerModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Modal -->
     <div class="modal-overlay" id="inventoryModal">
         <div class="modal">
             <div class="modal-header">
@@ -3536,7 +3560,7 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Category</label>
+                        <label>Category <button type="button" class="btn btn-secondary btn-sm" onclick="openCategoryManager('product')">Manage</button></label>
                         <select class="form-control" id="invCategory">
                             <option value="Memory Cards">Memory Cards</option>
                             <option value="Accessories">Accessories</option>
@@ -3558,6 +3582,16 @@
                     <div class="form-group">
                         <label>Price (LKR) *</label>
                         <input type="number" class="form-control" id="invPrice" placeholder="900">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Discount Price (LKR)</label>
+                        <input type="number" class="form-control" id="invDiscountPrice" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Minimum Stock Alert Level</label>
+                        <input type="number" class="form-control" id="invMinStock" value="3" min="0">
                     </div>
                 </div>
                 <div class="form-row">
@@ -3627,6 +3661,16 @@
                     <div class="form-group">
                         <label><span data-key="selling_price">Selling Price</span> (LKR) *</label>
                         <input type="number" class="form-control" id="editInvPrice">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Discount Price (LKR)</label>
+                        <input type="number" class="form-control" id="editInvDiscountPrice" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Minimum Stock Alert Level</label>
+                        <input type="number" class="form-control" id="editInvMinStock" min="0">
                     </div>
                 </div>
                 <div class="form-row">
@@ -3822,13 +3866,8 @@
                     <input type="text" class="form-control" id="printCustomer" placeholder="e.g. Sunil Perera">
                 </div>
                 <div class="form-group">
-                    <label><span data-key="service_type">Service Type</span> *</label>
+                    <label><span data-key="service_type">Service Type</span> * <button type="button" class="btn btn-secondary btn-sm" onclick="openCategoryManager('service')">Manage</button></label>
                     <select class="form-control" id="printService">
-                        <option value="Photocopy">Photocopy (B&W)</option>
-                        <option value="Color Print">Color Print</option>
-                        <option value="Lamination">Lamination</option>
-                        <option value="Binding">Binding</option>
-                        <option value="Other">Other</option>
                     </select>
                 </div>
                 <div class="form-row">
@@ -3865,11 +3904,6 @@
                 <div class="form-group">
                     <label>Service Type *</label>
                     <select class="form-control" id="editPrintService">
-                        <option value="Photocopy">Photocopy (B&W)</option>
-                        <option value="Color Print">Color Print</option>
-                        <option value="Lamination">Lamination</option>
-                        <option value="Binding">Binding</option>
-                        <option value="Other">Other</option>
                     </select>
                 </div>
                 <div class="form-row">
@@ -4353,6 +4387,31 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="editBankModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-pen-to-square"></i> Edit Bank Account</h3>
+                <button class="modal-close" onclick="closeModal('editBankModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editBankId">
+                <div class="form-group"><label>Bank Name *</label><input type="text" class="form-control" id="editBankName"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Account Number *</label><input type="text" class="form-control" id="editBankAccNum"></div>
+                    <div class="form-group"><label>Branch</label><input type="text" class="form-control" id="editBankBranch"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Account Holder Name</label><input type="text" class="form-control" id="editBankHolder"></div>
+                    <div class="form-group"><label>Balance (LKR)</label><input type="number" class="form-control" id="editBankBalance" min="0"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editBankModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEditedBankAccount()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -4511,6 +4570,8 @@
 
     let data = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY)) || {
         inventory: [],
+        productCategories: ['Memory Cards', 'Accessories', 'Spares', 'Paper'],
+        serviceCategories: ['Photocopy', 'Color Print', 'Lamination', 'Binding', 'Other'],
         customers: [],
         suppliers: [],
         repairs: [],
@@ -4548,6 +4609,8 @@
             address: 'Kandy Road, Kurunegala'
         }
     };
+    data.productCategories = Array.from(new Set((data.productCategories || ['Memory Cards', 'Accessories', 'Spares', 'Paper']).filter(Boolean)));
+    data.serviceCategories = Array.from(new Set((data.serviceCategories || ['Photocopy', 'Color Print', 'Lamination', 'Binding', 'Other']).filter(Boolean)));
 
     let _cloudSyncTimeout = null;
     let _isRemoteUpdate = false;
@@ -6192,6 +6255,7 @@
             loadUserRole('sathityre05@gmail.com');
         }
         updateSidebarByRole();
+        populateCategoryControls();
 
         const hash = window.location.hash.replace('#', '');
         if (hash && document.getElementById('page-' + hash) && hasPageAccess(hash)) {
@@ -6221,7 +6285,7 @@ function renderDashboard() {
     }, 0);
     
     var lowStockCount = (data.inventory || []).filter(function(item) {
-        return (item.stock || 0) <= 3;
+        return (item.stock || 0) <= (item.minStock == null ? 3 : item.minStock);
     }).length;
     
     var today = new Date();
@@ -6347,6 +6411,7 @@ function renderDashboard() {
     let selectedCustomer = null;
 
     function renderPOS() {
+        populateCategoryControls();
         const search = (document.getElementById('posSearch')?.value || '').toLowerCase();
         const filtered = (data.inventory || []).filter(function(i) {
             return (posFilter === 'ALL' || i.category === posFilter) &&
@@ -6364,7 +6429,7 @@ function renderDashboard() {
                         '<div class="icon"><i class="fas fa-box"></i></div>' +
                         '<div class="name">' + i.name + '</div>' +
                         '<div class="price">' + (i.discountPrice && i.discountPrice > 0 ? '<span style="text-decoration:line-through; color:#999; font-size:10px;">LKR ' + (i.price || 0).toLocaleString() + '</span> <span style="color:#067d62; font-weight:900;">LKR ' + (i.discountPrice || 0).toLocaleString() + '</span>' : 'LKR ' + (i.price || 0).toLocaleString()) + '</div>' +
-                        '<div class="stock">' + (i.stock > 0 ? i.stock + ' in stock' : 'Out of Stock') + '</div>' +
+                        '<div class="stock">' + (i.stock > 0 ? i.stock + ' in stock' : 'Out of Stock') + (i.category !== 'SERVICES' ? ' · Alert at ' + (i.minStock == null ? 3 : i.minStock) : '') + '</div>' +
                     '</div>';
                 }).join('');
             }
@@ -6379,7 +6444,7 @@ function renderDashboard() {
                     return '<tr>' +
                         '<td><strong>' + i.name + '</strong></td>' +
                         '<td>' + (i.discountPrice && i.discountPrice > 0 ? '<span style="text-decoration:line-through; color:#999; font-size:10px;">LKR ' + (i.price || 0).toLocaleString() + '</span><br><strong style="color:#067d62;">LKR ' + (i.discountPrice || 0).toLocaleString() + '</strong>' : '<strong style="color:#067d62;">LKR ' + (i.price || 0).toLocaleString() + '</strong>') + '</td>' +
-                        '<td><span class="badge ' + (i.stock <= 3 ? 'badge-low' : 'badge-good') + '">' + i.stock + '</span></td>' +
+                        '<td><span class="badge ' + (i.stock <= (i.minStock == null ? 3 : i.minStock) ? 'badge-low' : 'badge-good') + '">' + i.stock + '</span></td>' +
                         '<td>' + getExpiryBadge(i) + '</td>' +
                         '<td class="text-right"><button class="btn btn-primary btn-sm" onclick="addToCart(\'' + i.id + '\')">+ Add</button></td>' +
                     '</tr>';
@@ -6408,7 +6473,7 @@ function renderDashboard() {
             }
             existing.qty++;
         } else {
-            data.cart.push({ id: item.id, name: item.name, price: item.price, cost: item.cost, qty: 1, isService: item.category === 'SERVICES' });
+            data.cart.push({ id: item.id, name: item.name, price: item.discountPrice || item.price, regularPrice: item.price, cost: item.cost, qty: 1, isService: item.category === 'SERVICES' });
         }
         if (item.category !== 'SERVICES') item.stock--;
 
@@ -7014,6 +7079,7 @@ function renderDashboard() {
 
     // Updated renderPrints Function
     function renderPrints() {
+        populateCategoryControls();
         var tbody = document.getElementById('printTable');
         if (!tbody) return;
         
@@ -7925,8 +7991,92 @@ function renderDashboard() {
     //  INVENTORY
     // ================================================================
 
+    var activeCategoryType = 'product';
+
+    function populateCategoryControls() {
+        data.productCategories = Array.from(new Set((data.productCategories || ['Memory Cards', 'Accessories', 'Spares', 'Paper']).filter(Boolean)));
+        data.serviceCategories = Array.from(new Set((data.serviceCategories || ['Photocopy', 'Color Print', 'Lamination', 'Binding', 'Other']).filter(Boolean)));
+        var productOptions = (data.productCategories || []).map(function(category) {
+            return '<option value="' + category + '">' + category + '</option>';
+        }).join('');
+        ['invCategory', 'editInvCategory'].forEach(function(id) {
+            var select = document.getElementById(id);
+            if (select) select.innerHTML = productOptions + '<option value="SERVICES">Services</option>';
+        });
+
+        var serviceOptions = (data.serviceCategories || []).map(function(category) {
+            return '<option value="' + category + '">' + category + '</option>';
+        }).join('');
+        ['printService', 'editPrintService'].forEach(function(id) {
+            var select = document.getElementById(id);
+            if (select) select.innerHTML = serviceOptions;
+        });
+
+        var filters = document.getElementById('posCategoryFilters');
+        if (filters) {
+            filters.innerHTML = (data.productCategories || []).concat(['SERVICES']).map(function(category) {
+                return '<button class="btn btn-secondary btn-sm" onclick="filterPOS(\'' + category.replace(/'/g, "\\'") + '\')">' + category + '</button>';
+            }).join('');
+        }
+    }
+
+    function openCategoryManager(type) {
+        activeCategoryType = type === 'service' ? 'service' : 'product';
+        document.getElementById('categoryManagerTitle').textContent = activeCategoryType === 'service' ? 'Manage Service Categories' : 'Manage Product Categories';
+        document.getElementById('newCategoryName').value = '';
+        renderCategoryManager();
+        openModal('categoryManagerModal');
+    }
+
+    function renderCategoryManager() {
+        var list = document.getElementById('categoryManagerList');
+        if (!list) return;
+        var categories = activeCategoryType === 'service' ? data.serviceCategories : data.productCategories;
+        list.innerHTML = categories.map(function(category) {
+            return '<span class="badge badge-blue" style="display:inline-flex; align-items:center; gap:6px; padding:6px 8px;">' + category +
+                '<button type="button" onclick="deleteManagedCategory(\'' + category.replace(/'/g, "\\'") + '\')" style="border:0; background:transparent; color:#dc2626; cursor:pointer; padding:0 2px;" title="Delete"><i class="fas fa-times"></i></button></span>';
+        }).join('') || '<span style="color:#999;">No categories yet.</span>';
+    }
+
+    function addManagedCategory() {
+        var input = document.getElementById('newCategoryName');
+        var name = input.value.trim();
+        if (!name) return;
+        var categories = activeCategoryType === 'service' ? data.serviceCategories : data.productCategories;
+        if (categories.some(function(category) { return category.toLowerCase() === name.toLowerCase(); })) {
+            showToast('Category already exists');
+            return;
+        }
+        categories.push(name);
+        saveData();
+        populateCategoryControls();
+        renderCategoryManager();
+        input.value = '';
+        showToast('Category added: ' + name);
+    }
+
+    function deleteManagedCategory(name) {
+        var categories = activeCategoryType === 'service' ? data.serviceCategories : data.productCategories;
+        var inUse = activeCategoryType === 'service' ? (data.prints || []).some(function(order) { return order.service === name; }) : (data.inventory || []).some(function(item) { return item.category === name; });
+        if (inUse) {
+            showToast('Cannot delete a category that is in use');
+            return;
+        }
+        if (!confirm('Delete category "' + name + '"?')) return;
+        if (categories.length <= 1) {
+            showToast('Keep at least one category');
+            return;
+        }
+        var index = categories.indexOf(name);
+        if (index >= 0) categories.splice(index, 1);
+        saveData();
+        populateCategoryControls();
+        renderCategoryManager();
+    }
+
 function renderInventory() {
     console.log('🔄 Rendering Inventory...');
+    populateCategoryControls();
     
     var tbody = document.getElementById('inventoryTable');
     if (!tbody) return;
@@ -7935,7 +8085,7 @@ function renderInventory() {
         return sum + (((i && i.cost) || 0) * (i.stock || 0));
     }, 0);
     var lowCount = (data.inventory || []).filter(function(i) {
-        return (i.stock || 0) <= 3;
+        return (i.stock || 0) <= (i.minStock == null ? 3 : i.minStock);
     }).length;
     
     if (document.getElementById('invTotalValuation')) document.getElementById('invTotalValuation').textContent = 'LKR ' + totalVal.toLocaleString('en-US', { minimumFractionDigits: 2 });
@@ -7948,7 +8098,7 @@ function renderInventory() {
     });
     
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999; padding:30px 0;">No items in inventory.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:#999; padding:30px 0;">No items in inventory.</td></tr>';
         return;
     }
     
@@ -7959,7 +8109,9 @@ function renderInventory() {
             '<td><span class="badge badge-blue">' + (i.category || 'Accessories') + '</span></td>' +
             '<td class="text-right">LKR ' + ((i.cost || 0)).toLocaleString() + '</td>' +
             '<td class="text-right"><strong style="color:#067d62;">LKR ' + ((i.price || 0)).toLocaleString() + '</strong></td>' +
+            '<td class="text-right">' + (i.discountPrice ? '<strong style="color:#067d62;">LKR ' + i.discountPrice.toLocaleString() + '</strong>' : '-') + '</td>' +
             '<td class="text-right"><strong>' + i.stock + '</strong></td>' +
+            '<td class="text-right">' + (i.minStock == null ? 3 : i.minStock) + '</td>' +
             '<td>' + (typeof getExpiryBadge === 'function' ? getExpiryBadge(i) : '-') + '</td>' +
             '<td><span class="badge ' + (i.stock <= 0 ? 'badge-low' : 'badge-good') + '">' + (i.stock <= 0 ? 'Out' : 'In Stock') + '</span></td>' +
             '<td class="text-right">' +
@@ -7993,6 +8145,8 @@ function openEditInventory(id) {
     document.getElementById('editInvStock').value = item.stock || 0;
     document.getElementById('editInvCost').value = item.cost || 0;
     document.getElementById('editInvPrice').value = item.price || 0;
+    document.getElementById('editInvDiscountPrice').value = item.discountPrice || 0;
+    document.getElementById('editInvMinStock').value = item.minStock == null ? 3 : item.minStock;
     document.getElementById('editInvWarranty').value = item.warranty || 12;
     document.getElementById('editInvExpiry').value = item.expiry || '';
     
@@ -8014,9 +8168,16 @@ function saveEditedInventory() {
     var newStock = parseInt(document.getElementById('editInvStock').value) || 0;
     var newCost = parseFloat(document.getElementById('editInvCost').value) || 0;
     var newPrice = parseFloat(document.getElementById('editInvPrice').value) || 0;
+    var newDiscountPrice = parseFloat(document.getElementById('editInvDiscountPrice').value) || 0;
+    var newMinStock = parseInt(document.getElementById('editInvMinStock').value) || 0;
     var newWarranty = parseInt(document.getElementById('editInvWarranty').value) || 12;
     var newExpiry = document.getElementById('editInvExpiry').value || null;
     var newTotalValue = newStock * newCost;
+
+    if (newDiscountPrice > 0 && newDiscountPrice >= newPrice) {
+        showToast('Discount price must be less than selling price');
+        return;
+    }
     
     if (oldStock !== newStock || oldCost !== newCost) {
         var diffValue = newTotalValue - oldTotalValue;
@@ -8052,6 +8213,8 @@ function saveEditedInventory() {
     item.stock = newStock;
     item.cost = newCost;
     item.price = newPrice;
+    item.discountPrice = newDiscountPrice > 0 ? newDiscountPrice : null;
+    item.minStock = newMinStock;
     item.warranty = newWarranty;
     item.expiry = newExpiry;
     
@@ -8511,6 +8674,8 @@ function deleteInventoryItem(id) {
                         '<div style="display:flex; gap:4px; margin-top:8px;">' +
                             '<button class="btn btn-secondary btn-sm" onclick="openModal(\'bankDepositModal\')">+ Deposit</button>' +
                             '<button class="btn btn-secondary btn-sm" onclick="openModal(\'bankWithdrawModal\')">Withdraw</button>' +
+                            '<button class="btn btn-secondary btn-sm" style="color:#0066c0;" onclick="openEditBankAccount(\'' + b.id + '\')" title="Edit"><i class="fas fa-pen"></i></button>' +
+                            '<button class="btn btn-secondary btn-sm" style="color:#dc2626;" onclick="deleteBankAccount(\'' + b.id + '\')" title="Delete"><i class="fas fa-trash"></i></button>' +
                         '</div>' +
                     '</div>';
                 }).join('');
@@ -8557,6 +8722,51 @@ function deleteInventoryItem(id) {
                 }).join('');
             }
         }
+    }
+
+    function openEditBankAccount(id) {
+        var bank = (data.bankAccounts || []).find(function(account) { return account.id === id; });
+        if (!bank) return;
+        document.getElementById('editBankId').value = bank.id;
+        document.getElementById('editBankName').value = bank.name || '';
+        document.getElementById('editBankAccNum').value = bank.num || '';
+        document.getElementById('editBankBranch').value = bank.branch || '';
+        document.getElementById('editBankHolder').value = bank.holder || '';
+        document.getElementById('editBankBalance').value = bank.balance || 0;
+        openModal('editBankModal');
+    }
+
+    function saveEditedBankAccount() {
+        var id = document.getElementById('editBankId').value;
+        var bank = (data.bankAccounts || []).find(function(account) { return account.id === id; });
+        var name = document.getElementById('editBankName').value.trim();
+        var num = document.getElementById('editBankAccNum').value.trim();
+        if (!bank || !name || !num) { showToast('Please fill bank name and account number'); return; }
+        bank.name = name;
+        bank.num = num;
+        bank.branch = document.getElementById('editBankBranch').value.trim() || 'Main Branch';
+        bank.holder = document.getElementById('editBankHolder').value.trim() || 'Sathi Tyre Centre';
+        bank.balance = Math.max(0, parseFloat(document.getElementById('editBankBalance').value) || 0);
+        closeModal('editBankModal');
+        saveData();
+        renderPayments();
+        renderDashboard();
+        renderAccounting();
+        showToast('Bank account updated');
+    }
+
+    function deleteBankAccount(id) {
+        var bank = (data.bankAccounts || []).find(function(account) { return account.id === id; });
+        if (!bank) return;
+        if ((bank.balance || 0) !== 0) { showToast('Transfer or withdraw the balance before deleting'); return; }
+        if (!(data.bankTx || []).every(function(tx) { return tx.bankId !== id; })) { showToast('Delete or reverse bank transactions first'); return; }
+        if (!confirm('Delete bank account "' + bank.name + '"?')) return;
+        data.bankAccounts = data.bankAccounts.filter(function(account) { return account.id !== id; });
+        saveData();
+        renderPayments();
+        renderDashboard();
+        updateBadges();
+        showToast('Bank account deleted');
     }
 
     function showPaymentsSubTab(tab) {

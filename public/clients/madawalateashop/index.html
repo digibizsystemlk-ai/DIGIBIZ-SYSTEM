@@ -5467,23 +5467,23 @@
         // 10. APP STARTUP & SERVICE WORKER
         // ==========================================
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function () {
-                navigator.serviceWorker.register('./sw.js?v=20260828_pwa_v7', {
-                    scope: './',
-                    updateViaCache: 'none'
+            navigator.serviceWorker.register('./sw.js?v=20260828_pwa_v7', {
+                scope: './',
+                updateViaCache: 'none'
+            })
+                .then(function (reg) {
+                    console.log('[PWA] Service Worker registered:', reg.scope);
+                    reg.update();
+                    setInterval(() => { reg.update(); }, 3600000);
                 })
-                    .then(function (reg) {
-                        console.log('[PWA] Service Worker registered:', reg.scope);
-                        reg.update();
-                        setInterval(() => { reg.update(); }, 3600000);
-                    })
-                    .catch(function (err) {
-                        console.warn('[PWA] Service Worker registration failed:', err);
-                    });
-            });
+                .catch(function (err) {
+                    console.warn('[PWA] Service Worker registration failed:', err);
+                });
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(showPWAInstallBanner, 500);
+
             // Restore saved tab
             const savedTab = sessionStorage.getItem('madawala_active_tab');
             if (savedTab && savedTab !== 'dashboard') {
@@ -5537,7 +5537,6 @@
                     }, 300);
                 }
 
-                setTimeout(showPWAInstallBanner, 2000);
             });
 
         });

@@ -2859,13 +2859,14 @@
 
                 await refreshAllData();
                 setTimeout(() => {
-                    const select = document.getElementById('wzGcCustomer');
-                    if (select) {
-                        const options = ['<option value="">-- Select Customer --</option>']
-                            .concat(allCustomers.map(c => `<option value="${c.id}">${c.name} (${c.phone || 'No Phone'})</option>`))
-                            .join('');
-                        select.innerHTML = options;
-                        select.value = docRef.id;
+                    const container = document.getElementById('gcSearchableContainer');
+                    const input = document.getElementById('wzGcCustomerSearch');
+                    const hiddenSelect = document.getElementById('wzGcCustomerSearch_hidden');
+                    const customer = allCustomers.find(c => c.id === docRef.id);
+                    if (container && input && hiddenSelect && customer) {
+                        input.value = customer.name;
+                        hiddenSelect.value = customer.id;
+                        if (container._searchableOptions) container._searchableOptions.classList.remove('open');
                     }
                 }, 300);
 
@@ -3045,10 +3046,7 @@
                                 <div class="form-group-large">
                                     <label>Customer *</label>
                                     <div style="display: flex; gap: 6px;">
-                                        <select class="form-control-large" id="wzGcCustomer" required style="flex: 1;">
-                                            <option value="">-- Select Customer --</option>
-                                            ${allCustomers.map(c => `<option value="${c.id}">${c.name} (${c.phone || 'No Phone'})</option>`).join('')}
-                                        </select>
+                                        <div id="gcSearchableContainer" style="flex: 1;"></div>
                                         <button type="button" class="btn-primary-action" onclick="openWizardAddCustomer()" style="flex-shrink: 0; padding: 0 12px;">
                                             <i class="fa-solid fa-plus"></i>
                                         </button>
@@ -3061,13 +3059,9 @@
                                 <div class="form-group-large">
                                     <label>Category *</label>
                                     <select class="form-control-large" id="wzGcCategory" required>
-                                        <option value="TEA_LOOSE">Loose Tea / Bulk Leaves</option>
-                                        <option value="TEA_PACKETS">Packaged Tea / Tea Packets</option>
-                                        <option value="SNACKS">Snacks / Bakery Items</option>
-                                        <option value="BEVERAGES">Bottled Drinks / Beverages</option>
-                                        <option value="GROCERY">Groceries / Provisions</option>
-                                        <option value="CASH_LOAN">Cash Loan / Advance</option>
-                                        <option value="OTHER">Other Goods</option>
+                                        <option value="RELOAD">RELOAD</option>
+                                        <option value="CASH_LOAN">CASH LOAN</option>
+                                        <option value="SELL_GOOD">SELL GOOD</option>
                                     </select>
                                 </div>
 
@@ -3228,8 +3222,22 @@
 
             container.innerHTML = html;
 
-            // After rendering, initialize searchable dropdown for collect-debt
-            if (wizardType === 'collect-debt') {
+            // After rendering, initialize the searchable customer dropdown.
+            if (wizardType === 'give-credit') {
+                createSearchableDropdown(
+                    'gcSearchableContainer',
+                    'wzGcCustomerSearch',
+                    allCustomers.map(c => ({
+                        id: c.id,
+                        name: c.name,
+                        phone: c.phone || '',
+                        totalDue: getCustomerCalculatedDue(c)
+                    })),
+                    function (customerId) {
+                        onWizardCustomerSelect(customerId);
+                    }
+                );
+            } else if (wizardType === 'collect-debt') {
                 const sortedCustomers = [...allCustomers].sort((a, b) => {
                     const dueA = getCustomerCalculatedDue(a);
                     const dueB = getCustomerCalculatedDue(b);
@@ -4537,7 +4545,8 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
-            const custId = document.getElementById('wzGcCustomer').value;
+            const hiddenSelect = document.getElementById('wzGcCustomerSearch_hidden');
+            const custId = hiddenSelect ? hiddenSelect.value : '';
             const category = document.getElementById('wzGcCategory').value;
             const amount = parseFloat(document.getElementById('wzGcAmount').value) || 0;
             const date = document.getElementById('wzGcDate').value;

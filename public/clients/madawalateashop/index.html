@@ -3616,10 +3616,6 @@
                 isPWAInstalled = true;
                 return true;
             }
-            if (localStorage.getItem('pwa_installed') === 'true') {
-                isPWAInstalled = true;
-                return true;
-            }
             if (document.referrer && document.referrer.includes('android-app://')) {
                 isPWAInstalled = true;
                 return true;
@@ -3631,10 +3627,6 @@
             var banner = document.getElementById('pwaInstallBanner');
             if (!banner) return;
             if (checkPWAInstalled()) {
-                banner.style.display = 'none';
-                return;
-            }
-            if (!deferredPrompt && !/iphone|ipad|ipod/i.test(navigator.userAgent)) {
                 banner.style.display = 'none';
                 return;
             }

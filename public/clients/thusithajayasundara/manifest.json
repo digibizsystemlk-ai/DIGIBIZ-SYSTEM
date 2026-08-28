@@ -1,0 +1,111 @@
+﻿{
+  "name": "THUSITHA JAYASUNDARA COCONUT PRODUCTS",
+  "short_name": "COCONUT ERP",
+  "description": "Coconut Wholesale & Fiber Mills Management System - DIGIBIZ Enterprise",
+  "start_url": "/clients/thusithajayasundara/index.html",
+  "display": "standalone",
+  "background_color": "#131921",
+  "theme_color": "#ff9900",
+  "orientation": "any",
+  "scope": "/clients/thusithajayasundara/",
+  "categories": [
+    "business",
+    "productivity",
+    "finance"
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/96/coconut.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/128/coconut.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/144/coconut.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/192/coconut.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/256/coconut.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/384/coconut.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/512/coconut.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://img.icons8.com/fluency/512/coconut.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "Home Screen"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Coconut Intake",
+      "short_name": "Intake",
+      "description": "Log new raw coconut intake",
+      "url": "/clients/thusithajayasundara/index.html#intake",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/fluency/96/coconut.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Fiber & Mill Production",
+      "short_name": "Production",
+      "description": "Track fiber and copra milling",
+      "url": "/clients/thusithajayasundara/index.html#production",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/fluency/96/factory.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Sales & Invoicing",
+      "short_name": "Sales",
+      "description": "Wholesale dispatch and invoicing",
+      "url": "/clients/thusithajayasundara/index.html#sales",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/fluency/96/receipt.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

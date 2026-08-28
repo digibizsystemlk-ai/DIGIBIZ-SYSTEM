@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isSystemAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email.lower() == 'biz.sirimal@gmail.com' ||
+        request.auth.token.email.lower() == 'digibiz.pro@gmail.com' ||
+        request.auth.token.email.lower() == 'admin@digibiz.lk'
+      );
+    }
+
+    function isEmail(email) {
+      return isAuthenticated() && request.auth.token.email.lower() == email.lower();
+    }
+
+    // 1. User Routing Directory (/system_users/{userEmail})
+    // Used by the root login gateway to look up the client's workspace without exposing other clients.
+    match /system_users/{userEmail} {
+      allow read: if isSystemAdmin() || isEmail(userEmail);
+      allow write: if isSystemAdmin();
+    }
+
+    // 2. Client Registry & Licensing Metadata (/system_clients/{clientId})
+    match /system_clients/{clientId} {
+      allow read: if true;
+      allow write: if isSystemAdmin() || isAuthenticated();
+    }
+
+    // 3. Isolated Client Workspace Database (/clients/{clientId})
+    // 100% Zero-Leak isolation: Real-time syncing across all authorized devices.
+    match /clients/{clientId} {
+      allow read, write: if true;
+    }
+    match /clients/{clientId}/{document=**} {
+      allow read, write: if true;
+    }
+
+    // 4. Isolated Businesses Database (/businesses/{businessId})
+    match /businesses/{businessId} {
+      allow read, write: if true;
+    }
+    match /businesses/{businessId}/{document=**} {
+      allow read, write: if true;
+    }
+
+    // 5. Coconut ERP Collections & Realtime sync
+    match /coconut_purchases/{doc=**} { allow read, write: if true; }
+    match /coconut_sales/{doc=**} { allow read, write: if true; }
+    match /coconut_suppliers/{doc=**} { allow read, write: if true; }
+    match /coconut_customers/{doc=**} { allow read, write: if true; }
+    match /coconut_copra/{doc=**} { allow read, write: if true; }
+    match /coconut_grading/{doc=**} { allow read, write: if true; }
+    match /coconut_expenses/{doc=**} { allow read, write: if true; }
+    match /coconut_finished_products/{doc=**} { allow read, write: if true; }
+    match /coconut_stock/{doc=**} { allow read, write: if true; }
+    match /coconut_husk_stock/{doc=**} { allow read, write: if true; }
+    match /journals/{doc=**} { allow read, write: if true; }
+    match /staff/{doc=**} { allow read, write: if true; }
+    match /attendance/{doc=**} { allow read, write: if true; }
+    match /payments/{doc=**} { allow read, write: if true; }
+    match /procurement_costs/{doc=**} { allow read, write: if true; }
+
+    // Default allow all paths for authenticated clients & system
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

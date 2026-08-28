@@ -1,0 +1,23 @@
+{
+    "name": "SPI HOLDINGS",
+    "short_name": "SPI",
+    "description": "SPI HOLDINGS — Distributor Management System",
+    "start_url": "/clients/spi_holdings/index.html",
+    "scope": "/clients/spi_holdings/",
+    "display": "standalone",
+    "background_color": "#0a101d",
+    "theme_color": "#ff9900",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/clients/spi_holdings/assets/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/clients/spi_holdings/assets/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

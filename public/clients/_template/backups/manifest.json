@@ -1,0 +1,14 @@
+{
+  "clientId": "_template",
+  "maxRetention": 3,
+  "lastBackupAt": "2026-08-26T17:16:10.436Z",
+  "activeBackupsCount": 1,
+  "backups": [
+    {
+      "slot": 1,
+      "fileName": "index.backup_2026-08-26_22-46-10.html",
+      "createdAt": "8/26/2026, 10:46:10 PM",
+      "hash": "57d5c4d819817e8bdd4ef557a44251700c82fe076c2d5e58711e56aeb2243148"
+    }
+  ]
+}

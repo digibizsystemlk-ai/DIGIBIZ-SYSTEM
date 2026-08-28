@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" class="digibiz-credit-app">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>User Manual — DARSHANA MADAWALA</title>
+    <link rel="manifest" href="/clients/darshanamadawala/manifest.json">
+    <meta name="theme-color" content="#064e3b">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <script src="/clients/darshanamadawala/core/firebase-init.js"></script>
+    <script src="/clients/darshanamadawala/core/sidebar.js?v=20260823_owner_v135"></script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --royal: #1e40af;
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 60px; padding-top: 0 !important; }
+
+        #digibizMobileTopbar, #digibizMobileMenuToggle { display: none !important; }
+
+        .app-container { max-width: 760px; margin: 0 auto; padding: 8px 12px 24px 12px; }
+
+        /* 2-LINE UNIFIED TOP HEADER */
+        .unified-header-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 8px 12px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hdr-line-1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hdr-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-hdr {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .btn-hdr:active { background: #e2e8f0; transform: scale(0.95); }
+
+        .app-title-wrap { display: flex; align-items: center; gap: 6px; }
+        .app-title-wrap h1 { font-size: 14.5px; font-weight: 900; color: var(--royal); margin: 0; line-height: 1; }
+
+        .status-dot {
+            width: 7.5px;
+            height: 7.5px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 7px var(--success);
+        }
+
+        .hdr-line-2 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 4px 9px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .hdr-owner-name { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--royal); }
+        .hdr-owner-name i { color: #f59e0b; font-size: 10.5px; }
+
+        .hdr-owner-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: var(--royal);
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 1.5px 6px;
+            border-radius: 6px;
+        }
+
+        .manual-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 16px;
+        }
+
+        .guide-step {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--royal);
+            color: #ffffff;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 13px;
+        }
+
+        .step-content h3 { font-size: 14px; font-weight: 800; color: var(--royal); margin-bottom: 3px; }
+        .step-content p { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+        /* Access Denied Overlay */
+        #accessDeniedScreen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            color: #ffffff;
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .denied-card {
+            background: #1e293b;
+            border: 2px solid #ef4444;
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 440px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .denied-icon { font-size: 48px; color: #ef4444; margin-bottom: 14px; }
+        .denied-card h2 { font-size: 19px; font-weight: 900; margin-bottom: 6px; color: #ffffff; }
+        .denied-card p { font-size: 13px; color: #94a3b8; margin-bottom: 16px; line-height: 1.4; }
+        .btn-switch-account {
+            background: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="credit-app-body">
+
+    <!-- ACCESS DENIED SCREEN -->
+    <div id="accessDeniedScreen">
+        <div class="denied-card">
+            <i class="fa-solid fa-ban denied-icon"></i>
+            <h2>Access Denied</h2>
+            <p>You do not have permission to access the <strong>DARSHANA MADAWALA</strong> workspace with account: <br><span id="deniedEmail" style="color:#38bdf8; font-weight:bold;"></span></p>
+            <p style="font-size: 11.5px; color: #cbd5e1;">Please log in with an authorized account.</p>
+            <button class="btn-switch-account" onclick="handleDeniedLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Switch Account / Log Out
+            </button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+        <!-- 2-LINE UNIFIED TOP HEADER -->
+        <header class="unified-header-card">
+            <div class="hdr-line-1">
+                <div class="hdr-left">
+                    <button type="button" class="btn-hdr" onclick="toggleSidebarMenu()" aria-label="Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <a href="/clients/darshanamadawala/modules/credit/dashboard.html?v=20260823_owner_v135" class="btn-hdr" title="Home Dashboard">
+                        <i class="fa-solid fa-house"></i>
+                    </a>
+                    <div class="app-title-wrap">
+                        <h1>USER MANUAL</h1>
+                        <span class="status-dot" id="networkStatusDot" title="Online"></span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/clients/darshanamadawala/modules/credit/profile.html" class="hdr-line-2" title="Business Profile">
+                <div class="hdr-owner-name">
+                    <i class="fa-solid fa-crown"></i>
+                    <span id="topOwnerName">DARSHANA MADAWALA</span>
+                </div>
+                <span class="hdr-owner-badge">MANUAL</span>
+            </a>
+        </header>
+
+        <div class="manual-card">
+            <h2 style="font-size: 16px; font-weight: 900; color: var(--royal); margin-bottom: 12px;">
+                <i class="fa-solid fa-book-open"></i> Quick System Guide
+            </h2>
+
+            <div class="guide-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <h3>Give Credit / New Loan</h3>
+                    <p>Select customer, choose category (Retail Goods, Reload, Cash Loan), and enter amount. For Cash Loans, choose disbursal via Cash in Hand or Bank Account Transfer.</p>
+                </div>
+            </div>
+
+            <div class="guide-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <h3>Collect Debt / Repayments</h3>
+                    <p>Select customer and enter payment amount. If paid via Bank Transfer or Cheque, select the bank account to automatically update bank balance and create deposit log.</p>
+                </div>
+            </div>
+
+            <div class="guide-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <h3>Banking & Cash Management</h3>
+                    <p>Manage bank accounts, record deposits/withdrawals, reconcile balances, and manage cheque/slip records with automatic balance adjustment.</p>
+                </div>
+            </div>
+
+            <div class="guide-step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <h3>Customer Profiles & History</h3>
+                    <p>Add, edit, or delete customer profiles. Click any customer name to view running transaction history with 0-balance active cycle filter.</p>
+                </div>
+            </div>
+
+            <div class="guide-step">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <h3>Reports & Statements</h3>
+                    <p>Filter transactions by date, customer, or type. Generate statements, print, or share directly via WhatsApp.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleSidebarMenu() {
+            document.documentElement.classList.toggle('digibiz-sidebar-open');
+        }
+
+                // ACCESS CONTROL CHECK — Strictly Restricted to Owner & Super Admin
+        function verifyDarshanaAccess(user) {
+            if (!user) return false;
+            const email = (user.email || '').toLowerCase().trim();
+            const isImpersonating = localStorage.getItem('digibiz_impersonate_active') === 'true';
+            
+            const isAuthorized = email === 'darshanamadawala80@gmail.com' ||
+                                 email.includes('darshanamadawala') || 
+                                 email.includes('darshana') ||
+                                 email === 'biz.sirimal@gmail.com' ||
+                                 email === '2biz.sirimal@gmail.com' ||
+                                 email === 'scrap@chinthaka.com' ||
+                                 email.includes('superadmin') ||
+                                 email.startsWith('chinthaka') ||
+                                 (isImpersonating && (email.includes('admin') || email.includes('super') || email.includes('chinthaka')));
+            
+            if (!isAuthorized) {
+                const deniedScreen = document.getElementById('accessDeniedScreen');
+                if (deniedScreen) {
+                    const deniedEmail = document.getElementById('deniedEmail');
+                    if (deniedEmail) deniedEmail.textContent = user.email || 'Unknown User';
+                    deniedScreen.style.display = 'flex';
+                } else {
+                    alert('Access Denied: You do not have permission to access Darshana Madawala Credit App.');
+                    window.location.href = '/auth/login.html';
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function handleDeniedLogout() {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = '/auth/login.html';
+                });
+            } else {
+                window.location.href = '/auth/login.html';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged((user) => {
+                    if (!user) {
+                    localStorage.removeItem('dm_auth_verified_email');
+                    window.location.href = '/auth/login.html';
+                    return;
+                }
+                if (!verifyDarshanaAccess(user)) return;
+                localStorage.setItem('dm_auth_verified_email', user.email);
+                localStorage.setItem('currentUserRole', 'BUSINESS_OWNER');
+                localStorage.setItem('currentBusinessNavRole', 'BUSINESS_OWNER');
+                localStorage.setItem('currentBusinessType', 'credit_ledger');
+                localStorage.setItem('currentBusinessName', 'MADAWALA TEA SHOP');
+                });
+            }
+        });
+    </script>
+    <script src="/clients/darshanamadawala/modules/credit/ptr-helper.js?v=20260821_2030">
+        window.toggleSidebarMenu = function() {
+            document.documentElement.classList.toggle('digibiz-sidebar-open');
+        };
+        </script>
+</body>
+</html>

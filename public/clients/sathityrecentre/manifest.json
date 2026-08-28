@@ -1,0 +1,107 @@
+{
+  "name": "SATHI TYRE CENTRE",
+  "short_name": "SATHI TYRE",
+  "description": "Tire Center Management System - Amazon Seller Central Edition",
+  "start_url": "/clients/sathityrecentre/mobile.html",
+  "display": "standalone",
+  "background_color": "#131921",
+  "theme_color": "#ff9900",
+  "orientation": "portrait",
+  "scope": "/clients/sathityrecentre/",
+  "categories": ["business", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/96/tire.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/128/tire.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/144/tire.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/192/tire.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/256/tire.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/384/tire.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/512/tire.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://img.icons8.com/fluency/512/tire.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "Home Screen"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open POS",
+      "short_name": "POS",
+      "description": "Quick access to Point of Sale",
+      "url": "/clients/sathityrecentre/mobile.html#pos",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/fluency/96/cash-register.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "View Orders",
+      "short_name": "Orders",
+      "description": "View recent orders",
+      "url": "/clients/sathityrecentre/mobile.html#orders",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/fluency/96/receipt.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Check Inventory",
+      "short_name": "Stock",
+      "description": "View current inventory",
+      "url": "/clients/sathityrecentre/mobile.html#inventory",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/fluency/96/box.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

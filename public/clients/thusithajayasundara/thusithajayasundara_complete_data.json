@@ -1,0 +1,678 @@
+{
+  "businessId": "thusithajayasundara",
+  "businessName": "THUSITHA JAYASUNDARA COCONUT PRODUCTS",
+  "exportedAt": "2026-08-27T16:54:44.587Z",
+  "purchases": [
+    {
+      "id": "CP_101",
+      "date": "2026-07-19",
+      "supplierId": "SUPP_SAMARASEKARA",
+      "supplierName": "Mr Samarasekara",
+      "category": "UNGRADED",
+      "quantity": 171,
+      "unitCost": 80,
+      "transportCost": 500,
+      "totalCost": 14180,
+      "effectiveCostPerNut": 82.92,
+      "isDehusked": true,
+      "huskCountGenerated": 171,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_102",
+      "date": "2026-07-20",
+      "supplierId": "SUPP_BANDARE_N",
+      "supplierName": "Mr Bandare",
+      "category": "UNGRADED",
+      "quantity": 45,
+      "unitCost": 70,
+      "transportCost": 0,
+      "totalCost": 3150,
+      "effectiveCostPerNut": 70,
+      "isDehusked": true,
+      "huskCountGenerated": 45,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_103",
+      "date": "2026-07-21",
+      "supplierId": "SUPP_DULAJ",
+      "supplierName": "Mr Dulaj Malinda",
+      "category": "UNGRADED",
+      "quantity": 106,
+      "unitCost": 70,
+      "transportCost": 300,
+      "totalCost": 7720,
+      "effectiveCostPerNut": 72.83,
+      "isDehusked": true,
+      "huskCountGenerated": 106,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_104",
+      "date": "2026-07-21",
+      "supplierId": "SUPP_PRABATH",
+      "supplierName": "Mr Prabath Manjula",
+      "category": "UNGRADED",
+      "quantity": 170,
+      "unitCost": 70,
+      "transportCost": 500,
+      "totalCost": 12400,
+      "effectiveCostPerNut": 72.94,
+      "isDehusked": true,
+      "huskCountGenerated": 170,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_105",
+      "date": "2026-07-21",
+      "supplierId": "SUPP_MAHINDA",
+      "supplierName": "Mr Mahinda Bandara",
+      "category": "UNGRADED",
+      "quantity": 120,
+      "unitCost": 70,
+      "transportCost": 400,
+      "totalCost": 8800,
+      "effectiveCostPerNut": 73.33,
+      "isDehusked": true,
+      "huskCountGenerated": 120,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_106",
+      "date": "2026-07-21",
+      "supplierId": "SUPP_BANDARE_M",
+      "supplierName": "Mr Bandare",
+      "category": "UNGRADED",
+      "quantity": 13,
+      "unitCost": 70,
+      "transportCost": 0,
+      "totalCost": 910,
+      "effectiveCostPerNut": 70,
+      "isDehusked": true,
+      "huskCountGenerated": 13,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_107",
+      "date": "2026-07-28",
+      "supplierId": "SUPP_DULAJ",
+      "supplierName": "Mr Dulaj Malinda",
+      "category": "UNGRADED",
+      "quantity": 163,
+      "unitCost": 70,
+      "transportCost": 500,
+      "totalCost": 11910,
+      "effectiveCostPerNut": 73.06,
+      "isDehusked": true,
+      "huskCountGenerated": 163,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_108",
+      "date": "2026-08-01",
+      "supplierId": "SUPP_MANATHUNGA",
+      "supplierName": "Mr Manathunga",
+      "category": "UNGRADED",
+      "quantity": 360,
+      "unitCost": 80,
+      "transportCost": 1000,
+      "totalCost": 29800,
+      "effectiveCostPerNut": 82.77,
+      "isDehusked": true,
+      "huskCountGenerated": 360,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_109",
+      "date": "2026-08-08",
+      "supplierId": "SUPP_DULAJ",
+      "supplierName": "Mr Dulaj Malinda",
+      "category": "UNGRADED",
+      "quantity": 171,
+      "unitCost": 80,
+      "transportCost": 500,
+      "totalCost": 14180,
+      "effectiveCostPerNut": 82.92,
+      "isDehusked": true,
+      "huskCountGenerated": 171,
+      "paymentMode": "CASH",
+      "paymentStatus": "PAID"
+    },
+    {
+      "id": "CP_110",
+      "date": "2026-08-20",
+      "supplierId": "SUPP_GAYAN",
+      "supplierName": "Mr Gayan Muthukumarana",
+      "category": "GOOD",
+      "quantity": 500,
+      "unitCost": 82,
+      "transportCost": 1500,
+      "totalCost": 42500,
+      "effectiveCostPerNut": 85,
+      "isDehusked": true,
+      "huskCountGenerated": 500,
+      "paymentMode": "CREDIT",
+      "paymentStatus": "UNPAID"
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "SUPP_SAMARASEKARA",
+      "name": "Mr Samarasekara",
+      "area": "Naththambura",
+      "phone": "0778899001",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_BANDARE_N",
+      "name": "Mr Bandare (Naththambura)",
+      "area": "Naththambura",
+      "phone": "0712233445",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_BANDARE_M",
+      "name": "Mr Bandare (Mirihagoda)",
+      "area": "Mirihagoda",
+      "phone": "0775566778",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_DULAJ",
+      "name": "Mr Dulaj Malinda",
+      "area": "Mirihagoda",
+      "phone": "0779900112",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_PRABATH",
+      "name": "Mr Prabath Manjula",
+      "area": "Kuliyapitiya",
+      "phone": "0776655443",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_MAHINDA",
+      "name": "Mr Mahinda Bandara",
+      "area": "Mirihagoda",
+      "phone": "0774433221",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_MANATHUNGA",
+      "name": "Mr Manathunga",
+      "area": "Walpola",
+      "phone": "0711122334",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_GAYAN",
+      "name": "Mr Gayan Muthukumarana",
+      "area": "Mirihagoda",
+      "phone": "0771122334",
+      "balance": 42500
+    },
+    {
+      "id": "SUPP_PUSHPA",
+      "name": "Mr Pushpa Kumara",
+      "area": "Naththambura",
+      "phone": "0772233445",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_KAPILA",
+      "name": "Mr Kapila",
+      "area": "Mirihagoda",
+      "phone": "0774455667",
+      "balance": 0
+    },
+    {
+      "id": "SUPP_AMILA",
+      "name": "Mr Amila",
+      "area": "Daliwala",
+      "phone": "0776677889",
+      "balance": 0
+    }
+  ],
+  "customers": [
+    {
+      "id": "CUST_HASITHA",
+      "name": "Mr Hasitha Lakmal",
+      "phone": "0771234567",
+      "area": "Gampaha",
+      "balance": 0
+    },
+    {
+      "id": "CUST_COLOMBO_OIL",
+      "name": "Colombo Oil Mills & Refineries",
+      "phone": "0112345678",
+      "area": "Pettah, Colombo",
+      "balance": 65000
+    },
+    {
+      "id": "CUST_COIR_EXPORTS",
+      "name": "Lanka Coir Fiber Exporters",
+      "phone": "0312233445",
+      "area": "Katunayake EPZ",
+      "balance": 0
+    },
+    {
+      "id": "CUST_KURUNEGALA_STORE",
+      "name": "Kurunegala Wholesale Traders",
+      "phone": "0372299887",
+      "area": "Kurunegala Town",
+      "balance": 18500
+    }
+  ],
+  "sales": [
+    {
+      "id": "SALE_101",
+      "date": "2026-07-21",
+      "customerId": "CUST_HASITHA",
+      "customerName": "Mr Hasitha Lakmal",
+      "product": "Dehusked Coconut",
+      "qty": 720,
+      "price": 85,
+      "total": 61200,
+      "paymentMode": "CASH"
+    },
+    {
+      "id": "SALE_102",
+      "date": "2026-08-10",
+      "customerId": "CUST_COLOMBO_OIL",
+      "customerName": "Colombo Oil Mills & Refineries",
+      "product": "Copra Grade 1",
+      "qty": 250,
+      "price": 550,
+      "total": 137500,
+      "paymentMode": "CREDIT"
+    },
+    {
+      "id": "SALE_103",
+      "date": "2026-08-18",
+      "customerId": "CUST_COIR_EXPORTS",
+      "customerName": "Lanka Coir Fiber Exporters",
+      "product": "Fiber Bale 50kg",
+      "qty": 20,
+      "price": 4500,
+      "total": 90000,
+      "paymentMode": "BANK"
+    },
+    {
+      "id": "SALE_104",
+      "date": "2026-08-25",
+      "customerId": "CUST_KURUNEGALA_STORE",
+      "customerName": "Kurunegala Wholesale Traders",
+      "product": "Good / Large (A Grade) Nuts",
+      "qty": 300,
+      "price": 95,
+      "total": 28500,
+      "paymentMode": "CASH"
+    }
+  ],
+  "coconutStock": {
+    "UNGRADED": {
+      "stockQty": 857,
+      "avgCostPerUnit": 76.5,
+      "totalValuation": 65560.5
+    },
+    "GOOD": {
+      "stockQty": 450,
+      "avgCostPerUnit": 82,
+      "totalValuation": 36900
+    },
+    "MEDIUM": {
+      "stockQty": 280,
+      "avgCostPerUnit": 74,
+      "totalValuation": 20720
+    },
+    "LOW": {
+      "stockQty": 150,
+      "avgCostPerUnit": 65,
+      "totalValuation": 9750
+    },
+    "COPRA_NUTS": {
+      "stockQty": 320,
+      "avgCostPerUnit": 72,
+      "totalValuation": 23040
+    }
+  },
+  "huskStock": {
+    "stockHuskCount": 2637,
+    "avgCostPerHusk": 0,
+    "totalValuation": 0
+  },
+  "finishedProducts": [
+    {
+      "id": "FP_COPRA_G1",
+      "name": "Copra Grade 1 (White Copra)",
+      "sku": "COPRA-G1",
+      "unit": "Kg",
+      "stockQty": 420,
+      "unitCost": 385.5,
+      "sellingPrice": 550,
+      "isActive": true
+    },
+    {
+      "id": "FP_DEHUSKED",
+      "name": "Dehusked Fresh Coconut",
+      "sku": "NUT-DEHUSK",
+      "unit": "Pieces",
+      "stockQty": 660,
+      "unitCost": 79.27,
+      "sellingPrice": 85,
+      "isActive": true
+    },
+    {
+      "id": "FP_FIBER_BALE",
+      "name": "Fiber Bale 50kg",
+      "sku": "FIBER-50KG",
+      "unit": "Bales",
+      "stockQty": 35,
+      "unitCost": 3200,
+      "sellingPrice": 4500,
+      "isActive": true
+    },
+    {
+      "id": "FP_COCO_PEAT",
+      "name": "Coco Peat Low EC Block 5kg",
+      "sku": "PEAT-5KG",
+      "unit": "Pieces",
+      "stockQty": 180,
+      "unitCost": 420,
+      "sellingPrice": 650,
+      "isActive": true
+    },
+    {
+      "id": "FP_CHIPS",
+      "name": "Coconut Husk Chips Bag",
+      "sku": "CHIPS-BAG",
+      "unit": "Bags",
+      "stockQty": 90,
+      "unitCost": 680,
+      "sellingPrice": 950,
+      "isActive": true
+    }
+  ],
+  "copraRuns": [
+    {
+      "id": "COPRA_RUN_1",
+      "date": "2026-08-05",
+      "nuts": 2400,
+      "avgCost": 72,
+      "output": 500,
+      "totalCost": 172800,
+      "notes": "Kiln Run Batch 1 - Good quality drying"
+    },
+    {
+      "id": "COPRA_RUN_2",
+      "date": "2026-08-19",
+      "nuts": 1920,
+      "avgCost": 72,
+      "output": 400,
+      "totalCost": 138240,
+      "notes": "Kiln Run Batch 2 - White copra Grade 1"
+    }
+  ],
+  "gradingRuns": [
+    {
+      "id": "GRADE_101",
+      "date": "2026-07-25",
+      "source": "UNGRADED",
+      "totalSorted": 500,
+      "good": 250,
+      "medium": 150,
+      "low": 60,
+      "copra": 40,
+      "spoiled": 0
+    },
+    {
+      "id": "GRADE_102",
+      "date": "2026-08-12",
+      "source": "UNGRADED",
+      "totalSorted": 600,
+      "good": 320,
+      "medium": 180,
+      "low": 50,
+      "copra": 50,
+      "spoiled": 0
+    }
+  ],
+  "productionRuns": [
+    {
+      "id": "PROD_RUN_1",
+      "date": "2026-08-14",
+      "recipe": "Husk to Fiber Bale",
+      "product": "Fiber Bale 50kg",
+      "qty": 25,
+      "unitCost": "3200.00",
+      "totalCost": 80000
+    },
+    {
+      "id": "PROD_RUN_2",
+      "date": "2026-08-22",
+      "recipe": "Husk to Coco Peat",
+      "product": "Coco Peat Low EC Block 5kg",
+      "qty": 100,
+      "unitCost": "420.00",
+      "totalCost": 42000
+    }
+  ],
+  "recipes": [
+    {
+      "id": "REC_1",
+      "name": "Husk to Fiber Bale",
+      "targetProduct": "Fiber Bale 50kg",
+      "unitsPerHusk": 0.02
+    },
+    {
+      "id": "REC_2",
+      "name": "Husk to Coco Peat",
+      "targetProduct": "Coco Peat Low EC Block 5kg",
+      "unitsPerHusk": 0.05
+    },
+    {
+      "id": "REC_3",
+      "name": "Husk to Chips",
+      "targetProduct": "Coconut Husk Chips Bag",
+      "unitsPerHusk": 0.03
+    }
+  ],
+  "expenses": [
+    {
+      "id": "EXP_101",
+      "date": "2026-07-22",
+      "category": "TRANSPORT",
+      "desc": "Estate lorry diesel & highway tolls",
+      "amount": 6500,
+      "paymentMode": "CASH"
+    },
+    {
+      "id": "EXP_102",
+      "date": "2026-08-02",
+      "category": "ELECTRICITY",
+      "desc": "Factory fiber mill CEB bill July",
+      "amount": 18450,
+      "paymentMode": "BANK"
+    },
+    {
+      "id": "EXP_103",
+      "date": "2026-08-15",
+      "category": "LABOR",
+      "desc": "Coconut sorting & kiln loading labor",
+      "amount": 14000,
+      "paymentMode": "CASH"
+    },
+    {
+      "id": "EXP_104",
+      "date": "2026-08-20",
+      "category": "MAINTENANCE",
+      "desc": "Fiber decorticator machine blade sharpening",
+      "amount": 4800,
+      "paymentMode": "CASH"
+    }
+  ],
+  "payments": [
+    {
+      "id": "PAY_101",
+      "date": "2026-07-22",
+      "type": "SUPPLIER_PAYMENT",
+      "party": "Mr Samarasekara",
+      "amount": 14180,
+      "method": "CASH",
+      "notes": "Full purchase settlement"
+    },
+    {
+      "id": "PAY_102",
+      "date": "2026-08-12",
+      "type": "CUSTOMER_RECEIPT",
+      "party": "Colombo Oil Mills",
+      "amount": 72500,
+      "method": "BANK",
+      "notes": "Advance payment for Copra"
+    },
+    {
+      "id": "PAY_103",
+      "date": "2026-08-20",
+      "type": "SUPPLIER_PAYMENT",
+      "party": "Mr Gayan Muthukumarana",
+      "amount": 10000,
+      "method": "CASH",
+      "notes": "Part payment for 500 nuts"
+    }
+  ],
+  "procurementCosts": [
+    {
+      "id": "PC_101",
+      "date": "2026-07-20",
+      "type": "TRANSPORT",
+      "desc": "Lorry freight from Naththambura Estate",
+      "supplier": "Sunil Transport",
+      "amount": 1500
+    },
+    {
+      "id": "PC_102",
+      "date": "2026-08-01",
+      "type": "HANDLING",
+      "desc": "Estate tree climber and nut gathering charge",
+      "supplier": "Labor Group",
+      "amount": 3200
+    }
+  ],
+  "journals": [
+    {
+      "id": "JRN_OPENING_STOCK",
+      "date": "2026-07-19",
+      "description": "Opening Inventory - Raw Coconuts & Husks",
+      "debit": 101978.24,
+      "credit": 101978.24
+    },
+    {
+      "id": "JRN_SALE_101",
+      "date": "2026-07-21",
+      "description": "Sales Revenue - Dehusked Coconut (Mr Hasitha Lakmal)",
+      "debit": 61200,
+      "credit": 61200
+    },
+    {
+      "id": "JRN_COPRA_PROD_1",
+      "date": "2026-08-05",
+      "description": "COGS Transfer - Copra Kiln Run Batch 1",
+      "debit": 172800,
+      "credit": 172800
+    },
+    {
+      "id": "JRN_SALE_102",
+      "date": "2026-08-10",
+      "description": "Sales Invoice - Colombo Oil Mills (Copra Grade 1)",
+      "debit": 137500,
+      "credit": 137500
+    }
+  ],
+  "staff": [
+    {
+      "id": "STAFF_1",
+      "name": "K. M. Priyantha",
+      "role": "Yard Supervisor",
+      "phone": "0771234567",
+      "rate": 2800
+    },
+    {
+      "id": "STAFF_2",
+      "name": "Sunil Shantha",
+      "role": "Machine Operator",
+      "phone": "0772345678",
+      "rate": 2500
+    },
+    {
+      "id": "STAFF_3",
+      "name": "Nimal Sirisena",
+      "role": "Grading Sorter",
+      "phone": "0773456789",
+      "rate": 2200
+    },
+    {
+      "id": "STAFF_4",
+      "name": "A. Chandrasiri",
+      "role": "Kiln Labor",
+      "phone": "0774567890",
+      "rate": 2000
+    }
+  ],
+  "attendance": [
+    {
+      "id": "ATT_1",
+      "date": "2026-08-27",
+      "staffId": "STAFF_1",
+      "name": "K. M. Priyantha",
+      "status": "Present",
+      "rate": 2800
+    },
+    {
+      "id": "ATT_2",
+      "date": "2026-08-27",
+      "staffId": "STAFF_2",
+      "name": "Sunil Shantha",
+      "status": "Present",
+      "rate": 2500
+    },
+    {
+      "id": "ATT_3",
+      "date": "2026-08-27",
+      "staffId": "STAFF_3",
+      "name": "Nimal Sirisena",
+      "status": "Present",
+      "rate": 2200
+    },
+    {
+      "id": "ATT_4",
+      "date": "2026-08-27",
+      "staffId": "STAFF_4",
+      "name": "A. Chandrasiri",
+      "status": "Present",
+      "rate": 2000
+    }
+  ],
+  "subscription": {
+    "plan": "ENTERPRISE",
+    "status": "ACTIVE",
+    "expireDate": "2027-08-25",
+    "smsBalance": 300,
+    "smsHeader": "THUSITHA"
+  },
+  "settings": {
+    "name": "THUSITHA JAYASUNDARA COCONUT PRODUCTS",
+    "owner": "Thusitha Jayasundara",
+    "phone": "077 123 4567",
+    "address": "Kurunegala, Sri Lanka"
+  }
+}

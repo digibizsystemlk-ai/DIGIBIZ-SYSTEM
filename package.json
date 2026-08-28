@@ -1,0 +1,18 @@
+{
+  "name": "digibiz-system",
+  "version": "1.0.0",
+  "description": "DIGIBIZ SYSTEM — Standalone Isolated Multi-Client Enterprise Applications Hub",
+  "main": "index.js",
+  "scripts": {
+    "serve": "firebase serve --only hosting",
+    "deploy": "firebase deploy --only hosting",
+    "deploy:all": "firebase deploy",
+    "sync:client": "node scripts/sync-client.js",
+    "backup": "node scripts/backup-client-index.js --all",
+    "watch:backups": "node scripts/client-backup-watcher.js"
+  },
+  "keywords": ["digibiz", "erp", "pos", "single-file", "isolated"],
+  "author": "DIGIBIZ SYSTEM",
+  "license": "UNLICENSED",
+  "private": true
+}

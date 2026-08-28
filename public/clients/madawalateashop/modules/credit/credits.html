@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en" class="digibiz-credit-app">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Credit Ledger — DARSHANA MADAWALA</title>
+    <link rel="manifest" href="/clients/madawalateashop/manifest.json">
+    <meta name="theme-color" content="#064e3b">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script src="/clients/madawalateashop/core/firebase-init.js"></script>
+    <script src="/clients/madawalateashop/core/sidebar.js?v=20260823_owner_v135"></script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --royal: #1e40af;
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 60px;
+            padding-top: 0 !important;
+        }
+
+        #digibizMobileTopbar,
+        #digibizMobileMenuToggle {
+            display: none !important;
+        }
+
+        .app-container {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 8px 12px 24px 12px;
+        }
+
+        /* 2-LINE UNIFIED TOP HEADER */
+        .unified-header-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 8px 12px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hdr-line-1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hdr-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-hdr {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .btn-hdr:active {
+            background: #e2e8f0;
+            transform: scale(0.95);
+        }
+
+        .app-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .app-title-wrap h1 {
+            font-size: 14.5px;
+            font-weight: 900;
+            color: var(--royal);
+            margin: 0;
+            line-height: 1;
+        }
+
+        .status-dot {
+            width: 7.5px;
+            height: 7.5px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 7px var(--success);
+        }
+
+        .hdr-line-2 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 4px 9px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .hdr-owner-name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--royal);
+        }
+
+        .hdr-owner-name i {
+            color: #f59e0b;
+            font-size: 10.5px;
+        }
+
+        .hdr-owner-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: var(--royal);
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 1.5px 6px;
+            border-radius: 6px;
+        }
+
+        /* Controls / Search Box */
+        .controls-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 9px 12px 9px 34px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .filter-selects {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-selects select {
+            padding: 8px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            background: #ffffff;
+            outline: none;
+        }
+
+        /* TABLE WITH PINNED CUSTOMER NAME */
+        .table-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            white-space: nowrap;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 800;
+            color: #475569;
+            border-bottom: 1.5px solid var(--border);
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .data-table td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        /* STICKY CUSTOMER NAME */
+        th.col-sticky-name,
+        td.col-sticky-name {
+            position: sticky;
+            left: 0;
+            background: #ffffff;
+            z-index: 2;
+            font-weight: 800;
+            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.06);
+        }
+
+        th.col-sticky-name {
+            background: #f8fafc;
+            z-index: 3;
+            color: #475569;
+        }
+
+        .cust-name-link {
+            color: var(--royal);
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 800;
+        }
+
+        .cust-name-link:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .data-table tr:hover td {
+            background: #fafcff;
+        }
+
+        .data-table tr:hover td.col-sticky-name {
+            background: #f0f7ff;
+        }
+
+        .badge-cat {
+            display: inline-block;
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+        }
+
+        .cat-reload {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .cat-grocery {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .cat-loan {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .cat-other {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .badge-status {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .badge-unpaid {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .badge-partial {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-paid {
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .btn-act-tbl {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .btn-pay-now {
+            background: #dcfce7;
+            color: #16a34a;
+            border-color: #bbf7d0;
+        }
+
+        .btn-pay-now:hover {
+            background: #bbf7d0;
+        }
+
+        .btn-edit-cred {
+            background: #eff6ff;
+            color: var(--royal);
+            border-color: #bfdbfe;
+        }
+
+        .btn-del-cred {
+            background: #fef2f2;
+            color: var(--danger);
+            border-color: #fecaca;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-card.wide {
+            max-width: 780px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .modal-header h3 {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--royal);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        .hist-row-credit {
+            background: #fff5f5 !important;
+        }
+
+        .hist-row-settle {
+            background: #f0fdf4 !important;
+        }
+
+        .tab-pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 1.5px solid var(--border);
+            background: #ffffff;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        .tab-pill.active {
+            background: var(--royal);
+            color: #ffffff;
+            border-color: var(--royal);
+        }
+
+        .badge-hist {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .b-credit {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .b-settle {
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        /* Access Denied Overlay */
+        #accessDeniedScreen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            color: #ffffff;
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .denied-card {
+            background: #1e293b;
+            border: 2px solid #ef4444;
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 440px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .denied-icon {
+            font-size: 48px;
+            color: #ef4444;
+            margin-bottom: 14px;
+        }
+
+        .denied-card h2 {
+            font-size: 19px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            color: #ffffff;
+        }
+
+        .denied-card p {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .btn-switch-account {
+            background: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="credit-app-body">
+
+    <!-- ACCESS DENIED SCREEN -->
+    <div id="accessDeniedScreen">
+        <div class="denied-card">
+            <i class="fa-solid fa-ban denied-icon"></i>
+            <h2>Access Denied</h2>
+            <p>You do not have permission to access the <strong>DARSHANA MADAWALA</strong> workspace with account:
+                <br><span id="deniedEmail" style="color:#38bdf8; font-weight:bold;"></span>
+            </p>
+            <p style="font-size: 11.5px; color: #cbd5e1;">Please log in with an authorized account.</p>
+            <button class="btn-switch-account" onclick="handleDeniedLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Switch Account / Log Out
+            </button>
+        </div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- 2-LINE UNIFIED TOP HEADER -->
+        <header class="unified-header-card">
+            <div class="hdr-line-1">
+                <div class="hdr-left">
+                    <button type="button" class="btn-hdr" onclick="toggleSidebarMenu()" aria-label="Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <a href="/clients/madawalateashop/modules/credit/dashboard.html?v=20260823_owner_v135"
+                        class="btn-hdr" title="Home Dashboard">
+                        <i class="fa-solid fa-house"></i>
+                    </a>
+                    <div class="app-title-wrap">
+                        <h1>CREDIT LEDGER</h1>
+                        <span class="status-dot" id="networkStatusDot" title="Online"></span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/clients/madawalateashop/modules/credit/profile.html" class="hdr-line-2" title="Business Profile">
+                <div class="hdr-owner-name">
+                    <i class="fa-solid fa-crown"></i>
+                    <span id="topOwnerName">DARSHANA MADAWALA</span>
+                </div>
+                <span class="hdr-owner-badge">LEDGER</span>
+            </a>
+        </header>
+
+        <!-- Summary KPI Cards -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-label">Total Credit Issued</div>
+                <div class="summary-value" id="summaryTotalCredit" style="color: #dc2626;">Rs. 0.00</div>
+                <div class="summary-sub">All credit sales</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Collections Received</div>
+                <div class="summary-value" id="summaryTotalCollected" style="color: #16a34a;">Rs. 0.00</div>
+                <div class="summary-sub">Cash / payments</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Outstanding Due</div>
+                <div class="summary-value" id="summaryOutstanding" style="color: #f59e0b;">Rs. 0.00</div>
+                <div class="summary-sub">Open balances</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Recovery Rate</div>
+                <div class="summary-value" id="summaryRecoveryRate" style="color: #2563eb;">0.0%</div>
+                <div class="summary-sub">Collected / issued</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Active Debtors</div>
+                <div class="summary-value" id="summaryActiveDebtors" style="color: #7c3aed;">0</div>
+                <div class="summary-sub">Customers with due</div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="controls-card">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Search customer, phone, notes..."
+                    oninput="filterCredits()">
+            </div>
+            <div class="filter-selects">
+                <select id="filterCategory" onchange="filterCredits()">
+                    <option value="">All Categories</option>
+                    <option value="GROCERY">Retail Sale</option>
+                    <option value="RELOAD">Mobile Reload</option>
+                    <option value="CASH_LOAN">Cash Loan</option>
+                </select>
+                <select id="filterStatus" onchange="filterCredits()">
+                    <option value="">All Statuses</option>
+                    <option value="UNPAID">Unpaid</option>
+                    <option value="PARTIAL">Partial</option>
+                    <option value="PAID">Paid</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Table Card with STICKY CUSTOMER NAME & ACTIONS -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="col-sticky-name">Customer Name</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="creditsTableBody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 24px; color: #64748b;">Loading credit
+                                records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL: QUICK SETTLE / PAY DEBT -->
+    <div class="modal" id="quickSettleModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-dollar-to-slot" style="color: var(--success);"></i> Quick Settle Debt
+                </h3>
+                <button class="close-btn" onclick="closeQuickSettleModal()">&times;</button>
+            </div>
+            <input type="hidden" id="settleCreditId">
+            <input type="hidden" id="settleCustId">
+
+            <div class="form-group">
+                <label>Customer</label>
+                <input type="text" class="form-control" id="settleCustName" readonly
+                    style="background:#f1f5f9; font-weight:800;">
+            </div>
+            <div class="form-group">
+                <label>Outstanding Balance (Rs.)</label>
+                <input type="text" class="form-control" id="settleDueAmt" readonly
+                    style="background:#f1f5f9; font-weight:800; color:var(--danger);">
+            </div>
+            <div class="form-group">
+                <label>Payment Amount (Rs.) *</label>
+                <input type="number" class="form-control" id="settlePayAmt" placeholder="0.00" min="1" step="any"
+                    style="font-size:16px; font-weight:900; color:var(--success);">
+            </div>
+            <div class="form-group">
+                <label>Payment Method *</label>
+                <select class="form-control" id="settlePayMethod" onchange="onSettleMethodChanged(this.value)">
+                    <option value="CASH">💵 Cash in Hand</option>
+                    <option value="BANK_TRANSFER">🏦 Bank Transfer</option>
+                    <option value="CHEQUE">📑 Cheque</option>
+                </select>
+            </div>
+            <div class="form-group" id="settleBankGroup" style="display: none;">
+                <label>Deposit To Bank Account *</label>
+                <select class="form-control" id="settleBankSelect">
+                    <option value="">-- Select Bank Account --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Payment Note / Reference</label>
+                <input type="text" class="form-control" id="settleNotes" placeholder="e.g. Quick settlement">
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" class="form-control" id="settleDate">
+            </div>
+            <button type="button" class="btn-act-tbl btn-pay-now"
+                style="width:100%; justify-content:center; padding:11px; font-size:13.5px; border-radius:10px; margin-top:6px;"
+                onclick="submitQuickSettlement()">
+                Record Payment
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: COMPACT CUSTOMER HISTORY -->
+    <div class="modal" id="historyModal">
+        <div class="modal-card wide">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Customer History</h3>
+                <button class="close-btn" onclick="closeHistoryModal()">&times;</button>
+            </div>
+
+            <div
+                style="background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div>
+                    <div style="font-size:15px; font-weight:900; color:var(--royal);" id="histCustName">Customer Name
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted);" id="histCustPhone">077 123 4567</div>
+                </div>
+                <div>
+                    <span id="histDueBadge" class="badge-status badge-unpaid"
+                        style="font-size:13px; padding:4px 10px;">Due: Rs. 0.00</span>
+                </div>
+            </div>
+
+            <!-- Active Cycle vs Full Lifetime Toggle -->
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+                <button type="button" class="tab-pill active" id="tabActiveCycle" onclick="setHistoryMode('ACTIVE')">
+                    <i class="fa-solid fa-filter"></i> Active Cycle
+                </button>
+                <button type="button" class="tab-pill" id="tabFullHistory" onclick="setHistoryMode('FULL')">
+                    <i class="fa-solid fa-list"></i> Full History
+                </button>
+            </div>
+
+            <div class="table-responsive"
+                style="max-height: 360px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type / Note</th>
+                            <th style="color: var(--danger);">Credit (+)</th>
+                            <th style="color: var(--success);">Paid (-)</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">Loading
+                                history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DIAGNOSTICS & DATA AUDITOR DEBUG WINDOW ================= -->
+    <div id="debugFloatingBtn" onclick="toggleDebugConsole()"
+        style="position: fixed; bottom: 18px; right: 18px; z-index: 999999; background: #0f172a; color: #38bdf8; border: 1.5px solid #38bdf8; padding: 8px 16px; border-radius: 30px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; font-family: monospace; user-select: none;">
+        <span style="font-size: 15px;">🐞</span>
+        <span>Diagnostics Console</span>
+        <span id="debugBadgeStatus"
+            style="background: #2563eb; color: #fff; font-size: 10.5px; padding: 2px 7px; border-radius: 10px;">Ready</span>
+    </div>
+
+    <div id="debugConsoleModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 1000000; align-items: center; justify-content: center; padding: 12px; font-family: 'SF Pro Display', -apple-system, monospace;">
+        <div
+            style="background: #0f172a; border: 1.5px solid #334155; border-radius: 18px; width: 100%; max-width: 860px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.6); color: #f1f5f9;">
+
+            <!-- Modal Header -->
+            <div
+                style="padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 20px;">🐞</span>
+                    <div>
+                        <div style="font-size: 15px; font-weight: 900; color: #38bdf8; letter-spacing: 0.5px;">DigiBiz
+                            Pro — Live Diagnostics & Data Auditor</div>
+                        <div style="font-size: 11px; color: #94a3b8;">Client: Darshana Madawala | Credits Ledger System
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="copyDiagnosticReport()"
+                        style="background: #38bdf8; color: #0f172a; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-copy"></i> Copy Report
+                    </button>
+                    <button type="button" onclick="toggleDebugConsole(false)"
+                        style="background: #334155; color: #cbd5e1; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer;">
+                        Close ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div
+                style="padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; font-size: 12.5px;">
+
+                <!-- Quick Status Cards -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+                    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px;">
+                        <div style="font-size: 10.5px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">
+                            Auth User</div>
+                        <div id="dbgUserEmail"
+                            style="font-size: 13px; font-weight: 800; color: #38bdf8; word-break: break-all; margin-top: 3px;">
+                            Checking...</div>
+                        <div id="dbgUserUid"
+                            style="font-size: 10.5px; color: #64748b; font-family: monospace; word-break: break-all; margin-top: 2px;">
+                            UID: -</div>
+                    </div>
+                    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px;">
+                        <div style="font-size: 10.5px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">
+                            Active Business ID</div>
+                        <div id="dbgActiveBid"
+                            style="font-size: 13px; font-weight: 800; color: #4ade80; font-family: monospace; word-break: break-all; margin-top: 3px;">
+                            -</div>
+                        <div id="dbgRoleInfo" style="font-size: 10.5px; color: #64748b; margin-top: 2px;">Role: -</div>
+                    </div>
+                    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px;">
+                        <div style="font-size: 10.5px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">
+                            Loaded Credits Count</div>
+                        <div id="dbgCreditsCount"
+                            style="font-size: 18px; font-weight: 900; color: #facc15; margin-top: 2px;">0</div>
+                        <div id="dbgCacheStatus" style="font-size: 10.5px; color: #64748b;">Cache: 0 items</div>
+                    </div>
+                </div>
+
+                <!-- Multi-Tenant ID Scanner Section -->
+                <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 14px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                        <div style="font-weight: 800; color: #e2e8f0; display: flex; align-items: center; gap: 6px;">
+                            <span>🔍 Multi-ID Firestore Scanner</span>
+                            <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">(Probes candidate paths
+                                in Firestore)</span>
+                        </div>
+                        <button type="button" onclick="runMultiIdScan()"
+                            style="background: #2563eb; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">
+                            <i class="fa-solid fa-rotate"></i> Run Deep Scan Now
+                        </button>
+                    </div>
+                    <div class="table-responsive" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-family: monospace; font-size: 12px;">
+                            <thead>
+                                <tr style="border-bottom: 1.5px solid #334155; text-align: left; color: #94a3b8;">
+                                    <th style="padding: 8px 6px;">Candidate Target ID</th>
+                                    <th style="padding: 8px 6px;">Credits</th>
+                                    <th style="padding: 8px 6px;">Customers</th>
+                                    <th style="padding: 8px 6px;">Banks</th>
+                                    <th style="padding: 8px 6px;">Profile Exists</th>
+                                    <th style="padding: 8px 6px; text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dbgScannerTableBody">
+                                <tr>
+                                    <td colspan="6" style="padding: 14px; text-align: center; color: #64748b;">Click
+                                        "Run Deep Scan Now" to probe Firestore paths...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Manual Path Override / Probe Tool -->
+                <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 14px;">
+                    <div style="font-weight: 800; color: #e2e8f0; margin-bottom: 8px;">⚙️ Manual Business ID Override &
+                        Inject</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="text" id="manualBidInput"
+                            placeholder="Enter Business ID to force switch (e.g. Qxl4JRGfBZTZOFMoQYhocFR2pfp2)"
+                            style="flex: 1; min-width: 260px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 8px 12px; color: #f8fafc; font-family: monospace; font-size: 12.5px; outline: none;">
+                        <button type="button" onclick="applyManualBusinessId()"
+                            style="background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; cursor: pointer;">
+                            Apply & Reload
+                        </button>
+                        <button type="button" onclick="createDiagnosticTestCredit()"
+                            style="background: #d97706; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 800; cursor: pointer;"
+                            title="Writes 1 test credit record to verify write permissions">
+                            + Test Credit Doc
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Event Stream Console Log -->
+                <div
+                    style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 14px; display: flex; flex-direction: column;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <div style="font-weight: 800; color: #e2e8f0;">📜 Live System Event Log</div>
+                        <button type="button" onclick="clearDebugLogs()"
+                            style="background: transparent; color: #64748b; border: 1px solid #334155; border-radius: 6px; padding: 2px 8px; font-size: 11px; cursor: pointer;">Clear</button>
+                    </div>
+                    <div id="dbgConsoleStream"
+                        style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11.5px; max-height: 180px; overflow-y: auto; color: #a5f3fc; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= DIAGNOSTICS LOGGING ENGINE =================
+        window.debugLogs = [];
+        function dbgLog(msg, type = 'info') {
+            const time = new Date().toTimeString().split(' ')[0];
+            const entry = `[${time}] ${msg}`;
+            window.debugLogs.push(entry);
+            console.log(`[Diagnostics] ${entry}`);
+            const stream = document.getElementById('dbgConsoleStream');
+            if (stream) {
+                stream.textContent = window.debugLogs.join('\n');
+                stream.scrollTop = stream.scrollHeight;
+            }
+        }
+        function clearDebugLogs() {
+            window.debugLogs = [];
+            const stream = document.getElementById('dbgConsoleStream');
+            if (stream) stream.textContent = '';
+        }
+
+        function toggleDebugConsole(forceOpen = null) {
+            const modal = document.getElementById('debugConsoleModal');
+            if (!modal) return;
+            const shouldOpen = (forceOpen !== null) ? forceOpen : (modal.style.display !== 'flex');
+            modal.style.display = shouldOpen ? 'flex' : 'none';
+            if (shouldOpen) {
+                updateDebugSummary();
+                runMultiIdScan();
+            }
+        }
+
+        function updateDebugSummary() {
+            const u = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+            const emailEl = document.getElementById('dbgUserEmail');
+            const uidEl = document.getElementById('dbgUserUid');
+            const bidEl = document.getElementById('dbgActiveBid');
+            const roleEl = document.getElementById('dbgRoleInfo');
+            const credCountEl = document.getElementById('dbgCreditsCount');
+            const cacheEl = document.getElementById('dbgCacheStatus');
+            const badgeStatus = document.getElementById('debugBadgeStatus');
+
+            if (emailEl) emailEl.textContent = u ? u.email : 'NOT LOGGED IN';
+            if (uidEl) uidEl.textContent = u ? `UID: ${u.uid}` : 'UID: null';
+            if (bidEl) bidEl.textContent = currentBusinessId || 'None Set';
+            if (roleEl) roleEl.textContent = `Role: ${localStorage.getItem('currentUserRole') || 'None'} | Type: ${localStorage.getItem('currentBusinessType') || 'None'}`;
+            if (credCountEl) credCountEl.textContent = allCredits ? allCredits.length : 0;
+
+            let cacheLen = 0;
+            try {
+                const c = JSON.parse(localStorage.getItem('dm_cache_credits') || '[]');
+                cacheLen = c.length;
+            } catch (e) { }
+            if (cacheEl) cacheEl.textContent = `Local cache: ${cacheLen} credits`;
+            if (badgeStatus) {
+                badgeStatus.textContent = allCredits && allCredits.length > 0 ? `${allCredits.length} Docs` : '0 Docs';
+                badgeStatus.style.background = allCredits && allCredits.length > 0 ? '#16a34a' : '#dc2626';
+            }
+        }
+
+        async function runMultiIdScan() {
+            const tbody = document.getElementById('dbgScannerTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="6" style="padding: 14px; text-align: center; color: #38bdf8;"><i class="fa-solid fa-spinner fa-spin"></i> Probing candidate Firestore paths...</td></tr>';
+            dbgLog('Starting Multi-ID deep scan...');
+
+            const user = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+            const candidates = [
+                { label: 'Standard Dedicated ID', id: 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2' },
+                { label: 'Legacy Template ID', id: 'DarshanaMadawala' },
+                { label: 'Logged-in User UID', id: user ? user.uid : null },
+                { label: 'Active Session ID', id: currentBusinessId },
+                { label: 'Stored LocalStorage ID', id: localStorage.getItem('currentBusinessId') }
+            ].filter((item, index, self) => item.id && self.findIndex(t => t.id === item.id) === index);
+
+            window.lastScanResults = [];
+            tbody.innerHTML = '';
+
+            for (const c of candidates) {
+                dbgLog(`Scanning candidate ID: ${c.id} (${c.label})...`);
+                let credCount = 'Error';
+                let custCount = 'Error';
+                let bankCount = 'Error';
+                let profileExists = 'Error';
+                let hasData = false;
+
+                try {
+                    const crSnap = await window.db.collection('businesses').doc(c.id).collection('credits').get();
+                    credCount = crSnap.size;
+                    if (credCount > 0) hasData = true;
+                } catch (e) {
+                    credCount = `❌ ${e.code || e.message}`;
+                    dbgLog(`[${c.id}] Credits query error: ${e.message}`, 'error');
+                }
+
+                try {
+                    const cuSnap = await window.db.collection('businesses').doc(c.id).collection('customers').get();
+                    custCount = cuSnap.size;
+                    if (custCount > 0) hasData = true;
+                } catch (e) {
+                    custCount = `❌ ${e.code || e.message}`;
+                }
+
+                try {
+                    const bSnap = await window.db.collection('businesses').doc(c.id).collection('bank_accounts').get();
+                    bankCount = bSnap.size;
+                    if (bankCount > 0) hasData = true;
+                } catch (e) {
+                    bankCount = `❌ ${e.code || e.message}`;
+                }
+
+                try {
+                    const pDoc = await window.db.collection('businesses').doc(c.id).get();
+                    profileExists = pDoc.exists ? `✅ Yes (${pDoc.data().businessName || pDoc.data().name || 'Found'})` : '❌ Not Found';
+                } catch (e) {
+                    profileExists = `❌ ${e.code || e.message}`;
+                }
+
+                window.lastScanResults.push({
+                    id: c.id,
+                    label: c.label,
+                    credCount,
+                    custCount,
+                    bankCount,
+                    profileExists,
+                    hasData
+                });
+
+                const isCurrent = (c.id === currentBusinessId);
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #334155';
+                tr.style.background = isCurrent ? 'rgba(56, 189, 248, 0.1)' : (hasData ? 'rgba(34, 197, 94, 0.1)' : 'transparent');
+
+                tr.innerHTML = `
+                    <td style="padding: 8px 6px;">
+                        <div style="font-weight: 800; color: ${isCurrent ? '#38bdf8' : (hasData ? '#4ade80' : '#f8fafc')};">${c.id}</div>
+                        <div style="font-size: 10px; color: #94a3b8;">${c.label} ${isCurrent ? '⭐ (ACTIVE)' : ''}</div>
+                    </td>
+                    <td style="padding: 8px 6px; font-weight: 800; color: ${typeof credCount === 'number' && credCount > 0 ? '#4ade80' : '#f8fafc'};">${credCount}</td>
+                    <td style="padding: 8px 6px; font-weight: 800; color: ${typeof custCount === 'number' && custCount > 0 ? '#4ade80' : '#f8fafc'};">${custCount}</td>
+                    <td style="padding: 8px 6px; font-weight: 800; color: ${typeof bankCount === 'number' && bankCount > 0 ? '#4ade80' : '#f8fafc'};">${bankCount}</td>
+                    <td style="padding: 8px 6px; font-size: 11px;">${profileExists}</td>
+                    <td style="padding: 8px 6px; text-align: right;">
+                        <button type="button" onclick="switchBusinessId('${c.id}')" style="background: ${isCurrent ? '#334155' : '#16a34a'}; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer;">
+                            ${isCurrent ? 'Active' : '⚡ Switch'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            dbgLog('Multi-ID scan completed.');
+            updateDebugSummary();
+        }
+
+        function switchBusinessId(newBid) {
+            if (!newBid) return;
+            dbgLog(`Switching Business ID from "${currentBusinessId}" to "${newBid}"`);
+            currentBusinessId = newBid;
+            localStorage.setItem('currentBusinessId', newBid);
+            sessionStorage.setItem('currentBusinessId', newBid);
+            updateDebugSummary();
+            listenToBusinessProfile();
+            listenToCredits();
+            listenToBankAccounts();
+            alert(`Switched active Business ID to: ${newBid}`);
+        }
+
+        function applyManualBusinessId() {
+            const val = (document.getElementById('manualBidInput').value || '').trim();
+            if (!val) {
+                alert('Please enter a Business ID');
+                return;
+            }
+            switchBusinessId(val);
+        }
+
+        async function createDiagnosticTestCredit() {
+            if (!window.db || !currentBusinessId) {
+                alert('Firestore or Business ID not ready');
+                return;
+            }
+            try {
+                dbgLog(`Attempting to write test credit doc to businesses/${currentBusinessId}/credits...`);
+                const ref = window.db.collection('businesses').doc(currentBusinessId).collection('credits').doc();
+                const testData = {
+                    customerName: 'Test Customer (Diagnostic)',
+                    customerPhone: '0770000000',
+                    customerId: 'diag_test_cust',
+                    amount: 500,
+                    paidAmount: 0,
+                    balance: 500,
+                    category: 'RELOAD',
+                    notes: 'Created via Diagnostics Auditor',
+                    date: new Date().toISOString().split('T')[0],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                await ref.set(testData);
+                dbgLog(`✅ Successfully wrote test doc ID: ${ref.id}`);
+                alert(`Test credit document created (ID: ${ref.id})! Refreshing table...`);
+                listenToCredits();
+            } catch (e) {
+                dbgLog(`❌ Write failed: ${e.code} - ${e.message}`, 'error');
+                alert(`Write failed: ${e.message}`);
+            }
+        }
+
+        function copyDiagnosticReport() {
+            const user = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+            const report = [
+                '### 🐞 DigiBiz Pro Diagnostics Report — Darshana Madawala',
+                `- **Timestamp**: ${new Date().toISOString()}`,
+                `- **Current URL**: ${window.location.href}`,
+                `- **Auth User**: ${user ? `${user.email} (UID: ${user.uid})` : 'Not Authenticated'}`,
+                `- **Active Business ID**: \`${currentBusinessId}\``,
+                `- **LocalStorage \`currentBusinessId\`**: \`${localStorage.getItem('currentBusinessId')}\``,
+                `- **LocalStorage \`currentUserRole\`**: \`${localStorage.getItem('currentUserRole')}\``,
+                `- **Loaded \`allCredits\` count**: ${allCredits ? allCredits.length : 0}`,
+                '',
+                '#### Multi-ID Scan Results:',
+                '```json',
+                JSON.stringify(window.lastScanResults || [], null, 2),
+                '```',
+                '',
+                '#### Event Logs:',
+                '```',
+                (window.debugLogs || []).join('\n'),
+                '```'
+            ].join('\n');
+
+            navigator.clipboard.writeText(report).then(() => {
+                alert('Diagnostic report copied to clipboard! You can paste it into the chat.');
+            }).catch(() => {
+                prompt('Copy this report:', report);
+            });
+        }
+        let currentBusinessId = null;
+        let allCredits = [];
+        let allBankAccounts = [];
+        let activeHistoryCustomer = null;
+        let activeHistoryTransactions = [];
+        let historyViewMode = 'ACTIVE';
+
+        function formatRs(num) {
+            const val = Number(num) || 0;
+            return 'Rs. ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function toggleSidebarMenu() {
+            document.documentElement.classList.toggle('digibiz-sidebar-open');
+        }
+
+        // ACCESS CONTROL CHECK — Strictly Restricted to Owner & Super Admin
+        function verifyDarshanaAccess(user) {
+            if (!user) return false;
+            const email = (user.email || '').toLowerCase().trim();
+            const isImpersonating = localStorage.getItem('digibiz_impersonate_active') === 'true';
+
+            const isAuthorized = email === 'madawalateashop80@gmail.com' ||
+                email.includes('madawalateashop') ||
+                email.includes('darshana') ||
+                email === 'biz.sirimal@gmail.com' ||
+                email === '2biz.sirimal@gmail.com' ||
+                email === 'scrap@chinthaka.com' ||
+                email.includes('superadmin') ||
+                email.startsWith('chinthaka') ||
+                (isImpersonating && (email.includes('admin') || email.includes('super') || email.includes('chinthaka')));
+
+            if (!isAuthorized) {
+                const deniedScreen = document.getElementById('accessDeniedScreen');
+                if (deniedScreen) {
+                    const deniedEmail = document.getElementById('deniedEmail');
+                    if (deniedEmail) deniedEmail.textContent = user.email || 'Unknown User';
+                    deniedScreen.style.display = 'flex';
+                } else {
+                    alert('Access Denied: You do not have permission to access Darshana Madawala Credit App.');
+                    window.location.href = '/auth/login.html';
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function handleDeniedLogout() {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = '/auth/login.html';
+                });
+            } else {
+                window.location.href = '/auth/login.html';
+            }
+        }
+
+        // INSTANT LOCAL CACHE HYDRATION (0ms Load from Phone)
+        function loadFromLocalCache() {
+            try {
+                const cachedBiz = localStorage.getItem('dm_cache_biz_profile');
+                if (cachedBiz) {
+                    const el = document.getElementById('topOwnerName');
+                    if (el) el.textContent = cachedBiz;
+                }
+
+                const cachedBank = localStorage.getItem('dm_cache_bank_accounts');
+                if (cachedBank) {
+                    allBankAccounts = JSON.parse(cachedBank) || [];
+                    const select = document.getElementById('settleBankSelect');
+                    if (select) {
+                        select.innerHTML = '<option value="">-- Select Bank Account --</option>';
+                        allBankAccounts.forEach(d => {
+                            const opt = document.createElement('option');
+                            opt.value = d.id;
+                            opt.textContent = `${d.bankName} - ${d.accountNumber} (${formatRs(d.currentBalance)})`;
+                            select.appendChild(opt);
+                        });
+                    }
+                }
+
+                const cachedCred = localStorage.getItem('dm_cache_credits');
+                if (cachedCred) {
+                    allCredits = JSON.parse(cachedCred) || [];
+                    updateSummaryCards();
+                    filterCredits();
+                }
+            } catch (e) { }
+        }
+
+        function updateSummaryCards(sourceList = null) {
+            const source = (sourceList ?? allCredits).filter(c => {
+                const bal = Number(c.balance !== undefined ? c.balance : (Number(c.amount || 0) - Number(c.paidAmount || 0)));
+                return bal > 0 && c.status !== 'PAID';
+            });
+
+            const totalCredit = source.reduce((sum, c) => sum + Number(c.amount || 0), 0);
+            const totalCollected = source.reduce((sum, c) => sum + Number(c.paidAmount || 0), 0);
+            const outstanding = source.reduce((sum, c) => {
+                const bal = Number(c.balance !== undefined ? c.balance : (Number(c.amount || 0) - Number(c.paidAmount || 0)));
+                return sum + Math.max(0, bal);
+            }, 0);
+            const recoveryRate = totalCredit > 0 ? ((totalCollected / totalCredit) * 100) : 0;
+            const activeDebtors = new Set(
+                source.map(c => c.customerId || c.customerName || 'unknown')
+            ).size;
+
+            const cards = {
+                totalCredit: document.getElementById('summaryTotalCredit'),
+                collected: document.getElementById('summaryTotalCollected'),
+                outstanding: document.getElementById('summaryOutstanding'),
+                recovery: document.getElementById('summaryRecoveryRate'),
+                debtors: document.getElementById('summaryActiveDebtors')
+            };
+
+            if (cards.totalCredit) cards.totalCredit.textContent = formatRs(totalCredit);
+            if (cards.collected) cards.collected.textContent = formatRs(totalCollected);
+            if (cards.outstanding) cards.outstanding.textContent = formatRs(outstanding);
+            if (cards.recovery) cards.recovery.textContent = `${Number(recoveryRate).toFixed(1)}%`;
+            if (cards.debtors) cards.debtors.textContent = String(activeDebtors);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('settleDate').value = todayStr;
+
+            // Load and display immediately from local phone memory
+            loadFromLocalCache();
+
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    dbgLog(`Auth state changed: user = ${user ? user.email : 'null'} (UID: ${user ? user.uid : 'none'})`);
+                    if (!user) {
+                        localStorage.removeItem('dm_auth_verified_email');
+                        window.location.href = '/auth/login.html';
+                        return;
+                    }
+                    if (!verifyDarshanaAccess(user)) {
+                        dbgLog(`Access Denied for user ${user.email}`, 'error');
+                        return;
+                    }
+                    localStorage.setItem('dm_auth_verified_email', user.email);
+                    localStorage.setItem('currentUserRole', 'BUSINESS_OWNER');
+                    localStorage.setItem('currentBusinessNavRole', 'BUSINESS_OWNER');
+                    localStorage.setItem('currentBusinessType', 'credit_ledger');
+                    localStorage.setItem('currentBusinessName', 'DARSHANA MADAWALA');
+
+                    const DM_DEFAULT_BID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
+                    let storedBid = localStorage.getItem('currentBusinessId') || sessionStorage.getItem('currentBusinessId');
+                    if (!storedBid || storedBid === 'DarshanaMadawala' || storedBid.toLowerCase() === 'qxl4jrgfbztzofmoqyhocfr2pfp2') {
+                        storedBid = DM_DEFAULT_BID;
+                    }
+                    currentBusinessId = storedBid;
+                    localStorage.setItem('currentBusinessId', currentBusinessId);
+                    sessionStorage.setItem('currentBusinessId', currentBusinessId);
+                    dbgLog(`Active Business ID locked to: ${currentBusinessId}`);
+
+                    updateDebugSummary();
+                    listenToBusinessProfile();
+                    listenToCredits();
+                    listenToBankAccounts();
+                });
+            }
+        });
+
+        function listenToBusinessProfile() {
+            if (!window.db || !currentBusinessId) return;
+            dbgLog(`Fetching business profile for: ${currentBusinessId}...`);
+            window.db.collection('businesses').doc(currentBusinessId).get().then(doc => {
+                if (doc.exists && (doc.data().businessName || doc.data().name)) {
+                    const name = doc.data().businessName || doc.data().name || 'DARSHANA MADAWALA';
+                    const el = document.getElementById('topOwnerName');
+                    if (el) el.textContent = name;
+                    try { localStorage.setItem('dm_cache_biz_profile', name); } catch (e) { }
+                    dbgLog(`Profile loaded: ${name}`);
+                } else {
+                    dbgLog(`Profile document businesses/${currentBusinessId} not found or empty.`);
+                }
+            }, err => {
+                dbgLog(`Profile fetch error: ${err.message}`, 'error');
+            });
+        }
+
+        function listenToBankAccounts() {
+            if (!window.db || !currentBusinessId) return;
+            dbgLog(`Fetching bank accounts from businesses/${currentBusinessId}/bank_accounts...`);
+            window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts')
+                .get().then(snapshot => {
+                    allBankAccounts = [];
+                    const select = document.getElementById('settleBankSelect');
+                    if (select) select.innerHTML = '<option value="">-- Select Bank Account --</option>';
+
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        d.id = doc.id;
+                        allBankAccounts.push(d);
+
+                        if (select) {
+                            const opt = document.createElement('option');
+                            opt.value = d.id;
+                            opt.textContent = `${d.bankName || 'Bank'} - ${d.accountNumber || ''} (${formatRs(d.currentBalance || 0)})`;
+                            select.appendChild(opt);
+                        }
+                    });
+
+                    try { localStorage.setItem('dm_cache_bank_accounts', JSON.stringify(allBankAccounts)); } catch (e) { }
+                    dbgLog(`Bank accounts loaded: ${allBankAccounts.length} accounts.`);
+                }, err => {
+                    dbgLog(`Bank accounts fetch error: ${err.message}`, 'error');
+                });
+        }
+
+        function listenToCredits() {
+            if (!window.db || !currentBusinessId) {
+                dbgLog('listenToCredits aborted: db or currentBusinessId missing', 'error');
+                return;
+            }
+            dbgLog(`Querying credits from businesses/${currentBusinessId}/credits...`);
+            window.db.collection('businesses').doc(currentBusinessId).collection('credits')
+                .get().then(snapshot => {
+                    allCredits = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        d.id = doc.id;
+                        allCredits.push(d);
+                    });
+
+                    allCredits.sort((a, b) => {
+                        const tA = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime())) : (a.date ? new Date(a.date).getTime() : 0);
+                        const tB = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAt.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime())) : (b.date ? new Date(b.date).getTime() : 0);
+                        return tB - tA;
+                    });
+
+                    try { localStorage.setItem('dm_cache_credits', JSON.stringify(allCredits)); } catch (e) { }
+                    dbgLog(`✅ Credits loaded successfully: ${allCredits.length} records.`);
+                    updateSummaryCards();
+                    updateDebugSummary();
+                    filterCredits();
+                }, err => {
+                    dbgLog(`❌ Credits fetch error from businesses/${currentBusinessId}/credits: [${err.code}] ${err.message}`, 'error');
+                    updateSummaryCards();
+                    updateDebugSummary();
+                    filterCredits();
+                });
+        }
+
+        function filterCredits() {
+            const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+            const cat = document.getElementById('filterCategory').value;
+            const stat = document.getElementById('filterStatus').value;
+
+            const filtered = allCredits.filter(c => {
+                const nameMatch = String(c.customerName || '').toLowerCase().includes(query) ||
+                    String(c.customerPhone || '').includes(query) ||
+                    String(c.notes || '').toLowerCase().includes(query);
+                if (!nameMatch) return false;
+                if (cat && c.category !== cat) return false;
+                if (stat && c.status !== stat) return false;
+                return true;
+            });
+
+            updateSummaryCards(filtered);
+            renderTable(filtered);
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('creditsTableBody');
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 28px 14px; color: #64748b;">
+                    <div style="font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 6px;">No credit records found under Business ID: <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #2563eb;">${currentBusinessId}</code></div>
+                    <div style="font-size: 12px; color: #64748b; margin-bottom: 14px;">If records exist under your Auth UID or another tenant ID, open Diagnostics below to scan and link with 1 click.</div>
+                    <button type="button" onclick="toggleDebugConsole(true)" style="background: linear-gradient(135deg, #1e40af, #2563eb); color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 800; font-size: 12.5px; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+                        🐞 Open Live Diagnostics & Data Auditor
+                    </button>
+                </td></tr>`;
+                return;
+            }
+
+            list.forEach(c => {
+                const tr = document.createElement('tr');
+                const amt = Number(c.amount || 0);
+                const paid = Number(c.paidAmount || 0);
+                const bal = Number(c.balance !== undefined ? c.balance : (amt - paid));
+
+                let catBadge = '';
+                if (c.category === 'RELOAD') catBadge = '<span class="badge-cat cat-reload">📱 Reload</span>';
+                else if (c.category === 'GROCERY') catBadge = '<span class="badge-cat cat-grocery">🛒 Goods</span>';
+                else if (c.category === 'CASH_LOAN') catBadge = '<span class="badge-cat cat-loan">💵 Loan</span>';
+                else catBadge = '<span class="badge-cat cat-other">Credit</span>';
+
+                let statusBadge = '<span class="badge-status badge-unpaid">Unpaid</span>';
+                if (bal <= 0) statusBadge = '<span class="badge-status badge-paid">Paid</span>';
+                else if (paid > 0) statusBadge = '<span class="badge-status badge-partial">Partial</span>';
+
+                const payBtn = bal > 0 ? `
+                    <button type="button" class="btn-act-tbl btn-pay-now" onclick="openQuickSettleModal('${c.id}')" title="Settle debt">
+                        <i class="fa-solid fa-circle-dollar-to-slot"></i> Settle
+                    </button>
+                ` : '';
+
+                tr.innerHTML = `
+                    <td class="col-sticky-name">
+                        <a href="javascript:void(0)" class="cust-name-link" onclick="openCustomerHistory('${c.customerId}', '${escapeHtml(c.customerName)}', '${escapeHtml(c.customerPhone)}')">
+                            <i class="fa-solid fa-user-tag" style="font-size: 11px; color: var(--primary);"></i>
+                            <span>${escapeHtml(c.customerName || 'Customer')}</span>
+                        </a>
+                    </td>
+                    <td>${c.date || '-'}</td>
+                    <td>${catBadge}</td>
+                    <td style="font-weight: 800;">${formatRs(amt)}</td>
+                    <td style="color: #16a34a; font-weight: 700;">${formatRs(paid)}</td>
+                    <td style="color: #dc2626; font-weight: 800;">${formatRs(bal)}</td>
+                    <td>${statusBadge}</td>
+                    <td style="color: #64748b;">${escapeHtml(c.notes || '-')}</td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 4px; justify-content: center;">
+                            ${payBtn}
+                            <button type="button" class="btn-act-tbl btn-del-cred" onclick="deleteCreditRecord('${c.id}')" title="Delete record">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* QUICK SETTLE MODAL */
+        function openQuickSettleModal(creditId) {
+            const cred = allCredits.find(x => x.id === creditId);
+            if (!cred) return;
+
+            const bal = Number(cred.balance !== undefined ? cred.balance : (cred.amount - cred.paidAmount));
+
+            document.getElementById('settleCreditId').value = cred.id;
+            document.getElementById('settleCustId').value = cred.customerId || '';
+            document.getElementById('settleCustName').value = cred.customerName || 'Customer';
+            document.getElementById('settleDueAmt').value = formatRs(bal);
+            document.getElementById('settlePayAmt').value = bal;
+            document.getElementById('settlePayMethod').value = 'CASH';
+            document.getElementById('settleNotes').value = `Repayment for ${cred.category || 'Credit'}`;
+            onSettleMethodChanged('CASH');
+
+            document.getElementById('quickSettleModal').classList.add('active');
+        }
+        function closeQuickSettleModal() { document.getElementById('quickSettleModal').classList.remove('active'); }
+
+        function onSettleMethodChanged(val) {
+            const grp = document.getElementById('settleBankGroup');
+            if (val === 'BANK_TRANSFER' || val === 'CHEQUE') {
+                grp.style.display = 'block';
+            } else {
+                grp.style.display = 'none';
+            }
+        }
+
+        async function submitQuickSettlement() {
+            const credId = document.getElementById('settleCreditId').value;
+            const custId = document.getElementById('settleCustId').value;
+            const custName = document.getElementById('settleCustName').value;
+            const payAmt = parseFloat(document.getElementById('settlePayAmt').value) || 0;
+            const payMethod = document.getElementById('settlePayMethod').value;
+            const bankId = document.getElementById('settleBankSelect').value;
+            const notes = document.getElementById('settleNotes').value.trim();
+            const date = document.getElementById('settleDate').value;
+
+            if (payAmt <= 0) {
+                alert('Please enter a valid payment amount.');
+                return;
+            }
+
+            if ((payMethod === 'BANK_TRANSFER' || payMethod === 'CHEQUE') && !bankId) {
+                alert('Please select the Bank Account to deposit this payment.');
+                return;
+            }
+
+            const credRef = window.db.collection('businesses').doc(currentBusinessId).collection('credits').doc(credId);
+            const custRef = window.db.collection('businesses').doc(currentBusinessId).collection('customers').doc(custId);
+            const isBankDeposit = ((payMethod === 'BANK_TRANSFER' || payMethod === 'CHEQUE') && bankId);
+
+            await window.db.runTransaction(async (t) => {
+                // 1. All Reads First
+                const credDoc = await t.get(credRef);
+                if (!credDoc.exists) throw new Error('Credit record not found');
+                const custDoc = await t.get(custRef);
+                let bankDoc = null;
+                let bankRef = null;
+                if (isBankDeposit) {
+                    bankRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bankId);
+                    bankDoc = await t.get(bankRef);
+                }
+
+                // 2. Calculations
+                const currPaid = Number(credDoc.data().paidAmount || 0);
+                const totalAmt = Number(credDoc.data().amount || 0);
+                const newPaid = currPaid + payAmt;
+                const newBal = Math.max(0, totalAmt - newPaid);
+                const newStatus = (newBal <= 0) ? 'PAID' : 'PARTIAL';
+
+                // 3. All Writes After Reads
+                t.update(credRef, {
+                    paidAmount: newPaid,
+                    balance: newBal,
+                    status: newStatus,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Update customer document
+                if (custDoc && custDoc.exists) {
+                    const custBal = Number(custDoc.data().currentBalance || 0);
+                    const custTotalPaid = Number(custDoc.data().totalPaid || 0);
+                    t.update(custRef, {
+                        currentBalance: Math.max(0, custBal - payAmt),
+                        totalPaid: custTotalPaid + payAmt,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // If Bank Transfer, balance bank account & log bank transaction
+                let bankName = '';
+                let bankAccNo = '';
+
+                if (bankDoc && bankDoc.exists && bankRef) {
+                    bankName = bankDoc.data().bankName || '';
+                    bankAccNo = bankDoc.data().accountNumber || '';
+                    const currBankBal = Number(bankDoc.data().currentBalance || 0);
+                    t.update(bankRef, {
+                        currentBalance: currBankBal + payAmt,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    const bankTxRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc();
+                    t.set(bankTxRef, {
+                        bankAccountId: bankId,
+                        bankName: bankName,
+                        accountNumber: bankAccNo,
+                        type: 'DEPOSIT',
+                        paymentMode: payMethod === 'CHEQUE' ? 'Cheque' : 'Bank Transfer',
+                        amount: payAmt,
+                        date: date,
+                        customerId: custId,
+                        customerName: custName,
+                        source: 'LOAN_SETTLEMENT',
+                        reference: `Credit Repayment: ${custName}`,
+                        notes: notes || `Quick settle (${custName})`,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // Create settlement log
+                const settleRef = window.db.collection('businesses').doc(currentBusinessId).collection('settlements').doc();
+                t.set(settleRef, {
+                    customerId: custId,
+                    customerName: custName,
+                    creditId: credId,
+                    amount: payAmt,
+                    paymentMethod: payMethod,
+                    bankAccountId: bankId || null,
+                    bankName: bankName,
+                    accountNumber: bankAccNo,
+                    date: date,
+                    notes: notes || 'Quick Debt Settle',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+
+            closeQuickSettleModal();
+            alert('Payment recorded successfully!');
+        }
+
+        /* DELETE CREDIT RECORD */
+        async function deleteCreditRecord(credId) {
+            const cred = allCredits.find(x => x.id === credId);
+            if (!cred) return;
+
+            if (!confirm(`Are you sure you want to delete this credit record of ${formatRs(cred.amount)}? Customer balance will be adjusted accordingly.`)) {
+                return;
+            }
+
+            const custRef = window.db.collection('businesses').doc(currentBusinessId).collection('customers').doc(cred.customerId);
+            const credRef = window.db.collection('businesses').doc(currentBusinessId).collection('credits').doc(credId);
+
+            await window.db.runTransaction(async (t) => {
+                const custDoc = await t.get(custRef);
+                if (custDoc.exists) {
+                    const custBal = Number(custDoc.data().currentBalance || 0);
+                    const custTotalCredit = Number(custDoc.data().totalCredit || 0);
+                    const unPaid = Number(cred.balance !== undefined ? cred.balance : (cred.amount - cred.paidAmount));
+                    t.update(custRef, {
+                        currentBalance: Math.max(0, custBal - unPaid),
+                        totalCredit: Math.max(0, custTotalCredit - cred.amount),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                t.delete(credRef);
+            });
+
+            alert('Credit record deleted successfully.');
+        }
+
+        /* CUSTOMER HISTORY MODAL */
+        async function openCustomerHistory(custId, custName, custPhone) {
+            if (!custId) return;
+            document.getElementById('histCustName').textContent = custName || 'Customer';
+            document.getElementById('histCustPhone').textContent = custPhone || 'No phone';
+
+            document.getElementById('historyModal').classList.add('active');
+            loadCustomerHistoryTransactions(custId);
+        }
+        function closeHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
+
+        async function loadCustomerHistoryTransactions(custId) {
+            const tbody = document.getElementById('historyTableBody');
+
+            // Try loading cached history first (0ms instant offline rendering)
+            try {
+                const cachedHist = localStorage.getItem('dm_cache_hist_' + custId);
+                if (cachedHist) {
+                    const data = JSON.parse(cachedHist);
+                    if (data && data.transactions) {
+                        activeHistoryTransactions = data.transactions;
+                        activeHistoryCustomer = { id: custId, lastZeroIndex: data.lastZeroIndex };
+                        document.getElementById('histDueBadge').textContent = `Due: ${formatRs(data.running || 0)}`;
+                        renderHistoryView();
+                    }
+                }
+            } catch (e) { }
+
+            if (!activeHistoryTransactions || activeHistoryTransactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">Loading history...</td></tr>';
+            }
+
+            try {
+                const credSnap = await window.db.collection('businesses').doc(currentBusinessId).collection('credits')
+                    .where('customerId', '==', custId).get();
+                const setSnap = await window.db.collection('businesses').doc(currentBusinessId).collection('settlements')
+                    .where('customerId', '==', custId).get();
+
+                let combined = [];
+
+                credSnap.forEach(doc => {
+                    const d = doc.data();
+                    combined.push({
+                        id: doc.id,
+                        type: 'CREDIT',
+                        category: d.category || 'CREDIT',
+                        amount: Number(d.amount || 0),
+                        date: d.date || '',
+                        notes: d.notes || 'Credit Given',
+                        createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : 0) : 0
+                    });
+                });
+
+                setSnap.forEach(doc => {
+                    const d = doc.data();
+                    combined.push({
+                        id: doc.id,
+                        type: 'SETTLE',
+                        category: d.paymentMethod || 'PAYMENT',
+                        amount: Number(d.amount || 0),
+                        date: d.date || '',
+                        notes: d.notes || `Repayment (${d.paymentMethod || 'Cash'})`,
+                        createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : 0) : 0
+                    });
+                });
+
+                combined.sort((a, b) => {
+                    if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '');
+                    return a.createdAt - b.createdAt;
+                });
+
+                let running = 0;
+                let lastZeroIndex = -1;
+
+                combined.forEach((tx, idx) => {
+                    if (tx.type === 'CREDIT') running += tx.amount;
+                    else if (tx.type === 'SETTLE') running = Math.max(0, running - tx.amount);
+                    tx.runningBalance = running;
+                    if (running === 0) lastZeroIndex = idx;
+                });
+
+                activeHistoryTransactions = combined;
+                activeHistoryCustomer = { id: custId, lastZeroIndex: lastZeroIndex };
+
+                try {
+                    localStorage.setItem('dm_cache_hist_' + custId, JSON.stringify({
+                        transactions: combined,
+                        lastZeroIndex: lastZeroIndex,
+                        running: running
+                    }));
+                } catch (e) { }
+
+                document.getElementById('histDueBadge').textContent = `Due: ${formatRs(running)}`;
+                renderHistoryView();
+            } catch (err) {
+                console.warn('[Offline Mode] Using cached history:', err);
+                if (!activeHistoryTransactions || activeHistoryTransactions.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">No offline transaction history available.</td></tr>`;
+                }
+            }
+        }
+
+        function setHistoryMode(mode) {
+            historyViewMode = mode;
+            document.getElementById('tabActiveCycle').classList.toggle('active', mode === 'ACTIVE');
+            document.getElementById('tabFullHistory').classList.toggle('active', mode === 'FULL');
+            renderHistoryView();
+        }
+
+        function renderHistoryView() {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            let list = [...activeHistoryTransactions];
+
+            if (historyViewMode === 'ACTIVE' && activeHistoryCustomer && activeHistoryCustomer.lastZeroIndex !== -1) {
+                list = activeHistoryTransactions.slice(activeHistoryCustomer.lastZeroIndex + 1);
+            }
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px; color: #16a34a; background: #f0fdf4;"><strong>All debts settled (Rs. 0.00). No active debt.</strong></td></tr>';
+                return;
+            }
+
+            list.forEach(tx => {
+                const tr = document.createElement('tr');
+                const isCredit = (tx.type === 'CREDIT');
+                tr.className = isCredit ? 'hist-row-credit' : 'hist-row-settle';
+
+                const badge = isCredit
+                    ? `<span class="badge-hist b-credit">🔴 ${tx.category}</span>`
+                    : `<span class="badge-hist b-settle">🟢 Repayment (${tx.category})</span>`;
+
+                tr.innerHTML = `
+                    <td style="font-weight: 700;">${tx.date || '-'}</td>
+                    <td>${badge} <span style="color: #64748b; font-size: 11.5px; margin-left: 4px;">${escapeHtml(tx.notes)}</span></td>
+                    <td style="color: #dc2626; font-weight: 800;">${isCredit ? formatRs(tx.amount) : '—'}</td>
+                    <td style="color: #16a34a; font-weight: 800;">${!isCredit ? formatRs(tx.amount) : '—'}</td>
+                    <td style="font-weight: 900; color: ${tx.runningBalance > 0 ? '#dc2626' : '#16a34a'};">${formatRs(tx.runningBalance)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    </script>
+    <script src="/clients/madawalateashop/modules/credit/ptr-helper.js?v=20260821_2030"></script>
+    <script src="/clients/madawalateashop/modules/credit/migration-bridge.js?v=20260827"></script>
+</body>
+
+</html>

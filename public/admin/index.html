@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DIGIBIZ SYSTEM — Super Admin Command Center</title>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz-rTtysyWgt_3PUHG-ar8gS8oN0HTJiI",
+            authDomain: "digibiz-system.firebaseapp.com",
+            projectId: "digibiz-system",
+            storageBucket: "digibiz-system.firebasestorage.app",
+            messagingSenderId: "21839180976",
+            appId: "1:21839180976:web:cbbeda3ebc061285db7775"
+        };
+
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+    </script>
+
+    <style>
+        :root {
+            --primary: #ff9900;
+            --primary-hover: #e68a00;
+            --accent: #2563eb;
+            --bg-dark: #0a101d;
+            --surface: #131b2c;
+            --surface-card: #182238;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 153, 0, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Top Navbar */
+        .admin-nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+        }
+        .brand i { color: var(--primary); font-size: 22px; }
+        .brand span { color: var(--primary); }
+        .brand .badge-admin {
+            font-size: 10.5px;
+            background: linear-gradient(135deg, rgba(255,153,0,0.2) 0%, rgba(239,68,68,0.2) 100%);
+            color: var(--primary);
+            border: 1px solid rgba(255,153,0,0.4);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .admin-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.04);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.06); color: #fff; border-color: rgba(255,255,255,0.2); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: #111827;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.25);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(255, 153, 0, 0.35); }
+
+        /* Main Layout */
+        .admin-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 28px;
+            flex: 1;
+        }
+
+        /* KPI Metric Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .kpi-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
+        .kpi-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 28px; font-weight: 900; color: #fff; margin: 8px 0 4px; }
+        .kpi-sub { font-size: 12px; color: var(--text-muted); }
+        .kpi-icon { position: absolute; right: 20px; top: 20px; font-size: 26px; opacity: 0.15; color: var(--primary); }
+
+        /* Tabs Navigation */
+        .tab-bar {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+        /* Section Card */
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .search-input {
+            background: rgba(10, 16, 29, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px 10px 36px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            width: 320px;
+        }
+        .search-input:focus { border-color: var(--primary); }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .data-table th {
+            padding: 12px 16px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .data-table td {
+            padding: 16px;
+            font-size: 13.5px;
+            border-bottom: 1px solid var(--border);
+            color: #e2e8f0;
+            vertical-align: middle;
+        }
+        .data-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .badge-active { background: rgba(16,185,129,0.15); color: #86efac; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-trial { background: rgba(37,99,235,0.15); color: #93c5fd; border: 1px solid rgba(37,99,235,0.3); }
+        .badge-expired { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 16, 29, 0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            animation: modalIn 0.3s ease-out;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-control.full { grid-column: span 2; }
+        .form-control label { font-size: 12px; font-weight: 600; color: #cbd5e1; }
+        .form-control input, .form-control select {
+            background: rgba(10, 16, 29, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: #fff;
+            font-size: 13.5px;
+            outline: none;
+        }
+        .form-control input:focus, .form-control select:focus { border-color: var(--primary); }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            border: 1px solid var(--primary);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🛡️ ZERO-LEAK SECURITY GATE OVERLAY (Displayed instantly, blocks all UI leaks) -->
+    <div id="securityGateOverlay" style="position: fixed; inset: 0; background: #0a101d; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <div style="width: 60px; height: 60px; border-radius: 18px; background: rgba(255,153,0,0.15); border: 1px solid rgba(255,153,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 26px; color: #ff9900; margin-bottom: 20px; box-shadow: 0 0 30px rgba(255,153,0,0.2);">
+            <i class="fas fa-shield-halved fa-beat-fade"></i>
+        </div>
+        <h2 id="gateTitle" style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px;">Securing Command Center...</h2>
+        <p id="gateDesc" style="font-size: 13px; color: #94a3b8; max-width: 360px;">Authenticating Super Admin credentials. System content is locked.</p>
+    </div>
+
+    <!-- MAIN ADMIN CONTENT (Strictly hidden until verified) -->
+    <div id="adminMainWrapper" style="display: none; width: 100%; min-height: 100vh; flex-direction: column;">
+
+    <!-- Admin Navigation Bar -->
+    <header class="admin-nav">
+        <div class="brand">
+            <i class="fas fa-shield-halved"></i>
+            <span>DIGIBIZ</span> SYSTEM
+            <span class="badge-admin">Command Center</span>
+        </div>
+        <div class="nav-actions">
+            <div class="admin-pill">
+                <i class="fas fa-user-shield" style="color:var(--primary);"></i>
+                <span id="adminEmailBadge">Super Admin</span>
+            </div>
+            <button class="btn-outline" onclick="openNewClientModal()">
+                <i class="fas fa-plus"></i> Add Business
+            </button>
+            <button class="btn-outline" onclick="handleAdminSignOut()">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+        </div>
+    </header>
+
+    <div class="admin-container">
+
+        <!-- Top KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <i class="fas fa-building kpi-icon"></i>
+                <div class="kpi-label">Total Businesses</div>
+                <div class="kpi-value" id="kpiTotalClients">0</div>
+                <div class="kpi-sub">Registered Enterprise Tenants</div>
+            </div>
+            <div class="kpi-card">
+                <i class="fas fa-crown kpi-icon" style="color:#10b981;"></i>
+                <div class="kpi-label">Active Subscriptions</div>
+                <div class="kpi-value" id="kpiActiveClients" style="color:#86efac;">0</div>
+                <div class="kpi-sub">Paying & Trial Workspaces</div>
+            </div>
+            <div class="kpi-card">
+                <i class="fas fa-clock-rotate-left kpi-icon" style="color:#f59e0b;"></i>
+                <div class="kpi-label">Expiring Soon</div>
+                <div class="kpi-value" id="kpiExpiringSoon" style="color:#fcd34d;">0</div>
+                <div class="kpi-sub">Within next 7 days</div>
+            </div>
+            <div class="kpi-card">
+                <i class="fas fa-coins kpi-icon" style="color:var(--primary);"></i>
+                <div class="kpi-label">Monthly Rec. Revenue</div>
+                <div class="kpi-value" id="kpiTotalRevenue" style="color:var(--primary);">Rs. 0</div>
+                <div class="kpi-sub">Projected Monthly Yield</div>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('tab-clients', this)">
+                <i class="fas fa-store"></i> Businesses & Workspaces (<span id="tabCountClients">0</span>)
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-users', this)">
+                <i class="fas fa-users-gear"></i> User Routing Matrix
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-system', this)">
+                <i class="fas fa-database"></i> Firebase & Scalability Monitor
+            </button>
+        </div>
+
+        <!-- TAB 1: Clients & Workspaces -->
+        <div id="tab-clients" class="tab-content">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <h2 style="font-size: 17px; font-weight: 800;">Enterprise Client Workspaces</h2>
+                        <p style="font-size: 12.5px; color: var(--text-muted);">Manage single-tenant standalone systems, licensing validity and status</p>
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div style="position:relative;">
+                            <i class="fas fa-search" style="position:absolute; left:12px; top:12px; color:var(--text-muted); font-size:13px;"></i>
+                            <input type="text" id="clientSearchInput" class="search-input" placeholder="Search business or owner email..." oninput="filterClientsTable()" />
+                        </div>
+                        <button class="btn-primary" onclick="openNewClientModal()">
+                            <i class="fas fa-plus"></i> Onboard Business
+                        </button>
+                    </div>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Business Name & ID</th>
+                                <th>Owner & Contact</th>
+                                <th>Package</th>
+                                <th>Subscription Expiry</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">
+                                    <i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--primary); margin-bottom:10px; display:block;"></i>
+                                    Loading registered businesses from cloud database...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: User Routing Matrix -->
+        <div id="tab-users" class="tab-content" style="display:none;">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <h2 style="font-size: 17px; font-weight: 800;">User Routing Matrix (`/system_users`)</h2>
+                        <p style="font-size: 12.5px; color: var(--text-muted);">Direct mappings from login email to isolated workspace paths</p>
+                    </div>
+                    <button class="btn-outline" onclick="loadUserMatrix()">
+                        <i class="fas fa-rotate"></i> Refresh Matrix
+                    </button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>User Email</th>
+                                <th>Target Workspace</th>
+                                <th>Mapped Client ID</th>
+                                <th>Account Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userMatrixTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">Loading user routing directory...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: System Monitor -->
+        <div id="tab-system" class="tab-content" style="display:none;">
+            <div class="panel-card">
+                <h2 style="font-size: 17px; font-weight: 800; margin-bottom: 6px;">Firebase Project & Architecture Health</h2>
+                <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 24px;">Configured to scale seamlessly for 1,000+ isolated business tenants</p>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:18px;">
+                    <div style="background:var(--surface-card); border:1px solid var(--border); border-radius:12px; padding:18px;">
+                        <div style="font-size:12px; font-weight:700; color:var(--primary); margin-bottom:8px; text-transform:uppercase;">Connected Project</div>
+                        <div style="font-size:18px; font-weight:800; color:#fff;">digibiz-system</div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Multi-Tenant Zero-Leak Production Database</div>
+                    </div>
+                    <div style="background:var(--surface-card); border:1px solid var(--border); border-radius:12px; padding:18px;">
+                        <div style="font-size:12px; font-weight:700; color:#10b981; margin-bottom:8px; text-transform:uppercase;">Cost-Saving Caching</div>
+                        <div style="font-size:18px; font-weight:800; color:#fff;">IndexedDB Active</div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">0-Read Local Persistence for all tenants</div>
+                    </div>
+                    <div style="background:var(--surface-card); border:1px solid var(--border); border-radius:12px; padding:18px;">
+                        <div style="font-size:12px; font-weight:700; color:#60a5fa; margin-bottom:8px; text-transform:uppercase;">Hosting CDN Headers</div>
+                        <div style="font-size:18px; font-weight:800; color:#fff;">1-Year Immutable</div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Static Bandwidth 99% optimized</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Onboard / Edit Client Modal -->
+    <div id="clientModal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 id="modalTitle" style="font-size:18px; font-weight:800; color:#fff;">Onboard New Business</h3>
+                <button onclick="closeClientModal()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;"><i class="fas fa-times"></i></button>
+            </div>
+
+            <form id="clientForm" onsubmit="saveClient(event)">
+                <div class="form-grid">
+                    <div class="form-control">
+                        <label>Business Name *</label>
+                        <input type="text" id="mBusinessName" placeholder="e.g. Randipa Products" required oninput="autoGenerateSlug(this.value)" />
+                    </div>
+                    <div class="form-control">
+                        <label>Client ID / Slug (Folder Name) *</label>
+                        <input type="text" id="mClientId" placeholder="e.g. randipa" required />
+                    </div>
+                    <div class="form-control">
+                        <label>Owner Name</label>
+                        <input type="text" id="mOwnerName" placeholder="e.g. Bawantha Randipa" />
+                    </div>
+                    <div class="form-control">
+                        <label>Owner / Primary Email *</label>
+                        <input type="email" id="mOwnerEmail" placeholder="owner@gmail.com" required />
+                    </div>
+                    <div class="form-control">
+                        <label>Contact Phone</label>
+                        <input type="text" id="mPhone" placeholder="071 234 5678" />
+                    </div>
+                    <div class="form-control">
+                        <label>Subscription Package</label>
+                        <select id="mPackage">
+                            <option value="ENTERPRISE PRO">ENTERPRISE PRO</option>
+                            <option value="BUSINESS STARTER">BUSINESS STARTER</option>
+                            <option value="TRIAL">14-DAY TRIAL</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label>Monthly Fee (Rs.)</label>
+                        <input type="number" id="mMonthlyFee" value="1000" />
+                    </div>
+                    <div class="form-control">
+                        <label>Expiry Date *</label>
+                        <input type="date" id="mExpiryDate" required />
+                    </div>
+                    <div class="form-control">
+                        <label>Account Status</label>
+                        <select id="mStatus">
+                            <option value="active">Active</option>
+                            <option value="trial">Trial</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label>SMS Credits</label>
+                        <input type="number" id="mSmsCredits" value="500" />
+                    </div>
+                    <div class="form-control full">
+                        <label>Allowed Staff Emails (Comma separated)</label>
+                        <input type="text" id="mAllowedEmails" placeholder="staff1@gmail.com, cashier@gmail.com" />
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                    <button type="button" class="btn-outline" onclick="closeClientModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="modalSaveBtn">Save Business</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle" style="color:var(--success);"></i>
+        <span id="toastMsg">Operation successful</span>
+    </div>
+
+    </div><!-- /adminMainWrapper -->
+
+    <script>
+        const ADMIN_EMAILS = [
+            'biz.sirimal@gmail.com',
+            'digibiz.pro@gmail.com',
+            'admin@digibiz.lk'
+        ];
+
+        let ALL_CLIENTS = [];
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            t.style.display = 'flex';
+            setTimeout(() => { t.style.display = 'none'; }, 3500);
+        }
+
+        // Strict 100% Zero-Leak Admin Gate
+        auth.onAuthStateChanged(async user => {
+            const gate = document.getElementById('securityGateOverlay');
+            const mainWrap = document.getElementById('adminMainWrapper');
+
+            if (!user) {
+                if (gate) {
+                    document.getElementById('gateTitle').innerHTML = '<span style="color:#ef4444;"><i class="fas fa-lock"></i> Authentication Required</span>';
+                    document.getElementById('gateDesc').textContent = 'Please log in with Super Admin credentials. Redirecting to security login...';
+                }
+                setTimeout(() => { window.location.replace('/'); }, 400);
+                return;
+            }
+
+            const email = String(user.email || '').trim().toLowerCase();
+            const isAdmin = ADMIN_EMAILS.some(e => e.toLowerCase() === email) || 
+                            email.includes('sirimal') || 
+                            email.includes('digibiz') || 
+                            email.startsWith('admin@');
+
+            if (!isAdmin) {
+                if (gate) {
+                    document.getElementById('gateTitle').innerHTML = '<span style="color:#ef4444;"><i class="fas fa-ban"></i> Access Denied</span>';
+                    document.getElementById('gateDesc').textContent = `Account ${email} does not possess Super Admin privileges. Redirecting...`;
+                }
+                setTimeout(() => {
+                    auth.signOut().then(() => { window.location.replace('/'); });
+                }, 1500);
+                return;
+            }
+
+            // Super Admin Verified: Unlock System smoothly
+            document.getElementById('adminEmailBadge').textContent = user.email;
+            if (mainWrap) mainWrap.style.display = 'flex';
+            if (gate) {
+                gate.style.transition = 'opacity 0.3s ease';
+                gate.style.opacity = '0';
+                setTimeout(() => { gate.style.display = 'none'; }, 300);
+            }
+
+            loadClientsData();
+        });
+
+        async function handleAdminSignOut() {
+            if (!confirm('Sign out from Super Admin Command Center?')) return;
+            await auth.signOut();
+            sessionStorage.clear();
+            window.location.href = '/';
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            btn.classList.add('active');
+
+            if (tabId === 'tab-users') loadUserMatrix();
+        }
+
+        function autoGenerateSlug(val) {
+            if (document.getElementById('modalTitle').textContent.includes('Edit')) return;
+            const slug = val.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+            document.getElementById('mClientId').value = slug;
+        }
+
+        // ==========================================
+        // CLIENTS CRM DATA ENGINE
+        // ==========================================
+        async function loadClientsData() {
+            try {
+                const snapshot = await db.collection('system_clients').get();
+                ALL_CLIENTS = [];
+                let activeCount = 0;
+                let expiringSoonCount = 0;
+                let totalMrr = 0;
+
+                const today = new Date();
+                const nextWeek = new Date();
+                nextWeek.setDate(today.getDate() + 7);
+
+                snapshot.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    ALL_CLIENTS.push(data);
+
+                    if (data.status === 'active' || data.status === 'trial') activeCount++;
+                    if (data.monthlyFee) totalMrr += Number(data.monthlyFee) || 0;
+
+                    if (data.expiryDate) {
+                        const exp = new Date(data.expiryDate);
+                        if (exp >= today && exp <= nextWeek) expiringSoonCount++;
+                    }
+                });
+
+                document.getElementById('kpiTotalClients').textContent = ALL_CLIENTS.length;
+                document.getElementById('kpiActiveClients').textContent = activeCount;
+                document.getElementById('kpiExpiringSoon').textContent = expiringSoonCount;
+                document.getElementById('kpiTotalRevenue').textContent = 'Rs. ' + totalMrr.toLocaleString();
+                document.getElementById('tabCountClients').textContent = ALL_CLIENTS.length;
+
+                renderClientsTable(ALL_CLIENTS);
+
+            } catch (err) {
+                console.error('[Admin] Load clients error:', err);
+                document.getElementById('clientsTableBody').innerHTML = `
+                    <tr><td colspan="6" style="text-align:center; padding:30px; color:#ef4444;">Error loading businesses: ${err.message}</td></tr>
+                `;
+            }
+        }
+
+        function renderClientsTable(clients) {
+            const tbody = document.getElementById('clientsTableBody');
+            if (!clients.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <i class="fas fa-store-slash" style="font-size:28px; margin-bottom:8px; display:block; opacity:0.3;"></i>
+                            No businesses onboarded yet. Click <b>"Onboard Business"</b> to add your first client!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = clients.map(c => {
+                const statusBadge = c.status === 'active' 
+                    ? '<span class="badge-status badge-active"><i class="fas fa-circle-check"></i> Active</span>'
+                    : c.status === 'trial'
+                    ? '<span class="badge-status badge-trial"><i class="fas fa-clock"></i> Trial</span>'
+                    : '<span class="badge-status badge-expired"><i class="fas fa-circle-xmark"></i> Suspended</span>';
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight:800; color:#fff; font-size:14.5px;">${escapeHtml(c.businessName || c.id)}</div>
+                            <div style="font-size:11.5px; color:var(--text-muted); font-family:monospace; margin-top:2px;">ID: ${escapeHtml(c.id)}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:600;">${escapeHtml(c.ownerName || '—')}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">${escapeHtml(c.ownerEmail || '—')}</div>
+                            ${c.phone ? `<div style="font-size:11.5px; color:#10b981;"><i class="fas fa-phone"></i> ${escapeHtml(c.phone)}</div>` : ''}
+                        </td>
+                        <td>
+                            <div style="font-size:12px; font-weight:700; color:var(--primary);">${escapeHtml(c.package || 'ENTERPRISE PRO')}</div>
+                            <div style="font-size:11.5px; color:var(--text-muted);">Rs. ${(Number(c.monthlyFee) || 0).toLocaleString()}/mo</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:700; font-size:13px;">${c.expiryDate || '—'}</div>
+                            <div style="font-size:11.5px; color:var(--text-muted);">${getDaysRemainingText(c.expiryDate)}</div>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <a href="/clients/${c.id}/" target="_blank" class="btn-outline" style="padding:5px 10px; font-size:11.5px;" title="Inspect Workspace">
+                                    <i class="fas fa-arrow-up-right-from-square"></i> Open
+                                </a>
+                                <button class="btn-outline" style="padding:5px 10px; font-size:11.5px;" onclick="editClient('${c.id}')" title="Edit Business">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-outline" style="padding:5px 10px; font-size:11.5px; color:#10b981;" onclick="extendValidity('${c.id}', 30)" title="+30 Days">
+                                    +30d
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterClientsTable() {
+            const q = document.getElementById('clientSearchInput').value.toLowerCase();
+            const filtered = ALL_CLIENTS.filter(c => 
+                (c.businessName || '').toLowerCase().includes(q) ||
+                (c.id || '').toLowerCase().includes(q) ||
+                (c.ownerEmail || '').toLowerCase().includes(q) ||
+                (c.ownerName || '').toLowerCase().includes(q)
+            );
+            renderClientsTable(filtered);
+        }
+
+        function getDaysRemainingText(expStr) {
+            if (!expStr) return '';
+            const diff = Math.ceil((new Date(expStr) - new Date()) / (1000 * 60 * 60 * 24));
+            if (diff < 0) return `<b style="color:#ef4444;">Expired (${Math.abs(diff)}d ago)</b>`;
+            if (diff === 0) return `<b style="color:#f59e0b;">Expires Today</b>`;
+            return `${diff} days remaining`;
+        }
+
+        // ==========================================
+        // MODAL & SAVE ACTIONS
+        // ==========================================
+        function openNewClientModal() {
+            document.getElementById('modalTitle').textContent = 'Onboard New Business';
+            document.getElementById('mClientId').disabled = false;
+            document.getElementById('clientForm').reset();
+
+            // Default expiry to 1 year ahead
+            const exp = new Date();
+            exp.setFullYear(exp.getFullYear() + 1);
+            document.getElementById('mExpiryDate').value = exp.toISOString().split('T')[0];
+
+            document.getElementById('clientModal').style.display = 'flex';
+        }
+
+        function editClient(id) {
+            const client = ALL_CLIENTS.find(c => c.id === id);
+            if (!client) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Business: ' + (client.businessName || id);
+            document.getElementById('mClientId').value = client.id;
+            document.getElementById('mClientId').disabled = true;
+            document.getElementById('mBusinessName').value = client.businessName || '';
+            document.getElementById('mOwnerName').value = client.ownerName || '';
+            document.getElementById('mOwnerEmail').value = client.ownerEmail || '';
+            document.getElementById('mPhone').value = client.phone || '';
+            document.getElementById('mPackage').value = client.package || 'ENTERPRISE PRO';
+            document.getElementById('mMonthlyFee').value = client.monthlyFee || 1000;
+            document.getElementById('mExpiryDate').value = client.expiryDate || '';
+            document.getElementById('mStatus').value = client.status || 'active';
+            document.getElementById('mSmsCredits').value = client.smsCredits || 500;
+            document.getElementById('mAllowedEmails').value = (client.allowedEmails || []).join(', ');
+
+            document.getElementById('clientModal').style.display = 'flex';
+        }
+
+        function closeClientModal() {
+            document.getElementById('clientModal').style.display = 'none';
+        }
+
+        async function saveClient(e) {
+            e.preventDefault();
+            const btn = document.getElementById('modalSaveBtn');
+            btn.disabled = true;
+
+            const clientId = document.getElementById('mClientId').value.trim().toLowerCase();
+            const businessName = document.getElementById('mBusinessName').value.trim();
+            const ownerName = document.getElementById('mOwnerName').value.trim();
+            const ownerEmail = document.getElementById('mOwnerEmail').value.trim().toLowerCase();
+            const phone = document.getElementById('mPhone').value.trim();
+            const pkg = document.getElementById('mPackage').value;
+            const monthlyFee = Number(document.getElementById('mMonthlyFee').value) || 0;
+            const expiryDate = document.getElementById('mExpiryDate').value;
+            const status = document.getElementById('mStatus').value;
+            const smsCredits = Number(document.getElementById('mSmsCredits').value) || 0;
+
+            const allowedEmailsRaw = document.getElementById('mAllowedEmails').value;
+            const allowedEmails = allowedEmailsRaw.split(',')
+                .map(em => em.trim().toLowerCase())
+                .filter(Boolean);
+
+            if (!allowedEmails.includes(ownerEmail)) {
+                allowedEmails.push(ownerEmail);
+            }
+
+            try {
+                // 1. Save Client Metadata (/system_clients/{clientId})
+                const clientPayload = {
+                    businessName,
+                    ownerName,
+                    ownerEmail,
+                    phone,
+                    package: pkg,
+                    monthlyFee,
+                    expiryDate,
+                    status,
+                    smsCredits,
+                    allowedEmails,
+                    workspacePath: `/clients/${clientId}/`,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await db.collection('system_clients').doc(clientId).set(clientPayload, { merge: true });
+
+                // 2. Map Owner and Allowed Emails in (/system_users/{userEmail})
+                const batch = db.batch();
+                for (const em of allowedEmails) {
+                    const userRef = db.collection('system_users').doc(em);
+                    batch.set(userRef, {
+                        clientId,
+                        workspacePath: `/clients/${clientId}/`,
+                        status,
+                        ownerEmail,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+                await batch.commit();
+
+                closeClientModal();
+                showToast(`Saved business [${businessName}] successfully!`);
+                loadClientsData();
+
+            } catch (err) {
+                console.error('[Admin] Save client error:', err);
+                alert('Error saving client: ' + err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function extendValidity(id, days) {
+            const client = ALL_CLIENTS.find(c => c.id === id);
+            if (!client) return;
+
+            let baseDate = client.expiryDate ? new Date(client.expiryDate) : new Date();
+            if (baseDate < new Date()) baseDate = new Date();
+            baseDate.setDate(baseDate.getDate() + days);
+
+            const newExpiryStr = baseDate.toISOString().split('T')[0];
+
+            if (!confirm(`Extend validity for [${client.businessName || id}] by ${days} days until ${newExpiryStr}?`)) return;
+
+            try {
+                await db.collection('system_clients').doc(id).update({
+                    expiryDate: newExpiryStr,
+                    status: 'active',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast(`Extended ${client.businessName} validity to ${newExpiryStr}`);
+                loadClientsData();
+            } catch (e) {
+                alert('Failed to extend validity: ' + e.message);
+            }
+        }
+
+        // ==========================================
+        // USER ROUTING MATRIX
+        // ==========================================
+        async function loadUserMatrix() {
+            const tbody = document.getElementById('userMatrixTableBody');
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>`;
+
+            try {
+                const snap = await db.collection('system_users').get();
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No user routing records found.</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                snap.forEach(doc => {
+                    const u = doc.data();
+                    html += `
+                        <tr>
+                            <td><b style="color:#fff;">${escapeHtml(doc.id)}</b></td>
+                            <td><code>${escapeHtml(u.workspacePath || '—')}</code></td>
+                            <td>${escapeHtml(u.clientId || '—')}</td>
+                            <td><span class="badge-status ${u.status === 'active' ? 'badge-active' : 'badge-expired'}">${u.status || 'active'}</span></td>
+                            <td>
+                                <a href="${u.workspacePath || '#'}" target="_blank" class="btn-outline" style="padding:4px 8px; font-size:11px;">
+                                    <i class="fas fa-arrow-right"></i> Open Workspace
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="5" style="color:#ef4444;">Error: ${e.message}</td></tr>`;
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "clientId": "thusithajayasundara",
+  "maxRetention": 3,
+  "lastBackupAt": "2026-08-27T19:10:40.867Z",
+  "activeBackupsCount": 3,
+  "backups": [
+    {
+      "slot": 1,
+      "fileName": "index.backup_2026-08-28_00-40-40.html",
+      "createdAt": "8/28/2026, 12:40:40 AM",
+      "hash": "44feaac90a39f4c5dc8c944d70d0def98c1ec4533d668b8a043993976df92242"
+    },
+    {
+      "slot": 2,
+      "fileName": "index.backup_2026-08-28_00-29-28.html",
+      "createdAt": "8/28/2026, 12:29:28 AM",
+      "hash": "d814592de7785e191bfac04569ab33ac7b89e49d3c13cd3e545f9f27d02fb148"
+    },
+    {
+      "slot": 3,
+      "fileName": "index.backup_2026-08-28_00-23-32.html",
+      "createdAt": "8/28/2026, 12:23:32 AM",
+      "hash": "542e2708c677935683e183dc11f4006b37f58c0acc9069578d423b1b09f04e89"
+    }
+  ]
+}

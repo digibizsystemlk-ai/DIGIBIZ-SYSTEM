@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DIGIBIZ SYSTEM — Enterprise Cloud Portal</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz-rTtysyWgt_3PUHG-ar8gS8oN0HTJiI",
+            authDomain: "digibiz-system.firebaseapp.com",
+            projectId: "digibiz-system",
+            storageBucket: "digibiz-system.firebasestorage.app",
+            messagingSenderId: "21839180976",
+            appId: "1:21839180976:web:cbbeda3ebc061285db7775"
+        };
+
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // 🚀 Cost Optimization Strategy #1: Enable Offline Persistence (0 Reads on Cache)
+        db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+            if (err.code === 'failed-precondition') {
+                console.warn('[Persistence] Multiple tabs open, persistence enabled in primary tab only.');
+            } else if (err.code === 'unimplemented') {
+                console.warn('[Persistence] Current browser does not support offline persistence.');
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary: #ff9900;
+            --primary-hover: #e68a00;
+            --accent: #2563eb;
+            --bg-dark: #0a101d;
+            --surface: rgba(19, 27, 44, 0.75);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 153, 0, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.9) 0px, var(--bg-dark) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 440px;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255,153,0,0.2) 0%, rgba(37,99,235,0.2) 100%);
+            border: 1px solid rgba(255,153,0,0.4);
+            color: var(--primary);
+            font-size: 26px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 24px rgba(255, 153, 0, 0.2);
+        }
+
+        .brand-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff;
+        }
+
+        .brand-title span {
+            color: var(--primary);
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            letter-spacing: 0.2px;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group i.field-icon {
+            position: absolute;
+            left: 14px;
+            color: #64748b;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(10, 16, 29, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 13px 14px 13px 40px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            background: rgba(10, 16, 29, 0.9);
+            box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.18);
+        }
+
+        .form-input:focus ~ i.field-icon {
+            color: var(--primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: #111827;
+            font-weight: 700;
+            font-size: 14.5px;
+            padding: 13px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
+            margin-top: 24px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 18px;
+            display: none;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .alert-info {
+            background: rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            color: #93c5fd;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #86efac;
+        }
+
+        .routing-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 16, 29, 0.92);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(255, 153, 0, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 11.5px;
+            color: #64748b;
+            margin-top: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="brand-header">
+            <div class="brand-logo">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <h1 class="brand-title">DIGIBIZ <span>SYSTEM</span></h1>
+            <p class="brand-subtitle">Secure Enterprise Workspace Gateway</p>
+        </div>
+
+        <div class="card">
+            <!-- Loading & Routing State -->
+            <div id="routingOverlay" class="routing-overlay">
+                <div class="spinner"></div>
+                <h3 id="routingTitle" style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px;">Authenticating...</h3>
+                <p id="routingDesc" style="font-size: 12.5px; color: var(--text-muted);">Accessing your secured workspace environment</p>
+            </div>
+
+            <!-- Notification / Alert -->
+            <div id="loginAlert" class="alert">
+                <i id="alertIcon" class="fas fa-circle-exclamation"></i>
+                <div id="alertMsg"></div>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label" for="userEmail">Account Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope field-icon"></i>
+                        <input type="email" id="userEmail" class="form-input" placeholder="name@company.com" required autocomplete="username" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <label class="form-label" for="userPassword" style="margin-bottom:0;">Password</label>
+                        <a href="javascript:void(0)" onclick="handleForgotPassword()" style="font-size:11.5px; color:var(--text-muted); text-decoration:none;">Forgot?</a>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock field-icon"></i>
+                        <input type="password" id="userPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password" />
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-submit">
+                    <span>Sign In to Workspace</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="footer-note">
+            &copy; 2026 DIGIBIZ SYSTEM. Zero-Leak Single-Tenant Architecture.
+        </div>
+    </div>
+
+    <script>
+        function showAlert(message, type = 'error') {
+            const alertEl = document.getElementById('loginAlert');
+            const alertMsg = document.getElementById('alertMsg');
+            const alertIcon = document.getElementById('alertIcon');
+
+            alertEl.className = 'alert ' + (type === 'error' ? 'alert-error' : type === 'success' ? 'alert-success' : 'alert-info');
+            alertIcon.className = type === 'error' ? 'fas fa-circle-exclamation' : type === 'success' ? 'fas fa-circle-check' : 'fas fa-circle-info';
+            alertMsg.innerHTML = message;
+            alertEl.style.display = 'flex';
+        }
+
+        function hideAlert() {
+            document.getElementById('loginAlert').style.display = 'none';
+        }
+
+        function showRoutingState(title, desc) {
+            const overlay = document.getElementById('routingOverlay');
+            document.getElementById('routingTitle').textContent = title || 'Authenticating...';
+            document.getElementById('routingDesc').textContent = desc || 'Routing to your isolated workspace';
+            overlay.style.display = 'flex';
+        }
+
+        function hideRoutingState() {
+            document.getElementById('routingOverlay').style.display = 'none';
+        }
+
+        // Automatic Session Detection
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                console.log('[DIGIBIZ Gateway] Active session detected:', user.email);
+                await routeUserToWorkspace(user.email);
+            }
+        });
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            hideAlert();
+
+            const email = document.getElementById('userEmail').value.trim().toLowerCase();
+            const password = document.getElementById('userPassword').value;
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!email || !password) {
+                showAlert('Please enter both email and password.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            showRoutingState('Verifying Credentials...', 'Connecting to Digibiz Cloud Security Gate');
+
+            try {
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+                let userCredential = null;
+                try {
+                    userCredential = await auth.signInWithEmailAndPassword(email, password);
+                } catch (signErr) {
+                    const isNewUserOrInvalid = [
+                        'auth/user-not-found',
+                        'auth/invalid-credential',
+                        'auth/invalid-login-credentials'
+                    ].includes(signErr.code) || (signErr.code && signErr.code.includes('invalid'));
+
+                    if (isNewUserOrInvalid) {
+                        try {
+                            userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        } catch (createErr) {
+                            if (createErr.code === 'auth/email-already-in-use') {
+                                throw { code: 'auth/wrong-password', message: 'Incorrect password for this account. Please enter the correct password.' };
+                            }
+                            throw createErr;
+                        }
+                    } else {
+                        throw signErr;
+                    }
+                }
+
+                showRoutingState('Loading Workspace...', 'Preparing your enterprise dashboard');
+                await routeUserToWorkspace(email);
+
+            } catch (err) {
+                console.error('[DIGIBIZ Gateway] Auth error:', err);
+                hideRoutingState();
+                submitBtn.disabled = false;
+                
+                let errorMsg = 'Invalid email or password. Please check your credentials.';
+                if (err.code === 'auth/operation-not-allowed') {
+                    errorMsg = '<b>Firebase Auth Not Enabled:</b> Please enable "Email/Password" provider in Firebase Console under Authentication > Sign-in method.';
+                } else if (err.code === 'auth/wrong-password') {
+                    errorMsg = '<b>Incorrect Password:</b> Please enter the correct password for this account.';
+                } else if (err.code === 'auth/too-many-requests') {
+                    errorMsg = 'Too many attempts. Please try again in a few moments.';
+                } else if (err.code === 'auth/invalid-email') {
+                    errorMsg = 'Invalid email address format.';
+                } else if (err.message) {
+                    errorMsg = `${err.message}`;
+                }
+                showAlert(errorMsg, 'error');
+            }
+        }
+
+        async function routeUserToWorkspace(email) {
+            const cleanEmail = String(email || '').trim().toLowerCase();
+            
+            try {
+                let targetWorkspace = null;
+                let clientStatus = 'active';
+
+                // 0. Super Admin Master Route
+                const ADMIN_EMAILS = [
+                    'biz.sirimal@gmail.com',
+                    'digibiz.pro@gmail.com',
+                    'admin@digibiz.lk'
+                ];
+                if (ADMIN_EMAILS.some(e => e.toLowerCase() === cleanEmail) || cleanEmail.includes('sirimal') || cleanEmail.includes('digibiz') || cleanEmail.startsWith('admin@')) {
+                    targetWorkspace = '/admin/';
+                }
+
+                // 1. Dynamic Firestore Route Lookup (/system_users/{userEmail})
+                if (!targetWorkspace) {
+                    try {
+                        const userDoc = await db.collection('system_users').doc(cleanEmail).get();
+                        if (userDoc.exists) {
+                            const data = userDoc.data();
+                            targetWorkspace = data.workspacePath || (data.clientId ? `/clients/${data.clientId}/` : null);
+                            clientStatus = data.status || 'active';
+                        }
+                    } catch (fsErr) {
+                        console.warn('[DIGIBIZ Gateway] Cloud directory lookup:', fsErr.message);
+                    }
+                }
+
+                // 2. Fallback to Local Storage Cached Workspace (0 Read optimization)
+                if (!targetWorkspace) {
+                    const cachedWs = localStorage.getItem('digibiz_ws_' + cleanEmail);
+                    if (cachedWs) targetWorkspace = cachedWs;
+                }
+
+                // 3. Fallback Client Routing Directory
+                if (!targetWorkspace) {
+                    if (cleanEmail.includes('sathityre')) {
+                        targetWorkspace = '/clients/sathityrecentre/';
+                    } else if (cleanEmail.includes('shashintha') || cleanEmail.includes('chisathi')) {
+                        targetWorkspace = '/clients/chisathifamily/';
+                    } else if (cleanEmail.includes('thusitha') || cleanEmail.includes('jayasundara') || cleanEmail.includes('coconut')) {
+                        targetWorkspace = '/clients/thusithajayasundara/';
+                    } else if (cleanEmail.includes('madawala') || cleanEmail.includes('darshana')) {
+                        targetWorkspace = '/clients/madawalateashop/';
+                    }
+                }
+
+                // 4. Strict Normalization: Sanitize any legacy subpaths, old slugs, or query strings
+                if (targetWorkspace) {
+                    if (targetWorkspace.includes('chisathifamilyproducts') || cleanEmail.includes('shashintha') || cleanEmail.includes('chisathi')) {
+                        targetWorkspace = '/clients/chisathifamily/';
+                    } else if (targetWorkspace.includes('/modules/')) {
+                        const clientMatch = targetWorkspace.match(/\/clients\/([a-zA-Z0-9_-]+)/);
+                        if (clientMatch) {
+                            targetWorkspace = `/clients/${clientMatch[1]}/`;
+                        }
+                    }
+                    // Strip any query strings or hashes
+                    targetWorkspace = targetWorkspace.split('?')[0].split('#')[0];
+                    if (!targetWorkspace.endsWith('/')) targetWorkspace += '/';
+                }
+
+                if (!targetWorkspace) {
+                    hideRoutingState();
+                    document.getElementById('submitBtn').disabled = false;
+                    showAlert(`<b>Access Restricted</b><br>No dedicated workspace is assigned to <code>${cleanEmail}</code>. Please contact DIGIBIZ support on WhatsApp: <b>071 344 6500</b>`, 'error');
+                    auth.signOut();
+                    return;
+                }
+
+                if (clientStatus === 'suspended' || clientStatus === 'expired') {
+                    hideRoutingState();
+                    document.getElementById('submitBtn').disabled = false;
+                    showAlert(`<b>Account Suspended</b><br>Your subscription has expired. Please contact DIGIBIZ Support on WhatsApp: <b>071 344 6500</b> to renew.`, 'error');
+                    auth.signOut();
+                    return;
+                }
+
+                // Cache routing locally for future 0-read logins
+                localStorage.setItem('digibiz_ws_' + cleanEmail, targetWorkspace);
+                sessionStorage.setItem('digibiz_authenticated_user', cleanEmail);
+                sessionStorage.setItem('digibiz_active_workspace', targetWorkspace);
+
+                // Smooth instant redirect
+                showRoutingState('Launching Workspace...', 'Redirecting to your isolated workspace');
+                setTimeout(() => {
+                    window.location.href = targetWorkspace;
+                }, 300);
+
+            } catch (routeErr) {
+                console.error('[DIGIBIZ Gateway] Routing error:', routeErr);
+                hideRoutingState();
+                document.getElementById('submitBtn').disabled = false;
+                showAlert('Failed to route to workspace: ' + routeErr.message, 'error');
+            }
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('userEmail').value.trim();
+            if (!email) {
+                showAlert('Please enter your email above first, then click "Forgot?".', 'info');
+                return;
+            }
+
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showAlert(`Password reset link sent to <b>${email}</b>. Please check your inbox.`, 'success');
+            } catch (err) {
+                showAlert('Error sending reset email: ' + err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

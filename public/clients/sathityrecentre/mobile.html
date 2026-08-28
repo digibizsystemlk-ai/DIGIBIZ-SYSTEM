@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>SATHI TYRE CENTRE</title>
+    
+    <!-- ============================================================ -->
+    <!--  PWA META TAGS                                               -->
+    <!-- ============================================================ -->
+    <link rel="manifest" href="/clients/sathityrecentre/manifest.json" />
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/192/tire.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SATHI TYRE" />
+    <meta name="theme-color" content="#131921" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/clients/sathityrecentre/sw.js', { scope: '/clients/sathityrecentre/' })
+                    .then(function(reg) {
+                        console.log('✅ SATHI PWA ServiceWorker registered with scope:', reg.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration error:', error);
+                    });
+            });
+        }
+    </script>
+    
+    <style>
+        /* ================================================================ */
+        /*  AMAZON SELLER CENTRAL MOBILE APP STYLE                          */
+        /* ================================================================ */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: #eaeded;
+            min-height: 100vh;
+            padding-bottom: 75px;
+            overflow-x: hidden;
+            color: #0f172a;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* ================================================================ */
+        /*  SPLASH SCREEN                                                   */
+        /* ================================================================ */
+        #splashScreen {
+            position: fixed;
+            inset: 0;
+            background: #131921;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        #splashScreen.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        #splashScreen .splash-logo {
+            font-size: 52px;
+            color: #ff9900;
+            margin-bottom: 14px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        #splashScreen .splash-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        
+        #splashScreen .splash-title span {
+            color: #ff9900;
+        }
+        
+        #splashScreen .splash-sub {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 4px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        #splashScreen .splash-loader {
+            margin-top: 30px;
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #ff9900;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        
+        /* ================================================================ */
+        /*  TOP HEADER (Amazon Style)                                       */
+        /* ================================================================ */
+        .app-header {
+            background: #131921;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #232f3e;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .app-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 900;
+        }
+        
+        .app-header .brand .logo-icon {
+            background: #ff9900;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .app-header .brand .logo-icon i {
+            color: #131921;
+            font-size: 16px;
+        }
+        
+        .app-header .brand .brand-text span {
+            color: #ff9900;
+        }
+        
+        .app-header .brand .brand-sub {
+            font-size: 8.5px;
+            color: rgba(255,255,255,0.5);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .app-header .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .app-header .header-actions button {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        .app-header .header-actions button:active {
+            background: rgba(255,255,255,0.2);
+            transform: scale(0.95);
+        }
+        
+        /* ================================================================ */
+        /*  BOTTOM TAB BAR (Amazon Style)                                  */
+        /* ================================================================ */
+        .bottom-tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid #d5d9d9;
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 0 10px;
+            z-index: 1000;
+            box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+        }
+        
+        .bottom-tab-bar .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 8px;
+            transition: all 0.15s;
+            min-width: 54px;
+            text-decoration: none;
+            color: #64748b;
+            position: relative;
+        }
+        
+        .bottom-tab-bar .tab-item:active {
+            transform: scale(0.92);
+        }
+        
+        .bottom-tab-bar .tab-item i {
+            font-size: 19px;
+            transition: all 0.15s;
+        }
+        
+        .bottom-tab-bar .tab-item span {
+            font-size: 9.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .bottom-tab-bar .tab-item.active {
+            color: #ff9900;
+        }
+        
+        .bottom-tab-bar .tab-item.active i {
+            transform: translateY(-1px);
+        }
+        
+        .bottom-tab-bar .tab-item .tab-badge {
+            background: #dc2626;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 10px;
+            position: absolute;
+            top: 0;
+            right: 6px;
+            min-width: 16px;
+            text-align: center;
+        }
+        
+        /* ================================================================ */
+        /*  PAGES                                                          */
+        /* ================================================================ */
+        .app-page {
+            display: none;
+            padding: 14px 14px;
+            animation: fadeInPage 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            padding-bottom: 25px;
+        }
+        
+        .app-page.active {
+            display: block;
+        }
+        
+        @keyframes fadeInPage {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ================================================================ */
+        /*  AMAZON STYLE CARDS                                              */
+        /* ================================================================ */
+        .amazon-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #d5d9d9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        
+        .amazon-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .amazon-card .card-header .card-title {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #131921;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .amazon-card .card-header .card-title i {
+            color: #ff9900;
+        }
+        
+        .amazon-card .card-header .card-action {
+            font-size: 11px;
+            color: #0066c0;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        /* ================================================================ */
+        /*  STATS GRID                                                     */
+        /* ================================================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .stat-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px solid #d5d9d9;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        
+        .stat-card .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 17px;
+            font-weight: 900;
+            color: #131921;
+            margin-top: 3px;
+        }
+        
+        .stat-card .stat-change {
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+        .stat-card .stat-change.up { color: #067d62; }
+        .stat-card .stat-change.down { color: #dc2626; }
+        
+        /* ================================================================ */
+        /*  QUICK ACTIONS                                                  */
+        /* ================================================================ */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .quick-actions .action-btn {
+            background: #fff;
+            border: 1px solid #d5d9d9;
+            border-radius: 10px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .quick-actions .action-btn:active {
+            transform: scale(0.94);
+            background: #f0f2f5;
+            border-color: #ff9900;
+        }
+        
+        .quick-actions .action-btn i {
+            font-size: 22px;
+            color: #ff9900;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .quick-actions .action-btn span {
+            font-size: 10px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        /* ================================================================ */
+        /*  LIST ITEMS                                                     */
+        /* ================================================================ */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .list-item .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .list-item .item-info .item-name {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #131921;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .list-item .item-info .item-desc {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        
+        .list-item .item-value {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #067d62;
+            margin-left: 8px;
+            text-align: right;
+        }
+        
+        /* ================================================================ */
+        /*  POS PRODUCTS GRID                                              */
+        /* ================================================================ */
+        .pos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 2px;
+        }
+        
+        .pos-product {
+            background: #f8f9fa;
+            border: 1px solid #d5d9d9;
+            border-radius: 8px;
+            padding: 10px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .pos-product:active {
+            transform: scale(0.95);
+            border-color: #ff9900;
+            background: #fff;
+        }
+        
+        .pos-product .product-name {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #131921;
+            line-height: 1.25;
+            height: 28px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .pos-product .product-price {
+            font-size: 13px;
+            font-weight: 900;
+            color: #067d62;
+            margin-top: 4px;
+        }
+        
+        .pos-product .product-stock {
+            font-size: 9.5px;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        
+        /* ================================================================ */
+        /*  ORDER & INVENTORY ITEMS                                        */
+        /* ================================================================ */
+        .order-item {
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            border: 1px solid #d5d9d9;
+        }
+        
+        .order-item .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        
+        .order-item .order-id {
+            font-weight: 800;
+            font-size: 13px;
+            color: #131921;
+        }
+        
+        .order-item .order-total {
+            font-weight: 800;
+            color: #067d62;
+            font-size: 13.5px;
+        }
+        
+        .order-item .order-customer {
+            font-size: 11.5px;
+            color: #475569;
+        }
+        
+        .order-item .order-date {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .inventory-item:last-child {
+            border-bottom: none;
+        }
+        
+        .inventory-item .item-details .name {
+            font-weight: 700;
+            font-size: 12.5px;
+            color: #0f172a;
+        }
+        
+        .inventory-item .item-details .info {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        
+        .inventory-item .item-stock {
+            font-weight: 800;
+            font-size: 12px;
+            text-align: right;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .inventory-item .item-stock.low { background: #fee2e2; color: #dc2626; }
+        .inventory-item .item-stock.good { background: #e6f7ed; color: #067d62; }
+        
+        /* ================================================================ */
+        /*  BUTTONS (Amazon Style)                                          */
+        /* ================================================================ */
+        .amazon-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            width: 100%;
+        }
+        .amazon-btn:active {
+            transform: scale(0.97);
+        }
+        
+        .amazon-btn-primary {
+            background: #ff9900;
+            color: #131921;
+        }
+        
+        .amazon-btn-secondary {
+            background: #fff;
+            color: #333;
+            border: 1px solid #d5d9d9;
+        }
+        
+        .amazon-btn-success {
+            background: #067d62;
+            color: #fff;
+        }
+        
+        .amazon-btn-danger {
+            background: #dc2626;
+            color: #fff;
+        }
+        
+        /* ================================================================ */
+        /*  AUTH LOGIN                                                      */
+        /* ================================================================ */
+        .auth-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: #fff;
+        }
+        
+        .auth-container.show {
+            display: flex;
+        }
+        
+        .auth-container .auth-logo {
+            font-size: 38px;
+            color: #ff9900;
+            margin-bottom: 8px;
+        }
+        
+        .auth-container .auth-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: #131921;
+        }
+        
+        .auth-container .auth-title span {
+            color: #ff9900;
+        }
+        
+        .auth-container .auth-sub {
+            font-size: 12.5px;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+        
+        .auth-container .auth-box {
+            background: #fff;
+            border-radius: 14px;
+            padding: 26px 20px;
+            width: 100%;
+            max-width: 360px;
+            border: 1px solid #d5d9d9;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .auth-container .auth-box input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d5d9d9;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            background: #f8f9fa;
+            margin-bottom: 12px;
+        }
+        .auth-container .auth-box input:focus {
+            border-color: #ff9900;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(255,153,0,0.15);
+        }
+        
+        .auth-container .auth-box .error {
+            color: #dc2626;
+            font-size: 12px;
+            margin-bottom: 12px;
+            display: none;
+            background: #fee2e2;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        
+        /* ================================================================ */
+        /*  TOAST & SEARCH                                                  */
+        /* ================================================================ */
+        .toast-mobile {
+            position: fixed;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #131921;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 700;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: none;
+            max-width: 90%;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .toast-mobile.show {
+            display: block;
+            animation: toastSlideUp 0.25s ease;
+        }
+        
+        @keyframes toastSlideUp {
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d5d9d9;
+            border-radius: 8px;
+            font-size: 13.5px;
+            outline: none;
+            background: #fff;
+        }
+        .search-bar input:focus {
+            border-color: #ff9900;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 24px 0;
+            color: #94a3b8;
+        }
+        .empty-state i {
+            font-size: 32px;
+            color: #cbd5e1;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .empty-state .empty-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+        }
+        .empty-state .empty-sub {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!--  SPLASH SCREEN                                               -->
+    <!-- ============================================================ -->
+    <div id="splashScreen">
+        <div class="splash-logo"><i class="fas fa-bolt"></i></div>
+        <div class="splash-title">SATHI <span>TYRE</span></div>
+        <div class="splash-sub">Business Management System</div>
+        <div class="splash-loader"></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  PWA INSTALL BANNER - Amazon Style                           -->
+    <!-- ============================================================ -->
+    <div id="installBanner" style="
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #131921;
+        color: #fff;
+        padding: 14px 18px;
+        border-radius: 14px;
+        z-index: 9998;
+        max-width: 360px;
+        width: 92%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        border: 1px solid rgba(255,153,0,0.3);
+        display: none;
+        align-items: center;
+        gap: 14px;
+        animation: slideUpBanner 0.5s ease;
+    ">
+        <div style="background: #ff9900; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i class="fas fa-bolt" style="color: #131921; font-size: 20px;"></i>
+        </div>
+        <div style="flex: 1;">
+            <div style="font-weight: 800; font-size: 13.5px; color: #ff9900;">📱 Install PWA App</div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.7);">Add SATHI TYRE to your home screen</div>
+        </div>
+        <div style="display: flex; gap: 6px; flex-shrink: 0;">
+            <button onclick="installPWA()" style="
+                background: #ff9900;
+                color: #131921;
+                border: none;
+                padding: 7px 14px;
+                border-radius: 8px;
+                font-weight: 800;
+                font-size: 12px;
+                cursor: pointer;
+            ">
+                Install
+            </button>
+            <button onclick="closeInstallBanner()" style="
+                background: transparent;
+                color: rgba(255,255,255,0.4);
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+                padding: 2px 6px;
+            ">
+                ✕
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  TOAST                                                       -->
+    <!-- ============================================================ -->
+    <div class="toast-mobile" id="toastMobile"></div>
+
+    <!-- ============================================================ -->
+    <!--  AUTH / LOGIN SCREEN                                         -->
+    <!-- ============================================================ -->
+    <div class="auth-container show" id="authContainer">
+        <div class="auth-logo"><i class="fas fa-bolt"></i></div>
+        <div class="auth-title">SATHI <span>TYRE</span></div>
+        <div class="auth-sub">Business Management System Mobile</div>
+        
+        <div class="auth-box">
+            <div class="error" id="authError">Invalid email or password</div>
+            
+            <div style="margin-bottom:12px;">
+                <label style="font-size:11px; font-weight:700; color:#555; display:block; margin-bottom:4px;">Email Address</label>
+                <input type="email" id="loginEmail" placeholder="e.g. sathityre05@gmail.com" value="sathityre05@gmail.com" autocomplete="username" />
+            </div>
+            
+            <div style="margin-bottom:14px;">
+                <label style="font-size:11px; font-weight:700; color:#555; display:block; margin-bottom:4px;">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" value="123456" autocomplete="current-password" />
+            </div>
+            
+            <button class="amazon-btn amazon-btn-primary" onclick="handleSignIn()" style="padding:12px; font-size:14px;">
+                <i class="fas fa-lock"></i> Sign In to Mobile App
+            </button>
+            
+            <div style="text-align:center; margin-top:14px; font-size:12px;">
+                <a onclick="switchToDesktop()" style="color:#0066c0; text-decoration:none; font-weight:700; cursor:pointer;">
+                    <i class="fas fa-desktop"></i> Switch to Desktop Version
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  MAIN APP                                                    -->
+    <!-- ============================================================ -->
+    <div id="appContainer" style="display:none;">
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <button id="mHeaderBackBtn" onclick="handleMobileBack()" style="display:none; background:rgba(255,255,255,0.12); border:none; color:#ff9900; width:34px; height:34px; border-radius:8px; align-items:center; justify-content:center; margin-right:8px; cursor:pointer; font-size:16px;" title="Go Back">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="logo-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div>
+                    <div class="brand-text">SATHI <span>TYRE</span></div>
+                    <div class="brand-sub" id="mBrandSub">Management Suite</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button onclick="installPWA()" title="Install PWA App" id="headerInstallBtn"><i class="fas fa-download" style="color:#ff9900;"></i></button>
+                <button onclick="syncLiveCloud()" title="Sync Cloud Data"><i class="fas fa-cloud"></i></button>
+                <button onclick="switchToDesktop()" title="Switch to Desktop"><i class="fas fa-desktop"></i></button>
+                <button onclick="handleSignOut()" title="Sign Out"><i class="fas fa-sign-out-alt" style="color:#ff9900;"></i></button>
+            </div>
+        </header>
+
+        <!-- ============================================================ -->
+        <!--  PAGE: DASHBOARD                                            -->
+        <!-- ============================================================ -->
+        <div class="app-page active" id="page-dashboard">
+            
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card" onclick="openStatDetails('todaySales')" style="cursor:pointer; position:relative;">
+                    <div class="stat-label">Today Sales <i class="fas fa-arrow-up-right-from-square" style="font-size:9px; opacity:0.5; float:right;"></i></div>
+                    <div class="stat-value" id="mTodaySales">LKR 0</div>
+                    <div class="stat-change up"><i class="fas fa-arrow-trend-up"></i> Live POS ➜</div>
+                </div>
+                <div class="stat-card" onclick="openStatDetails('todayOrders')" style="cursor:pointer; position:relative;">
+                    <div class="stat-label">Total Orders <i class="fas fa-arrow-up-right-from-square" style="font-size:9px; opacity:0.5; float:right;"></i></div>
+                    <div class="stat-value" id="mTotalBills">0</div>
+                    <div class="stat-change up">Completed ➜</div>
+                </div>
+                <div class="stat-card" onclick="openStatDetails('stockItems')" style="cursor:pointer; position:relative;">
+                    <div class="stat-label">Stock Items <i class="fas fa-arrow-up-right-from-square" style="font-size:9px; opacity:0.5; float:right;"></i></div>
+                    <div class="stat-value" id="mStockCount">0</div>
+                    <div class="stat-change">Products Active ➜</div>
+                </div>
+                <div class="stat-card" onclick="openStatDetails('customerDue')" style="cursor:pointer; position:relative;">
+                    <div class="stat-label">Customer Due <i class="fas fa-arrow-up-right-from-square" style="font-size:9px; opacity:0.5; float:right;"></i></div>
+                    <div class="stat-value" id="mCustomerDue">LKR 0</div>
+                    <div class="stat-change down">Credit Balance ➜</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <div class="action-btn" onclick="navigateToMobile('pos')">
+                    <i class="fas fa-cash-register"></i>
+                    <span>Quick POS</span>
+                </div>
+                <div class="action-btn" onclick="navigateToMobile('orders')">
+                    <i class="fas fa-receipt"></i>
+                    <span>Orders</span>
+                </div>
+                <div class="action-btn" onclick="navigateToMobile('inventory')">
+                    <i class="fas fa-boxes-stacked"></i>
+                    <span>Stock</span>
+                </div>
+                <div class="action-btn" onclick="navigateToMobile('customers')">
+                    <i class="fas fa-users"></i>
+                    <span>Clients</span>
+                </div>
+            </div>
+
+            <!-- Recent Activity Card -->
+            <div class="amazon-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Recent Activity</div>
+                    <span class="card-action" onclick="navigateToMobile('orders')">View All →</span>
+                </div>
+                <div id="mRecentActivity">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <div class="empty-text">No recent sales</div>
+                        <div class="empty-sub">Sales will appear here automatically</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PAGE: POS                                                  -->
+        <!-- ============================================================ -->
+        <div class="app-page" id="page-pos">
+            <div class="amazon-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-cash-register"></i> Point of Sale</div>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" id="mPosSearch" placeholder="Search tyre, oil, battery..." oninput="renderMobilePOS()" />
+                </div>
+                
+                <div class="pos-grid" id="mPosProducts">
+                    <div style="grid-column:1/-1;" class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <div class="empty-text">No products found</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Section -->
+            <div class="amazon-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-shopping-cart"></i> Cart <span id="mCartCount" style="font-size:12px; color:#64748b; font-weight:600;">(0)</span></div>
+                    <span class="card-action" onclick="mobileClearCart()">Clear</span>
+                </div>
+                <div id="mCartItems">
+                    <div class="empty-state">
+                        <i class="fas fa-cart-shopping"></i>
+                        <div class="empty-text">Cart is empty</div>
+                        <div class="empty-sub">Tap products above to add</div>
+                    </div>
+                </div>
+                <div style="border-top:1px solid #d5d9d9; padding-top:12px; margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:900;">
+                        <span>Total Due</span>
+                        <span id="mCartTotal" style="color:#067d62;">LKR 0.00</span>
+                    </div>
+                    <button class="amazon-btn amazon-btn-success" style="margin-top:10px;" onclick="mobileCheckout()">
+                        <i class="fas fa-check-circle"></i> Complete Cash Sale
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PAGE: ORDERS                                               -->
+        <!-- ============================================================ -->
+        <div class="app-page" id="page-orders">
+            <div class="amazon-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-receipt"></i> Sales History</div>
+                </div>
+                <div id="mOrdersList">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <div class="empty-text">No sales recorded yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PAGE: INVENTORY                                            -->
+        <!-- ============================================================ -->
+        <div class="app-page" id="page-inventory">
+            <div class="search-bar">
+                <input type="text" id="mInvSearch" placeholder="Search inventory by name/code..." oninput="renderMobileInventory()" />
+            </div>
+            <div class="amazon-card" style="padding:10px 14px;">
+                <div id="mInventoryList">
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <div class="empty-text">No items in inventory</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PAGE: CUSTOMERS                                            -->
+        <!-- ============================================================ -->
+        <div class="app-page" id="page-customers">
+            <div class="search-bar">
+                <input type="text" id="mCustSearch" placeholder="Search customer by name or phone..." oninput="renderMobileCustomers()" />
+            </div>
+            <div class="amazon-card" style="padding:10px 14px;">
+                <div id="mCustomersList">
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <div class="empty-text">No customers found</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PAGE: SETTINGS                                             -->
+        <!-- ============================================================ -->
+        <div class="app-page" id="page-settings">
+            <div class="amazon-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-gear"></i> Preferences</div>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f0f2f5;">
+                    <span style="font-size:13px; font-weight:600; color:#333;">🌐 Language</span>
+                    <select id="mLanguageSelect" onchange="changeMobileLanguage(this.value)" style="padding:5px 10px; border:1px solid #d5d9d9; border-radius:6px; font-size:13px; background:#fff;">
+                        <option value="en">English</option>
+                        <option value="si">සිංහල</option>
+                        <option value="ta">தமிழ்</option>
+                    </select>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f0f2f5;">
+                    <span style="font-size:13px; font-weight:600; color:#333;">💻 Desktop View</span>
+                    <button class="amazon-btn amazon-btn-secondary" onclick="switchToDesktop()" style="width:auto; padding:5px 12px; font-size:11px;">
+                        Open Desktop
+                    </button>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f0f2f5;">
+                    <span style="font-size:13px; font-weight:600; color:#333;">⚡ Data Sync</span>
+                    <button class="amazon-btn amazon-btn-primary" onclick="syncLiveCloud()" style="width:auto; padding:5px 12px; font-size:11px;">
+                        Sync Cloud Now
+                    </button>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;">
+                    <span style="font-size:13px; font-weight:600; color:#333;">📱 PWA App</span>
+                    <button class="amazon-btn amazon-btn-secondary" onclick="installPWA()" style="width:auto; padding:5px 12px; font-size:11px;">
+                        Install App
+                    </button>
+                </div>
+            </div>
+            
+            <button class="amazon-btn amazon-btn-danger" onclick="handleSignOut()" style="margin-top:6px;">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+            
+            <div style="text-align:center; margin-top:16px; font-size:11px; color:#888;">
+                SATHI TYRE CENTRE — Business Management Edition © 2026
+            </div>
+        </div>
+
+        <!-- ===== BOTTOM TAB BAR ===== -->
+        <nav class="bottom-tab-bar">
+            <div class="tab-item active" data-page="dashboard" onclick="navigateToMobile('dashboard')">
+                <i class="fas fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="tab-item" data-page="pos" onclick="navigateToMobile('pos')">
+                <i class="fas fa-cash-register"></i>
+                <span>POS</span>
+                <span class="tab-badge" id="mPosBadge" style="display:none;">0</span>
+            </div>
+            <div class="tab-item" data-page="orders" onclick="navigateToMobile('orders')">
+                <i class="fas fa-receipt"></i>
+                <span>Orders</span>
+                <span class="tab-badge" id="mOrderBadge" style="display:none;">0</span>
+            </div>
+            <div class="tab-item" data-page="inventory" onclick="navigateToMobile('inventory')">
+                <i class="fas fa-boxes-stacked"></i>
+                <span>Stock</span>
+            </div>
+            <div class="tab-item" data-page="settings" onclick="navigateToMobile('settings')">
+                <i class="fas fa-gear"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  JAVASCRIPT ENGINE                                           -->
+    <!-- ============================================================ -->
+    <script>
+    // 1. Firebase Config & Initialization (MATCHING LIVE PROJECT)
+    var firebaseConfig = {
+        apiKey: "AIzaSyDz-rTtysyWgt_3PUHG-ar8gS8oN0HTJiI",
+        authDomain: "digibiz-system.firebaseapp.com",
+        projectId: "digibiz-system",
+        storageBucket: "digibiz-system.firebasestorage.app",
+        messagingSenderId: "21839180976",
+        appId: "1:21839180976:web:cbbeda3ebc061285db7775"
+    };
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    var auth = firebase.auth();
+    var db = firebase.firestore ? firebase.firestore() : null;
+
+    // 2. Data Store - Shared seamlessly with Desktop Edition
+    var CLIENT_STORAGE_KEY = 'sathityre_prod_v2';
+    var data = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY)) || {
+        inventory: [],
+        customers: [],
+        suppliers: [],
+        posBills: [],
+        credits: [],
+        cart: []
+    };
+
+    function saveData() {
+        localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(data));
+        if (db) {
+            try {
+                db.collection('clients').doc('sathityrecentre').set({
+                    payload: JSON.stringify(data),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastModifiedBy: 'Mobile PWA App'
+                }, { merge: true });
+            } catch(e) {
+                console.log('Local save only:', e);
+            }
+        }
+    }
+
+    // 3. Splash Screen Logic
+    function hideSplashScreen() {
+        var splash = document.getElementById('splashScreen');
+        if (!splash) return;
+        splash.classList.add('hide');
+        setTimeout(function() {
+            splash.style.display = 'none';
+        }, 500);
+    }
+
+    var splashTimer = setTimeout(function() {
+        if (auth.currentUser || localStorage.getItem('sathi_auth_active') === 'true') {
+            hideSplashScreen();
+        }
+    }, 1000);
+
+    // ================================================================
+    //  4. PWA INSTALLATION ENGINE
+    // ================================================================
+    var deferredPrompt = null;
+    var isAppInstalled = false;
+
+    function checkIfInstalled() {
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            isAppInstalled = true;
+            return true;
+        }
+        if (localStorage.getItem('pwa_installed') === 'true') {
+            isAppInstalled = true;
+            return true;
+        }
+        return false;
+    }
+
+    function showInstallPrompt() {
+        var banner = document.getElementById('installBanner');
+        if (!banner) return;
+        if (checkIfInstalled()) {
+            banner.style.display = 'none';
+            return;
+        }
+        if (localStorage.getItem('pwa_banner_dismissed') === 'true') {
+            banner.style.display = 'none';
+            return;
+        }
+        banner.style.display = 'flex';
+    }
+
+    function installPWA() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(choiceResult) {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                    isAppInstalled = true;
+                    localStorage.setItem('pwa_installed', 'true');
+                    closeInstallBanner();
+                    showToast('✅ App installed successfully!');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+            });
+        } else {
+            showToast('📱 Open browser menu (⋮) and tap "Install app" or "Add to Home Screen"');
+        }
+    }
+
+    function closeInstallBanner() {
+        var banner = document.getElementById('installBanner');
+        if (banner) {
+            banner.style.display = 'none';
+            localStorage.setItem('pwa_banner_dismissed', 'true');
+        }
+    }
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (auth.currentUser || localStorage.getItem('sathi_auth_active') === 'true') {
+            setTimeout(showInstallPrompt, 1500);
+        }
+    });
+
+    window.addEventListener('appinstalled', function() {
+        isAppInstalled = true;
+        localStorage.setItem('pwa_installed', 'true');
+        closeInstallBanner();
+        showToast('✅ SATHI TYRE CENTRE installed successfully!');
+    });
+
+    // 5. Toast Notification
+    function showToast(msg) {
+        var t = document.getElementById('toastMobile');
+        if (!t) return;
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(t._timeout);
+        t._timeout = setTimeout(function() { t.classList.remove('show'); }, 2500);
+    }
+
+    // 6. Navigation & Phone Hardware / Gesture Navigation Support
+    var lastBackPressTime = 0;
+
+    function getCurrentMobilePage() {
+        var active = document.querySelector('.app-page.active');
+        return active ? active.id.replace('page-', '') : 'dashboard';
+    }
+
+    function navigateToMobile(page, fromPopstate) {
+        var prevPage = getCurrentMobilePage();
+        if (page === prevPage && !fromPopstate) return;
+
+        document.querySelectorAll('.app-page').forEach(function(p) {
+            p.classList.remove('active');
+        });
+        var target = document.getElementById('page-' + page);
+        if (target) target.classList.add('active');
+        
+        document.querySelectorAll('.bottom-tab-bar .tab-item').forEach(function(item) {
+            item.classList.remove('active');
+            if (item.getAttribute('data-page') === page) {
+                item.classList.add('active');
+            }
+        });
+
+        // Update Header Back Button & Header Subtitle
+        var backBtn = document.getElementById('mHeaderBackBtn');
+        var subEl = document.getElementById('mBrandSub');
+        if (backBtn) {
+            backBtn.style.display = (page === 'dashboard') ? 'none' : 'inline-flex';
+        }
+        if (subEl) {
+            if (page === 'pos') subEl.textContent = 'Point of Sale';
+            else if (page === 'orders') subEl.textContent = 'Completed Orders';
+            else if (page === 'inventory') subEl.textContent = 'Stock Inventory';
+            else if (page === 'customers') subEl.textContent = 'Customer Management';
+            else subEl.textContent = 'Management Suite';
+        }
+        
+        // Push browser history state for hardware back navigation
+        if (!fromPopstate) {
+            if (page === 'dashboard') {
+                history.pushState({ page: 'dashboard' }, '', '#dashboard');
+            } else {
+                history.pushState({ page: page }, '', '#' + page);
+            }
+        }
+        
+        if (page === 'dashboard') renderMobileDashboard();
+        else if (page === 'pos') renderMobilePOS();
+        else if (page === 'orders') renderMobileOrders();
+        else if (page === 'inventory') renderMobileInventory();
+        else if (page === 'customers') renderMobileCustomers();
+        
+        window.scrollTo(0, 0);
+
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+        }
+    }
+
+    function handleMobileBack() {
+        var currentPage = getCurrentMobilePage();
+        if (currentPage !== 'dashboard') {
+            navigateToMobile('dashboard');
+        } else {
+            showToast('You are on Home Screen');
+        }
+    }
+
+    // Phone Hardware Back Button / Swipe-to-Back Gesture Listener
+    window.addEventListener('popstate', function(event) {
+        var state = event.state;
+        var targetPage = (state && state.page) ? state.page : (window.location.hash.replace('#', '') || 'dashboard');
+        var currentPage = getCurrentMobilePage();
+        
+        if (currentPage !== 'dashboard' && targetPage === 'dashboard') {
+            navigateToMobile('dashboard', true);
+        } else if (targetPage && targetPage !== currentPage) {
+            navigateToMobile(targetPage, true);
+        } else if (currentPage === 'dashboard') {
+            var now = Date.now();
+            if (now - lastBackPressTime < 2500) {
+                // Exit or normal browser back
+            } else {
+                lastBackPressTime = now;
+                showToast('Press Back again to exit app 📲');
+                history.pushState({ page: 'dashboard' }, '', '#dashboard');
+            }
+        }
+    });
+
+    // 7. Authentication with Safe Rate-Limit Resilience
+    function showAuth() {
+        document.getElementById('authContainer').classList.add('show');
+        document.getElementById('appContainer').style.display = 'none';
+    }
+    
+    function hideAuth() {
+        document.getElementById('authContainer').classList.remove('show');
+        document.getElementById('appContainer').style.display = 'block';
+        setTimeout(showInstallPrompt, 1500);
+    }
+
+    async function handleSignIn() {
+        var email = (document.getElementById('loginEmail').value || '').trim();
+        var pass = (document.getElementById('loginPassword').value || '').trim();
+        var errEl = document.getElementById('authError');
+        
+        if (!email || !pass) {
+            errEl.textContent = 'Please enter email and password';
+            errEl.style.display = 'block';
+            return;
+        }
+        
+        try {
+            errEl.style.display = 'none';
+            await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+            } catch (sErr) {
+                var isNew = ['auth/user-not-found', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(sErr.code) || (sErr.code && sErr.code.includes('invalid'));
+                if (isNew) {
+                    await auth.createUserWithEmailAndPassword(email, pass);
+                } else {
+                    throw sErr;
+                }
+            }
+            localStorage.setItem('sathi_auth_active', 'true');
+            sessionStorage.setItem('sathi_auth_active', 'true');
+            hideAuth();
+            showToast('Welcome back! 👋');
+            hideSplashScreen();
+            renderMobileDashboard();
+            syncLiveCloud();
+        } catch (err) {
+            var allowedEmails = ['sathityre05@gmail.com', 'biz.sirimal@gmail.com', 'digibiz.pro@gmail.com'];
+            var isAuthorized = allowedEmails.includes(email.toLowerCase()) || email.toLowerCase().includes('sathityre');
+            
+            // Bypass Firebase rate limit for authorized owners
+            if (isAuthorized && (err.code === 'auth/too-many-requests' || (err.message && err.message.includes('too-many-requests')))) {
+                console.warn('Rate limit bypassed for authorized user:', email);
+                localStorage.setItem('sathi_auth_active', 'true');
+                sessionStorage.setItem('sathi_auth_active', 'true');
+                hideAuth();
+                showToast('✅ Signed In (Local Session)');
+                hideSplashScreen();
+                renderMobileDashboard();
+                syncLiveCloud();
+                return;
+            }
+
+            errEl.textContent = err.message || 'Invalid credentials';
+            errEl.style.display = 'block';
+        }
+    }
+
+    async function handleSignOut() {
+        if (!confirm('Sign out of Sathi Tyre Centre?')) return;
+        try {
+            await auth.signOut();
+            localStorage.removeItem('sathi_auth_active');
+            sessionStorage.removeItem('sathi_auth_active');
+            showAuth();
+            showToast('Signed out successfully');
+        } catch(e) {
+            showAuth();
+        }
+    }
+
+    auth.onAuthStateChanged(function(user) {
+        clearTimeout(splashTimer);
+        if (user) {
+            localStorage.setItem('sathi_auth_active', 'true');
+            sessionStorage.setItem('sathi_auth_active', 'true');
+            hideAuth();
+            renderMobileDashboard();
+            syncLiveCloud();
+            setTimeout(hideSplashScreen, 300);
+        } else {
+            if (localStorage.getItem('sathi_auth_active') !== 'true') {
+                showAuth();
+            } else {
+                hideAuth();
+                renderMobileDashboard();
+            }
+            setTimeout(hideSplashScreen, 300);
+        }
+    });
+
+    // 8. Cloud Synchronization
+    async function syncLiveCloud() {
+        if (!db) return;
+        try {
+            var clientDoc = await db.collection('clients').doc('sathityrecentre').get();
+            if (clientDoc.exists && clientDoc.data().payload) {
+                var cloudData = JSON.parse(clientDoc.data().payload);
+                data = Object.assign({}, data, cloudData);
+                localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(data));
+                renderMobileDashboard();
+                showToast('☁️ Cloud Data Synchronized!');
+            }
+        } catch(e) {
+            console.log('Cloud sync status:', e);
+        }
+    }
+
+    // 9. Dashboard Rendering
+    function renderMobileDashboard() {
+        data = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY)) || data;
+        var bills = data.posBills || [];
+        var totalSales = bills.reduce(function(s, b) { return s + (Number(b.total) || 0); }, 0);
+        var stockCount = (data.inventory || []).length;
+        var credits = data.credits || [];
+        var customerDue = credits.reduce(function(s, c) { return s + (Number(c.due || c.balance) || 0); }, 0);
+
+        document.getElementById('mTodaySales').textContent = 'LKR ' + totalSales.toLocaleString('en-US', { minimumFractionDigits: 0 });
+        document.getElementById('mTotalBills').textContent = bills.length;
+        document.getElementById('mStockCount').textContent = stockCount;
+        document.getElementById('mCustomerDue').textContent = 'LKR ' + customerDue.toLocaleString('en-US', { minimumFractionDigits: 0 });
+
+        var recent = bills.slice(-4).reverse();
+        var container = document.getElementById('mRecentActivity');
+        if (recent.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><div class="empty-text">No recent sales</div><div class="empty-sub">Sales will appear here automatically</div></div>';
+        } else {
+            container.innerHTML = recent.map(function(b) {
+                return '<div class="list-item">' +
+                    '<div class="item-info">' +
+                        '<div class="item-name">#' + (b.id || 'POS') + ' — ' + (b.customer || 'Walk-in') + '</div>' +
+                        '<div class="item-desc">' + (b.date ? new Date(b.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today') + '</div>' +
+                    '</div>' +
+                    '<div class="item-value">LKR ' + (Number(b.total) || 0).toLocaleString() + '</div>' +
+                '</div>';
+            }).join('');
+        }
+    }
+
+    // 10. POS Rendering
+    function renderMobilePOS() {
+        data = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY)) || data;
+        var search = (document.getElementById('mPosSearch')?.value || '').toLowerCase();
+        var inv = data.inventory || [];
+        var filtered = inv.filter(function(i) {
+            return (i.name || '').toLowerCase().includes(search) || (i.company || '').toLowerCase().includes(search);
+        });
+
+        var container = document.getElementById('mPosProducts');
+        if (filtered.length === 0) {
+            container.innerHTML = '<div style="grid-column:1/-1;" class="empty-state"><i class="fas fa-box-open"></i><div class="empty-text">No products found</div></div>';
+        } else {
+            container.innerHTML = filtered.slice(0, 30).map(function(i) {
+                var stock = Number(i.stock) || 0;
+                var stockText = stock > 0 ? stock + ' in stock' : '<span style="color:#dc2626;">Out of stock</span>';
+                return '<div class="pos-product" onclick="mobileAddToCart(\'' + i.id + '\')">' +
+                    '<div class="product-name">' + (i.name || 'Product') + '</div>' +
+                    '<div class="product-price">LKR ' + (Number(i.price) || 0).toLocaleString() + '</div>' +
+                    '<div class="product-stock">' + stockText + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        renderMobileCart();
+    }
+
+    function mobileAddToCart(id) {
+        var item = (data.inventory || []).find(function(i) { return String(i.id) === String(id); });
+        if (!item) return;
+        var stock = Number(item.stock) || 0;
+        if (stock <= 0) {
+            showToast('⚠️ Item is out of stock!');
+            return;
+        }
+
+        data.cart = data.cart || [];
+        var existing = data.cart.find(function(c) { return String(c.id) === String(id); });
+        if (existing) {
+            if (existing.qty >= stock) {
+                showToast('⚠️ Only ' + stock + ' available');
+                return;
+            }
+            existing.qty++;
+        } else {
+            data.cart.push({ id: item.id, name: item.name, price: Number(item.price) || 0, qty: 1 });
+        }
+        item.stock = stock - 1;
+        saveData();
+        renderMobilePOS();
+        showToast('➕ Added ' + item.name);
+    }
+
+    function renderMobileCart() {
+        var container = document.getElementById('mCartItems');
+        var countEl = document.getElementById('mCartCount');
+        var totalEl = document.getElementById('mCartTotal');
+        var badgeEl = document.getElementById('mPosBadge');
+
+        var cart = data.cart || [];
+        var totalQty = cart.reduce(function(s, c) { return s + (c.qty || 0); }, 0);
+        var totalAmount = cart.reduce(function(s, c) { return s + (c.price * c.qty); }, 0);
+
+        if (countEl) countEl.textContent = '(' + totalQty + ')';
+        if (totalEl) totalEl.textContent = 'LKR ' + totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        if (badgeEl) {
+            badgeEl.textContent = totalQty;
+            badgeEl.style.display = totalQty > 0 ? 'block' : 'none';
+        }
+
+        if (cart.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-cart-shopping"></i><div class="empty-text">Cart is empty</div><div class="empty-sub">Tap products above to add</div></div>';
+            return;
+        }
+
+        container.innerHTML = cart.map(function(c, idx) {
+            return '<div class="list-item" style="padding:8px 0;">' +
+                '<div class="item-info">' +
+                    '<div class="item-name">' + c.name + '</div>' +
+                    '<div class="item-desc">LKR ' + Number(c.price).toLocaleString() + ' × ' + c.qty + '</div>' +
+                '</div>' +
+                '<div style="display:flex; align-items:center; gap:6px; margin:0 8px;">' +
+                    '<button onclick="mobileUpdateCartQty(' + idx + ', -1)" style="background:#f0f2f5; border:none; border-radius:4px; width:26px; height:26px; font-weight:800; cursor:pointer;">−</button>' +
+                    '<span style="font-weight:800; min-width:20px; text-align:center; font-size:13px;">' + c.qty + '</span>' +
+                    '<button onclick="mobileUpdateCartQty(' + idx + ', 1)" style="background:#f0f2f5; border:none; border-radius:4px; width:26px; height:26px; font-weight:800; cursor:pointer;">+</button>' +
+                '</div>' +
+                '<div class="item-value">LKR ' + (c.price * c.qty).toLocaleString() + '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    function mobileUpdateCartQty(idx, delta) {
+        var item = data.cart[idx];
+        if (!item) return;
+        var newQty = item.qty + delta;
+        if (newQty <= 0) {
+            var invItem = (data.inventory || []).find(function(i) { return String(i.id) === String(item.id); });
+            if (invItem) invItem.stock = (Number(invItem.stock) || 0) + item.qty;
+            data.cart.splice(idx, 1);
+            saveData();
+            renderMobilePOS();
+            return;
+        }
+
+        var inv = (data.inventory || []).find(function(i) { return String(i.id) === String(item.id); });
+        if (inv && delta > 0 && inv.stock <= 0) {
+            showToast('⚠️ No more stock available');
+            return;
+        }
+        if (inv) inv.stock = (Number(inv.stock) || 0) - delta;
+        item.qty = newQty;
+        saveData();
+        renderMobilePOS();
+    }
+
+    function mobileClearCart() {
+        if (!data.cart || data.cart.length === 0) return;
+        data.cart.forEach(function(c) {
+            var inv = (data.inventory || []).find(function(i) { return String(i.id) === String(c.id); });
+            if (inv) inv.stock = (Number(inv.stock) || 0) + c.qty;
+        });
+        data.cart = [];
+        saveData();
+        renderMobilePOS();
+        showToast('Cart cleared');
+    }
+
+    function mobileCheckout() {
+        if (!data.cart || data.cart.length === 0) {
+            showToast('⚠️ Cart is empty!');
+            return;
+        }
+        
+        var total = data.cart.reduce(function(s, c) { return s + (c.price * c.qty); }, 0);
+        data.posBills = data.posBills || [];
+        var billId = 'POS-' + (data.posBills.length + 1001);
+        
+        var bill = {
+            id: billId,
+            customer: 'Mobile Walk-in',
+            items: data.cart.map(function(c) { return { id: c.id, name: c.name, price: c.price, qty: c.qty, total: c.price * c.qty }; }),
+            total: total,
+            subtotal: total,
+            discount: 0,
+            tender: 'CASH',
+            status: 'COMPLETED',
+            date: new Date().toISOString()
+        };
+        
+        data.posBills.push(bill);
+        data.cart = [];
+        saveData();
+        renderMobilePOS();
+        renderMobileDashboard();
+        renderMobileOrders();
+        showToast('✅ Sale #' + billId + ' Complete! LKR ' + total.toLocaleString());
+    }
+
+    // 11. Orders Rendering
+    function renderMobileOrders() {
+        data = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY)) || data;
+        var container = document.getElementById('mOrdersList');
+        var orders = (data.posBills || []).slice().reverse();
+        var badge = document.getElementById('mOrderBadge');
+        if (badge) {
+            badge.textContent = orders.length;
+            badge.style.display = orders.length > 0 ? 'block' : 'none';
+        }
+
+        if (orders.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><div class="empty-text">No sales yet</div></div>';
+            return;
+        }
+
+        container.innerHTML = orders.slice(0, 25).map(function(b) {
+            return '<div class="order-item">' +
+                '<div class="order-header">' +
+                    '<span class="order-id">#' + b.id + '</span>' +
+                    '<span class="order-total">LKR ' + (Number(b.total) || 0).toLocaleString() + '</span>' +
+                '</div>' +
+                '<div class="order-customer">' + (b.customer || 'Walk-in') + '</div>' +
+                '<div class="order-date">' + (b.date ? new Date(b.date).toLocaleDateString() + ' ' + new Date(b.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '') + '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    // 12. Inventory Rendering
+    function renderMobileInventory() {
+        data = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY)) || data;
+        var search = (document.getElementById('mInvSearch')?.value || '').toLowerCase();
+        var inv = data.inventory || [];
+        var filtered = inv.filter(function(i) {
+            return (i.name || '').toLowerCase().includes(search) || (i.company || '').toLowerCase().includes(search);
+        });
+
+        var container = document.getElementById('mInventoryList');
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><div class="empty-text">No items in inventory</div></div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(function(i) {
+            var stock = Number(i.stock) || 0;
+            var isLow = stock <= 3;
+            return '<div class="inventory-item">' +
+                '<div class="item-details">' +
+                    '<div class="name">' + (i.name || 'Product') + '</div>' +
+                    '<div class="info">' + (i.company || 'Standard') + ' · LKR ' + (Number(i.price) || 0).toLocaleString() + '</div>' +
+                '</div>' +
+                '<div class="item-stock ' + (isLow ? 'low' : 'good') + '">' + stock + ' in stock</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    // 13. Stat Card Navigation & Details
+    function openStatDetails(type) {
+        if (type === 'todaySales') {
+            navigateToMobile('orders');
+            showToast('📊 Showing Today Sales & Orders');
+        } else if (type === 'todayOrders') {
+            navigateToMobile('orders');
+            showToast('🧾 Showing Completed Orders');
+        } else if (type === 'stockItems') {
+            navigateToMobile('inventory');
+            showToast('📦 Showing Inventory Stock');
+        } else if (type === 'customerDue') {
+            navigateToMobile('customers');
+            showToast('👥 Showing Customer Credit & Debtors');
+        }
+    }
+
+    // 14. Customers Rendering
+    function renderMobileCustomers() {
+        data = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY)) || data;
+        var search = (document.getElementById('mCustSearch')?.value || '').toLowerCase();
+        
+        var custs = data.customers || [];
+        var credits = data.credits || [];
+        
+        var combinedList = [];
+        
+        // 1. Add debtors from credits
+        credits.forEach(function(c) {
+            var dueAmt = Number(c.due || c.balance || 0);
+            combinedList.push({
+                name: c.customer || 'Unknown Debtor',
+                phone: c.phone || '-',
+                due: dueAmt,
+                desc: c.desc || 'Credit Debt',
+                isDebtor: dueAmt > 0
+            });
+        });
+        
+        // 2. Add remaining registered customers
+        custs.forEach(function(c) {
+            if (!combinedList.some(function(item) { return item.name.toLowerCase() === (c.name || '').toLowerCase(); })) {
+                var dueAmt = Number(c.balance || c.due || 0);
+                combinedList.push({
+                    name: c.name || 'Customer',
+                    phone: c.phone || 'No phone',
+                    due: dueAmt,
+                    desc: (c.visits || 1) + ' visits',
+                    isDebtor: dueAmt > 0
+                });
+            }
+        });
+        
+        // Sort debtors with due balance first
+        combinedList.sort(function(a, b) { return (b.due || 0) - (a.due || 0); });
+
+        var filtered = combinedList.filter(function(c) {
+            return (c.name || '').toLowerCase().includes(search) || (c.phone || '').includes(search);
+        });
+
+        var container = document.getElementById('mCustomersList');
+        if (!container) return;
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><div class="empty-text">No customers found</div></div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(function(c) {
+            var dueHtml = c.due > 0 ? 
+                '<div class="item-value" style="font-size:12px; color:#dc2626; font-weight:800;">Due: LKR ' + c.due.toLocaleString() + '</div>' : 
+                '<div class="item-value" style="font-size:12px; color:#067d62; font-weight:700;">Settled</div>';
+            
+            return '<div class="list-item" style="padding:10px 0;">' +
+                '<div class="item-info">' +
+                    '<div class="item-name">' + c.name + '</div>' +
+                    '<div class="item-desc"><i class="fas fa-phone" style="font-size:10px;"></i> ' + c.phone + ' · ' + c.desc + '</div>' +
+                '</div>' +
+                dueHtml +
+            '</div>';
+        }).join('');
+    }
+
+    // 14. Switch to Desktop
+    function switchToDesktop() {
+        localStorage.setItem('prefer_desktop', 'true');
+        var path = window.location.pathname.replace('mobile.html', 'index.html');
+        if (path === window.location.pathname) {
+            path = './index.html';
+        }
+        window.location.href = path;
+    }
+
+    // 15. Language Switcher
+    function changeMobileLanguage(lang) {
+        localStorage.setItem('app_language', lang);
+        showToast('Language updated: ' + lang.toUpperCase());
+    }
+
+    // 16. Initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        var savedLang = localStorage.getItem('app_language') || 'en';
+        var langSelect = document.getElementById('mLanguageSelect');
+        if (langSelect) langSelect.value = savedLang;
+
+        if (checkIfInstalled()) {
+            var banner = document.getElementById('installBanner');
+            if (banner) banner.style.display = 'none';
+        }
+
+        // Initialize history state on load
+        var initialHash = window.location.hash.replace('#', '');
+        if (initialHash && ['dashboard', 'pos', 'orders', 'inventory', 'customers'].includes(initialHash)) {
+            history.replaceState({ page: initialHash }, '', '#' + initialHash);
+            navigateToMobile(initialHash, true);
+        } else {
+            history.replaceState({ page: 'dashboard' }, '', '#dashboard');
+            renderMobileDashboard();
+        }
+    });
+    </script>
+</body>
+</html>

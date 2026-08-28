@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en" class="digibiz-credit-app">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Customers Directory — DARSHANA MADAWALA</title>
+    <link rel="manifest" href="/clients/madawalateashop/manifest.json">
+    <meta name="theme-color" content="#064e3b">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <script src="/clients/madawalateashop/core/firebase-init.js"></script>
+    <script src="/clients/madawalateashop/core/sidebar.js?v=20260823_owner_v135"></script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --royal: #1e40af;
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 60px; padding-top: 0 !important; }
+
+        #digibizMobileTopbar, #digibizMobileMenuToggle { display: none !important; }
+
+        .app-container { max-width: 1050px; margin: 0 auto; padding: 8px 12px 24px 12px; }
+
+        /* 2-LINE UNIFIED TOP HEADER */
+        .unified-header-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 8px 12px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hdr-line-1 { display: flex; align-items: center; justify-content: space-between; }
+        .hdr-left { display: flex; align-items: center; gap: 8px; }
+
+        .btn-hdr {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-hdr:active { background: #e2e8f0; transform: scale(0.95); }
+
+        .app-title-wrap { display: flex; align-items: center; gap: 6px; }
+        .app-title-wrap h1 { font-size: 14.5px; font-weight: 900; color: var(--royal); margin: 0; line-height: 1; }
+
+        .status-dot {
+            width: 7.5px;
+            height: 7.5px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 7px var(--success);
+        }
+
+        .hdr-line-2 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 4px 9px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .hdr-owner-name { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--royal); }
+        .hdr-owner-name i { color: #f59e0b; font-size: 10.5px; }
+
+        .hdr-owner-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: var(--royal);
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 1.5px 6px;
+            border-radius: 6px;
+        }
+
+        /* Controls Box */
+        .controls-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 9px 12px 9px 34px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 9px 14px;
+            border-radius: 9px;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.2);
+            transition: all 0.15s;
+        }
+        .btn-add:hover { background: var(--royal); }
+
+        /* Summary Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .stat-label { font-size: 10.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+        .stat-val { font-size: 16px; font-weight: 900; }
+
+        /* Customers Table */
+        .table-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            white-space: nowrap;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 800;
+            color: #475569;
+            border-bottom: 1.5px solid var(--border);
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .data-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        /* STICKY CUSTOMER NAME & CLICKABLE */
+        th.col-sticky-name, td.col-sticky-name {
+            position: sticky;
+            left: 0;
+            background: #ffffff;
+            z-index: 2;
+            font-weight: 800;
+            box-shadow: 3px 0 8px rgba(0,0,0,0.06);
+        }
+
+        th.col-sticky-name { background: #f8fafc; z-index: 3; color: #475569; }
+
+        .cust-name-link {
+            color: var(--royal);
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 800;
+            transition: color 0.15s;
+        }
+        .cust-name-link:hover { color: var(--primary); text-decoration: underline; }
+
+        .cust-avatar-sm {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: #eff6ff;
+            color: var(--royal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+            border: 1px solid #bfdbfe;
+        }
+
+        .data-table tr:hover td { background: #fafcff; }
+        .data-table tr:hover td.col-sticky-name { background: #f0f7ff; }
+
+        .due-pill {
+            display: inline-block;
+            background: #fee2e2;
+            color: var(--danger);
+            font-weight: 800;
+            font-size: 11.5px;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        .settled-pill {
+            display: inline-block;
+            background: #dcfce7;
+            color: var(--success);
+            font-weight: 800;
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 6px;
+        }
+
+        /* Action Buttons */
+        .actions-cell { display: flex; gap: 6px; align-items: center; }
+        .btn-tbl-action {
+            border: none;
+            border-radius: 7px;
+            padding: 5px 9px;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+        }
+        .btn-tbl-edit { background: #eff6ff; color: var(--royal); border: 1px solid #bfdbfe; }
+        .btn-tbl-edit:hover { background: #dbeafe; }
+        .btn-tbl-hist { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+        .btn-tbl-hist:hover { background: #dcfce7; }
+        .btn-tbl-del { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+        .btn-tbl-del:hover { background: #fee2e2; }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .modal.active { display: flex; }
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-card.wide { max-width: 780px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .modal-header h3 { font-size: 15.5px; font-weight: 800; color: var(--royal); display: flex; align-items: center; gap: 8px; }
+        .close-btn { background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 4px; }
+        .form-control { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 13px; font-weight: 600; outline: none; }
+        .form-control:focus { border-color: var(--primary); }
+
+        .btn-modal-submit {
+            width: 100%;
+            padding: 11px;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary);
+            color: #ffffff;
+            font-size: 13.5px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .btn-modal-submit:hover { background: var(--royal); }
+
+        /* History Modal Elements */
+        .history-profile-bar {
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .hist-cust-name { font-size: 15px; font-weight: 900; color: var(--royal); }
+        .hist-cust-phone { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+        .history-tabs-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tab-pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 1.5px solid var(--border);
+            background: #ffffff;
+            cursor: pointer;
+            color: #475569;
+        }
+        .tab-pill.active { background: var(--royal); color: #ffffff; border-color: var(--royal); }
+
+        .hist-row-credit { background: #fff5f5 !important; }
+        .hist-row-settle { background: #f0fdf4 !important; }
+
+        .badge-hist {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+        .b-credit { background: #fee2e2; color: var(--danger); }
+        .b-settle { background: #dcfce7; color: var(--success); }
+
+        /* Access Denied Overlay */
+        #accessDeniedScreen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            color: #ffffff;
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .denied-card {
+            background: #1e293b;
+            border: 2px solid #ef4444;
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 440px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .denied-icon { font-size: 48px; color: #ef4444; margin-bottom: 14px; }
+        .denied-card h2 { font-size: 19px; font-weight: 900; margin-bottom: 6px; color: #ffffff; }
+        .denied-card p { font-size: 13px; color: #94a3b8; margin-bottom: 16px; line-height: 1.4; }
+        .btn-switch-account {
+            background: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="credit-app-body">
+
+    <!-- ACCESS DENIED SCREEN -->
+    <div id="accessDeniedScreen">
+        <div class="denied-card">
+            <i class="fa-solid fa-ban denied-icon"></i>
+            <h2>Access Denied</h2>
+            <p>You do not have permission to access the <strong>DARSHANA MADAWALA</strong> workspace with account: <br><span id="deniedEmail" style="color:#38bdf8; font-weight:bold;"></span></p>
+            <p style="font-size: 11.5px; color: #cbd5e1;">Please log in with an authorized account.</p>
+            <button class="btn-switch-account" onclick="handleDeniedLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Switch Account / Log Out
+            </button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+        <!-- 2-LINE UNIFIED TOP HEADER -->
+        <header class="unified-header-card">
+            <div class="hdr-line-1">
+                <div class="hdr-left">
+                    <button type="button" class="btn-hdr" onclick="toggleSidebarMenu()" aria-label="Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <a href="/clients/madawalateashop/modules/credit/dashboard.html?v=20260823_owner_v135" class="btn-hdr" title="Home Dashboard">
+                        <i class="fa-solid fa-house"></i>
+                    </a>
+                    <div class="app-title-wrap">
+                        <h1>CUSTOMERS</h1>
+                        <span class="status-dot" id="networkStatusDot" title="Online"></span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/clients/madawalateashop/modules/credit/profile.html" class="hdr-line-2" title="Business Profile">
+                <div class="hdr-owner-name">
+                    <i class="fa-solid fa-crown"></i>
+                    <span id="topOwnerName">DARSHANA MADAWALA</span>
+                </div>
+                <span class="hdr-owner-badge">CUSTOMERS</span>
+            </a>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Customers</span>
+                <span class="stat-val" id="kpiCustCount" style="color: var(--royal);">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Due Balance</span>
+                <span class="stat-val" id="kpiTotalDue" style="color: var(--danger);">Rs. 0.00</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Credit Given</span>
+                <span class="stat-val" id="kpiTotalGiven">Rs. 0.00</span>
+            </div>
+        </div>
+
+        <!-- Controls Card -->
+        <div class="controls-card">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Search customer name or phone..." oninput="filterCustomers()">
+            </div>
+            <button type="button" class="btn-add" onclick="openAddCustomerModal()">
+                <i class="fa-solid fa-user-plus"></i> + Add Customer
+            </button>
+        </div>
+
+        <!-- Table Card with STICKY CUSTOMER NAME & ACTIONS -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="col-sticky-name">Customer Name</th>
+                            <th>Phone Number</th>
+                            <th>Due Balance</th>
+                            <th>Credit Given</th>
+                            <th>Total Repaid</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">Loading customer directory...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL 1: ADD NEW CUSTOMER -->
+    <div class="modal" id="addCustModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus"></i> Add New Customer</h3>
+                <button class="close-btn" onclick="closeAddCustomerModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Customer Full Name *</label>
+                <input type="text" class="form-control" id="addCustName" placeholder="e.g. Sunil Perera">
+            </div>
+            <div class="form-group">
+                <label>Mobile Phone</label>
+                <input type="tel" class="form-control" id="addCustPhone" placeholder="077 123 4567">
+            </div>
+            <div class="form-group">
+                <label>Address / Location</label>
+                <input type="text" class="form-control" id="addCustAddress" placeholder="e.g. Madawala, Kandy">
+            </div>
+            <div class="form-group">
+                <label>Notes / Category</label>
+                <input type="text" class="form-control" id="addCustNotes" placeholder="e.g. Retail Customer">
+            </div>
+            <button type="button" class="btn-modal-submit" onclick="saveNewCustomer()">
+                Save Customer
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: EDIT CUSTOMER -->
+    <div class="modal" id="editCustModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-pen"></i> Edit Customer Details</h3>
+                <button class="close-btn" onclick="closeEditCustomerModal()">&times;</button>
+            </div>
+            <input type="hidden" id="editCustId">
+            <input type="hidden" id="editCustOriginalBalance">
+            <div class="form-group">
+                <label>Customer Full Name *</label>
+                <input type="text" class="form-control" id="editCustName">
+            </div>
+            <div class="form-group">
+                <label>Mobile Phone</label>
+                <input type="tel" class="form-control" id="editCustPhone">
+            </div>
+            <div class="form-group">
+                <label style="color: var(--danger); font-weight: 800; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-solid fa-money-bill-wave"></i> Current Outstanding Debt (ණය ශේෂය - Rs.)</span>
+                    <small style="color: #64748b; font-weight: 600;">වෙනස් කළ හැක</small>
+                </label>
+                <input type="number" step="0.01" min="0" class="form-control" id="editCustBalance" style="border: 1.5px solid #f87171; font-weight: 800; color: #b91c1c; font-size: 15px; background: #fef2f2;" placeholder="0.00">
+                <small style="font-size: 11px; color: #dc2626; margin-top: 4px; display: block; font-weight: 600;">
+                    ⚠️ මෙම මුදල වෙනස් කළහොත් මෙම පාරිභෝගිකයාගේ මේ මොහොතේ හිඟ ණය ශේෂය සෘජුවම යාවත්කාලීන වේ.
+                </small>
+            </div>
+            <div class="form-group">
+                <label>Address / Location</label>
+                <input type="text" class="form-control" id="editCustAddress">
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <input type="text" class="form-control" id="editCustNotes">
+            </div>
+            <button type="button" class="btn-modal-submit" onclick="updateCustomerDetails()">
+                Update Customer
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: DELETE CUSTOMER CONFIRMATION -->
+    <div class="modal" id="deleteCustModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="color: var(--danger);"><i class="fa-solid fa-trash"></i> Delete Customer</h3>
+                <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <input type="hidden" id="deleteCustId">
+            <p style="font-size: 13.5px; margin-bottom: 12px; line-height: 1.4;">
+                Are you sure you want to delete <strong id="deleteCustName"></strong>?
+            </p>
+            <div id="deleteWarningBox" style="display: none; background: #fee2e2; border: 1.5px solid #f87171; border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; color: #991b1b;">
+                <strong>⚠️ Warning:</strong> This customer has an outstanding balance of <span id="deleteCustDue" style="font-weight: 900;"></span>.
+            </div>
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button type="button" onclick="closeDeleteModal()" style="padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; font-weight: 700; cursor: pointer;">Cancel</button>
+                <button type="button" onclick="confirmDeleteCustomer()" style="padding: 9px 16px; border-radius: 8px; border: none; background: var(--danger); color: #fff; font-weight: 800; cursor: pointer;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: COMPACT CUSTOMER HISTORY -->
+    <div class="modal" id="historyModal">
+        <div class="modal-card wide">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Customer History</h3>
+                <button class="close-btn" onclick="closeHistoryModal()">&times;</button>
+            </div>
+
+            <div class="history-profile-bar">
+                <div>
+                    <div class="hist-cust-name" id="histCustName">Customer Name</div>
+                    <div class="hist-cust-phone" id="histCustPhone"><i class="fa-solid fa-phone"></i> 077 123 4567</div>
+                </div>
+                <div>
+                    <span id="histDueBadge" class="due-pill" style="font-size: 13px; padding: 4px 10px;">Due: Rs. 0.00</span>
+                </div>
+            </div>
+
+            <!-- Active Cycle vs Full Lifetime Toggle -->
+            <div class="history-tabs-bar">
+                <div style="display:flex; gap:6px;">
+                    <button type="button" class="tab-pill active" id="tabActiveCycle" onclick="setHistoryMode('ACTIVE')">
+                        <i class="fa-solid fa-filter"></i> Active Cycle
+                    </button>
+                    <button type="button" class="tab-pill" id="tabFullHistory" onclick="setHistoryMode('FULL')">
+                        <i class="fa-solid fa-list"></i> Full History
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 360px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type / Note</th>
+                            <th style="color: var(--danger);">Credit (+)</th>
+                            <th style="color: var(--success);">Paid (-)</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">Loading history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px;">
+                <div id="histSummaryNote" style="font-size: 11px; font-weight: 700; color: #64748b;"></div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-tbl-action btn-tbl-hist" onclick="shareCustomerWhatsApp()">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button type="button" class="btn-tbl-action btn-tbl-edit" onclick="printCustomerStatement()">
+                        <i class="fa-solid fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBusinessId = null;
+        let allCustomers = [];
+        let activeHistoryCustomer = null;
+        let activeHistoryTransactions = [];
+        let historyViewMode = 'ACTIVE'; // 'ACTIVE' or 'FULL'
+
+        function formatRs(num) {
+            const val = Number(num) || 0;
+            return 'Rs. ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function toggleSidebarMenu() {
+            document.documentElement.classList.toggle('digibiz-sidebar-open');
+        }
+
+                // ACCESS CONTROL CHECK — Strictly Restricted to Owner & Super Admin
+        function verifyDarshanaAccess(user) {
+            if (!user) return false;
+            const email = (user.email || '').toLowerCase().trim();
+            const isImpersonating = localStorage.getItem('digibiz_impersonate_active') === 'true';
+            
+            const isAuthorized = email === 'madawalateashop80@gmail.com' ||
+                                 email.includes('madawalateashop') || 
+                                 email.includes('darshana') ||
+                                 email === 'biz.sirimal@gmail.com' ||
+                                 email === '2biz.sirimal@gmail.com' ||
+                                 email === 'scrap@chinthaka.com' ||
+                                 email.includes('superadmin') ||
+                                 email.startsWith('chinthaka') ||
+                                 (isImpersonating && (email.includes('admin') || email.includes('super') || email.includes('chinthaka')));
+            
+            if (!isAuthorized) {
+                const deniedScreen = document.getElementById('accessDeniedScreen');
+                if (deniedScreen) {
+                    const deniedEmail = document.getElementById('deniedEmail');
+                    if (deniedEmail) deniedEmail.textContent = user.email || 'Unknown User';
+                    deniedScreen.style.display = 'flex';
+                } else {
+                    alert('Access Denied: You do not have permission to access Darshana Madawala Credit App.');
+                    window.location.href = '/auth/login.html';
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function handleDeniedLogout() {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = '/auth/login.html';
+                });
+            } else {
+                window.location.href = '/auth/login.html';
+            }
+        }
+
+        // INSTANT LOCAL CACHE HYDRATION (0ms Load from Phone)
+        function loadFromLocalCache() {
+            try {
+                const cachedBiz = localStorage.getItem('dm_cache_biz_profile');
+                if (cachedBiz) {
+                    const el = document.getElementById('topOwnerName');
+                    if (el) el.textContent = cachedBiz;
+                }
+
+                const cached = localStorage.getItem('dm_cache_customers');
+                if (cached) {
+                    allCustomers = JSON.parse(cached) || [];
+                    let totalDue = 0;
+                    let totalGiven = 0;
+                    allCustomers.forEach(d => {
+                        totalDue += Number(d.currentBalance || 0);
+                        totalGiven += Number(d.totalCredit || 0);
+                    });
+                    document.getElementById('kpiCustCount').textContent = allCustomers.length;
+                    document.getElementById('kpiTotalDue').textContent = formatRs(totalDue);
+                    document.getElementById('kpiTotalGiven').textContent = formatRs(totalGiven);
+                    filterCustomers();
+                }
+            } catch(e) {}
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Load and display immediately from local phone memory
+            loadFromLocalCache();
+
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    if (!user) {
+                        localStorage.removeItem('dm_auth_verified_email');
+                        window.location.href = '/auth/login.html';
+                        return;
+                    }
+                    if (!verifyDarshanaAccess(user)) return;
+                    localStorage.setItem('dm_auth_verified_email', user.email);
+                    localStorage.setItem('currentUserRole', 'BUSINESS_OWNER');
+                    localStorage.setItem('currentBusinessNavRole', 'BUSINESS_OWNER');
+                    localStorage.setItem('currentBusinessType', 'credit_ledger');
+                    localStorage.setItem('currentBusinessName', 'DARSHANA MADAWALA');
+
+                    const DM_DEFAULT_BID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
+                    let storedBid = localStorage.getItem('currentBusinessId') || sessionStorage.getItem('currentBusinessId');
+                    if (!storedBid || storedBid === 'DarshanaMadawala' || storedBid.toLowerCase() === 'qxl4jrgfbztzofmoqyhocfr2pfp2') {
+                        storedBid = DM_DEFAULT_BID;
+                    }
+                    currentBusinessId = storedBid;
+                    localStorage.setItem('currentBusinessId', currentBusinessId);
+                    sessionStorage.setItem('currentBusinessId', currentBusinessId);
+                    listenToBusinessProfile();
+                    listenToCustomers();
+                });
+            }
+        });
+
+        function listenToBusinessProfile() {
+            if (!window.db || !currentBusinessId) return;
+            window.db.collection('businesses').doc(currentBusinessId).get().then(doc => {
+                if (doc.exists && (doc.data().businessName || doc.data().name)) {
+                    const name = doc.data().businessName || doc.data().name || 'DARSHANA MADAWALA';
+                    document.getElementById('topOwnerName').textContent = name;
+                    try { localStorage.setItem('dm_cache_biz_profile', name); } catch(e) {}
+                }
+            }, err => {
+                console.warn('[Offline Mode] Using local business profile cache');
+            });
+        }
+
+        function listenToCustomers() {
+            if (!window.db || !currentBusinessId) return;
+            window.db.collection('businesses').doc(currentBusinessId).collection('customers')
+                .orderBy('name', 'asc')
+                .get().then(snapshot => {
+                    allCustomers = [];
+                    let totalDue = 0;
+                    let totalGiven = 0;
+
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        d.id = doc.id;
+                        allCustomers.push(d);
+                        totalDue += Number(d.currentBalance || 0);
+                        totalGiven += Number(d.totalCredit || 0);
+                    });
+
+                    // Save to local device storage for instant offline loading
+                    try { localStorage.setItem('dm_cache_customers', JSON.stringify(allCustomers)); } catch(e) {}
+
+                    document.getElementById('kpiCustCount').textContent = allCustomers.length;
+                    document.getElementById('kpiTotalDue').textContent = formatRs(totalDue);
+                    document.getElementById('kpiTotalGiven').textContent = formatRs(totalGiven);
+
+                    filterCustomers();
+                }, err => {
+                    console.warn('[Offline Mode] Using local customers cache:', err);
+                });
+        }
+
+        function filterCustomers() {
+            const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+            const filtered = allCustomers.filter(c => {
+                return String(c.name || '').toLowerCase().includes(query) ||
+                       String(c.phone || '').includes(query) ||
+                       String(c.address || '').toLowerCase().includes(query);
+            });
+            renderTable(filtered);
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('customersTableBody');
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">No customers found.</td></tr>';
+                return;
+            }
+
+            list.forEach(c => {
+                const tr = document.createElement('tr');
+                const bal = Number(c.currentBalance || 0);
+                const totalCred = Number(c.totalCredit || 0);
+                const totalPaid = Number(c.totalPaid || 0);
+                const initial = (c.name || 'C').charAt(0).toUpperCase();
+
+                const dueBadge = bal > 0 
+                    ? `<span class="due-pill">${formatRs(bal)}</span>` 
+                    : `<span class="settled-pill">Rs. 0.00 (Settled)</span>`;
+
+                tr.innerHTML = `
+                    <td class="col-sticky-name">
+                        <a href="javascript:void(0)" class="cust-name-link" onclick="openCustomerHistory('${c.id}')" title="Click to view transaction history">
+                            <span class="cust-avatar-sm">${initial}</span>
+                            <span>${escapeHtml(c.name)}</span>
+                        </a>
+                    </td>
+                    <td><i class="fa-solid fa-phone" style="font-size: 10px; color: #94a3b8;"></i> ${escapeHtml(c.phone || 'No phone')}</td>
+                    <td>${dueBadge}</td>
+                    <td style="font-weight: 700;">${formatRs(totalCred)}</td>
+                    <td style="color: #16a34a; font-weight: 700;">${formatRs(totalPaid)}</td>
+                    <td style="text-align: center;">
+                        <div class="actions-cell" style="justify-content: center;">
+                            <button type="button" class="btn-tbl-action btn-tbl-hist" onclick="openCustomerHistory('${c.id}')" title="View History">
+                                <i class="fa-solid fa-clock-rotate-left"></i> History
+                            </button>
+                            <button type="button" class="btn-tbl-action btn-tbl-edit" onclick="openEditCustomerModal('${c.id}')" title="Edit Profile">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <button type="button" class="btn-tbl-action btn-tbl-del" onclick="openDeleteModal('${c.id}')" title="Delete Profile">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* ADD CUSTOMER MODAL */
+        function openAddCustomerModal() {
+            document.getElementById('addCustName').value = '';
+            document.getElementById('addCustPhone').value = '';
+            document.getElementById('addCustAddress').value = '';
+            document.getElementById('addCustNotes').value = '';
+            document.getElementById('addCustModal').classList.add('active');
+            document.getElementById('addCustName').focus();
+        }
+        function closeAddCustomerModal() { document.getElementById('addCustModal').classList.remove('active'); }
+
+        async function saveNewCustomer() {
+            const name = document.getElementById('addCustName').value.trim();
+            const phone = document.getElementById('addCustPhone').value.trim();
+            const address = document.getElementById('addCustAddress').value.trim();
+            const notes = document.getElementById('addCustNotes').value.trim();
+
+            if (!name) {
+                alert('Please enter customer full name.');
+                return;
+            }
+
+            const custId = phone ? phone.replace(/[^0-9]/g, '') : name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const newCust = {
+                id: custId,
+                name: name,
+                phone: phone,
+                address: address,
+                notes: notes,
+                currentBalance: 0,
+                totalCredit: 0,
+                totalPaid: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await window.db.collection('businesses').doc(currentBusinessId).collection('customers').doc(custId).set(newCust, { merge: true });
+            closeAddCustomerModal();
+            alert(`Customer "${name}" added successfully!`);
+        }
+
+        /* EDIT CUSTOMER MODAL */
+        function openEditCustomerModal(custId) {
+            const cust = allCustomers.find(c => c.id === custId);
+            if (!cust) return;
+
+            const currBal = Number(cust.currentBalance || 0);
+
+            document.getElementById('editCustId').value = cust.id;
+            document.getElementById('editCustOriginalBalance').value = currBal;
+            document.getElementById('editCustName').value = cust.name || '';
+            document.getElementById('editCustPhone').value = cust.phone || '';
+            document.getElementById('editCustBalance').value = currBal;
+            document.getElementById('editCustAddress').value = cust.address || '';
+            document.getElementById('editCustNotes').value = cust.notes || '';
+
+            document.getElementById('editCustModal').classList.add('active');
+        }
+        function closeEditCustomerModal() { document.getElementById('editCustModal').classList.remove('active'); }
+
+        async function updateCustomerDetails() {
+            const custId = document.getElementById('editCustId').value;
+            const name = document.getElementById('editCustName').value.trim();
+            const phone = document.getElementById('editCustPhone').value.trim();
+            const address = document.getElementById('editCustAddress').value.trim();
+            const notes = document.getElementById('editCustNotes').value.trim();
+            const newBal = parseFloat(document.getElementById('editCustBalance').value) || 0;
+            const origBal = parseFloat(document.getElementById('editCustOriginalBalance').value) || 0;
+
+            if (!name) {
+                alert('Please enter Customer Name.');
+                return;
+            }
+
+            // ⚠️ CONFIRMATION PROMPT IF OUTSTANDING BALANCE HAS BEEN MODIFIED
+            if (Math.abs(newBal - origBal) > 0.001) {
+                const confirmMsg = `⚠️ ණය ශේෂය වෙනස් කිරීමේ තහවුරු කිරීම:\n\n"${name}" පාරිභෝගිකයාගේ වත්මන් හිඟ ණය මුදල:\n• පරණ ශේෂය: Rs. ${formatRs(origBal)}\n• අලුත් ශේෂය: Rs. ${formatRs(newBal)}\n\nමෙම වෙනස්කම සිදු කිරීමට ඔබට විශ්වාසද?`;
+                if (!confirm(confirmMsg)) {
+                    return; // User cancelled
+                }
+            }
+
+            const updateData = {
+                name: name,
+                phone: phone,
+                address: address,
+                notes: notes,
+                currentBalance: newBal,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await window.db.collection('businesses').doc(currentBusinessId).collection('customers').doc(custId).update(updateData);
+
+            // Update in local array & local phone cache
+            const idx = allCustomers.findIndex(c => c.id === custId);
+            if (idx !== -1) {
+                allCustomers[idx] = { ...allCustomers[idx], ...updateData };
+                try { localStorage.setItem('dm_cache_customers', JSON.stringify(allCustomers)); } catch(e) {}
+            }
+
+            // Recalculate KPIs
+            let totalDue = 0;
+            let totalGiven = 0;
+            allCustomers.forEach(d => {
+                totalDue += Number(d.currentBalance || 0);
+                totalGiven += Number(d.totalCredit || 0);
+            });
+            document.getElementById('kpiCustCount').textContent = allCustomers.length;
+            document.getElementById('kpiTotalDue').textContent = formatRs(totalDue);
+            document.getElementById('kpiTotalGiven').textContent = formatRs(totalGiven);
+
+            filterCustomers();
+            closeEditCustomerModal();
+            alert(`Customer "${name}" profile updated successfully!`);
+        }
+
+        /* DELETE CUSTOMER MODAL */
+        function openDeleteModal(custId) {
+            const cust = allCustomers.find(c => c.id === custId);
+            if (!cust) return;
+
+            document.getElementById('deleteCustId').value = cust.id;
+            document.getElementById('deleteCustName').textContent = cust.name;
+            
+            const bal = Number(cust.currentBalance || 0);
+            const warnBox = document.getElementById('deleteWarningBox');
+            if (bal > 0) {
+                document.getElementById('deleteCustDue').textContent = formatRs(bal);
+                warnBox.style.display = 'block';
+            } else {
+                warnBox.style.display = 'none';
+            }
+
+            document.getElementById('deleteCustModal').classList.add('active');
+        }
+        function closeDeleteModal() { document.getElementById('deleteCustModal').classList.remove('active'); }
+
+        async function confirmDeleteCustomer() {
+            const custId = document.getElementById('deleteCustId').value;
+            if (!custId) return;
+
+            await window.db.collection('businesses').doc(currentBusinessId).collection('customers').doc(custId).delete();
+            closeDeleteModal();
+            alert('Customer profile deleted successfully.');
+        }
+
+        /* CUSTOMER HISTORY & 0-BALANCE RESET VISUALIZER */
+        async function openCustomerHistory(custId) {
+            const cust = allCustomers.find(c => c.id === custId);
+            if (!cust) return;
+
+            activeHistoryCustomer = cust;
+            document.getElementById('histCustName').textContent = cust.name;
+            document.getElementById('histCustPhone').innerHTML = `<i class="fa-solid fa-phone"></i> ${cust.phone || 'No phone'} | ${cust.address || 'General'}`;
+            
+            const bal = Number(cust.currentBalance || 0);
+            document.getElementById('histDueBadge').className = bal > 0 ? 'due-pill' : 'settled-pill';
+            document.getElementById('histDueBadge').textContent = bal > 0 ? `Outstanding Due: ${formatRs(bal)}` : 'Fully Settled (Rs. 0.00)';
+
+            document.getElementById('historyModal').classList.add('active');
+            loadCustomerHistoryTransactions(custId);
+        }
+        function closeHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
+
+        async function loadCustomerHistoryTransactions(custId) {
+            const tbody = document.getElementById('historyTableBody');
+            
+            // Try loading cached history first (0ms instant offline rendering)
+            try {
+                const cachedHist = localStorage.getItem('dm_cache_hist_' + custId);
+                if (cachedHist) {
+                    const data = JSON.parse(cachedHist);
+                    if (data && data.transactions) {
+                        activeHistoryTransactions = data.transactions;
+                        activeHistoryCustomer.lastZeroIndex = data.lastZeroIndex;
+                        renderHistoryView();
+                    }
+                }
+            } catch(e) {}
+
+            if (!activeHistoryTransactions || activeHistoryTransactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Loading transaction records...</td></tr>';
+            }
+
+            try {
+                // Fetch Credits
+                const credSnap = await window.db.collection('businesses').doc(currentBusinessId).collection('credits')
+                    .where('customerId', '==', custId)
+                    .get();
+
+                // Fetch Settlements
+                const setSnap = await window.db.collection('businesses').doc(currentBusinessId).collection('settlements')
+                    .where('customerId', '==', custId)
+                    .get();
+
+                let combined = [];
+
+                credSnap.forEach(doc => {
+                    const d = doc.data();
+                    combined.push({
+                        id: doc.id,
+                        type: 'CREDIT',
+                        category: d.category || 'CREDIT',
+                        amount: Number(d.amount || 0),
+                        date: d.date || '',
+                        notes: d.notes || 'Credit Given',
+                        createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : 0) : 0
+                    });
+                });
+
+                setSnap.forEach(doc => {
+                    const d = doc.data();
+                    combined.push({
+                        id: doc.id,
+                        type: 'SETTLE',
+                        category: d.paymentMethod || 'PAYMENT',
+                        amount: Number(d.amount || 0),
+                        date: d.date || '',
+                        notes: d.notes || `Repayment (${d.paymentMethod || 'Cash'})`,
+                        createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : 0) : 0
+                    });
+                });
+
+                // Chronological sort (oldest to newest) to calculate running balances and 0-resets
+                combined.sort((a, b) => {
+                    if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '');
+                    return a.createdAt - b.createdAt;
+                });
+
+                let running = 0;
+                let lastZeroIndex = -1;
+
+                combined.forEach((tx, idx) => {
+                    if (tx.type === 'CREDIT') {
+                        running += tx.amount;
+                    } else if (tx.type === 'SETTLE') {
+                        running = Math.max(0, running - tx.amount);
+                    }
+                    tx.runningBalance = running;
+                    if (running === 0) {
+                        lastZeroIndex = idx;
+                    }
+                });
+
+                activeHistoryTransactions = combined;
+                activeHistoryCustomer.lastZeroIndex = lastZeroIndex;
+
+                // Cache to device storage
+                try {
+                    localStorage.setItem('dm_cache_hist_' + custId, JSON.stringify({
+                        transactions: combined,
+                        lastZeroIndex: lastZeroIndex
+                    }));
+                } catch(e) {}
+
+                renderHistoryView();
+            } catch (err) {
+                console.warn('[Offline Mode] Using cached history or empty:', err);
+                if (!activeHistoryTransactions || activeHistoryTransactions.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger); padding: 20px;">No offline transaction history available.</td></tr>`;
+                }
+            }
+        }
+
+        function setHistoryMode(mode) {
+            historyViewMode = mode;
+            document.getElementById('tabActiveCycle').classList.toggle('active', mode === 'ACTIVE');
+            document.getElementById('tabFullHistory').classList.toggle('active', mode === 'FULL');
+            renderHistoryView();
+        }
+
+        function renderHistoryView() {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            let list = [...activeHistoryTransactions];
+
+            if (historyViewMode === 'ACTIVE' && activeHistoryCustomer && activeHistoryCustomer.lastZeroIndex !== -1) {
+                // Slice from the transaction right after the last 0-balance settlement
+                list = activeHistoryTransactions.slice(activeHistoryCustomer.lastZeroIndex + 1);
+            }
+
+            if (list.length === 0) {
+                if (historyViewMode === 'ACTIVE' && activeHistoryTransactions.length > 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 28px; color: #16a34a; background: #f0fdf4;">
+                                <i class="fa-solid fa-circle-check" style="font-size: 24px; margin-bottom: 6px; display:block;"></i>
+                                <strong>All debts are 100% fully settled! (Balance: Rs. 0.00)</strong><br>
+                                <span style="font-size: 11.5px; color: #475569;">No unpaid debt in the active cycle. Click 'Full Lifetime History' above to review past archived records.</span>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">No transaction history found for this customer.</td></tr>';
+                }
+                document.getElementById('histSummaryNote').textContent = '';
+                return;
+            }
+
+            // Render list (displayed newest first or chronological)
+            list.forEach(tx => {
+                const tr = document.createElement('tr');
+                const isCredit = (tx.type === 'CREDIT');
+                tr.className = isCredit ? 'hist-row-credit' : 'hist-row-settle';
+
+                const badge = isCredit 
+                    ? `<span class="badge-hist b-credit">🔴 ${tx.category}</span>`
+                    : `<span class="badge-hist b-settle">🟢 Repayment (${tx.category})</span>`;
+
+                tr.innerHTML = `
+                    <td style="font-weight: 700;">${tx.date || '-'}</td>
+                    <td>${badge} <span style="color: #64748b; font-size: 11.5px; margin-left: 4px;">${escapeHtml(tx.notes)}</span></td>
+                    <td style="color: #dc2626; font-weight: 800;">${isCredit ? formatRs(tx.amount) : '—'}</td>
+                    <td style="color: #16a34a; font-weight: 800;">${!isCredit ? formatRs(tx.amount) : '—'}</td>
+                    <td style="font-weight: 900; color: ${tx.runningBalance > 0 ? '#dc2626' : '#16a34a'};">${formatRs(tx.runningBalance)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const modeLabel = (historyViewMode === 'ACTIVE') ? 'Showing Active Cycle (Since last Rs. 0.00 settlement)' : 'Showing Complete Lifetime History';
+            document.getElementById('histSummaryNote').textContent = `${modeLabel} • Total ${list.length} transaction(s)`;
+        }
+
+        function shareCustomerWhatsApp() {
+            if (!activeHistoryCustomer) return;
+            const bal = Number(activeHistoryCustomer.currentBalance || 0);
+            const msg = `*📊 DARSHANA MADAWALA — Customer Statement*\n` +
+                        `------------------------------------\n` +
+                        `👤 *Customer:* ${activeHistoryCustomer.name}\n` +
+                        `📞 *Phone:* ${activeHistoryCustomer.phone || 'N/A'}\n` +
+                        `⚠️ *Current Outstanding Due:* ${formatRs(bal)}\n` +
+                        `------------------------------------\n` +
+                        `Thank you for doing business with us!`;
+            const url = `whatsapp://send?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        function printCustomerStatement() {
+            window.print();
+        }
+
+        function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    </script>
+    <script src="/clients/madawalateashop/modules/credit/ptr-helper.js?v=20260821_2030">
+        window.toggleSidebarMenu = function() {
+            document.documentElement.classList.toggle('digibiz-sidebar-open');
+        };
+        </script>
+    <script src="/clients/madawalateashop/modules/credit/migration-bridge.js?v=20260827"></script>
+</body>
+</html>

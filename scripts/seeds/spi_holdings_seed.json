@@ -1,0 +1,39 @@
+{
+    "system_clients": {
+        "spi_holdings": {
+            "clientId": "spi_holdings",
+            "businessName": "SPI HOLDINGS",
+            "type": "DISTRIBUTOR",
+            "ownerName": "Nadun De Alwis",
+            "ownerEmail": "nadundealwis@gmail.com",
+            "phone": "",
+            "package": "ENTERPRISE PRO",
+            "monthlyFee": 1500,
+            "expiryDate": "2027-08-28",
+            "status": "active",
+            "smsCredits": 500,
+            "allowedEmails": [
+                "nadundealwis@gmail.com"
+            ],
+            "workspacePath": "/clients/spi_holdings/",
+            "createdAt": "2026-08-28T00:00:00Z",
+            "subscription": {
+                "plan": "PRO",
+                "status": "ACTIVE",
+                "expireDate": "2027-08-28",
+                "monthlyFee": 1500
+            }
+        }
+    },
+    "system_users": {
+        "nadundealwis@gmail.com": {
+            "email": "nadundealwis@gmail.com",
+            "displayName": "Nadun De Alwis",
+            "clientId": "spi_holdings",
+            "workspacePath": "/clients/spi_holdings/",
+            "role": "BUSINESS_OWNER",
+            "status": "active",
+            "createdAt": "2026-08-28T00:00:00Z"
+        }
+    }
+}

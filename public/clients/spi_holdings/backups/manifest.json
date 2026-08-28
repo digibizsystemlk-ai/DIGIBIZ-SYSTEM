@@ -1,0 +1,7 @@
+{
+    "clientId": "spi_holdings",
+    "maxRetention": 3,
+    "lastBackupAt": "2026-08-28T00:00:00Z",
+    "activeBackupsCount": 0,
+    "backups": []
+}

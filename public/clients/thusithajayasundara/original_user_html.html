@@ -1,0 +1,3539 @@
+<!DOCTYPE html>
+<html lang="si" class="auth-active">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>THUSITHA JAYASUNDARA COCONUT PRODUCTS — ERP System</title>
+
+    <meta name="theme-color" content="#0f3b2c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="COCONUT ERP" />
+    <link rel="manifest" href="manifest.json" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz-rTtysyWgt_3PUHG-ar8gS8oN0HTJiI",
+            authDomain: "digibiz-system.firebaseapp.com",
+            projectId: "digibiz-system",
+            storageBucket: "digibiz-system.firebasestorage.app",
+            messagingSenderId: "21839180976",
+            appId: "1:21839180976:web:cbbeda3ebc061285db7775"
+        };
+
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth() : null;
+        const db = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : null;
+
+        if (db) {
+            db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+                if (err.code === 'failed-precondition') {
+                    console.warn('[Persistence] Multiple tabs - primary tab only.');
+                } else if (err.code === 'unimplemented') {
+                    console.warn('[Persistence] Browser does not support offline persistence.');
+                }
+            });
+        }
+
+        localStorage.setItem('coconut_auth_active', 'true');
+        sessionStorage.setItem('coconut_auth_active', 'true');
+        document.documentElement.classList.add('auth-active');
+    </script>
+
+    <style>
+        :root {
+            --c-primary: #0f3b2c;
+            --c-primary-dark: #09241b;
+            --c-accent: #059669;
+            --c-accent-hover: #047857;
+            --c-bg: #f8fafc;
+            --c-surface: #ffffff;
+            --c-border: #e2e8f0;
+            --c-text: #0f172a;
+            --c-text-muted: #64748b;
+            --c-danger: #dc2626;
+            --c-warning: #d97706;
+            --c-success: #16a34a;
+            --c-radius: 12px;
+            --c-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--c-bg);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        #authGateOverlay {
+            position: fixed;
+            inset: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: linear-gradient(145deg, #0f3b2c 0%, #09241b 100%);
+            z-index: 999999 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        html.auth-active #authGateOverlay { display: none !important; }
+        #authGateOverlay.show { display: flex !important; }
+
+        #authGateOverlay .brand {
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        #authGateOverlay .brand i { color: #059669; }
+        #authGateOverlay .brand span { font-size: 14px; font-weight: 400; color: #059669; }
+
+        #authGateOverlay .login-box {
+            background: #fff;
+            border-radius: 14px;
+            padding: 32px 36px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        #authGateOverlay .login-box h2 {
+            color: #0f3b2c;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        #authGateOverlay .login-box p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        #authGateOverlay .login-box input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d5d9d9;
+            border-radius: 8px;
+            background: #fff;
+            color: #0f3b2c;
+            font-size: 16px !important;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+        }
+
+        #authGateOverlay .login-box input:focus {
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+        }
+
+        #authGateOverlay .login-box .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: #059669;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #authGateOverlay .login-box .btn-login:hover { background: #047857; }
+
+        #authGateOverlay .login-box .error {
+            color: #dc2626;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+            background: #fee2e2;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #0f3b2c;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            border-bottom: 1px solid #1a4a36;
+        }
+
+        .top-nav-left { display: flex; align-items: center; gap: 16px; }
+
+        .top-nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .top-nav-logo .logo-icon-wrap {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #059669, #047857);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(5, 150, 105, 0.4);
+        }
+
+        .top-nav-logo .logo-icon-wrap i { color: #fff; font-size: 18px; }
+
+        .top-nav-logo .brand-digibiz { font-size: 18px; font-weight: 900; color: #ffffff; }
+        .top-nav-logo .brand-plus { font-size: 18px; font-weight: 900; color: #059669; margin: 0 2px; }
+        .top-nav-logo .brand-microtech { font-size: 18px; font-weight: 900; color: #059669; }
+        .top-nav-logo .brand-sub { font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; }
+
+        .top-nav-search {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 380px;
+            border: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .top-nav-search:focus-within {
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+        }
+
+        .top-nav-search input { flex: 1; padding: 8px 14px; border: none; outline: none; font-size: 13px; background: transparent; }
+        .top-nav-search button { padding: 8px 16px; background: #059669; border: none; color: #fff; cursor: pointer; font-weight: 800; }
+
+        .top-nav-right { display: flex; align-items: center; gap: 16px; }
+
+        .top-nav-item {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12.5px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            position: relative;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .top-nav-item:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+
+        .top-nav-item .badge {
+            background: #059669;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 1px 6px;
+            border-radius: 10px;
+            position: absolute;
+            top: -4px;
+            right: -4px;
+        }
+
+        .top-nav-item .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #059669;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 12px;
+            color: #fff;
+        }
+
+        .mobile-toggle { display: none; background: transparent; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 4px 8px; }
+
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            width: 260px;
+            background: #fff;
+            border-right: 1px solid var(--c-border);
+            overflow-y: auto;
+            padding: 8px 0;
+            z-index: 999;
+        }
+
+        .sidebar-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 10px 20px 4px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 7px 20px;
+            color: #444;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+
+        .sidebar-item:hover { background: #f0fdf4; color: #0f3b2c; }
+        .sidebar-item.active { background: #f0fdf4; border-left-color: #059669; color: #0f3b2c; font-weight: 700; }
+        .sidebar-item i { width: 20px; color: #888; font-size: 14px; text-align: center; }
+        .sidebar-item.active i { color: #059669; }
+
+        .sidebar-item .count {
+            margin-left: auto;
+            background: #e7e7e7;
+            color: #555;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 8px;
+            border-radius: 10px;
+        }
+
+        .sidebar-item.active .count { background: #059669; color: #fff; }
+
+        .sidebar-subscription-card {
+            margin: 10px 14px 14px;
+            background: linear-gradient(135deg, #0f3b2c 0%, #1a4a36 100%);
+            border: 1px solid #059669;
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar-subscription-card .plan-badge { font-size: 10px; font-weight: 800; color: #059669; text-transform: uppercase; }
+        .sidebar-subscription-card .status-badge { background: #059669; color: #fff; font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 800; }
+        .sidebar-subscription-card .days-left { font-size: 16px; font-weight: 900; color: #ffffff; }
+        .sidebar-subscription-card .expiry-text { font-size: 10px; color: #aaa; }
+
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 998; }
+        .sidebar-overlay.active { display: block; }
+
+        .main-content {
+            margin-left: 260px;
+            margin-top: 60px;
+            flex: 1;
+            padding: 24px 28px;
+            background: var(--c-bg);
+            min-height: calc(100vh - 60px);
+        }
+
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.2s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .c-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+        .c-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--c-border);
+        }
+
+        .c-header-left h1 { font-size: 24px; font-weight: 800; color: var(--c-text); margin-bottom: 4px; }
+        .c-header-left p { font-size: 14px; color: var(--c-text-muted); }
+        .c-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .c-card {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--c-radius);
+            padding: 20px;
+            box-shadow: var(--c-shadow);
+            margin-bottom: 20px;
+        }
+
+        .c-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .c-card-title { font-size: 16px; font-weight: 800; color: var(--c-text); display: flex; align-items: center; gap: 8px; }
+        .c-card-title i { color: var(--c-accent); }
+
+        .c-grid-2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px; }
+        @media (max-width: 960px) { .c-grid-2 { grid-template-columns: 1fr; } }
+
+        .c-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        @media (max-width: 768px) { .c-grid-3 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 480px) { .c-grid-3 { grid-template-columns: 1fr; } }
+
+        .c-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        @media (max-width: 992px) { .c-grid-4 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 480px) { .c-grid-4 { grid-template-columns: 1fr; } }
+
+        .c-form-group { margin-bottom: 14px; }
+        .c-form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--c-text-muted); margin-bottom: 4px; }
+
+        .c-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 600px) { .c-form-row { grid-template-columns: 1fr; } }
+
+        .c-input, .c-select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--c-border);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #fff;
+            color: var(--c-text);
+        }
+
+        .c-input:focus, .c-select:focus {
+            border-color: var(--c-accent);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        }
+
+        .c-btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13.5px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .c-btn-primary { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #fff; }
+        .c-btn-primary:hover { background: linear-gradient(135deg, #047857 0%, #065f46 100%); transform: translateY(-1px); }
+        .c-btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+        .c-btn-secondary:hover { background: #e2e8f0; }
+        .c-btn-accent { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+        .c-btn-accent:hover { background: #bfdbfe; }
+        .c-btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .c-btn-danger:hover { background: #fecaca; }
+        .c-btn-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .c-btn-success:hover { background: #bbf7d0; }
+        .c-btn-sm { padding: 6px 12px; font-size: 12px; }
+        .c-btn-lg { padding: 12px 24px; font-size: 15px; }
+
+        .c-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; }
+        .c-badge-success { background: #dcfce7; color: #15803d; }
+        .c-badge-warning { background: #fef3c7; color: #b45309; }
+        .c-badge-danger { background: #fee2e2; color: #b91c1c; }
+        .c-badge-info { background: #dbeafe; color: #1d4ed8; }
+        .c-badge-neutral { background: #f1f5f9; color: #475569; }
+
+        .c-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .c-kpi-card { background: #fff; border: 1px solid var(--c-border); border-radius: var(--c-radius); padding: 16px 20px; box-shadow: var(--c-shadow); }
+        .c-kpi-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .c-kpi-label { font-size: 11px; font-weight: 700; color: var(--c-text-muted); text-transform: uppercase; }
+        .c-kpi-icon { font-size: 20px; color: var(--c-accent); }
+        .c-kpi-value { font-size: 22px; font-weight: 900; color: var(--c-text); }
+        .c-kpi-sub { font-size: 12px; color: var(--c-text-muted); margin-top: 2px; }
+
+        .c-table-wrapper { overflow-x: auto; }
+        .c-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .c-table th { background: #f8fafc; color: #475569; font-weight: 700; text-align: left; padding: 12px 14px; border-bottom: 2px solid #e2e8f0; }
+        .c-table td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+        .c-table tr:hover td { background: #f8fafc; }
+        .c-table .text-right { text-align: right; }
+        .c-table .text-center { text-align: center; }
+
+        .c-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-top: 1px solid var(--c-border);
+            background: #fff;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .c-pagination-info {
+            font-size: 12.5px;
+            color: var(--c-text-muted);
+            font-weight: 600;
+        }
+
+        .c-pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .c-page-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--c-border);
+            background: #fff;
+            color: var(--c-text);
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .c-page-btn:hover:not(:disabled) {
+            background: #f0fdf4;
+            border-color: #059669;
+            color: #0f3b2c;
+        }
+
+        .c-page-btn.active {
+            background: #0f3b2c;
+            border-color: #0f3b2c;
+            color: #fff;
+        }
+
+        .c-page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .c-cart-total-box {
+            background: #f8fafc;
+            border: 1px solid var(--c-border);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .c-cart-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+
+        .c-cart-row.grand-total {
+            border-top: 2px solid var(--c-border);
+            margin-top: 6px;
+            padding-top: 8px;
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--c-text);
+        }
+
+        .c-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .c-modal-overlay.show, .c-modal-overlay.open { display: flex !important; }
+
+        .c-modal {
+            background: #fff;
+            border-radius: var(--c-radius);
+            max-width: 540px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .c-modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--c-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f3b2c;
+            color: #fff;
+            border-radius: var(--c-radius) var(--c-radius) 0 0;
+        }
+
+        .c-modal-header h3 { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .c-modal-header h3 i { color: #059669; }
+        .c-modal-close { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; opacity: 0.7; }
+        .c-modal-body { padding: 20px; }
+        .c-modal-footer { padding: 12px 20px; border-top: 1px solid var(--c-border); display: flex; justify-content: flex-end; gap: 10px; background: #f8fafc; }
+
+        .c-toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .c-toast { background: #0f172a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+        .c-toast-success { border-left: 4px solid #059669; }
+        .c-toast-error { border-left: 4px solid #dc2626; }
+        .c-toast-info { border-left: 4px solid #3b82f6; }
+
+        .settings-tab-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            background: transparent;
+            color: #666;
+            white-space: nowrap;
+        }
+        .settings-tab-btn:hover { background: #f0fdf4; color: #0f3b2c; }
+        .settings-tab-btn.active { background: #0f3b2c; color: #ffffff; }
+
+        .balance-status-box { margin-top: 14px; padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 13px; }
+        .balance-status-box.balanced { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .balance-status-box.not-balanced { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+
+        @media (max-width: 767px) {
+            .top-nav-search { display: none; }
+            .hide-mobile { display: none !important; }
+            .mobile-toggle { display: inline-flex !important; }
+            .sidebar { width: 280px; transform: translateX(-100%); transition: transform 0.3s ease; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .main-content { margin-left: 0; padding: 12px 14px; margin-top: 56px; }
+            .c-grid-4 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- AUTH GATE OVERLAY -->
+    <div id="authGateOverlay">
+        <div class="brand">
+            <i class="fas fa-coconut"></i>
+            THUSITHA JAYASUNDARA<span>COCONUT</span>
+        </div>
+        <div class="login-box">
+            <h2>THUSITHA JAYASUNDARA</h2>
+            <p>Coconut Products ERP — Secure Sign In</p>
+            <div class="error" id="authError">Invalid email or password</div>
+            <input type="email" id="loginEmail" placeholder="Owner / Staff Email" value="thusithajayasundara@gmail.com" autocomplete="username" />
+            <input type="password" id="loginPassword" placeholder="Password" value="123456" autocomplete="current-password" />
+            <button class="btn-login" onclick="handleSignIn()">
+                <i class="fas fa-lock"></i> Sign In
+            </button>
+            <div id="mobileLoginLoader" style="display:none; text-align:center; margin-top:12px; color:#059669; font-size:13px; font-weight:700;">
+                <i class="fas fa-spinner fa-spin"></i> Signing in...
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP NAVIGATION -->
+    <nav class="top-nav">
+        <div class="top-nav-left">
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="top-nav-logo" onclick="navigateTo('dashboard')" title="THUSITHA JAYASUNDARA COCONUT PRODUCTS - ERP System">
+                <div class="logo-icon-wrap">
+                    <i class="fas fa-coconut"></i>
+                </div>
+                <div class="logo-text-col" style="display:flex; flex-direction:column; line-height:1.1;">
+                    <div style="display:flex; align-items:center; gap:2px;">
+                        <span class="brand-digibiz">THUSITHA</span>
+                        <span class="brand-plus">✦</span>
+                        <span class="brand-microtech">COCONUT</span>
+                    </div>
+                    <div class="brand-sub">Coconut Products ERP System</div>
+                </div>
+            </div>
+            <div class="top-nav-search">
+                <input type="text" placeholder="Search products, sales..." id="globalSearch" oninput="handleSearch(this.value)" />
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        <div class="top-nav-right">
+            <div class="top-nav-item" style="position:relative;">
+                <select id="languageSelect" onchange="changeLanguage(this.value)" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;outline:none;">
+                    <option value="en" style="background:#0f3b2c;color:#fff;">🇬🇧 EN</option>
+                    <option value="si" style="background:#0f3b2c;color:#fff;">🇱🇰 සිං</option>
+                    <option value="ta" style="background:#0f3b2c;color:#fff;">🇱🇰 த</option>
+                </select>
+            </div>
+            <div class="top-nav-item" onclick="navigateTo('dashboard')">
+                <i class="fas fa-home"></i>
+                <span class="hide-mobile">Home</span>
+            </div>
+            <div class="top-nav-item" id="userRoleItem" style="display:flex;align-items:center;gap:6px;">
+                <div class="avatar" id="userAvatarText">TJ</div>
+                <div style="display:flex;flex-direction:column;line-height:1.2;">
+                    <span class="hide-mobile" id="navUserName" style="font-weight:700;">THUSITHA</span>
+                    <span id="userRoleBadge" style="font-size:9px;"></span>
+                </div>
+            </div>
+            <div class="top-nav-item" onclick="handleSignOut()" style="color:#059669;font-weight:700;">
+                <i class="fas fa-arrow-right-from-bracket"></i>
+                <span class="hide-mobile">Sign Out</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR - UPDATED WITH CORRECT MENU -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-subscription-card" onclick="navigateTo('subscription')" role-page="subscription">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span class="plan-badge"><i class="fas fa-crown"></i> <span id="sidePlanName">ENTERPRISE</span></span>
+                <span class="status-badge" id="sidePlanStatusBadge">ACTIVE</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                <div class="days-left" id="sidePlanDaysLeft">364 Days</div>
+                <div class="expiry-text" id="sidePlanExpiryDate">Expires: 2027-08-25</div>
+            </div>
+        </div>
+
+        <div class="sidebar-section-title">📊 OPERATIONS</div>
+        <a class="sidebar-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+            <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+        </a>
+        <a class="sidebar-item" data-page="purchase" onclick="navigateTo('purchase')">
+            <i class="fas fa-coconut"></i> <span>Coconut Purchase</span>
+            <span class="count" id="sidePurchaseCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="grading" onclick="navigateTo('grading')">
+            <i class="fas fa-tags"></i> <span>Grading</span>
+            <span class="count" id="sideGradingCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="coconut-stock" onclick="navigateTo('coconut-stock')">
+            <i class="fas fa-boxes-stacked"></i> <span>Coconut Stock</span>
+            <span class="count" id="sideStockCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="copra" onclick="navigateTo('copra')">
+            <i class="fas fa-fire"></i> <span>Copra (කොප්පරා)</span>
+            <span class="count" id="sideCopraCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="husk-purchase" onclick="navigateTo('husk-purchase')">
+            <i class="fas fa-seedling"></i> <span>Husk Purchase</span>
+            <span class="count" id="sideHuskCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="production" onclick="navigateTo('production')">
+            <i class="fas fa-industry"></i> <span>Production</span>
+            <span class="count" id="sideProdCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="products" onclick="navigateTo('products')">
+            <i class="fas fa-box"></i> <span>Products / Stock</span>
+            <span class="count" id="sideProdCount2">0</span>
+        </a>
+        <a class="sidebar-item" data-page="sales" onclick="navigateTo('sales')">
+            <i class="fas fa-cart-shopping"></i> <span>Sales</span>
+            <span class="count" id="sideSalesCount">0</span>
+        </a>
+
+        <div class="sidebar-section-title">💰 FINANCE</div>
+        <a class="sidebar-item" data-page="procurement-costs" onclick="navigateTo('procurement-costs')">
+            <i class="fas fa-hand-holding-dollar"></i> <span>Procurement Costs</span>
+        </a>
+        <a class="sidebar-item" data-page="expenses" onclick="navigateTo('expenses')">
+            <i class="fas fa-receipt"></i> <span>Expenses</span>
+            <span class="count" id="sideExpenseCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="customers" onclick="navigateTo('customers')">
+            <i class="fas fa-users"></i> <span>Customers</span>
+            <span class="count" id="sideCustCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="suppliers" onclick="navigateTo('suppliers')">
+            <i class="fas fa-truck"></i> <span>Suppliers</span>
+            <span class="count" id="sideSuppCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="daily-transactions" onclick="navigateTo('daily-transactions')">
+            <i class="fas fa-clock"></i> <span>Daily Transactions</span>
+        </a>
+        <a class="sidebar-item" data-page="accounting" onclick="navigateTo('accounting')">
+            <i class="fas fa-calculator"></i> <span>Accounting</span>
+        </a>
+        <a class="sidebar-item" data-page="finance-ledger" onclick="navigateTo('finance-ledger')">
+            <i class="fas fa-book"></i> <span>Finance Ledger</span>
+        </a>
+        <a class="sidebar-item" data-page="receivables" onclick="navigateTo('receivables')">
+            <i class="fas fa-hand-holding-heart"></i> <span>Receivables (ලැබිය යුතු)</span>
+        </a>
+        <a class="sidebar-item" data-page="payables" onclick="navigateTo('payables')">
+            <i class="fas fa-hand-holding-dollar"></i> <span>Payables (ගෙවිය යුතු)</span>
+        </a>
+        <a class="sidebar-item" data-page="ledgers" onclick="navigateTo('ledgers')">
+            <i class="fas fa-list-check"></i> <span>Ledgers</span>
+        </a>
+        <a class="sidebar-item" data-page="payments" onclick="navigateTo('payments')">
+            <i class="fas fa-credit-card"></i> <span>Payments</span>
+        </a>
+        <a class="sidebar-item" data-page="history" onclick="navigateTo('history')">
+            <i class="fas fa-timeline"></i> <span>History</span>
+        </a>
+
+        <div class="sidebar-section-title">📈 REPORTS & HR</div>
+        <a class="sidebar-item" data-page="reports" onclick="navigateTo('reports')">
+            <i class="fas fa-chart-line"></i> <span>Reports</span>
+        </a>
+        <a class="sidebar-item" data-page="staff" onclick="navigateTo('staff')">
+            <i class="fas fa-users-gear"></i> <span>Staff</span>
+            <span class="count" id="sideStaffCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="attendance" onclick="navigateTo('attendance')">
+            <i class="fas fa-clock"></i> <span>Attendance & Payroll</span>
+            <span class="count" id="sideAttCount">0</span>
+        </a>
+
+        <div class="sidebar-section-title">⚙️ SYSTEM</div>
+        <a class="sidebar-item" data-page="profile" onclick="navigateTo('profile')">
+            <i class="fas fa-building"></i> <span>Profile</span>
+        </a>
+        <a class="sidebar-item" data-page="settings" onclick="navigateTo('settings')">
+            <i class="fas fa-cog"></i> <span>Settings</span>
+        </a>
+        <a class="sidebar-item" data-page="subscription" onclick="navigateTo('subscription')">
+            <i class="fas fa-credit-card"></i> <span>Subscription</span>
+            <span class="badge" id="sideSubStatusPill" style="background:#059669;color:#fff;font-size:9px;">PRO</span>
+        </a>
+        <a class="sidebar-item" data-page="manual" onclick="navigateTo('manual')">
+            <i class="fas fa-book"></i> <span>User Manual</span>
+        </a>
+
+        <div style="padding:14px 20px;border-top:1px solid #e7e7e7;margin-top:8px;font-size:11px;color:#888;">
+            <div style="font-weight:700;color:#0f3b2c;">THUSITHA JAYASUNDARA</div>
+            <div style="font-size:10px;color:#059669;"><i class="fas fa-circle" style="font-size:7px;"></i> Coconut ERP Active</div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- PAGE: DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📊 Executive Dashboard</h1>
+                    <p>Real-time coconut procurement, grading, copra production, stock & financial intelligence.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="navigateTo('purchase')">🥥 New Purchase</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('sales')">🛒 New Sale</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('grading')">📊 Grade Stock</button>
+                </div>
+            </div>
+
+            <div class="c-kpi-grid">
+                <div class="c-kpi-card">
+                    <div class="c-kpi-head"><span class="c-kpi-label">Coconut Stock</span><span class="c-kpi-icon">🥥</span></div>
+                    <div class="c-kpi-value" id="kpiCoconutStock">0 nuts</div>
+                    <div class="c-kpi-sub">All grades combined</div>
+                </div>
+                <div class="c-kpi-card">
+                    <div class="c-kpi-head"><span class="c-kpi-label">Copra Stock</span><span class="c-kpi-icon">🔥</span></div>
+                    <div class="c-kpi-value" id="kpiCopraStock">0 kg</div>
+                    <div class="c-kpi-sub">Ready Copra</div>
+                </div>
+                <div class="c-kpi-card">
+                    <div class="c-kpi-head"><span class="c-kpi-label">Today Sales</span><span class="c-kpi-icon">🛒</span></div>
+                    <div class="c-kpi-value" id="kpiTodaySales">Rs. 0.00</div>
+                    <div class="c-kpi-sub">Revenue generated today</div>
+                </div>
+                <div class="c-kpi-card">
+                    <div class="c-kpi-head"><span class="c-kpi-label">Inventory Value</span><span class="c-kpi-icon">📦</span></div>
+                    <div class="c-kpi-value" id="kpiInventoryValue">Rs. 0.00</div>
+                    <div class="c-kpi-sub">Total raw + finished goods</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-clock"></i> Recent Activity</div>
+                    <button class="c-btn c-btn-secondary c-btn-sm" onclick="navigateTo('reports')">View All →</button>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Party</th>
+                                <th class="text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivityBody">
+                            <tr><td colspan="5" class="text-center text-muted" style="padding:24px;">No recent activity</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: COCONUT PURCHASE -->
+        <div class="page" id="page-purchase">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🥥 Fresh Coconut Purchase</h1>
+                    <p>Record raw coconut procurement by count, grade/rate, transport costs, and automatic inventory & ledger updates.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button type="button" onclick="navigateTo('coconut-stock')" class="c-btn c-btn-secondary">📦 View Coconut Stock</button>
+                    <button type="button" onclick="navigateTo('grading')" class="c-btn c-btn-secondary">🏷️ Manage Grades</button>
+                </div>
+            </div>
+
+            <div class="c-grid-2">
+                <div class="c-card">
+                    <div class="c-card-header">
+                        <div class="c-card-title">📝 New Purchase Entry</div>
+                        <span class="c-badge c-badge-info">Auto Inventory Sync</span>
+                    </div>
+                    <form id="purchaseForm" onsubmit="handleSavePurchase(event)">
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Purchase Date *</label>
+                                <input type="date" id="pDate" class="c-input" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Supplier (සැපයුම්කරු) *</label>
+                                <div style="display:flex; gap:8px;">
+                                    <select id="pSupplier" class="c-select" required style="flex:1;">
+                                        <option value="">Select Supplier...</option>
+                                    </select>
+                                    <button type="button" class="c-btn c-btn-accent c-btn-sm" onclick="openQuickSupplierModal()">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Grade / Category (වර්ගය) *</label>
+                                <select id="pCategory" class="c-select" required>
+                                    <option value="GOOD">Good / Large (A Grade)</option>
+                                    <option value="MEDIUM">Medium (B Grade)</option>
+                                    <option value="LOW">Low / Small (C Grade)</option>
+                                    <option value="COPRA_NUTS">Copra Nuts (කොප්පරා සඳහා ගෙඩි)</option>
+                                    <option value="UNGRADED">Ungraded Whole Batch</option>
+                                </select>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Coconut Count / Quantity (ගෙඩි ගණන) *</label>
+                                <input type="number" id="pQty" class="c-input" min="1" step="1" placeholder="e.g. 5000" required oninput="updatePurchasePreview()">
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Rate per Nut (ගෙඩියක මිල) *</label>
+                                <input type="number" id="pUnitCost" class="c-input" min="0" step="any" placeholder="e.g. 85.00" required oninput="updatePurchasePreview()">
+                            </div>
+                            <div class="c-form-group">
+                                <label>Transport Cost (ප්රවාහන වියදම)</label>
+                                <input type="number" id="pTransport" class="c-input" min="0" step="any" placeholder="0.00" value="0" oninput="updatePurchasePreview()">
+                            </div>
+                        </div>
+
+                        <div class="c-cart-total-box" style="margin-bottom:16px;">
+                            <div class="c-cart-row">
+                                <span>Base Coconut Cost:</span>
+                                <strong id="prevBaseCost">Rs. 0.00</strong>
+                            </div>
+                            <div class="c-cart-row">
+                                <span>Transport & Freight:</span>
+                                <strong id="prevTransport">Rs. 0.00</strong>
+                            </div>
+                            <div class="c-cart-row grand-total">
+                                <span>Total Landed Cost:</span>
+                                <span id="prevTotalCost">Rs. 0.00</span>
+                            </div>
+                            <div style="font-size:12px; color:var(--c-text-muted); margin-top:8px; border-top:1px dashed #cbd5e1; padding-top:6px; display:flex; justify-content:space-between;">
+                                <span>Purchased Volume: <strong id="prevEquivalent" style="color:#0f3b2c;">0 nuts</strong></span>
+                                <span>Effective Landed Rate: <strong id="prevEffectiveRate" style="color:var(--c-primary);">Rs. 0.00 / nut</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Payment Mode (ගෙවීම් ක්රමය) *</label>
+                                <select id="pPaymentMode" class="c-select" required>
+                                    <option value="CASH">Cash (අත්පිට මුදල්)</option>
+                                    <option value="CREDIT">Credit / Payable (ණයට)</option>
+                                    <option value="BANK">Bank Transfer (බැංකු මාරු)</option>
+                                    <option value="CHEQUE">Cheque (චෙක්පත්)</option>
+                                </select>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Notes / Vehicle / Estate Reference</label>
+                                <input type="text" id="pNotes" class="c-input" placeholder="e.g. Lorry WP-GA-1234 / Kurunegala Estate">
+                            </div>
+                        </div>
+
+                        <div class="c-form-group" style="margin-bottom:14px; background:#f0fdf4; padding:10px 14px; border-radius:10px; border:1px solid #bbf7d0;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:700; color:#166534; margin:0;">
+                                <input type="checkbox" id="pDehusked" style="width:18px; height:18px; accent-color:#0f3b2c;" checked>
+                                <span>🥥 Add Husks to Raw Husk Stock (1:1 ratio @ Rs. 0.00 Cost)</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="c-btn c-btn-primary c-btn-lg" style="width:100%;" id="btnSavePurchase">
+                            💾 Save Purchase & Update Stock
+                        </button>
+                    </form>
+                </div>
+
+                <div>
+                    <div class="c-card">
+                        <div class="c-card-header">
+                            <div class="c-card-title">🥥 Current Coconut Stock Summary</div>
+                            <button type="button" onclick="navigateTo('coconut-stock')" class="c-btn c-btn-secondary c-btn-sm">View Full</button>
+                        </div>
+                        <div class="c-table-wrapper">
+                            <table class="c-table">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th class="text-right">Stock (ගෙඩි)</th>
+                                        <th class="text-right">Avg Cost</th>
+                                        <th class="text-right">Total Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockSummaryBody">
+                                    <tr><td colspan="4" class="text-center" style="color:var(--c-text-muted);">Loading stock summary...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-card" style="padding:0; overflow:hidden;">
+                <div class="c-card-header" style="padding:16px 20px; margin-bottom:0; border-bottom:1px solid var(--c-border);">
+                    <div class="c-card-title">📜 Coconut Purchase Records</div>
+                    <input type="text" id="searchPurchase" class="c-input" placeholder="Search supplier / category..." style="width:240px; padding:6px 12px; font-size:12.5px;" oninput="handleSearchPurchase(this.value)">
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Category</th>
+                                <th class="text-right">Nuts</th>
+                                <th class="text-right">Landed Rate</th>
+                                <th class="text-right">Total Cost</th>
+                                <th>Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseHistoryBody">
+                            <tr><td colspan="7" class="text-center" style="padding:24px; color:var(--c-text-muted);">No coconut purchases recorded yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: GRADING -->
+        <div class="page" id="page-grading">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🏷️ Coconut Grading & Quality Sorting</h1>
+                    <p>Sort ungraded bulk coconut batches into specific quality grades (A, B, C) and allocate stock accurately.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button type="button" onclick="navigateTo('coconut-stock')" class="c-btn c-btn-secondary">📦 Current Stock View</button>
+                    <button type="button" onclick="navigateTo('sales')" class="c-btn c-btn-primary">🛒 Sell Graded Coconuts</button>
+                </div>
+            </div>
+
+            <div class="c-grid-2">
+                <div class="c-card">
+                    <div class="c-card-header">
+                        <div class="c-card-title">⚖️ Execute Stock Sorting / Grading Run</div>
+                        <span class="c-badge c-badge-primary">Batch Sorting</span>
+                    </div>
+
+                    <form id="gradingRunForm" onsubmit="handleSaveGrading(event)">
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Grading Date *</label>
+                                <input type="date" id="gDate" class="c-input" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Source Batch / Category to Sort *</label>
+                                <select id="gSourceCategory" class="c-select" required onchange="updateGradingCalculations()">
+                                    <option value="UNGRADED">Ungraded Whole Batch</option>
+                                    <option value="GOOD">Good / Large (A Grade)</option>
+                                    <option value="MEDIUM">Medium (B Grade)</option>
+                                    <option value="LOW">Low / Small (C Grade)</option>
+                                    <option value="COPRA_NUTS">Copra Nuts Batch</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="c-cart-total-box" style="margin-bottom:14px; background:#f0f9ff; border-color:#bae6fd;">
+                            <div style="font-size:12px; color:#0369a1;">
+                                Available Source Stock: <strong id="sourceStockDisplay">0 nuts</strong> (Avg Cost: <strong id="sourceAvgCostDisplay">Rs. 0.00</strong>)
+                            </div>
+                        </div>
+
+                        <div style="font-weight:700; font-size:13px; color:var(--c-primary); margin-bottom:10px;">
+                            Output Grade Distribution:
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Good / Large (A Grade) Nuts</label>
+                                <input type="number" id="outGoodQty" class="c-input" min="0" step="1" value="0" oninput="updateGradingCalculations()">
+                            </div>
+                            <div class="c-form-group">
+                                <label>Medium (B Grade) Nuts</label>
+                                <input type="number" id="outMediumQty" class="c-input" min="0" step="1" value="0" oninput="updateGradingCalculations()">
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Low / Small (C Grade) Nuts</label>
+                                <input type="number" id="outLowQty" class="c-input" min="0" step="1" value="0" oninput="updateGradingCalculations()">
+                            </div>
+                            <div class="c-form-group">
+                                <label style="color:#b45309; font-weight:700;">🥥 Copra Nuts</label>
+                                <input type="number" id="outCopraQty" class="c-input" min="0" step="1" value="0" style="border-color:#fde68a; background:#fffbeb;" oninput="updateGradingCalculations()">
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Discarded / Rotten (Spoilage)</label>
+                                <input type="number" id="outSpoiledQty" class="c-input" min="0" step="1" value="0" oninput="updateGradingCalculations()">
+                            </div>
+                        </div>
+
+                        <div class="c-cart-total-box" style="margin-bottom:16px;">
+                            <div class="c-cart-row">
+                                <span>Total Nuts Sorted:</span>
+                                <strong id="totalSortedNutsDisplay">0 nuts</strong>
+                            </div>
+                            <div class="c-cart-row">
+                                <span>Sorting Discrepancy:</span>
+                                <strong id="gradingDiscrepancyDisplay" style="color:var(--c-accent);">0 nuts remaining</strong>
+                            </div>
+                        </div>
+
+                        <div class="c-form-group" style="margin-bottom:16px;">
+                            <label>Sorting Operator / Team Notes</label>
+                            <input type="text" id="gNotes" class="c-input" placeholder="e.g. Sorter: Kamal / Evening batch">
+                        </div>
+
+                        <button type="submit" class="c-btn c-btn-primary c-btn-lg" style="width:100%;" id="btnSaveGrading">
+                            ✨ Save Grading Run & Re-allocate Stock
+                        </button>
+                    </form>
+                </div>
+
+                <div>
+                    <div class="c-card">
+                        <div class="c-card-header">
+                            <div class="c-card-title">📋 Active Quality Categories</div>
+                        </div>
+                        <div class="c-table-wrapper">
+                            <table class="c-table">
+                                <thead>
+                                    <tr>
+                                        <th>Grade</th>
+                                        <th>Specifications</th>
+                                        <th class="text-right">Recommended Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="c-badge c-badge-success">GOOD (A)</span></td>
+                                        <td>Large (>13"), heavy water, thick kernel</td>
+                                        <td class="text-right" style="font-weight:700; color:#166534;">Rs. 110 - 130</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="c-badge c-badge-info">MEDIUM (B)</span></td>
+                                        <td>Standard commercial size (11-13")</td>
+                                        <td class="text-right" style="font-weight:700; color:#0369a1;">Rs. 95 - 105</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="c-badge c-badge-warning">LOW (C)</span></td>
+                                        <td>Small size (<11"), dry fallen nuts</td>
+                                        <td class="text-right" style="font-weight:700; color:#b45309;">Rs. 75 - 85</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="c-badge" style="background:#fef3c7; color:#92400e;">COPRA NUTS</span></td>
+                                        <td>Diverted for Copra drying & processing</td>
+                                        <td class="text-right" style="font-weight:700; color:#92400e;">Production Input</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">📜 Grading History Log</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Source Category</th>
+                                <th class="text-right">Total Sorted</th>
+                                <th class="text-right">Good (A)</th>
+                                <th class="text-right">Medium (B)</th>
+                                <th class="text-right">Low (C)</th>
+                                <th class="text-right">Copra Nuts</th>
+                                <th class="text-right">Spoiled</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradingHistoryBody">
+                            <tr><td colspan="8" class="text-center" style="padding:20px; color:var(--c-text-muted);">No grading runs recorded yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: COCONUT STOCK -->
+        <div class="page" id="page-coconut-stock">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📦 Coconut Stock Inventory</h1>
+                    <p>Monitor raw coconut grade counts, valuation, and record adjustments.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="navigateTo('purchase')">🥥 Purchase Coconuts</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('grading')">📊 Re-grade Stock</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('copra')">🔥 Transfer to Copra</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">🥥 Whole Coconut Stock by Quality Grade</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Category / Grade</th>
+                                <th class="text-right">Stock (Nuts)</th>
+                                <th class="text-right">Avg Landed Cost / Nut</th>
+                                <th class="text-right">Last Purchase Rate</th>
+                                <th class="text-right">Asset Valuation (LKR)</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coconutStockTableBody">
+                            <tr><td colspan="6" class="text-center" style="padding:20px;">Loading stock data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding:16px 20px; border-top:2px solid var(--c-border); background:#f8fafc; border-radius:0 0 var(--c-radius) var(--c-radius);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <span style="font-weight:700; font-size:14px;">📦 COMBINED TOTAL INVENTORY ASSET</span>
+                        <span style="font-size:20px; font-weight:900; color:var(--c-primary);" id="coconutTotalAsset">Rs. 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">🟤 Raw Husk Stock</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Raw Material</th>
+                                <th class="text-right">Stock (Husks)</th>
+                                <th class="text-right">Avg Cost / Husk</th>
+                                <th class="text-right">Last Rate / Husk</th>
+                                <th class="text-right">Total Asset Value (LKR)</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="huskStockTableBody">
+                            <tr><td colspan="6" class="text-center" style="padding:20px;">No husk stock data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">📦 Finished Goods & Manufactured Products</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Unit</th>
+                                <th class="text-right">In-Stock Qty</th>
+                                <th class="text-right">Cost / Unit</th>
+                                <th class="text-right">Selling Price</th>
+                                <th class="text-right">Total Valuation (LKR)</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fgStockTableBody">
+                            <tr><td colspan="7" class="text-center" style="padding:20px;">No finished goods data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: COPRA MANAGEMENT -->
+        <div class="page" id="page-copra">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🔥 Copra Management & P&L</h1>
+                    <p>Transfer whole coconuts to Copra raw stock, track drying conversion yield, record copra sales, and calculate dedicated Copra profits & margins.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('copraModal')">➕ New Copra Run</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('sales')">🛒 Sell Copra</button>
+                </div>
+            </div>
+
+            <div class="c-grid-3">
+                <div class="c-card" style="border-left:4px solid #059669;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Copra Revenue</div>
+                    <div style="font-size:20px;font-weight:900;color:#059669;" id="copraTotalRevenue">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #dc2626;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Copra Cost (COGS)</div>
+                    <div style="font-size:20px;font-weight:900;color:#dc2626;" id="copraTotalCost">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #0f3b2c;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Copra Net Profit / Margin</div>
+                    <div style="font-size:20px;font-weight:900;color:#0f3b2c;" id="copraNetProfit">Rs. 0.00</div>
+                    <div style="font-size:12px;color:#64748b;" id="copraMarginPercent">Net Margin: 0.0%</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-fire"></i> Copra Production Runs</div>
+                    <input type="text" class="c-input" placeholder="Search records..." style="width:200px;padding:6px 12px;font-size:12.5px;">
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Invoice #</th>
+                                <th>Customer</th>
+                                <th class="text-right">Sold Qty (KG)</th>
+                                <th class="text-right">Selling Rate / KG</th>
+                                <th class="text-right">Revenue (LKR)</th>
+                                <th class="text-right">Cost (COGS)</th>
+                                <th class="text-right">Net Profit</th>
+                                <th class="text-right">Margin %</th>
+                                <th>Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="copraTable">
+                            <tr><td colspan="10" class="text-center text-muted" style="padding:24px;">No copra production records</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: HUSK PURCHASE -->
+        <div class="page" id="page-husk-purchase">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🟤 Husk Purchase</h1>
+                    <p>Procure de-husked raw husks by count for husk chip and coir fibre production.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('huskPurchaseModal')">➕ New Husk Purchase</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('production')">🏭 Process Husk</button>
+                </div>
+            </div>
+
+            <div class="c-grid-3">
+                <div class="c-card" style="border-left:4px solid #d97706;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Husk Stock</div>
+                    <div style="font-size:20px;font-weight:900;color:#d97706;" id="huskStock">0 husks</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #059669;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Fiber Stock</div>
+                    <div style="font-size:20px;font-weight:900;color:#059669;" id="fiberStock">0 kg</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #0f3b2c;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Peat Stock</div>
+                    <div style="font-size:20px;font-weight:900;color:#0f3b2c;" id="peatStock">0 kg</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-list"></i> Husk Purchase History</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th class="text-right">Husks</th>
+                                <th class="text-right">Rate/Husk</th>
+                                <th class="text-right">Total</th>
+                                <th>Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="huskTable">
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:24px;">No husk purchase records</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: PRODUCTION -->
+        <div class="page" id="page-production">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🏭 Production Runs & Value Addition</h1>
+                    <p>Convert raw husks and inputs into finished goods (Husk Chips, Coir Fibre, Bales, Copra) with real-time conversion costing.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button type="button" class="c-btn c-btn-accent" onclick="openModal('recipeModal')">⚙️ Manage Recipes</button>
+                    <button type="button" onclick="navigateTo('products')" class="c-btn c-btn-secondary">📦 Finished Goods</button>
+                </div>
+            </div>
+
+            <div class="c-grid-2">
+                <div class="c-card">
+                    <div class="c-card-header">
+                        <div class="c-card-title">⚙️ Record Production Batch / Run</div>
+                        <span class="c-badge c-badge-primary">Raw to Finished</span>
+                    </div>
+
+                    <form id="productionRunForm" onsubmit="handleExecuteProductionRun(event)">
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Run Date *</label>
+                                <input type="date" id="prDate" class="c-input" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Transformation Recipe *</label>
+                                <select id="prRecipe" class="c-select" required onchange="handleRecipeChange()">
+                                    <option value="">Select Recipe...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Target Finished Product *</label>
+                                <select id="prProduct" class="c-select" required>
+                                    <option value="">Select Product...</option>
+                                </select>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Units Produced *</label>
+                                <input type="number" id="prProducedQty" class="c-input" min="0.001" step="any" placeholder="e.g. 100" required oninput="handleProducedQtyInput()">
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Raw Husks Consumed</label>
+                                <input type="number" id="prHuskCount" class="c-input" min="0" step="1" placeholder="e.g. 1500 husks" value="0" oninput="handleHuskCountInput()">
+                                <div style="font-size:11px; color:var(--c-text-muted); margin-top:2px;">
+                                    Available: <span id="availHuskDisplay" style="font-weight:700; color:var(--c-primary);">0 husks</span>
+                                </div>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Raw / Copra Coconuts Consumed</label>
+                                <input type="number" id="prCoconutQty" class="c-input" min="0" step="1" value="0" placeholder="e.g. 1000 nuts" oninput="handleCoconutQtyInput()">
+                                <div style="font-size:11px; color:var(--c-text-muted); margin-top:2px;">
+                                    Available: <span id="availCoconutDisplay" style="font-weight:700; color:#92400e;">0 nuts</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Processing / Direct Labor & Power Cost *</label>
+                                <input type="number" id="prProcessingCost" class="c-input" min="0" step="0.01" placeholder="0.00" value="0.00" oninput="calculateProductionCost()">
+                            </div>
+                            <div class="c-form-group">
+                                <label>Processing Cost Payment</label>
+                                <select id="prPaymentMode" class="c-select">
+                                    <option value="CASH">Cash in Drawer</option>
+                                    <option value="BANK">Bank Transfer</option>
+                                    <option value="ACCRUED">Accrued / Internal</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="c-cart-total-box" style="margin-bottom:16px;">
+                            <div class="c-cart-row">
+                                <span>Input Raw Material Cost:</span>
+                                <strong id="calcRmCost">Rs. 0.00</strong>
+                            </div>
+                            <div class="c-cart-row">
+                                <span>Processing & Direct Labor Cost:</span>
+                                <strong id="calcProcCost">Rs. 0.00</strong>
+                            </div>
+                            <div class="c-cart-row grand-total">
+                                <span>Total Batch Production Cost:</span>
+                                <span id="calcTotalBatchCost">Rs. 0.00</span>
+                            </div>
+                            <div style="font-size:12px; color:var(--c-text-muted); margin-top:8px;">
+                                Calculated Finished Unit Cost: <strong id="calcUnitProductionCost" style="color:var(--c-accent); font-size:14px;">Rs. 0.00</strong> per unit
+                            </div>
+                        </div>
+
+                        <div class="c-form-group" style="margin-bottom:16px;">
+                            <label>Batch / Machine Operator Notes</label>
+                            <input type="text" id="prNotes" class="c-input" placeholder="e.g. Shift 1 / Machine A / Operator Nimal">
+                        </div>
+
+                        <button type="submit" class="c-btn c-btn-primary c-btn-lg" style="width:100%;" id="btnSaveProduction">
+                            🏭 Execute Batch Run & Transfer Inventory
+                        </button>
+                    </form>
+                </div>
+
+                <div>
+                    <div class="c-card">
+                        <div class="c-card-header">
+                            <div class="c-card-title">📜 Configured Transformation Recipes</div>
+                        </div>
+                        <div class="c-table-wrapper">
+                            <table class="c-table">
+                                <thead>
+                                    <tr>
+                                        <th>Recipe Name</th>
+                                        <th>Yield Ratio</th>
+                                        <th>Output Product</th>
+                                        <th class="text-right">Base Processing Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recipeListBody">
+                                    <tr><td colspan="4" class="text-center" style="padding:20px;">Loading recipes...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">📜 Production History</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Recipe</th>
+                                <th>Output Product</th>
+                                <th class="text-right">Qty Produced</th>
+                                <th class="text-right">Raw Consumed</th>
+                                <th class="text-right">Unit Cost</th>
+                                <th class="text-right">Total Run Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productionHistoryBody">
+                            <tr><td colspan="7" class="text-center" style="padding:20px;">Loading production runs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: PRODUCTS / STOCK -->
+        <div class="page" id="page-products">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📦 Products / Stock</h1>
+                    <p>Manage manufactured products and track inventory valuation.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button type="button" class="c-btn c-btn-primary" onclick="openNewProductModal()">➕ Add New Product</button>
+                    <button type="button" onclick="navigateTo('production')" class="c-btn c-btn-accent">🏭 Production Runs</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">📦 Finished Products Directory</div>
+                    <input type="text" id="searchProductInput" class="c-input" placeholder="Search product name..." style="width:260px; padding:6px 12px; font-size:12.5px;" oninput="handleSearchProduct(this.value)">
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>SKU</th>
+                                <th>Unit</th>
+                                <th class="text-right">Stock Qty</th>
+                                <th class="text-right">Unit Cost</th>
+                                <th class="text-right">Selling Price</th>
+                                <th class="text-right">Total Asset</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <tr><td colspan="9" class="text-center" style="padding:24px;">Loading products...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: SALES -->
+        <div class="page" id="page-sales">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🛒 Sales & Dispatch</h1>
+                    <p>Sell raw graded coconuts and manufactured products with live COGS, gross margin, and customer ledger tracking.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('saleModal')">➕ New Sale</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('customers')">👥 Customers</button>
+                </div>
+            </div>
+
+            <div class="c-grid-3">
+                <div class="c-card" style="border-left:4px solid #059669;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Revenue</div>
+                    <div style="font-size:20px;font-weight:900;color:#059669;" id="salesTotalRevenue">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #0f3b2c;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Invoices</div>
+                    <div style="font-size:20px;font-weight:900;color:#0f3b2c;" id="salesDispatchCount">0</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #d97706;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Cash vs Credit</div>
+                    <div style="font-size:16px;font-weight:900;color:#d97706;" id="salesTenderSplit">0 Cash | 0 Credit</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-file-invoice"></i> Sales Invoices</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th class="text-right">Qty</th>
+                                <th>Payment</th>
+                                <th class="text-right">Total</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTable">
+                            <tr><td colspan="8" class="text-center text-muted" style="padding:24px;">No sales records</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: PROCUREMENT COSTS -->
+        <div class="page" id="page-procurement-costs">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>💸 Procurement Costs</h1>
+                    <p>Track all procurement-related costs including transport, handling, and supplier payments.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('procurementCostModal')">➕ Add Cost</button>
+                </div>
+            </div>
+
+            <div class="c-grid-3">
+                <div class="c-card" style="border-left:4px solid #d97706;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Transport Costs</div>
+                    <div style="font-size:20px;font-weight:900;color:#d97706;" id="procTransportCost">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #059669;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Handling Charges</div>
+                    <div style="font-size:20px;font-weight:900;color:#059669;" id="procHandlingCost">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #0f3b2c;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Procurement</div>
+                    <div style="font-size:20px;font-weight:900;color:#0f3b2c;" id="procTotalCost">Rs. 0.00</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-list"></i> Procurement Cost Records</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Supplier</th>
+                                <th class="text-right">Amount</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="procurementCostTable">
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:24px;">No procurement cost records</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: EXPENSES -->
+        <div class="page" id="page-expenses">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🧾 Expenses</h1>
+                    <p>Record daily operational overheads with automated GL accounting.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('expenseModal')">➕ Add Expense</button>
+                </div>
+            </div>
+
+            <div class="c-grid-3">
+                <div class="c-card" style="border-left:4px solid #dc2626;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Today</div>
+                    <div style="font-size:20px;font-weight:900;color:#dc2626;" id="expToday">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #d97706;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">This Week</div>
+                    <div style="font-size:20px;font-weight:900;color:#d97706;" id="expWeek">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #0f3b2c;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">This Month</div>
+                    <div style="font-size:20px;font-weight:900;color:#0f3b2c;" id="expMonth">Rs. 0.00</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-list"></i> Expense Records</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Payment Mode</th>
+                                <th class="text-right">Amount</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesTable">
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:24px;">No expenses recorded</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: CUSTOMERS -->
+        <div class="page" id="page-customers">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>👥 Customers</h1>
+                    <p>Manage buyer profiles, track credit balances, and view transaction ledgers.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('customerModal')">➕ Add Customer</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('payments')">💳 Receive</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-users"></i> Customer Profiles</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Area</th>
+                                <th class="text-right">Total Purchases</th>
+                                <th class="text-right">Balance</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTable">
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:24px;">No customers</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: SUPPLIERS -->
+        <div class="page" id="page-suppliers">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🚚 Suppliers</h1>
+                    <p>Manage coconut farmers and husk suppliers, view procurement payables, and settle balances.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('supplierModal')">➕ Add Supplier</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('payments')">💳 Pay</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-truck"></i> Supplier Registry</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Area</th>
+                                <th class="text-right">Total Purchases</th>
+                                <th class="text-right">Balance Due</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliersTable">
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:24px;">No suppliers</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: DAILY TRANSACTIONS -->
+        <div class="page" id="page-daily-transactions">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📑 Daily Transactions</h1>
+                    <p>View all daily business transactions including purchases, sales, expenses, and payments.</p>
+                </div>
+                <div class="c-header-actions">
+                    <input type="date" id="dailyTxDate" class="c-input" style="width:180px;padding:6px 12px;font-size:12.5px;" onchange="renderDailyTransactions()">
+                </div>
+            </div>
+
+            <div class="c-grid-4">
+                <div class="c-card" style="border-left:4px solid #059669;">
+                    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Sales</div>
+                    <div style="font-size:18px;font-weight:900;color:#059669;" id="dailySales">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #dc2626;">
+                    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Expenses</div>
+                    <div style="font-size:18px;font-weight:900;color:#dc2626;" id="dailyExpenses">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #d97706;">
+                    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Net Cash Flow</div>
+                    <div style="font-size:18px;font-weight:900;color:#d97706;" id="dailyNetCash">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #0f3b2c;">
+                    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Transactions</div>
+                    <div style="font-size:18px;font-weight:900;color:#0f3b2c;" id="dailyTxCount">0</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-list"></i> Transaction Details</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Party</th>
+                                <th class="text-right">Debit</th>
+                                <th class="text-right">Credit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dailyTxBody">
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:24px;">No transactions for this date</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: ACCOUNTING -->
+        <div class="page" id="page-accounting">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📁 Accounting</h1>
+                    <p>Real-time double-entry accounting with Trial Balance, P&L, and Balance Sheet.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('journalModal')">📝 Journal Entry</button>
+                    <button class="c-btn c-btn-secondary" onclick="exportDailySheetCsv()">📥 Export</button>
+                </div>
+            </div>
+
+            <div class="c-grid-3">
+                <div class="c-card" style="border-left:4px solid #059669;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Revenue</div>
+                    <div style="font-size:20px;font-weight:900;color:#059669;" id="accRevenue">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #dc2626;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Expenses</div>
+                    <div style="font-size:20px;font-weight:900;color:#dc2626;" id="accExpenses">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #0f3b2c;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Net Profit</div>
+                    <div style="font-size:20px;font-weight:900;color:#0f3b2c;" id="accNetProfit">Rs. 0.00</div>
+                </div>
+            </div>
+
+            <div class="finance-pill-tabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+                <button class="settings-tab-btn active" onclick="showAccountingTab('journal')"><i class="fas fa-book"></i> Journal</button>
+                <button class="settings-tab-btn" onclick="showAccountingTab('ledger')"><i class="fas fa-list-check"></i> Ledger</button>
+                <button class="settings-tab-btn" onclick="showAccountingTab('trial')"><i class="fas fa-scale-balanced"></i> Trial Balance</button>
+                <button class="settings-tab-btn" onclick="showAccountingTab('income')"><i class="fas fa-file-invoice-dollar"></i> P&L</button>
+                <button class="settings-tab-btn" onclick="showAccountingTab('balance')"><i class="fas fa-building-columns"></i> Balance Sheet</button>
+            </div>
+
+            <div id="acc-tab-journal" class="c-card">
+                <div class="c-card-header"><div class="c-card-title"><i class="fas fa-book"></i> Journal Entries</div></div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th class="text-right">Debit</th>
+                                <th class="text-right">Credit</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="journalBody"><tr><td colspan="5" class="text-center text-muted" style="padding:24px;">No entries</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="acc-tab-ledger" class="c-card" style="display:none;">
+                <div class="c-card-header"><div class="c-card-title"><i class="fas fa-list-check"></i> General Ledger</div></div>
+                <div id="ledgerBody"><p class="text-center text-muted" style="padding:20px;">No ledger records found.</p></div>
+            </div>
+
+            <div id="acc-tab-trial" class="c-card" style="display:none;">
+                <div class="c-card-header"><div class="c-card-title"><i class="fas fa-scale-balanced"></i> Trial Balance</div></div>
+                <div id="trialBody"><p class="text-center text-muted" style="padding:20px;">No trial balance entries.</p></div>
+                <div id="balanceMsg" class="balance-status-box balanced">✓ Trial Balance is balanced.</div>
+            </div>
+
+            <div id="acc-tab-income" class="c-card" style="display:none;">
+                <div class="c-card-header"><div class="c-card-title" style="color:#059669;"><i class="fas fa-file-invoice-dollar"></i> Profit & Loss</div></div>
+                <div id="incomeContent"><p class="text-center text-muted" style="padding:20px;">No income statement data available.</p></div>
+            </div>
+
+            <div id="acc-tab-balance" class="c-card" style="display:none;">
+                <div class="c-card-header"><div class="c-card-title" style="color:#0f3b2c;"><i class="fas fa-building-columns"></i> Balance Sheet</div></div>
+                <div id="balanceContent"><p class="text-center text-muted" style="padding:20px;">No balance sheet data available.</p></div>
+            </div>
+        </div>
+
+        <!-- PAGE: FINANCE LEDGER -->
+        <div class="page" id="page-finance-ledger">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>💰 Finance Ledger</h1>
+                    <p>Complete financial ledger with all account transactions and balances.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('accounting')">📁 Full Accounting</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-book"></i> Account Summary</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Account Code</th>
+                                <th>Account Name</th>
+                                <th class="text-right">Total Debit</th>
+                                <th class="text-right">Total Credit</th>
+                                <th class="text-right">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financeLedgerBody">
+                            <tr><td colspan="5" class="text-center text-muted" style="padding:24px;">No ledger data available</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: RECEIVABLES -->
+        <div class="page" id="page-receivables">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📥 Receivables (ලැබිය යුතු)</h1>
+                    <p>Track all customer outstanding balances and receivables.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="navigateTo('payments')">💳 Record Receipt</button>
+                </div>
+            </div>
+
+            <div class="c-grid-2">
+                <div class="c-card" style="border-left:4px solid #059669;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Receivables</div>
+                    <div style="font-size:24px;font-weight:900;color:#059669;" id="receivablesTotal">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #d97706;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Customers with Balance</div>
+                    <div style="font-size:24px;font-weight:900;color:#d97706;" id="receivablesCount">0</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-users"></i> Customer Receivables</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th class="text-right">Total Sales</th>
+                                <th class="text-right">Balance</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receivablesTable">
+                            <tr><td colspan="5" class="text-center text-muted" style="padding:24px;">No receivables data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: PAYABLES -->
+        <div class="page" id="page-payables">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📤 Payables (ගෙවිය යුතු)</h1>
+                    <p>Track all supplier outstanding balances and payables.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="navigateTo('payments')">💳 Record Payment</button>
+                </div>
+            </div>
+
+            <div class="c-grid-2">
+                <div class="c-card" style="border-left:4px solid #dc2626;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Payables</div>
+                    <div style="font-size:24px;font-weight:900;color:#dc2626;" id="payablesTotal">Rs. 0.00</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #d97706;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Suppliers with Balance</div>
+                    <div style="font-size:24px;font-weight:900;color:#d97706;" id="payablesCount">0</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-truck"></i> Supplier Payables</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Supplier</th>
+                                <th>Phone</th>
+                                <th class="text-right">Total Purchases</th>
+                                <th class="text-right">Balance</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payablesTable">
+                            <tr><td colspan="5" class="text-center text-muted" style="padding:24px;">No payables data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: LEDGERS -->
+        <div class="page" id="page-ledgers">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📚 Ledgers</h1>
+                    <p>Complete general ledger with all accounts and transaction history.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('accounting')">📁 Accounting</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-list-check"></i> All Ledger Entries</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Account</th>
+                                <th>Description</th>
+                                <th class="text-right">Debit</th>
+                                <th class="text-right">Credit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgersTableBody">
+                            <tr><td colspan="5" class="text-center text-muted" style="padding:24px;">No ledger entries</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: PAYMENTS -->
+        <div class="page" id="page-payments">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>💳 Payments</h1>
+                    <p>Record customer receipts and supplier disbursements with automated balancing.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('paymentModal')">➕ New Payment</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-hand-holding-dollar"></i> Payment History</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Party</th>
+                                <th>Method</th>
+                                <th class="text-right">Amount</th>
+                                <th>Ref</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTable">
+                            <tr><td colspan="7" class="text-center text-muted" style="padding:24px;">No payment records</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: HISTORY -->
+        <div class="page" id="page-history">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📖 History</h1>
+                    <p>Complete transaction history across all modules.</p>
+                </div>
+                <div class="c-header-actions">
+                    <input type="date" id="historyFromDate" class="c-input" style="width:150px;padding:6px 12px;font-size:12.5px;">
+                    <input type="date" id="historyToDate" class="c-input" style="width:150px;padding:6px 12px;font-size:12.5px;">
+                    <button class="c-btn c-btn-primary" onclick="renderHistory()">🔍 Search</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-timeline"></i> Transaction History</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Module</th>
+                                <th>Description</th>
+                                <th>Party</th>
+                                <th class="text-right">Amount</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:24px;">No history records</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: REPORTS -->
+        <div class="page" id="page-reports">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📈 Reports</h1>
+                    <p>Comprehensive yield analysis, product sales contributions, procurement vs manufacturing efficiency, and periodic P&L statements.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-secondary" onclick="window.print()">🖨️ Print</button>
+                    <button class="c-btn c-btn-secondary" onclick="exportDailySheetCsv()">📥 Excel</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-sliders-h"></i> Report Controls</div>
+                    <button class="c-btn c-btn-primary" onclick="generateReport()">🔍 Generate</button>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
+                    <div class="c-form-group">
+                        <label>Report Type</label>
+                        <select id="reportTypeSelect" class="c-select" onchange="generateReport()">
+                            <option value="SALES_SUMMARY">Sales Summary</option>
+                            <option value="INVENTORY_VALUATION">Inventory Valuation</option>
+                            <option value="PROFIT_LOSS">Profit & Loss</option>
+                            <option value="GRADING_YIELD">Grading Yield</option>
+                            <option value="COPRA_PRODUCTION">Copra Production</option>
+                        </select>
+                    </div>
+                    <div class="c-form-group">
+                        <label>From Date</label>
+                        <input type="date" id="reportFromDate" class="c-input" onchange="generateReport()">
+                    </div>
+                    <div class="c-form-group">
+                        <label>To Date</label>
+                        <input type="date" id="reportToDate" class="c-input" onchange="generateReport()">
+                    </div>
+                </div>
+            </div>
+
+            <div id="reportPrintArea" class="c-card">
+                <div style="border-bottom:2px solid #0f3b2c;padding-bottom:14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+                    <div>
+                        <h2 style="margin:0;font-size:20px;color:#0f3b2c;font-weight:900;" id="printShopName">THUSITHA JAYASUNDARA COCONUT PRODUCTS</h2>
+                        <div style="font-size:12px;color:#666;" id="printShopAddress">Kurunegala, Sri Lanka</div>
+                        <div style="font-size:14px;font-weight:700;color:#059669;margin-top:6px;" id="printReportHeading">SALES SUMMARY REPORT</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:10px;text-transform:uppercase;color:#888;font-weight:700;">Period</div>
+                        <div style="font-size:14px;font-weight:800;color:#0f3b2c;" id="printReportPeriod">All Time</div>
+                        <div style="font-size:10px;color:#999;">Generated: <span id="printReportGenDate"></span></div>
+                    </div>
+                </div>
+                <div id="reportContentArea">
+                    <div style="text-align:center;color:#999;padding:40px 0;">
+                        <i class="fas fa-chart-line" style="font-size:48px;display:block;margin-bottom:12px;color:#d5d9d9;"></i>
+                        <span style="font-size:16px;font-weight:600;">Select a report type and click Generate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: STAFF -->
+        <div class="page" id="page-staff">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>👥 Staff</h1>
+                    <p>Manage yard supervisors, sorting operators, machine operators, drivers, and cashiers.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="openModal('staffModal')">➕ Add Staff</button>
+                    <button class="c-btn c-btn-secondary" onclick="navigateTo('attendance')">⏱️ Attendance</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-users-gear"></i> Staff Roster</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Phone</th>
+                                <th class="text-right">Daily Rate</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTable"><tr><td colspan="5" class="text-center text-muted" style="padding:24px;">No staff records</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: ATTENDANCE & PAYROLL -->
+        <div class="page" id="page-attendance">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>⏱️ Attendance & Payroll</h1>
+                    <p>Track daily staff attendance and calculate payroll.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-secondary" onclick="saveAttendance()">📋 Save Attendance</button>
+                    <input type="date" id="attendanceDate" class="c-input" style="width:180px;padding:6px 12px;font-size:12.5px;" onchange="renderAttendance()">
+                </div>
+            </div>
+
+            <div class="c-grid-3">
+                <div class="c-card" style="border-left:4px solid #059669;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Staff</div>
+                    <div style="font-size:20px;font-weight:900;color:#059669;" id="attTotalStaff">0</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #d97706;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Present Today</div>
+                    <div style="font-size:20px;font-weight:900;color:#d97706;" id="attPresentCount">0</div>
+                </div>
+                <div class="c-card" style="border-left:4px solid #0f3b2c;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Payroll Cost</div>
+                    <div style="font-size:20px;font-weight:900;color:#0f3b2c;" id="attPayrollCost">Rs. 0.00</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title"><i class="fas fa-clock"></i> Daily Attendance</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Staff</th>
+                                <th>Status</th>
+                                <th>In Time</th>
+                                <th>Out Time</th>
+                                <th>Hours</th>
+                                <th class="text-right">Earnings</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTable"><tr><td colspan="6" class="text-center text-muted" style="padding:20px;">No attendance records</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: PROFILE -->
+        <div class="page" id="page-profile">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>🏢 Business Profile</h1>
+                    <p>Manage mill identity, branding logo, contact details, and invoice header branding.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="saveAllSettings()">💾 Save</button>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                    <div>
+                        <div class="c-form-group">
+                            <label>Business Name</label>
+                            <input type="text" class="c-input" id="profileName" value="THUSITHA JAYASUNDARA COCONUT PRODUCTS">
+                        </div>
+                        <div class="c-form-group">
+                            <label>Owner Name</label>
+                            <input type="text" class="c-input" id="profileOwner" value="Thusitha Jayasundara">
+                        </div>
+                        <div class="c-form-group">
+                            <label>Phone Number</label>
+                            <input type="text" class="c-input" id="profilePhone" value="077 123 4567">
+                        </div>
+                        <div class="c-form-group">
+                            <label>Address</label>
+                            <input type="text" class="c-input" id="profileAddress" value="Kurunegala, Sri Lanka">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="c-form-group">
+                            <label>Business Type</label>
+                            <input type="text" class="c-input" value="Coconut Wholesale & Husk Products" disabled>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Registration Number</label>
+                            <input type="text" class="c-input" id="profileBr" placeholder="BR Number">
+                        </div>
+                        <div class="c-form-group">
+                            <label>Website</label>
+                            <input type="text" class="c-input" id="profileWebsite" placeholder="https://">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: SETTINGS -->
+        <div class="page" id="page-settings">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>⚙️ Settings</h1>
+                    <p>Manage business profile, language, and payment preferences.</p>
+                </div>
+                <div class="c-header-actions">
+                    <button class="c-btn c-btn-primary" onclick="saveAllSettings()">💾 Save Settings</button>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1px solid var(--c-border);border-radius:8px;padding:4px;overflow-x:auto;">
+                <button class="settings-tab-btn active" data-tab="general" onclick="switchSettingsTab('general')">
+                    <i class="fas fa-sliders-h"></i> General
+                </button>
+                <button class="settings-tab-btn" data-tab="business" onclick="switchSettingsTab('business')">
+                    <i class="fas fa-building"></i> Business
+                </button>
+                <button class="settings-tab-btn" data-tab="language" onclick="switchSettingsTab('language')">
+                    <i class="fas fa-language"></i> Language
+                </button>
+                <button class="settings-tab-btn" data-tab="payment" onclick="switchSettingsTab('payment')">
+                    <i class="fas fa-credit-card"></i> Payment
+                </button>
+            </div>
+
+            <div id="settings-tab-general" class="settings-tab-content">
+                <div class="c-card">
+                    <div style="border-bottom:1px solid #f1f5f9;padding-bottom:14px;margin-bottom:20px;">
+                        <h3 style="margin:0;font-size:16px;color:#0f172a;font-weight:800;"><i class="fas fa-sliders-h" style="color:#059669;"></i> General Settings</h3>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;">
+                        <div class="c-form-group">
+                            <label>Store Name</label>
+                            <input type="text" class="c-input" id="settingsStoreName" value="THUSITHA JAYASUNDARA COCONUT PRODUCTS">
+                        </div>
+                        <div class="c-form-group">
+                            <label>Currency</label>
+                            <select class="c-select" id="settingsCurrency">
+                                <option value="LKR">🇱🇰 Sri Lankan Rupee (LKR)</option>
+                                <option value="USD">🇺🇸 US Dollar (USD)</option>
+                            </select>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Tax Rate (%)</label>
+                            <input type="number" class="c-input" id="settingsTaxRate" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings-tab-business" class="settings-tab-content" style="display:none;">
+                <div class="c-card">
+                    <div style="border-bottom:1px solid #f1f5f9;padding-bottom:14px;margin-bottom:20px;">
+                        <h3 style="margin:0;font-size:16px;color:#0f172a;font-weight:800;"><i class="fas fa-building" style="color:#059669;"></i> Business Profile</h3>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;">
+                        <div class="c-form-group" style="grid-column:1/-1;">
+                            <label>Business Name</label>
+                            <input type="text" class="c-input" id="settingsName" value="THUSITHA JAYASUNDARA COCONUT PRODUCTS">
+                        </div>
+                        <div class="c-form-group">
+                            <label>Owner Name</label>
+                            <input type="text" class="c-input" id="settingsOwner" value="Thusitha Jayasundara">
+                        </div>
+                        <div class="c-form-group">
+                            <label>Phone Number</label>
+                            <input type="text" class="c-input" id="settingsPhone" value="077 123 4567">
+                        </div>
+                        <div class="c-form-group" style="grid-column:1/-1;">
+                            <label>Business Address</label>
+                            <input type="text" class="c-input" id="settingsAddress" value="Kurunegala, Sri Lanka">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings-tab-language" class="settings-tab-content" style="display:none;">
+                <div class="c-card">
+                    <div style="border-bottom:1px solid #f1f5f9;padding-bottom:14px;margin-bottom:20px;">
+                        <h3 style="margin:0;font-size:16px;color:#0f172a;font-weight:800;"><i class="fas fa-language" style="color:#059669;"></i> Language Settings</h3>
+                    </div>
+                    <div class="c-form-group">
+                        <label>Select Language</label>
+                        <select id="settingsLanguage" class="c-select" onchange="changeLanguage(this.value)">
+                            <option value="en">🇬🇧 English</option>
+                            <option value="si">🇱🇰 සිංහල</option>
+                            <option value="ta">🇱🇰 தமிழ்</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings-tab-payment" class="settings-tab-content" style="display:none;">
+                <div class="c-card">
+                    <div style="border-bottom:1px solid #f1f5f9;padding-bottom:14px;margin-bottom:20px;">
+                        <h3 style="margin:0;font-size:16px;color:#0f172a;font-weight:800;"><i class="fas fa-credit-card" style="color:#059669;"></i> Payment Settings</h3>
+                    </div>
+                    <div class="c-form-group">
+                        <label>Default Payment Method</label>
+                        <select class="c-select" id="settingsDefaultPayment">
+                            <option value="CASH">Cash</option>
+                            <option value="BANK">Bank Transfer</option>
+                            <option value="CREDIT">Credit</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: SUBSCRIPTION -->
+        <div class="page" id="page-subscription">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>💳 Subscription</h1>
+                    <p>Enterprise Pro Active Plan and SMS Wallet Management.</p>
+                </div>
+                <div>
+                    <span id="subStatusBadge" class="c-badge c-badge-success" style="font-size:13px;padding:6px 16px;">
+                        <i class="fas fa-circle-check"></i> Active
+                    </span>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-bottom:20px;">
+                <div class="c-card" style="padding:22px;border-left:4px solid #059669;">
+                    <h3 style="margin:0 0 16px;font-size:16px;"><i class="fas fa-crown" style="color:#059669;"></i> Package</h3>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div style="font-size:11px;color:#64748b;text-transform:uppercase;">Current Plan</div>
+                            <div id="planValue" style="font-size:24px;font-weight:900;">ENTERPRISE</div>
+                            <div style="font-size:13px;color:#64748b;">Fee: <b>Rs. 1,000/month</b></div>
+                            <div style="font-size:13px;color:#64748b;">Registered: <b id="regDateValue">2026-08-26</b></div>
+                            <div style="font-size:13px;color:#64748b;">Expiry: <b id="expiryValue">2027-08-25</b></div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:28px;font-weight:900;color:#0f3b2c;" id="daysRemaining">364</div>
+                            <div style="font-size:11px;color:#64748b;">days left</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="c-card" style="padding:22px;border-left:4px solid #d97706;">
+                    <h3 style="margin:0 0 14px;font-size:16px;"><i class="fas fa-message" style="color:#d97706;"></i> SMS Credits</h3>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input id="smsHeaderInput" class="c-input" maxlength="10" value="THUSITHA" style="font-weight:800;text-transform:uppercase;">
+                        <button class="c-btn c-btn-primary c-btn-sm" onclick="saveSmsHeader()">Save</button>
+                    </div>
+                    <div style="font-size:11px;color:#64748b;">Total Credits</div>
+                    <div id="smsBalanceValue" style="font-size:32px;font-weight:900;">300</div>
+                </div>
+
+                <div class="c-card" style="padding:22px;border-left:4px solid #0f3b2c;">
+                    <h3 style="margin:0 0 14px;font-size:16px;"><i class="fas fa-building-columns" style="color:#0f3b2c;"></i> Payment</h3>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px;font-size:13px;">
+                        <div style="font-size:10px;color:#64748b;text-transform:uppercase;font-weight:700;">Bank Account</div>
+                        <b style="color:#0f3b2c;">Sampath Bank PLC</b><br>
+                        A/C: <b style="font-family:monospace;">0123 4567 8901</b><br>
+                        Name: <b>Thusitha Jayasundara</b><br>
+                        Branch: <b>Kuliyapitiya</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-card" style="padding:20px;">
+                <h3 style="margin:0 0 8px;font-size:15px;"><i class="fas fa-key" style="color:#059669;"></i> Activation Key</h3>
+                <p style="font-size:13px;color:#64748b;margin:0 0 12px;">Enter activation code from DIGIBIZ Support:</p>
+                <div style="display:flex;gap:10px;max-width:520px;">
+                    <input type="text" class="c-input" id="directActivationCodeInput" placeholder="DIGIBIZ-PRO-XXXX" style="text-transform:uppercase;font-weight:800;letter-spacing:1px;">
+                    <button class="c-btn c-btn-primary" onclick="submitActivationCodeDirect()"><i class="fas fa-bolt"></i> Activate</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: USER MANUAL -->
+        <div class="page" id="page-manual">
+            <div class="c-header">
+                <div class="c-header-left">
+                    <h1>📖 User Manual</h1>
+                    <p>Complete guide to the THUSITHA JAYASUNDARA COCONUT PRODUCTS ERP System.</p>
+                </div>
+            </div>
+            <div class="c-card">
+                <div style="padding:20px;">
+                    <h3><i class="fas fa-book-open" style="color:#059669;"></i> System Overview</h3>
+                    <p style="color:#475569;line-height:1.6;">THUSITHA JAYASUNDARA COCONUT PRODUCTS ERP System</p>
+                    <ul style="color:#475569;line-height:1.8;padding-left:20px;">
+                        <li><strong>Dashboard:</strong> Real-time KPI monitoring</li>
+                        <li><strong>Coconut Purchases:</strong> Raw material procurement from estates</li>
+                        <li><strong>Grading:</strong> Coconut sorting (Good, Copra, Medium, Reject)</li>
+                        <li><strong>Copra Management:</strong> Copra production, drying, and sales</li>
+                        <li><strong>Husk & Fiber:</strong> Coir fiber, Coco peat, Shells</li>
+                        <li><strong>Production:</strong> Value addition and batch runs</li>
+                        <li><strong>Sales & Dispatch:</strong> Lorry load, wholesale billing</li>
+                        <li><strong>Accounting:</strong> Full double-entry (5 tabs)</li>
+                        <li><strong>Reports:</strong> Sales, Inventory, Grading, Copra, Husk</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODALS -->
+    <!-- ============================================================ -->
+
+    <!-- Supplier Modal -->
+    <div class="c-modal-overlay" id="supplierModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-truck"></i> Add Supplier</h3>
+                <button class="c-modal-close" onclick="closeModal('supplierModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-group">
+                    <label>Supplier Name *</label>
+                    <input type="text" id="suppName" class="c-input" placeholder="Nimal Wickramasinghe">
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Phone</label>
+                        <input type="text" id="suppPhone" class="c-input" placeholder="0771234567">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Area</label>
+                        <input type="text" id="suppArea" class="c-input" placeholder="Kuliyapitiya">
+                    </div>
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('supplierModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitSupplier()">Save Supplier</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Modal -->
+    <div class="c-modal-overlay" id="customerModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-user-plus"></i> Add Customer</h3>
+                <button class="c-modal-close" onclick="closeModal('customerModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-group">
+                    <label>Customer Name *</label>
+                    <input type="text" id="custName" class="c-input" placeholder="Colombo Oil Mills PLC">
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Phone</label>
+                        <input type="text" id="custPhone" class="c-input" placeholder="0112345678">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Area</label>
+                        <input type="text" id="custArea" class="c-input" placeholder="Pettah, Colombo">
+                    </div>
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('customerModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitCustomer()">Save Customer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sale Modal -->
+    <div class="c-modal-overlay" id="saleModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-cart-shopping"></i> New Sale</h3>
+                <button class="c-modal-close" onclick="closeModal('saleModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Date *</label>
+                        <input type="date" id="saleDate" class="c-input">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Customer *</label>
+                        <select id="saleCustomer" class="c-select">
+                            <option value="">Select Customer...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Product *</label>
+                        <select id="saleProduct" class="c-select">
+                            <option value="Coconuts">🥥 Coconuts (Nuts)</option>
+                            <option value="Copra">🔥 Copra (Kg)</option>
+                            <option value="Fiber">🧵 Fiber (Kg)</option>
+                            <option value="Peat">🌱 Peat (Kg)</option>
+                            <option value="Shells">🐚 Shells (Kg)</option>
+                        </select>
+                    </div>
+                    <div class="c-form-group">
+                        <label>Qty *</label>
+                        <input type="number" id="saleQty" class="c-input" min="1" step="1" placeholder="100">
+                    </div>
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Unit Price (Rs) *</label>
+                        <input type="number" id="salePrice" class="c-input" min="0" step="0.5" placeholder="550.00">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Payment Mode *</label>
+                        <select id="salePayment" class="c-select">
+                            <option value="CASH">Cash</option>
+                            <option value="CREDIT">Credit</option>
+                            <option value="CHEQUE">Cheque</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="c-form-group">
+                    <label>Vehicle / Dispatch Notes</label>
+                    <input type="text" id="saleNotes" class="c-input" placeholder="WP LK-8890, Driver K. Perera">
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('saleModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitSale()">💾 Complete Sale</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div class="c-modal-overlay" id="expenseModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-receipt"></i> Add Expense</h3>
+                <button class="c-modal-close" onclick="closeModal('expenseModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-group">
+                    <label>Date *</label>
+                    <input type="date" id="expDate" class="c-input">
+                </div>
+                <div class="c-form-group">
+                    <label>Category *</label>
+                    <select id="expCategory" class="c-select">
+                        <option value="TRANSPORT">Transport & Freight</option>
+                        <option value="ELECTRICITY">Electricity & Overheads</option>
+                        <option value="LABOR">Labor & Wages</option>
+                        <option value="FUEL">Fuel & Generator</option>
+                        <option value="MAINTENANCE">Maintenance & Repairs</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+                <div class="c-form-group">
+                    <label>Description *</label>
+                    <input type="text" id="expDesc" class="c-input" placeholder="Diesel for Kiln Generator">
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Amount (Rs) *</label>
+                        <input type="number" id="expAmount" class="c-input" min="0" step="any" placeholder="35000.00">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Payment Mode</label>
+                        <select id="expPayment" class="c-select">
+                            <option value="CASH">Cash</option>
+                            <option value="BANK">Bank</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitExpense()">💾 Save Expense</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Modal -->
+    <div class="c-modal-overlay" id="staffModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-user-plus"></i> Add Staff</h3>
+                <button class="c-modal-close" onclick="closeModal('staffModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="staffName" class="c-input" placeholder="K. M. Priyantha">
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Role *</label>
+                        <select id="staffRole" class="c-select">
+                            <option value="Yard Supervisor">Yard Supervisor</option>
+                            <option value="Grading Sorter">Grading Sorter</option>
+                            <option value="Machine Operator">Machine Operator</option>
+                            <option value="Lorry Driver">Lorry Driver</option>
+                            <option value="General Labor">General Labor</option>
+                        </select>
+                    </div>
+                    <div class="c-form-group">
+                        <label>Phone</label>
+                        <input type="text" id="staffPhone" class="c-input" placeholder="07X-XXXXXXX">
+                    </div>
+                </div>
+                <div class="c-form-group">
+                    <label>Daily Rate (Rs)</label>
+                    <input type="number" id="staffRate" class="c-input" min="0" step="50" placeholder="2500.00">
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('staffModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitStaff()">Save Staff</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal Modal -->
+    <div class="c-modal-overlay" id="journalModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-book"></i> Journal Entry</h3>
+                <button class="c-modal-close" onclick="closeModal('journalModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-group">
+                    <label>Date *</label>
+                    <input type="date" id="journalDate" class="c-input">
+                </div>
+                <div class="c-form-group">
+                    <label>Description *</label>
+                    <input type="text" id="journalDesc" class="c-input" placeholder="Loan repayment to lender">
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Debit Account</label>
+                        <input type="text" id="journalDebit" class="c-input" placeholder="2-2030-01 Loans Payable">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Debit Amount</label>
+                        <input type="number" id="journalDebitAmt" class="c-input" min="0" step="any" placeholder="50000.00">
+                    </div>
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Credit Account</label>
+                        <input type="text" id="journalCredit" class="c-input" placeholder="1-1010-01 Cash in Hand">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Credit Amount</label>
+                        <input type="number" id="journalCreditAmt" class="c-input" min="0" step="any" placeholder="50000.00">
+                    </div>
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('journalModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitJournal()">📝 Post Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copra Modal -->
+    <div class="c-modal-overlay" id="copraModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-fire"></i> New Copra Run</h3>
+                <button class="c-modal-close" onclick="closeModal('copraModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-group">
+                    <label>Date *</label>
+                    <input type="date" id="copraDate" class="c-input">
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>COPRA Nuts Used *</label>
+                        <input type="number" id="copraNuts" class="c-input" min="1" step="1" placeholder="4800">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Avg Cost per Nut (Rs)</label>
+                        <input type="number" id="copraAvgCost" class="c-input" min="0" step="0.5" value="82.00">
+                    </div>
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Labor Cost (Rs)</label>
+                        <input type="number" id="copraLabor" class="c-input" min="0" step="any" value="0">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Fuel Cost (Rs)</label>
+                        <input type="number" id="copraFuel" class="c-input" min="0" step="any" value="0">
+                    </div>
+                </div>
+                <div class="c-form-group">
+                    <label>Output Copra (Kg) *</label>
+                    <input type="number" id="copraOutput" class="c-input" min="0.1" step="0.1" placeholder="1000">
+                </div>
+                <div class="c-form-group">
+                    <label>Notes</label>
+                    <input type="text" id="copraNotes" class="c-input" placeholder="3-day Kiln Batch No 14">
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('copraModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitCopraRun()">🏭 Save Copra Run</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Husk Purchase Modal -->
+    <div class="c-modal-overlay" id="huskPurchaseModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-seedling"></i> New Husk Purchase</h3>
+                <button class="c-modal-close" onclick="closeModal('huskPurchaseModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Date *</label>
+                        <input type="date" id="huskDate" class="c-input">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Supplier *</label>
+                        <select id="huskSupplier" class="c-select">
+                            <option value="">Select Supplier...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Husk Count *</label>
+                        <input type="number" id="huskQty" class="c-input" min="1" step="1" placeholder="8000">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Rate per Husk (Rs)</label>
+                        <input type="number" id="huskRate" class="c-input" min="0" step="0.5" placeholder="3.50">
+                    </div>
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Transport Cost (Rs)</label>
+                        <input type="number" id="huskTransport" class="c-input" min="0" step="any" value="0">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Payment Mode</label>
+                        <select id="huskPayment" class="c-select">
+                            <option value="CASH">Cash</option>
+                            <option value="CREDIT">Credit</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('huskPurchaseModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitHuskPurchase()">Save Purchase</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="c-modal-overlay" id="paymentModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-hand-holding-dollar"></i> New Payment</h3>
+                <button class="c-modal-close" onclick="closeModal('paymentModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Date *</label>
+                        <input type="date" id="paymentDate" class="c-input">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Type *</label>
+                        <select id="paymentType" class="c-select">
+                            <option value="SUPPLIER_PAYMENT">Supplier Payment</option>
+                            <option value="CUSTOMER_RECEIPT">Customer Receipt</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="c-form-group">
+                    <label>Party *</label>
+                    <select id="paymentParty" class="c-select">
+                        <option value="">Select Party...</option>
+                    </select>
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Amount (Rs) *</label>
+                        <input type="number" id="paymentAmount" class="c-input" min="0" step="any" placeholder="50000.00">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Method *</label>
+                        <select id="paymentMethod" class="c-select">
+                            <option value="CASH">Cash</option>
+                            <option value="BANK">Bank Transfer</option>
+                            <option value="CHEQUE">Cheque</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="c-form-group">
+                    <label>Reference / Notes</label>
+                    <input type="text" id="paymentNotes" class="c-input" placeholder="Part settlement for Lot 12">
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitPayment()">💾 Save Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="c-modal-overlay" id="productModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-box"></i> Add Product</h3>
+                <button class="c-modal-close" onclick="closeModal('productModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-group">
+                    <label>Product Name *</label>
+                    <input type="text" id="prodName" class="c-input" placeholder="Copra Grade 1">
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>SKU</label>
+                        <input type="text" id="prodSku" class="c-input" placeholder="COPRA-G1">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Unit *</label>
+                        <select id="prodUnit" class="c-select">
+                            <option value="Kg">Kg</option>
+                            <option value="Bales">Bales</option>
+                            <option value="Bags">Bags</option>
+                            <option value="Liters">Liters</option>
+                            <option value="Pieces">Pieces</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Unit Cost (Rs)</label>
+                        <input type="number" id="prodCost" class="c-input" min="0" step="0.5" placeholder="385.50">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Selling Price (Rs) *</label>
+                        <input type="number" id="prodPrice" class="c-input" min="0" step="0.5" placeholder="550.00">
+                    </div>
+                </div>
+                <div class="c-form-group">
+                    <label>Opening Stock Qty</label>
+                    <input type="number" id="prodStock" class="c-input" min="0" step="1" value="0">
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('productModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitProduct()">Save Product</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Modal -->
+    <div class="c-modal-overlay" id="recipeModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-cogs"></i> Manage Production Recipes</h3>
+                <button class="c-modal-close" onclick="closeModal('recipeModal')">&times;</button>
+            </div>
+            <form id="recipeForm" onsubmit="handleSaveRecipe(event)">
+                <div class="c-modal-body">
+                    <div class="c-form-group">
+                        <label>Recipe Name *</label>
+                        <input type="text" id="recName" class="c-input" placeholder="e.g. Husk to Fiber Bale" required>
+                    </div>
+                    <div class="c-form-row">
+                        <div class="c-form-group">
+                            <label>Input Type *</label>
+                            <select id="recInputType" class="c-select" required>
+                                <option value="HUSK_COUNT">Husk Count</option>
+                                <option value="COPRA_NUTS">Copra Nuts</option>
+                                <option value="COCONUT">Coconut Nuts</option>
+                            </select>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Units per Input *</label>
+                            <input type="number" id="recUnitsPerHusk" class="c-input" min="0.001" step="0.001" placeholder="0.085" required>
+                        </div>
+                    </div>
+                    <div class="c-form-row">
+                        <div class="c-form-group">
+                            <label>Target Product *</label>
+                            <select id="recTargetProduct" class="c-select" required>
+                                <option value="">Select Product...</option>
+                            </select>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Base Processing Cost (Rs/unit)</label>
+                            <input type="number" id="recProcCost" class="c-input" min="0" step="0.5" placeholder="15.00" value="15.00">
+                        </div>
+                    </div>
+                </div>
+                <div class="c-modal-footer">
+                    <button type="button" class="c-btn c-btn-secondary" onclick="closeModal('recipeModal')">Cancel</button>
+                    <button type="submit" class="c-btn c-btn-primary">💾 Save Recipe</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Supplier Modal -->
+    <div class="c-modal-overlay" id="quickSupplierModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3>➕ Add New Coconut Supplier</h3>
+                <button type="button" class="c-modal-close" onclick="closeModal('quickSupplierModal')">&times;</button>
+            </div>
+            <form id="quickSupplierForm" onsubmit="handleSaveQuickSupplier(event)">
+                <div class="c-modal-body">
+                    <div class="c-form-group" style="margin-bottom:12px;">
+                        <label>Supplier Name (නම) *</label>
+                        <input type="text" id="qSupName" class="c-input" placeholder="e.g. Sunil Perera" required>
+                    </div>
+                    <div class="c-form-row">
+                        <div class="c-form-group">
+                            <label>Phone Number (දුරකථන)</label>
+                            <input type="tel" id="qSupPhone" class="c-input" placeholder="07X-XXXXXXX">
+                        </div>
+                        <div class="c-form-group">
+                            <label>Area / Estate Location (ප්රදේශය)</label>
+                            <input type="text" id="qSupArea" class="c-input" placeholder="e.g. Kuliyapitiya">
+                        </div>
+                    </div>
+                </div>
+                <div class="c-modal-footer">
+                    <button type="button" class="c-btn c-btn-secondary" onclick="closeModal('quickSupplierModal')">Cancel</button>
+                    <button type="submit" class="c-btn c-btn-primary">Save Supplier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Procurement Cost Modal -->
+    <div class="c-modal-overlay" id="procurementCostModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3><i class="fas fa-hand-holding-dollar"></i> Add Procurement Cost</h3>
+                <button class="c-modal-close" onclick="closeModal('procurementCostModal')">&times;</button>
+            </div>
+            <div class="c-modal-body">
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Date *</label>
+                        <input type="date" id="pcDate" class="c-input">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Type *</label>
+                        <select id="pcType" class="c-select">
+                            <option value="TRANSPORT">Transport</option>
+                            <option value="HANDLING">Handling</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="c-form-group">
+                    <label>Description *</label>
+                    <input type="text" id="pcDesc" class="c-input" placeholder="Lorry transport from estate">
+                </div>
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Supplier</label>
+                        <input type="text" id="pcSupplier" class="c-input" placeholder="Supplier name">
+                    </div>
+                    <div class="c-form-group">
+                        <label>Amount (Rs) *</label>
+                        <input type="number" id="pcAmount" class="c-input" min="0" step="any" placeholder="5000.00">
+                    </div>
+                </div>
+            </div>
+            <div class="c-modal-footer">
+                <button class="c-btn c-btn-secondary" onclick="closeModal('procurementCostModal')">Cancel</button>
+                <button class="c-btn c-btn-primary" onclick="submitProcurementCost()">💾 Save Cost</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="c-toast-container" id="toastContainer"></div>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT ENGINE -->
+    <!-- ============================================================ -->
+    <script>
+        // ================================================================
+        // 1. AUTH & FIREBASE SETUP
+        // ================================================================
+        var auth = (typeof window !== 'undefined' && window.auth) ? window.auth : ((typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth() : null);
+        var db = (typeof window !== 'undefined' && window.db) ? window.db : ((typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : null);
+
+        function setEl(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = (val !== null && val !== undefined) ? String(val) : '';
+        }
+
+        function setElHtml(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = (val !== null && val !== undefined) ? String(val) : '';
+        }
+
+        // ================================================================
+        // 2. BUSINESS CONSTANTS & DATA
+        // ================================================================
+        const BUSINESS_ID = 'thusithajayasundara';
+        const STORAGE_KEY = 'thusithajayasundara_prod';
+        const SUPER_ADMIN_EMAILS = ['thusithajayasundara@gmail.com', 'thusithajayasundara86@gmail.com', 'biz.sirimal@gmail.com'];
+        const ALLOWED_EMAILS = ['thusithajayasundara@gmail.com', 'thusithajayasundara86@gmail.com', 'biz.sirimal@gmail.com'];
+
+        const DEFAULT_GRADING_YIELDS = { GOOD: 70, COPRA: 18, MEDIUM: 9, REJECT: 3 };
+        const COPRA_CONVERSION = { nutsPerKg: 4.8, moistureLoss: 48, dryingDays: 4 };
+        const HUSK_CONVERSION = { fiberPer1000: 90, peatPer1000: 110, costPerHusk: 3.50 };
+
+        // ================================================================
+        // 3. MIGRATED DATA
+        // ================================================================
+        const MIGRATED_PURCHASES = [
+            { id: "CP_raw_1787650986082_idiez", date: "2026-07-19", supplierId: "R3zqrditDx9TOeZIGlZP", supplierName: "Mr Samarasekara", category: "UNGRADED", quantity: 171, unitCost: 80, transportCost: 0, totalCost: 13680, effectiveCostPerNut: 80, isDehusked: true, huskCountGenerated: 171, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651151242_l38yz", date: "2026-07-20", supplierId: "YWag3myy4bydA3ZBHq7s", supplierName: "Mr Bandare", category: "UNGRADED", quantity: 45, unitCost: 70, transportCost: 0, totalCost: 3150, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 45, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651256551_fnbjz", date: "2026-07-21", supplierId: "REkrR1K3zm2wlBlKfz4A", supplierName: "Mr Dulaj Malinda", category: "UNGRADED", quantity: 106, unitCost: 70, transportCost: 0, totalCost: 7420, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 106, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651320334_3b88p", date: "2026-07-21", supplierId: "w6KhEMujVOfI6xDeavLl", supplierName: "Mr Prabath Manjula", category: "UNGRADED", quantity: 170, unitCost: 70, transportCost: 0, totalCost: 11900, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 170, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651390515_8lbo7", date: "2026-07-21", supplierId: "eGVUaUJkN44oRtPBAaL2", supplierName: "Mr Mahnda Bandara", category: "UNGRADED", quantity: 120, unitCost: 70, transportCost: 0, totalCost: 8400, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 120, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651494610_bev8n", date: "2026-07-21", supplierId: "GSerG1fPeTYRPTRrZHrF", supplierName: "Mr Bandare", category: "UNGRADED", quantity: 13, unitCost: 70, transportCost: 0, totalCost: 910, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 13, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651636223_jru7p", date: "2026-08-01", supplierId: "XIaA0q2kByTJIpWAePw2", supplierName: "Mr Manathunga", category: "UNGRADED", quantity: 360, unitCost: 80, transportCost: 0, totalCost: 28800, effectiveCostPerNut: 80, isDehusked: true, huskCountGenerated: 360, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651700878_2lbco", date: "2026-07-28", supplierId: "REkrR1K3zm2wlBlKfz4A", supplierName: "Mr Dulaj Malinda", category: "UNGRADED", quantity: 163, unitCost: 70, transportCost: 0, totalCost: 11410, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 163, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651736952_2xxd3", date: "2026-08-08", supplierId: "REkrR1K3zm2wlBlKfz4A", supplierName: "Mr Dulaj Malinda", category: "UNGRADED", quantity: 171, unitCost: 80, transportCost: 0, totalCost: 13680, effectiveCostPerNut: 80, isDehusked: true, huskCountGenerated: 171, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651802664_bfdk6", date: "2026-08-08", supplierId: "GSerG1fPeTYRPTRrZHrF", supplierName: "Mr Bandare", category: "UNGRADED", quantity: 9, unitCost: 70, transportCost: 0, totalCost: 630, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 9, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651858984_p495i", date: "2026-08-09", supplierId: "i47sLLbW0DYVExd5CcAt", supplierName: "Mr Hemantha", category: "UNGRADED", quantity: 110, unitCost: 80, transportCost: 0, totalCost: 8800, effectiveCostPerNut: 80, isDehusked: true, huskCountGenerated: 110, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787651940682_jsa0b", date: "2026-08-09", supplierId: "hRePuYrJqiWqnV64NG9e", supplierName: "Mr Ajith", category: "UNGRADED", quantity: 160, unitCost: 80, transportCost: 0, totalCost: 12800, effectiveCostPerNut: 80, isDehusked: true, huskCountGenerated: 160, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787652192196_a7f3y", date: "2026-08-10", supplierId: "x6tBylCZtGPwRqEWISmC", supplierName: "Mr Sumesh", category: "UNGRADED", quantity: 81, unitCost: 80, transportCost: 0, totalCost: 6480, effectiveCostPerNut: 80, isDehusked: true, huskCountGenerated: 81, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787653654164_no4s8", date: "2026-08-11", supplierId: "9XuwMZ7fpyeY5y3F6sCl", supplierName: "Mr Pushpa Kumara", category: "UNGRADED", quantity: 40, unitCost: 80, transportCost: 0, totalCost: 3200, effectiveCostPerNut: 80, isDehusked: true, huskCountGenerated: 40, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787653743601_nff1b", date: "2026-08-11", supplierId: "vbZUZ0nCgf6C9SEhH94p", supplierName: "Mr Sadaruwan", category: "UNGRADED", quantity: 20, unitCost: 70, transportCost: 0, totalCost: 1400, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 20, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787653813246_yhkxu", date: "2026-08-11", supplierId: "Gauzvre2YXOpdQOaetub", supplierName: "Mr Amila", category: "UNGRADED", quantity: 41, unitCost: 70, transportCost: 0, totalCost: 2870, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 41, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787653847204_vygu3", date: "2026-08-11", supplierId: "x6tBylCZtGPwRqEWISmC", supplierName: "Mr Sumesh", category: "UNGRADED", quantity: 20, unitCost: 70, transportCost: 0, totalCost: 1400, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 20, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787653917016_vvt4r", date: "2026-08-12", supplierId: "BqZGPRKMbKvWTd3HLlso", supplierName: "Mr Sanjeewa Muthukumarana", category: "UNGRADED", quantity: 21, unitCost: 70, transportCost: 0, totalCost: 1470, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 21, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787653946930_ucxoi", date: "2026-08-12", supplierId: "x6tBylCZtGPwRqEWISmC", supplierName: "Mr Sumesh", category: "UNGRADED", quantity: 18, unitCost: 70, transportCost: 0, totalCost: 1260, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 18, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787654000259_ga7w5", date: "2026-08-13", supplierId: "EINXzWCMSRo9BsQbcTBD", supplierName: "Mr Kapila", category: "UNGRADED", quantity: 30, unitCost: 70, transportCost: 0, totalCost: 2100, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 30, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787654067630_ku9dz", date: "2026-08-13", supplierId: "HtoLJc3HD5uFyf4IfLnx", supplierName: "Mr Priyankara", category: "UNGRADED", quantity: 95, unitCost: 80, transportCost: 0, totalCost: 7600, effectiveCostPerNut: 80, isDehusked: true, huskCountGenerated: 95, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787654103032_03f0e", date: "2026-08-13", supplierId: "BqZGPRKMbKvWTd3HLlso", supplierName: "Mr Sanjeewa Muthukumarana", category: "UNGRADED", quantity: 34, unitCost: 70, transportCost: 0, totalCost: 2380, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 34, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787654147892_h8kra", date: "2026-08-14", supplierId: "x6tBylCZtGPwRqEWISmC", supplierName: "Mr Sumesh", category: "UNGRADED", quantity: 101, unitCost: 70, transportCost: 0, totalCost: 7070, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 101, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787654197419_akw19", date: "2026-08-14", supplierId: "Gauzvre2YXOpdQOaetub", supplierName: "Mr Amila", category: "UNGRADED", quantity: 19, unitCost: 70, transportCost: 0, totalCost: 1330, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 19, paymentMode: "CASH", paymentStatus: "PAID" },
+            { id: "CP_raw_1787654298490_1hcv2", date: "2026-08-15", supplierId: "76BDnVkpZEuFGjoIdDpB", supplierName: "Mr Gayan Muthukumarana", category: "UNGRADED", quantity: 19, unitCost: 70, transportCost: 0, totalCost: 1330, effectiveCostPerNut: 70, isDehusked: true, huskCountGenerated: 19, paymentMode: "CREDIT", paymentStatus: "UNPAID" }
+        ];
+
+        const MIGRATED_SUPPLIERS = [
+            { id: "76BDnVkpZEuFGjoIdDpB", name: "Mr Gayan Muthukumarana", area: "Mirihagoda", address: "Mirihagoda,Rambukkana" },
+            { id: "9XuwMZ7fpyeY5y3F6sCl", name: "Mr Pushpa Kumara", area: "Naththambura", address: "Naththambura,Rambukkana" },
+            { id: "BqZGPRKMbKvWTd3HLlso", name: "Mr Sanjeewa Muthukumarana", area: "Mirihagoda", address: "Mirihagoda,Rambukkana" },
+            { id: "EINXzWCMSRo9BsQbcTBD", name: "Mr Kapila", area: "Mirihagoda", address: "Mirihagoda,Rambukkana" },
+            { id: "GSerG1fPeTYRPTRrZHrF", name: "Mr Bandare", area: "Mirihagoda", address: "Mirihagoda,Rambukkana" },
+            { id: "Gauzvre2YXOpdQOaetub", name: "Mr Amila", area: "Daliwala", address: "Daliwala,Rambukkana" },
+            { id: "HtoLJc3HD5uFyf4IfLnx", name: "Mr Priyankara", area: "Daliwala", address: "Daliwala,Rambukkana" },
+            { id: "R3zqrditDx9TOeZIGlZP", name: "Mr Samarasekara", area: "Naththambura", address: "Naththambura,Rambukkana" },
+            { id: "REkrR1K3zm2wlBlKfz4A", name: "Mr Dulaj Malinda", area: "Mirihagoda", address: "Mirihagoda,Rambukkana" },
+            { id: "XIaA0q2kByTJIpWAePw2", name: "Mr Manathunga", area: "Walpola", address: "Walpola,Rambukkana" },
+            { id: "YWag3myy4bydA3ZBHq7s", name: "Mr Bandare", area: "Naththambura", address: "Naththambura,Rambukkana" },
+            { id: "eGVUaUJkN44oRtPBAaL2", name: "Mr Mahnda Bandara", area: "Naththambura", address: "Naththambura,Rambukkana" },
+            { id: "hRePuYrJqiWqnV64NG9e", name: "Mr Ajith", area: "Bamunaulla", address: "Bamunaulla,Rambukkana" },
+            { id: "i47sLLbW0DYVExd5CcAt", name: "Mr Hemantha", area: "Naththambura", address: "Naththambura,Rambukkana" },
+            { id: "vbZUZ0nCgf6C9SEhH94p", name: "Mr Sadaruwan", area: "Naththambura", address: "Naththambura,Rambukkana" },
+            { id: "w6KhEMujVOfI6xDeavLl", name: "Mr Prabath Manjula", area: "Mirihagoda", address: "Mirihagoda,Rambukkana" },
+            { id: "x6tBylCZtGPwRqEWISmC", name: "Mr Sumesh", area: "Naththambura", address: "Naththambura,Rambukkana" }
+        ];
+
+        const MIGRATED_COCONUT_STOCK = {
+            "UNGRADED": { stockQty: 1357, avgCostPerUnit: 75.1498, totalValuation: 101978.2402 },
+            "GOOD": { stockQty: 0, avgCostPerUnit: 0 },
+            "MEDIUM": { stockQty: 0, avgCostPerUnit: 0 },
+            "LOW": { stockQty: 0, avgCostPerUnit: 0 },
+            "COPRA_NUTS": { stockQty: 0, avgCostPerUnit: 0 }
+        };
+
+        const MIGRATED_HUSK_STOCK = { stockHuskCount: 2137, avgCostPerHusk: 0, totalValuation: 0 };
+
+        const MIGRATED_FINISHED_PRODUCTS = [
+            { id: "FP_COPRA_G1", name: "Copra Grade 1", unitName: "Kg", stockQty: 0, unitCost: 400, sellingPrice: 550, lowStockLevel: 10, isActive: true },
+            { id: "FP_p_1787652851458_5avtj", name: "Dehusked coconut", unitName: "Piece", stockQty: 660, unitCost: 79.2717, sellingPrice: 85, lowStockLevel: 50, isActive: true }
+        ];
+
+        const MIGRATED_CUSTOMERS = [
+            { id: "nhinev78uNTBeNLbswkN", name: "Mr Hasitha Lakmal", area: "Gampaha", balance: 0, totalSales: 0 }
+        ];
+
+        const MIGRATED_SALES = [
+            { id: "SALE_inv_1787653398339_qv1iy", date: "2026-07-21", customerId: "nhinev78uNTBeNLbswkN", customerName: "Mr Hasitha Lakmal", product: "Coconut Products", total: 61200, paymentMode: "CASH", paymentStatus: "PAID" }
+        ];
+
+        // ================================================================
+        // 4. DATA STORE
+        // ================================================================
+        let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+            purchases: MIGRATED_PURCHASES,
+            suppliers: MIGRATED_SUPPLIERS,
+            coconutStock: MIGRATED_COCONUT_STOCK,
+            huskStock: MIGRATED_HUSK_STOCK,
+            finishedProducts: MIGRATED_FINISHED_PRODUCTS,
+            customers: MIGRATED_CUSTOMERS,
+            sales: MIGRATED_SALES,
+            expenses: [],
+            payments: [],
+            journals: [],
+            productionRuns: [],
+            gradingRuns: [],
+            copraRuns: [],
+            staff: [],
+            attendance: [],
+            procurementCosts: [],
+            subscription: { plan: 'ENTERPRISE', status: 'ACTIVE', startDate: '2026-08-26', expireDate: '2027-08-25', monthlyFee: 1000, smsBalance: 300 },
+            settings: { name: 'THUSITHA JAYASUNDARA COCONUT PRODUCTS', owner: 'Thusitha Jayasundara', phone: '077 123 4567', address: 'Kurunegala, Sri Lanka' }
+        };
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // ================================================================
+        // 5. AUTH FUNCTIONS
+        // ================================================================
+        function showAuthGate() {
+            var gate = document.getElementById('authGateOverlay');
+            if (gate) {
+                document.documentElement.classList.remove('auth-active');
+                gate.style.display = 'flex';
+                gate.classList.add('show');
+            }
+        }
+
+        function hideAuthGate() {
+            var gate = document.getElementById('authGateOverlay');
+            if (gate) {
+                document.documentElement.classList.add('auth-active');
+                gate.style.display = 'none';
+                gate.classList.remove('show');
+            }
+        }
+
+        if (auth && typeof auth.onAuthStateChanged === "function") {
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    const userEmail = String(user.email || '').trim().toLowerCase();
+                    const isAllowed = ALLOWED_EMAILS.some(e => e.toLowerCase() === userEmail) ||
+                                     SUPER_ADMIN_EMAILS.some(e => e.toLowerCase() === userEmail);
+                    if (!isAllowed) {
+                        showAuthGate();
+                        const err = document.getElementById('authError');
+                        if (err) {
+                            err.innerHTML = '<b>ACCESS DENIED:</b> Account <code>' + userEmail + '</code> is not authorized.';
+                            err.style.display = 'block';
+                        }
+                        return;
+                    }
+                    hideAuthGate();
+                    document.getElementById('navUserName').textContent = 'THUSITHA';
+                    document.getElementById('userAvatarText').textContent = 'TJ';
+                    document.getElementById('userRoleBadge').innerHTML = '<span class="badge" style="background:#ff9900;color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;"><i class="fas fa-crown"></i> Admin</span>';
+                    renderAll();
+                } else {
+                    if (sessionStorage.getItem('coconut_auth_active') !== 'true' && localStorage.getItem('coconut_auth_active') !== 'true') {
+                        showAuthGate();
+                    }
+                }
+            });
+        }
+
+        async function handleSignIn() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            const errEl = document.getElementById('authError');
+            const loader = document.getElementById('mobileLoginLoader');
+
+            if (!email || !pass) {
+                if (errEl) { errEl.textContent = 'Please enter email and password'; errEl.style.display = 'block'; }
+                return;
+            }
+
+            try {
+                if (loader) loader.style.display = 'block';
+                if (errEl) errEl.style.display = 'none';
+
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                try {
+                    await auth.signInWithEmailAndPassword(email, pass);
+                } catch (sErr) {
+                    const isNew = ['auth/user-not-found', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(sErr.code);
+                    if (isNew) {
+                        await auth.createUserWithEmailAndPassword(email, pass);
+                    } else {
+                        throw sErr;
+                    }
+                }
+                if (loader) loader.style.display = 'none';
+                hideAuthGate();
+                localStorage.setItem('coconut_auth_active', 'true');
+                sessionStorage.setItem('coconut_auth_active', 'true');
+                showToast('Welcome, THUSITHA JAYASUNDARA COCONUT PRODUCTS!');
+            } catch (err) {
+                if (loader) loader.style.display = 'none';
+                if (errEl) {
+                    errEl.textContent = 'Invalid credentials: ' + (err.message || 'Please check email & password');
+                    errEl.style.display = 'block';
+                }
+            }
+        }
+
+        async function handleSignOut() {
+            if (!confirm('Are you sure you want to sign out?')) return;
+            try {
+                await auth.signOut();
+                localStorage.removeItem('coconut_auth_active');
+                sessionStorage.removeItem('coconut_auth_active');
+                showAuthGate();
+                showToast('Signed out successfully');
+            } catch (e) {
+                showAuthGate();
+            }
+        }
+
+        // ================================================================
+        // 6. UTILITY FUNCTIONS
+        // ================================================================
+        function showToast(msg, type) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'c-toast c-toast-' + (type || 'success');
+            toast.innerHTML = '<i class="fas fa-' + (type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle') + '"></i> ' + msg;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
+
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('show');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('show');
+        }
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+            if (sidebar && sidebar.classList.contains('open')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ================================================================
+        // 7. NAVIGATION
+        // ================================================================
+        let currentPage = 'dashboard';
+
+        function navigateTo(page) {
+            currentPage = page;
+            window.location.hash = page;
+
+            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+            const target = document.getElementById('page-' + page);
+            if (target) target.classList.add('active');
+
+            document.querySelectorAll('.sidebar-item').forEach(function(item) {
+                item.classList.remove('active');
+                if (item.getAttribute('data-page') === page) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Render page
+            try {
+                if (page === 'dashboard') renderDashboard();
+                else if (page === 'purchase') renderPurchase();
+                else if (page === 'grading') renderGrading();
+                else if (page === 'coconut-stock') renderCoconutStock();
+
+<truncated 129318 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.

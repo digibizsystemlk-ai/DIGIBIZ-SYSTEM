@@ -3634,6 +3634,10 @@
                 banner.style.display = 'none';
                 return;
             }
+            if (!deferredPrompt && !/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+                banner.style.display = 'none';
+                return;
+            }
             banner.style.display = 'flex';
         }
 
@@ -3668,7 +3672,11 @@
                     }
                 });
             } else {
-                showToast('📲 Browser install is not ready. Use the browser menu: Install app / Add to Home screen.');
+                var isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                var installHelp = isAppleMobile
+                    ? 'On iPhone/iPad: tap Share, then Add to Home Screen.'
+                    : 'Open the browser menu, then choose Install app or Add to Home screen.';
+                alert('Install MADAWALA App\n\n' + installHelp);
             }
         }
 

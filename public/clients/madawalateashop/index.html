@@ -3651,8 +3651,9 @@
             if (deferredPrompt) {
                 const installPrompt = deferredPrompt;
                 deferredPrompt = null;
-                installPrompt.prompt();
-                installPrompt.userChoice.then(function (choiceResult) {
+                try {
+                    const promptResult = await installPrompt.prompt();
+                    const choiceResult = promptResult || await installPrompt.userChoice;
                     if (choiceResult.outcome === 'accepted') {
                         console.log('[PWA] User accepted install');
                         isPWAInstalled = true;
@@ -3662,7 +3663,10 @@
                     } else {
                         console.log('[PWA] User dismissed install');
                     }
-                });
+                } catch (err) {
+                    console.warn('[PWA] Native install prompt failed:', err);
+                    showToast('📲 Open the browser menu and choose Install app.');
+                }
             } else {
                 var isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent);
                 var installHelp = isAppleMobile
@@ -5467,7 +5471,7 @@
         // 10. APP STARTUP & SERVICE WORKER
         // ==========================================
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=20260828_pwa_v7', {
+            navigator.serviceWorker.register('./sw.js?v=20260828_pwa_v8', {
                 scope: './',
                 updateViaCache: 'none'
             })

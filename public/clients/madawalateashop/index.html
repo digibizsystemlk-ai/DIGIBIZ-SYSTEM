@@ -9,12 +9,19 @@
 
     <!-- Fast Auth State & PWA Native Prompt Capture -->
     <script>
+        if (localStorage.getItem('madawala_active_build') !== '2026.08.29.05') {
+            localStorage.setItem('madawala_active_build', '2026.08.29.05');
+            if ('caches' in window) {
+                caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+            }
+        }
+
         if (localStorage.getItem('madawala_auth_active') === 'true') {
             document.documentElement.classList.add('auth-active');
         }
 
-        // Restore active tab from session storage
-        const savedTab = sessionStorage.getItem('madawala_active_tab');
+        // Restore active tab from hash / localStorage / sessionStorage
+        const savedTab = (window.location.hash ? window.location.hash.replace('#', '') : null) || localStorage.getItem('madawala_active_tab') || sessionStorage.getItem('madawala_active_tab');
         if (savedTab) {
             document.documentElement.setAttribute('data-active-tab', savedTab);
         }
@@ -24,14 +31,10 @@
             e.preventDefault();
             deferredPrompt = e;
             console.log('[PWA] beforeinstallprompt event captured');
-            if (typeof showPWAInstallBanner === 'function') {
-                showPWAInstallBanner();
-            }
         });
 
         window.addEventListener('appinstalled', function () {
             localStorage.setItem('pwa_installed', 'true');
-            if (typeof closePWAInstallBanner === 'function') closePWAInstallBanner();
             if (typeof showToast === 'function') showToast('🎉 MADAWALA TEA SHOP App Installed Successfully!');
         });
     </script>
@@ -61,6 +64,19 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
+        #pwaInstallBanner, [id*="pwaInstallBanner"], .pwa-install-banner, #pwa-install-prompt, [id*="InstallBanner"], [class*="InstallBanner"] {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+            position: absolute !important;
+            left: -9999px !important;
+            bottom: -9999px !important;
+        }
+
         :root {
             --bg: #f8fafc;
             --surface: #ffffff;
@@ -93,7 +109,7 @@
             --blue-badge: #bfdbfe;
             --blue-text: #1d4ed8;
 
-            --sidebar-width: 270px;
+            --sidebar-width: 235px;
         }
 
         * {
@@ -126,15 +142,141 @@
         }
 
         /* ==========================================
-           TOP FLOATING HEADER
+           IN-APP UPDATE BANNER (Google Play Style)
+           ========================================== */
+        .in-app-update-banner {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120%);
+            width: calc(100% - 24px);
+            max-width: 440px;
+            background: #064e3b;
+            color: #ffffff;
+            border-radius: 18px;
+            padding: 12px 16px;
+            box-shadow: 0 12px 36px rgba(6, 78, 59, 0.4), 0 2px 8px rgba(0,0,0,0.15);
+            border: 1.8px solid #f59e0b;
+            z-index: 999999;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .in-app-update-banner.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .update-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .update-pulse-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(245, 158, 11, 0.2);
+            border: 1.5px solid #f59e0b;
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            animation: pulseGlow 1.8s infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { transform: scale(1.06); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+        }
+
+        .update-banner-text strong {
+            display: block;
+            font-size: 13.5px;
+            font-weight: 900;
+            color: #fef08a;
+        }
+
+        .update-banner-text span {
+            font-size: 11px;
+            color: #e2e8f0;
+        }
+
+        .btn-update-now {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #022c22;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+            flex-shrink: 0;
+        }
+
+        /* ==========================================
+           PULL TO REFRESH INDICATOR
+           ========================================== */
+        .native-ptr-indicator {
+            position: fixed;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            border: 2px solid #059669;
+            box-shadow: 0 8px 24px rgba(6, 78, 59, 0.2);
+            padding: 8px 18px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            color: #064e3b;
+            z-index: 999998;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.1s ease-out;
+        }
+
+        .native-ptr-indicator.active {
+            opacity: 1;
+        }
+
+        .native-ptr-indicator .ptr-spinner {
+            font-size: 14px;
+            transition: transform 0.2s ease;
+        }
+
+        .native-ptr-indicator.loading .ptr-spinner {
+            animation: ptrRotate 0.6s linear infinite;
+        }
+
+        @keyframes ptrRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==========================================
+           TOP FLOATING HEADER (PREMIUM BRAND GREEN)
            ========================================== */
         .header-floating-pill {
-            background: #ffffff;
-            border-radius: 18px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-            border: 1.5px solid #e2e8f0;
-            padding: 8px 14px;
-            margin: 10px 12px 8px 12px;
+            background: linear-gradient(135deg, #064e3b 0%, #032b21 100%);
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(6, 78, 59, 0.3);
+            border: 1.8px solid #059669;
+            padding: 12px 16px;
+            margin: 10px 12px 10px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -143,62 +285,64 @@
         .header-left-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .header-menu-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            border: 1.5px solid #e2e8f0;
-            background: #ffffff;
-            color: #0f172a;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1.5px solid rgba(245, 158, 11, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.18s;
         }
 
         .header-menu-btn:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--tea-gold);
+            color: var(--tea-gold);
         }
 
         .header-brand-logo {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: #064e3b;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid var(--tea-gold);
+            border: 1.5px solid var(--tea-gold);
             overflow: hidden;
             flex-shrink: 0;
         }
 
         .header-title-text h1 {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 900;
-            color: #064e3b;
+            color: #ffffff;
             line-height: 1.2;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.3px;
         }
 
         .header-title-text p {
-            font-size: 11.5px;
+            font-size: 12px;
             font-weight: 700;
-            color: #059669;
+            color: #34d399;
+            margin-top: 2px;
         }
 
         .header-online-dot {
-            width: 10px;
-            height: 10px;
+            width: 11px;
+            height: 11px;
             border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            background: #34d399;
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.35);
             flex-shrink: 0;
         }
 
@@ -206,20 +350,20 @@
            TAB 1: 🎯 HOME SCREEN (SCREEN FIT 3 CARDS)
            ========================================== */
         .home-screen-wrapper {
-            height: calc(100dvh - 74px);
-            max-height: calc(100dvh - 74px);
-            padding: 0 12px 10px 12px;
+            flex: 1;
+            padding: 0 12px 12px 12px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-height: calc(100dvh - 125px);
         }
 
         .home-main-card {
-            background: #ffffff;
-            border-radius: 22px;
-            border: 1.5px solid #e2e8f0;
-            padding: 16px 14px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+            border-radius: 26px;
+            border: 1.8px solid #e2e8f0;
+            padding: clamp(14px, 2.2vh, 22px) clamp(14px, 2.5vw, 20px);
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02);
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -229,57 +373,63 @@
 
         .home-heading-box {
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: clamp(6px, 1.2vh, 14px);
         }
 
         .home-heading-box h2 {
-            font-size: 16px;
-            font-weight: 800;
+            font-size: clamp(16px, 2.2vh, 19px);
+            font-weight: 900;
             color: #0f172a;
-            letter-spacing: -0.2px;
+            letter-spacing: -0.3px;
         }
 
         .home-heading-box p {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 3px;
+            font-size: clamp(12px, 1.6vh, 13.5px);
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 500;
         }
 
         .three-action-cards-container {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: clamp(12px, 1.8vh, 18px);
             flex: 1;
             justify-content: space-evenly;
         }
 
         .action-card-preset {
-            border-radius: 16px;
-            padding: 14px 14px;
+            flex: 1;
+            min-height: clamp(86px, 12vh, 115px);
+            border-radius: 20px;
+            padding: clamp(14px, 2vh, 20px) clamp(14px, 2.5vw, 20px);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: clamp(12px, 2.5vw, 18px);
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+            position: relative;
+            overflow: hidden;
         }
 
         .action-card-preset:hover,
         .action-card-preset:active {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
         }
 
         /* Card 1: Red */
         .card-red-flow {
-            border: 1.8px solid var(--red-border);
+            border: 2px solid var(--red-border);
             background: linear-gradient(135deg, #ffffff 0%, var(--red-bg) 100%);
         }
 
         .card-red-flow .action-icon-badge {
             background: var(--red-badge);
             color: #dc2626;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
         }
 
         .card-red-flow h3 {
@@ -288,13 +438,14 @@
 
         /* Card 2: Green */
         .card-green-flow {
-            border: 1.8px solid var(--green-border);
+            border: 2px solid var(--green-border);
             background: linear-gradient(135deg, #ffffff 0%, var(--green-bg) 100%);
         }
 
         .card-green-flow .action-icon-badge {
             background: var(--green-badge);
             color: #16a34a;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
         }
 
         .card-green-flow h3 {
@@ -303,13 +454,14 @@
 
         /* Card 3: Blue */
         .card-blue-flow {
-            border: 1.8px solid var(--blue-border);
+            border: 2px solid var(--blue-border);
             background: linear-gradient(135deg, #ffffff 0%, var(--blue-bg) 100%);
         }
 
         .card-blue-flow .action-icon-badge {
             background: var(--blue-badge);
             color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
         }
 
         .card-blue-flow h3 {
@@ -317,14 +469,19 @@
         }
 
         .action-icon-badge {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: clamp(50px, 7vh, 62px);
+            height: clamp(50px, 7vh, 62px);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: clamp(22px, 3vh, 28px);
             flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .action-card-preset:hover .action-icon-badge {
+            transform: scale(1.08);
         }
 
         .action-card-info {
@@ -332,22 +489,30 @@
         }
 
         .action-card-info h3 {
-            font-size: 14.5px;
-            font-weight: 800;
-            margin-bottom: 2px;
+            font-size: clamp(15px, 2.1vh, 18px);
+            font-weight: 900;
+            margin-bottom: 4px;
+            letter-spacing: -0.2px;
         }
 
         .action-card-info p {
-            font-size: 11.5px;
+            font-size: clamp(12px, 1.55vh, 13.5px);
             color: #64748b;
-            line-height: 1.35;
+            line-height: 1.4;
+            font-weight: 500;
         }
 
         .action-arrow-icon {
             color: #94a3b8;
-            font-size: 15px;
+            font-size: clamp(16px, 2.2vh, 19px);
             margin-left: auto;
             flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .action-card-preset:hover .action-arrow-icon {
+            transform: translateX(4px);
+            color: #475569;
         }
 
         /* ==========================================
@@ -418,14 +583,14 @@
         }
 
         .sidebar-title h2 {
-            font-size: 13.5px;
-            font-weight: 900;
-            color: #fef3c7;
-            line-height: 1.2;
+            font-size: 15.5px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.3px;
         }
 
         .sidebar-title p {
-            font-size: 10.5px;
+            font-size: 11.5px;
             font-weight: 700;
             color: var(--tea-accent);
             text-transform: uppercase;
@@ -441,7 +606,7 @@
 
         .sidebar-menu {
             flex: 1;
-            padding: 8px 12px;
+            padding: 8px 10px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -449,30 +614,31 @@
         }
 
         .menu-category {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 800;
-            color: #475569;
+            color: #64748b;
             text-transform: uppercase;
             letter-spacing: 1px;
-            padding: 10px 10px 4px 10px;
+            padding: 10px 8px 4px 8px;
         }
 
         .sidebar-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            color: #cbd5e1;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
+            gap: 10px;
+            padding: 9px 12px;
+            color: #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.18s;
             text-decoration: none;
+            letter-spacing: 0.1px;
         }
 
         .sidebar-item i {
-            font-size: 15px;
+            font-size: 16px;
             width: 20px;
             text-align: center;
             color: #64748b;
@@ -484,10 +650,10 @@
         }
 
         .sidebar-item.active {
-            background: linear-gradient(135deg, rgba(6, 78, 59, 0.9) 0%, rgba(5, 150, 105, 0.7) 100%);
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.95) 0%, rgba(5, 150, 105, 0.85) 100%);
             color: #ffffff;
-            font-weight: 700;
-            border-left: 4px solid var(--tea-gold);
+            font-weight: 800;
+            border-left: 5px solid var(--tea-gold);
         }
 
         .sidebar-item.text-danger {
@@ -496,28 +662,29 @@
 
         /* Subscription status in sidebar - simple text version */
         .sidebar-subscription-status {
-            margin: 10px 14px 6px 14px;
-            padding: 10px 14px;
-            background: rgba(6, 78, 59, 0.3);
-            border-radius: 8px;
-            border-left: 3px solid var(--tea-gold);
-            font-size: 11px;
-            color: #94a3b8;
+            margin: 10px 12px;
+            padding: 12px 16px;
+            background: rgba(6, 78, 59, 0.4);
+            border-radius: 12px;
+            border-left: 4px solid var(--tea-gold);
+            font-size: 14px;
+            color: #cbd5e1;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-weight: 700;
         }
 
         .sidebar-subscription-status .plan-name {
             color: #f59e0b;
-            font-weight: 800;
-            font-size: 12px;
+            font-weight: 900;
+            font-size: 15px;
         }
 
         .sidebar-subscription-status .status-badge {
-            font-size: 9px;
-            padding: 2px 8px;
-            border-radius: 4px;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
             font-weight: 800;
         }
 
@@ -631,29 +798,30 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 12.5px;
+            font-size: 13.5px;
             text-align: left;
         }
 
         .data-table-dense thead th {
             background: #f8fafc;
             color: #475569;
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 10px 12px;
+            letter-spacing: 0.3px;
+            padding: 9px 12px;
             border-bottom: 1.5px solid var(--border);
             white-space: nowrap;
         }
 
         .data-table-dense tbody td {
-            padding: 10px 12px;
+            padding: 9px 12px;
             border-bottom: 1px solid var(--border-light);
             color: var(--text-main);
             vertical-align: middle;
             white-space: nowrap;
             background: #ffffff;
+            font-size: 13px;
         }
 
         .data-table-dense tbody tr:hover td {
@@ -665,20 +833,24 @@
             position: sticky;
             left: 0;
             background: #ffffff !important;
-            z-index: 5;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-            min-width: 130px;
+            z-index: 10;
+            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.08);
+            border-right: 1.5px solid #cbd5e1;
+            min-width: 125px;
+            max-width: 160px;
+            padding: 9px 12px !important;
         }
 
         thead th.sticky-name-col {
-            background: #f8fafc !important;
-            z-index: 6;
+            background: #f1f5f9 !important;
+            z-index: 12;
+            border-right: 1.5px solid #cbd5e1;
         }
 
         .status-badge {
             display: inline-block;
             padding: 3px 8px;
-            border-radius: 20px;
+            border-radius: 12px;
             font-size: 10.5px;
             font-weight: 800;
             text-transform: uppercase;
@@ -703,14 +875,14 @@
             background: #f1f5f9;
             border: 1px solid var(--border);
             color: #334155;
-            padding: 5px 8px;
-            border-radius: 6px;
-            font-size: 11.5px;
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-size: 10.5px;
             font-weight: 700;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
         }
 
         .btn-action-green {
@@ -884,19 +1056,20 @@
         }
 
         /* ==========================================
-           SLIDE-OVER / WIZARD OVERLAY
+           SLIDE-OVER / WIZARD OVERLAY (DEAD-CENTER)
            ========================================== */
         .wizard-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(5px);
-            z-index: 1200;
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(6px);
+            z-index: 1400;
             display: none;
-            align-items: flex-end;
+            align-items: center;
             justify-content: center;
+            padding: 16px;
             opacity: 0;
-            transition: opacity 0.25s ease;
+            transition: opacity 0.22s ease;
         }
 
         .wizard-overlay.active {
@@ -907,31 +1080,20 @@
         .wizard-modal-panel {
             background: #ffffff;
             width: 100%;
-            max-width: 540px;
-            max-height: 92vh;
-            border-radius: 24px 24px 0 0;
+            max-width: 520px;
+            max-height: 90vh;
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            transform: scale(0.92);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            margin: auto;
         }
 
         .wizard-overlay.active .wizard-modal-panel {
-            transform: translateY(0);
-        }
-
-        @media (min-width: 768px) {
-            .wizard-overlay {
-                align-items: center;
-                padding: 20px;
-            }
-
-            .wizard-modal-panel {
-                border-radius: 22px;
-                max-height: 88vh;
-            }
+            transform: scale(1);
         }
 
         .wizard-header {
@@ -1234,32 +1396,54 @@
             box-shadow: 0 4px 15px rgba(6, 78, 59, 0.3);
         }
 
-        /* Top Floating Toast */
+        /* Center Screen Toast / Notification Banner */
         .toast-notification {
             position: fixed;
-            top: 16px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            background: #0f172a;
+            transform: translate(-50%, -50%) scale(0.82);
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
             color: #ffffff;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 700;
-            z-index: 99999;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border: 1.5px solid var(--tea-gold);
-            display: none;
+            padding: 20px 28px;
+            border-radius: 22px;
+            font-size: 16px;
+            font-weight: 800;
+            z-index: 999999;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 0 2px rgba(245, 158, 11, 0.5);
+            border: 2px solid #f59e0b;
+            display: flex;
             opacity: 0;
-            transition: all 0.25s ease;
+            pointer-events: none;
+            visibility: hidden;
+            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            text-align: center;
+            gap: 14px;
+            max-width: 90vw;
+            width: auto;
+            min-width: 280px;
+            backdrop-filter: blur(12px);
         }
 
         .toast-notification.show {
-            display: flex;
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .toast-notification i {
+            font-size: 24px;
+            color: #34d399;
+            filter: drop-shadow(0 2px 8px rgba(52, 211, 153, 0.5));
+            flex-shrink: 0;
+        }
+
+        .toast-notification span {
+            line-height: 1.4;
+            color: #f8fafc;
+            letter-spacing: 0.2px;
         }
 
         /* Searchable dropdown styles */
@@ -1313,6 +1497,190 @@
             font-size: 11px;
             color: #94a3b8;
             font-weight: 400;
+        }
+
+        /* ==========================================
+           2x2 CREDIT LEDGER GRID & GAUGE
+           ========================================== */
+        .credit-ledger-grid-2x2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .credit-ledger-grid-2x2 {
+                gap: 8px;
+            }
+        }
+
+        /* ==========================================
+           GLOWING MONEY INPUTS (INFLOW=GREEN, OUTFLOW=RED)
+           ========================================== */
+        @keyframes pulseGreenGlow {
+            0% {
+                border-color: #10b981;
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6), 0 2px 8px rgba(0,0,0,0.04);
+            }
+            70% {
+                border-color: #059669;
+                box-shadow: 0 0 0 7px rgba(16, 185, 129, 0), 0 4px 14px rgba(16, 185, 129, 0.25);
+            }
+            100% {
+                border-color: #10b981;
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 2px 8px rgba(0,0,0,0.04);
+            }
+        }
+
+        @keyframes pulseRedGlow {
+            0% {
+                border-color: #ef4444;
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6), 0 2px 8px rgba(0,0,0,0.04);
+            }
+            70% {
+                border-color: #dc2626;
+                box-shadow: 0 0 0 7px rgba(239, 68, 68, 0), 0 4px 14px rgba(239, 68, 68, 0.25);
+            }
+            100% {
+                border-color: #ef4444;
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0), 0 2px 8px rgba(0,0,0,0.04);
+            }
+        }
+
+        .input-glow-green {
+            animation: pulseGreenGlow 2s infinite ease-in-out !important;
+            border: 2px solid #10b981 !important;
+            background: #f0fdf4 !important;
+        }
+
+        .input-glow-red {
+            animation: pulseRedGlow 2s infinite ease-in-out !important;
+            border: 2px solid #ef4444 !important;
+            background: #fff6f7 !important;
+        }
+
+        /* ==========================================
+           CREDIT AGING & RISK ANALYTICS STYLES
+           ========================================== */
+        .aging-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .aging-metric-card {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            padding: 14px 16px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .aging-metric-card.bucket-current { border-left: 6px solid #10b981; }
+        .aging-metric-card.bucket-due { border-left: 6px solid #f59e0b; }
+        .aging-metric-card.bucket-overdue { border-left: 6px solid #f97316; }
+        .aging-metric-card.bucket-critical { border-left: 6px solid #ef4444; }
+
+        .aging-spectrum-wrap {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            padding: 16px 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+        }
+
+        .aging-spectrum-bar {
+            height: 14px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            margin: 10px 0 12px 0;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .aging-segment-0-30 { background: #10b981; }
+        .aging-segment-31-60 { background: #f59e0b; }
+        .aging-segment-61-90 { background: #f97316; }
+        .aging-segment-90-plus { background: #ef4444; }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .risk-badge-low { background: #dcfce7; color: #166534; }
+        .risk-badge-med { background: #fef3c7; color: #92400e; }
+        .risk-badge-high { background: #ffedd5; color: #9a3412; }
+        .risk-badge-crit { background: #fee2e2; color: #991b1b; }
+
+        /* ==========================================
+           UNIVERSAL PRINT & PDF STYLESHEET
+           ========================================== */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .sidebar-drawer, .sidebar-backdrop, .bottom-nav-bar, .sms-floating-bar,
+            .btn-primary-action, .toolbar-filter-box, .load-more-btn-bar,
+            .sidebar-close-btn, .modal-backdrop, #authGateOverlay, .no-print,
+            header, nav, .btn-table-action, button, input[type="text"] {
+                display: none !important;
+            }
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .tab-view {
+                display: none !important;
+            }
+            .tab-view.active {
+                display: block !important;
+            }
+            .page-container {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .table-card-wrapper {
+                border: 1px solid #94a3b8 !important;
+                box-shadow: none !important;
+            }
+            .data-table-dense {
+                font-size: 11px !important;
+            }
+            .data-table-dense thead th {
+                background: #f1f5f9 !important;
+                color: #0f172a !important;
+                border-bottom: 2px solid #334155 !important;
+            }
+            .data-table-dense tbody td {
+                border-bottom: 1px solid #cbd5e1 !important;
+            }
+            .sticky-name-col {
+                position: static !important;
+                box-shadow: none !important;
+            }
         }
     </style>
 </head>
@@ -1369,69 +1737,116 @@
         </div>
     </div>
 
-    <!-- PWA INSTALL BANNER -->
-    <div id="pwaInstallBanner" style="
+    <!-- SUBSCRIPTION PAYWALL LOCK OVERLAY -->
+    <div id="subscriptionPaywallOverlay" style="
         display: none;
         position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #131921;
-        color: #ffffff;
-        padding: 14px 18px;
-        border-radius: 14px;
-        z-index: 99999;
-        max-width: 440px;
-        width: 92%;
-        box-shadow: 0 10px 35px rgba(0,0,0,0.55);
-        border: 1.8px solid #f59e0b;
+        inset: 0;
+        background: rgba(10, 16, 29, 0.96);
+        backdrop-filter: blur(10px);
+        z-index: 100000;
         align-items: center;
-        gap: 12px;
+        justify-content: center;
+        padding: 16px;
     ">
-        <div style="display:flex; align-items:center; gap:12px; flex:1;">
-            <div
-                style="background:#064e3b; width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; border: 1.5px solid #f59e0b;">
-                <svg viewBox="0 0 100 100" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100" height="100" rx="20" fill="#064e3b" />
-                    <path d="M28 42H72V58C72 70 60 76 50 76C40 76 28 70 28 58V42Z" fill="#f59e0b" />
-                    <path d="M72 48H80C84 48 86 52 86 56C86 60 84 64 80 64H72" stroke="#f59e0b" stroke-width="5"
-                        stroke-linecap="round" />
-                    <path d="M38 32C38 28 42 26 42 22M50 32C50 28 54 26 54 22M62 32C62 28 66 26 66 22" stroke="#10b981"
-                        stroke-width="4" stroke-linecap="round" />
-                    <rect x="20" y="80" width="60" height="6" rx="3" fill="#f59e0b" />
-                </svg>
+        <div style="
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 480px;
+            width: 100%;
+            padding: 26px 22px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 2px solid #f59e0b;
+        ">
+            <div style="width: 62px; height: 62px; border-radius: 18px; background: #fff1f2; border: 2px solid #f87171; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 14px;">
+                <i class="fa-solid fa-crown"></i>
             </div>
-            <div>
-                <div style="font-weight:800; font-size:14px; color:#f59e0b;">📱 Install MADAWALA App</div>
-                <div style="font-size:11px; color:rgba(255,255,255,0.75); line-height: 1.3;">Add to home screen for full
-                    screen & quick offline access!</div>
+            <h2 style="font-size: 20px; font-weight: 900; color: #0f172a; margin-bottom: 6px;">Free Trial Expired</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                ඔබගේ <b>දින 7ක නොමිලේ අත්හදා බැලීමේ කාලය (Free Trial)</b> අවසන් වී ඇත. පද්ධතිය දිගටම භාවිත කිරීමට මාසික දායකත්වය සක්‍රිය කරන්න.
+            </p>
+
+            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Monthly Subscription</span>
+                    <span style="font-size: 17px; font-weight: 900; color: #064e3b;">Rs. 1,000 <small style="font-size: 11px; color: #64748b;">/ mo</small></span>
+                </div>
+                <div style="border-top: 1px dashed #cbd5e1; padding-top: 8px; font-size: 12px; color: #334155; line-height: 1.6;">
+                    <div>🏛️ <b>Sampath Bank</b></div>
+                    <div>Account No: <b style="font-family: monospace; color: #1d4ed8; font-size: 13.5px;">1099 5448 6969</b></div>
+                    <div>Account Name: <b>K A N C Jayawardana</b></div>
+                </div>
             </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-            <button onclick="installPWA()" style="
-                background: linear-gradient(135deg, #f59e0b, #d97706);
-                color: #090e17;
-                border: none;
-                padding: 8px 14px;
-                border-radius: 8px;
-                font-weight: 900;
-                font-size: 12.5px;
-                cursor: pointer;
+
+            <a id="paywallWhatsAppBtn" href="https://wa.me/94713446500?text=Hello%20DIGIBIZ%2C%20I%20have%20paid%20Rs.%201000%20for%20Madawala%20Tea%20Shop%20monthly%20subscription.%20Here%20is%20my%20slip." onclick="event.preventDefault(); openWhatsAppDirect('94713446500', 'Hello DIGIBIZ, I have paid Rs. 1000 for Madawala Tea Shop monthly subscription. Here is my slip.');" target="_blank" style="
                 display: flex;
                 align-items: center;
-                gap: 5px;
-            ">
-                <i class="fa-solid fa-download"></i> INSTALL
-            </button>
-            <button onclick="closePWAInstallBanner()" style="
-                background: transparent;
-                color: rgba(255,255,255,0.5);
-                border: none;
-                font-size: 20px;
+                justify-content: center;
+                gap: 8px;
+                background: #25d366;
+                color: #ffffff;
+                text-decoration: none;
+                padding: 13px;
+                border-radius: 12px;
+                font-weight: 800;
+                font-size: 14px;
+                margin-bottom: 12px;
+                box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
                 cursor: pointer;
-                padding: 4px;
-            ">&times;</button>
+            ">
+                <i class="fa-brands fa-whatsapp" style="font-size: 18px;"></i>
+                <span>Send Payment Receipt via WhatsApp</span>
+            </a>
+
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <input type="text" id="paywallLicenseInput" placeholder="Enter Activation Key" style="
+                    flex: 1;
+                    padding: 10px 12px;
+                    border-radius: 10px;
+                    border: 1.5px solid #cbd5e1;
+                    font-size: 13px;
+                    text-align: center;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                ">
+                <button onclick="handlePaywallLicenseActivate()" style="
+                    background: #064e3b;
+                    color: #fff;
+                    border: none;
+                    padding: 10px 16px;
+                    border-radius: 10px;
+                    font-weight: 800;
+                    font-size: 13px;
+                    cursor: pointer;
+                ">Activate</button>
+            </div>
         </div>
+    </div>
+
+    <!-- IN-APP UPDATE NOTIFIER (DIGIBIZ STORE Style) -->
+    <div id="inAppUpdateBanner" class="in-app-update-banner">
+        <div class="update-banner-content">
+            <div class="update-pulse-icon" style="background: rgba(245, 158, 11, 0.25); border-color: #f59e0b; color: #f59e0b;">
+                <i class="fa-solid fa-store"></i>
+            </div>
+            <div class="update-banner-text">
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <strong id="updateBannerTitle" style="color: #fef08a; font-weight: 900;">DIGIBIZ STORE</strong>
+                    <span style="background: #f59e0b; color: #022c22; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 6px; text-transform: uppercase;">Update Ready</span>
+                </div>
+                <span id="updateBannerDesc" style="color: #e2e8f0; font-size: 11.5px;">New version available with improvements.</span>
+            </div>
+        </div>
+        <button onclick="applyAppUpdateNow()" class="btn-update-now">
+            <i class="fa-solid fa-cloud-arrow-down"></i> <span>Update Now</span>
+        </button>
+    </div>
+
+    <!-- PULL TO REFRESH INDICATOR -->
+    <div id="nativePtrIndicator" class="native-ptr-indicator">
+        <i class="fa-solid fa-arrow-down ptr-spinner" id="ptrSpinnerIcon"></i>
+        <span id="ptrStatusText">Pull to refresh...</span>
     </div>
 
     <!-- TOAST NOTIFICATION -->
@@ -1470,17 +1885,6 @@
     <aside class="sidebar-drawer" id="digibizSidebar">
         <div class="sidebar-header">
             <div class="sidebar-brand-inner">
-                <div class="sidebar-logo">
-                    <svg viewBox="0 0 100 100" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="100" height="100" rx="20" fill="#064e3b" />
-                        <path d="M28 42H72V58C72 70 60 76 50 76C40 76 28 70 28 58V42Z" fill="#f59e0b" />
-                        <path d="M72 48H80C84 48 86 52 86 56C86 60 84 64 80 64H72" stroke="#f59e0b" stroke-width="5"
-                            stroke-linecap="round" />
-                        <path d="M38 32C38 28 42 26 42 22M50 32C50 28 54 26 54 22M62 32C62 28 66 26 66 22"
-                            stroke="#10b981" stroke-width="4" stroke-linecap="round" />
-                        <rect x="20" y="80" width="60" height="6" rx="3" fill="#f59e0b" />
-                    </svg>
-                </div>
                 <div class="sidebar-title">
                     <h2>MADAWALA TEA SHOP</h2>
                     <p>Darshana Madawala</p>
@@ -1489,51 +1893,51 @@
             <button class="sidebar-close-btn" onclick="toggleSidebarMenu()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <!-- Simple Subscription Status in Sidebar -->
-        <div class="sidebar-subscription-status">
-            <span>📋 Plan: <span class="plan-name" id="sidePlanName">TRIAL</span></span>
-            <span id="sidePlanDaysLeft">4 Days</span>
-            <span class="status-badge active" id="sidePlanStatusBadge">ACTIVE</span>
-        </div>
-
         <nav class="sidebar-menu">
             <div class="menu-category">Operations</div>
             <a class="sidebar-item active" onclick="switchTab('dashboard')">
-                <i class="fa-solid fa-house"></i> <span>Dashboard (Home)</span>
+                <span>Dashboard (Home)</span>
             </a>
             <a class="sidebar-item" onclick="switchTab('credits')">
-                <i class="fa-solid fa-file-invoice-dollar"></i> <span>Credit Ledger</span>
+                <span>Credit Ledger</span>
             </a>
             <a class="sidebar-item" onclick="switchTab('customers')">
-                <i class="fa-solid fa-users"></i> <span>Customers Directory</span>
+                <span>Customers Directory</span>
             </a>
             <a class="sidebar-item" onclick="switchTab('banking')">
-                <i class="fa-solid fa-building-columns"></i> <span>Banking & Cash</span>
+                <span>Banking & Cash</span>
+            </a>
+            <a class="sidebar-item" onclick="switchTab('credit-aging')">
+                <span>Credit Aging</span>
             </a>
             <a class="sidebar-item" onclick="switchTab('reports')">
-                <i class="fa-solid fa-chart-pie"></i> <span>Reports & Analytics</span>
+                <span>Reports & Analytics</span>
             </a>
 
             <div class="menu-category">System & Account</div>
             <a class="sidebar-item" onclick="switchTab('profile')">
-                <i class="fa-solid fa-id-badge"></i> <span>Business Profile</span>
-            </a>
-            <a class="sidebar-item" onclick="switchTab('subscription')">
-                <i class="fa-solid fa-crown"></i> <span>Subscription & Plan</span>
-            </a>
-            <a class="sidebar-item" style="color: #f59e0b;" onclick="installPWA()">
-                <i class="fa-solid fa-download" style="color: #f59e0b;"></i> <span>Install App (PWA)</span>
+                <span>Business Profile</span>
             </a>
             <a class="sidebar-item" onclick="switchTab('password')">
-                <i class="fa-solid fa-key"></i> <span>Change Password</span>
+                <span>Change Password</span>
             </a>
             <a class="sidebar-item" onclick="switchTab('manual')">
-                <i class="fa-solid fa-book-open"></i> <span>User Guide</span>
+                <span>User Guide</span>
             </a>
 
-            <div class="menu-category">Session</div>
+            <div class="menu-category">Subscription & Session</div>
+            <a class="sidebar-item" onclick="switchTab('subscription')">
+                <span>Subscription & Plan</span>
+            </a>
+            <!-- Simple Subscription Status in Sidebar (Above Sign Out) -->
+            <div class="sidebar-subscription-status" onclick="switchTab('subscription')" style="cursor: pointer; margin: 6px 12px 10px 12px;">
+                <span>Plan: <span class="plan-name" id="sidePlanName">TRIAL</span></span>
+                <span id="sidePlanDaysLeft">2 Days Left</span>
+                <span class="status-badge active" id="sidePlanStatusBadge">ACTIVE</span>
+            </div>
+
             <a class="sidebar-item text-danger" onclick="handleSignOut()">
-                <i class="fa-solid fa-right-from-bracket"></i> <span>Sign Out</span>
+                <span>Sign Out</span>
             </a>
         </nav>
     </aside>
@@ -1600,62 +2004,60 @@
         <!-- ========================================== -->
         <div id="view-credits" class="tab-view">
             <div class="page-container">
-                <div class="page-header-row">
+                <div class="page-header-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px;">
                     <div>
                         <h2>Credit Ledger</h2>
-                        <p style="color: var(--text-muted); font-size: 13px;">Historical records of credit given and
-                            repayments received</p>
+                        <p style="color: var(--text-muted); font-size: 13px;">Historical records of credit given and repayments received</p>
                     </div>
-                    <button class="btn-primary-action" onclick="openWizard('give-credit')">
-                        <i class="fa-solid fa-plus"></i> <span>Issue New Credit</span>
+                    <button class="btn-primary-action" onclick="switchTab('credit-aging')" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1.5px solid #334155; display: inline-flex; align-items: center; gap: 8px; font-weight: 800; padding: 9px 15px; box-shadow: 0 4px 12px rgba(15,23,42,0.15);">
+                        <i class="fa-solid fa-chart-pie" style="color: #38bdf8;"></i> <span>Credit Aging</span>
                     </button>
                 </div>
 
-                <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
-                    <div
-                        style="flex: 1 1 180px; min-width: 150px; background: linear-gradient(135deg, #fff6f7 0%, #ffffff 100%); border: 1.5px solid #f1c7d0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 4px 12px rgba(15,23,42,0.04);">
-                        <div
-                            style="font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px;">
-                            Total Credit Issued</div>
-                        <div id="creditSummaryTotalCredit"
-                            style="font-size: 18px; font-weight: 900; color: #dc2626; line-height: 1.1;">Rs. 0.00</div>
-                        <div style="font-size: 10px; color: #64748b; margin-top: 3px;">All credit sales</div>
+                <div class="credit-ledger-grid-2x2">
+                    <!-- Top Left: Today's Credit Given (අද දුන් ණය) -->
+                    <div style="background: linear-gradient(135deg, #fff6f7 0%, #ffffff 100%); border: 1.5px solid #fecdd3; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 12px rgba(15,23,42,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="font-size: 10px; font-weight: 800; color: #991b1b; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+                            <span>Today's Credit Issued</span>
+                            <span style="font-size: 9px; background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 4px; font-weight: 700;">අද දුන්</span>
+                        </div>
+                        <div id="creditSummaryTodayIssued" style="font-size: 20px; font-weight: 900; color: #dc2626; line-height: 1.1;">Rs. 0.00</div>
+                        <div style="font-size: 10px; color: #64748b; margin-top: 4px;">New credit sales today</div>
                     </div>
-                    <div
-                        style="flex: 1 1 180px; min-width: 150px; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 4px 12px rgba(15,23,42,0.04);">
-                        <div
-                            style="font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px;">
-                            Collections Received</div>
-                        <div id="creditSummaryCollected"
-                            style="font-size: 18px; font-weight: 900; color: #16a34a; line-height: 1.1;">Rs. 0.00</div>
-                        <div style="font-size: 10px; color: #64748b; margin-top: 3px;">Cash & payments</div>
+
+                    <!-- Top Right: Today's Collections (අද එකතු වූ ණය) -->
+                    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 12px rgba(15,23,42,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="font-size: 10px; font-weight: 800; color: #166534; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+                            <span>Today's Collections</span>
+                            <span style="font-size: 9px; background: #dcfce7; color: #166534; padding: 1px 6px; border-radius: 4px; font-weight: 700;">අද එකතු වූ</span>
+                        </div>
+                        <div id="creditSummaryTodayCollected" style="font-size: 20px; font-weight: 900; color: #16a34a; line-height: 1.1;">Rs. 0.00</div>
+                        <div style="font-size: 10px; color: #64748b; margin-top: 4px;">Cash & repayments today</div>
                     </div>
-                    <div
-                        style="flex: 1 1 180px; min-width: 150px; background: linear-gradient(135deg, #fffaf0 0%, #ffffff 100%); border: 1.5px solid #f9d98b; border-radius: 12px; padding: 10px 12px; box-shadow: 0 4px 12px rgba(15,23,42,0.04);">
-                        <div
-                            style="font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px;">
-                            Outstanding Due</div>
-                        <div id="creditSummaryOutstanding"
-                            style="font-size: 18px; font-weight: 900; color: #d97706; line-height: 1.1;">Rs. 0.00</div>
-                        <div style="font-size: 10px; color: #64748b; margin-top: 3px;">Open balances</div>
+
+                    <!-- Bottom Left: Total Outstanding Debt (දැනට එන්න තියන ඔක්කොම ණය) -->
+                    <div style="background: linear-gradient(135deg, #fffaf0 0%, #ffffff 100%); border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 12px rgba(15,23,42,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="font-size: 10px; font-weight: 800; color: #92400e; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+                            <span>Total Outstanding</span>
+                            <span id="creditSummaryDebtorsBadge" style="font-size: 9px; background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 4px; font-weight: 700;">0 Debtors</span>
+                        </div>
+                        <div id="creditSummaryOutstanding" style="font-size: 20px; font-weight: 900; color: #d97706; line-height: 1.1;">Rs. 0.00</div>
+                        <div style="font-size: 10px; color: #64748b; margin-top: 4px;">Total active due from all debtors</div>
                     </div>
-                    <div
-                        style="flex: 1 1 180px; min-width: 150px; background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 10px 12px; box-shadow: 0 4px 12px rgba(15,23,42,0.04);">
-                        <div
-                            style="font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px;">
-                            Recovery Rate</div>
-                        <div id="creditSummaryRecovery"
-                            style="font-size: 18px; font-weight: 900; color: #2563eb; line-height: 1.1;">0.0%</div>
-                        <div style="font-size: 10px; color: #64748b; margin-top: 3px;">Collected / issued</div>
-                    </div>
-                    <div
-                        style="flex: 1 1 180px; min-width: 150px; background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%); border: 1.5px solid #ddd6fe; border-radius: 12px; padding: 10px 12px; box-shadow: 0 4px 12px rgba(15,23,42,0.04);">
-                        <div
-                            style="font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px;">
-                            Active Debtors</div>
-                        <div id="creditSummaryDebtors"
-                            style="font-size: 18px; font-weight: 900; color: #7c3aed; line-height: 1.1;">0</div>
-                        <div style="font-size: 10px; color: #64748b; margin-top: 3px;">Customers with due</div>
+
+                    <!-- Bottom Right: Recovery Rate with SVG circular ring gauge (දකුණේ රේට් එක රවුමක් සහිතව) -->
+                    <div style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 12px rgba(15,23,42,0.04); display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <div>
+                            <div style="font-size: 10px; font-weight: 800; color: #1e40af; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px;">Recovery Rate</div>
+                            <div id="creditSummaryRecovery" style="font-size: 20px; font-weight: 900; color: #2563eb; line-height: 1.1;">0.0%</div>
+                            <div style="font-size: 10px; color: #64748b; margin-top: 4px;">Collected vs Total</div>
+                        </div>
+                        <div style="position: relative; width: 48px; height: 48px; flex-shrink: 0;">
+                            <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+                                <path stroke="#e2e8f0" stroke-width="4" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="creditSummaryRecoveryCircle" stroke="#2563eb" stroke-width="4" stroke-dasharray="0, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
 
@@ -1663,10 +2065,11 @@
                     <input type="text" class="search-input-field" id="creditSearchInput"
                         placeholder="Search customer name, phone or category..." oninput="filterCreditsTable()">
                     <select class="filter-select" id="creditStatusFilter" onchange="filterCreditsTable()">
-                        <option value="ALL">All Statuses</option>
-                        <option value="UNPAID">Unpaid</option>
+                        <option value="ACTIVE">Active Debts Only (Unpaid)</option>
+                        <option value="ALL">All Records</option>
+                        <option value="UNPAID">Fully Unpaid</option>
                         <option value="PARTIAL">Partially Paid</option>
-                        <option value="PAID">Fully Paid</option>
+                        <option value="PAID">Fully Settled / Paid Off</option>
                     </select>
                 </div>
 
@@ -1731,14 +2134,13 @@
                                 <tr>
                                     <th class="sticky-name-col">Customer Name</th>
                                     <th>Phone Number</th>
-                                    <th>Address / Route</th>
                                     <th>Total Due Balance</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="customersTableBody">
                                 <tr>
-                                    <td colspan="5"
+                                    <td colspan="4"
                                         style="text-align: center; padding: 20px; color: var(--text-muted);">Loading
                                         customers...</td>
                                 </tr>
@@ -1754,13 +2156,15 @@
         <!-- ========================================== -->
         <div id="view-banking" class="tab-view">
             <div class="page-container">
-                <div class="page-header-row">
+                <div class="page-header-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;">
                     <div>
                         <h2>Banking & Cash Reserves</h2>
-                        <p style="color: var(--text-muted); font-size: 13px;">Linked shop bank accounts and transaction
-                            logs</p>
+                        <p style="color: var(--text-muted); font-size: 13px;">Linked shop bank accounts, cash balances and transaction logs</p>
                     </div>
-                    <div style="display: flex; gap: 8px;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-primary-action" onclick="exportBankingPDF()" style="background:#1e293b;">
+                            <i class="fa-solid fa-file-pdf" style="color: #f87171;"></i> <span>Export PDF</span>
+                        </button>
                         <button class="btn-primary-action" onclick="openAddBankModal()">
                             <i class="fa-solid fa-plus"></i> <span>Add Bank</span>
                         </button>
@@ -1778,18 +2182,19 @@
 
                 <div class="table-card-wrapper">
                     <div
-                        style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 13.5px;">
-                        Recent Bank Transactions
+                        style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 13.5px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Bank & Cash Book History</span>
+                        <span id="bankTxCountBadge" style="font-size: 11px; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 700;">0 Records</span>
                     </div>
                     <div class="table-responsive">
                         <table class="data-table-dense">
                             <thead>
                                 <tr>
                                     <th>Date</th>
-                                    <th>Bank Account</th>
+                                    <th>Bank Account / Source</th>
                                     <th>Type</th>
                                     <th>Amount (Rs.)</th>
-                                    <th>Reference / Slip</th>
+                                    <th>Reference / Notes</th>
                                 </tr>
                             </thead>
                             <tbody id="bankTxTableBody">
@@ -1797,6 +2202,151 @@
                                     <td colspan="5"
                                         style="text-align: center; padding: 20px; color: var(--text-muted);">No
                                         transactions recorded.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 4.5: ⏳ CREDIT AGING & RISK ANALYTICS -->
+        <!-- ========================================== -->
+        <div id="view-credit-aging" class="tab-view">
+            <div class="page-container" style="max-width: 1240px;">
+                <!-- Header -->
+                <div class="page-header-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="background:#0f172a; color:#38bdf8; padding:3px 8px; border-radius:6px; font-weight:800; font-size:11px; border:1px solid #334155;">
+                                <i class="fa-solid fa-hourglass-half"></i> DEBT AGE ANALYSIS
+                            </span>
+                        </div>
+                        <h2 style="font-size:22px; font-weight:900; color:#0f172a; margin-top:4px;">Credit Aging & Risk Analytics</h2>
+                        <p style="color: var(--text-muted); font-size: 13px;">Classification of outstanding credit by age, default risk forecasting, and recovery automation</p>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-primary-action" onclick="exportCreditAgingPDF()" style="background:#1e293b; box-shadow: 0 4px 12px rgba(30,41,59,0.15);">
+                            <i class="fa-solid fa-file-pdf" style="color: #f87171;"></i> <span>Export PDF</span>
+                        </button>
+                        <button class="btn-primary-action" onclick="exportCreditAgingCSV()" style="background:#059669;">
+                            <i class="fa-solid fa-file-excel"></i> <span>Export CSV</span>
+                        </button>
+                        <button class="btn-primary-action" onclick="switchTab('credits')" style="background:#475569;">
+                            <i class="fa-solid fa-arrow-left"></i> <span>Credit Ledger</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 Aging Metric KPI Cards -->
+                <div class="aging-metrics-grid">
+                    <!-- Bucket 1: 0 - 30 Days -->
+                    <div class="aging-metric-card bucket-current" onclick="filterAgingBucket('0_30')" style="cursor: pointer;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11px; font-weight:800; color:#065f46; text-transform:uppercase;">0 - 30 Days (Current)</span>
+                            <span class="risk-badge risk-badge-low">🟢 Low Risk</span>
+                        </div>
+                        <div id="agingAmount0_30" style="font-size:22px; font-weight:900; color:#065f46; margin: 8px 0 4px 0;">Rs. 0.00</div>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
+                            <span id="agingCount0_30">0 Invoices / Debtors</span>
+                            <span id="agingPct0_30" style="font-weight:700;">0.0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Bucket 2: 31 - 60 Days -->
+                    <div class="aging-metric-card bucket-due" onclick="filterAgingBucket('31_60')" style="cursor: pointer;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11px; font-weight:800; color:#92400e; text-transform:uppercase;">31 - 60 Days (Due)</span>
+                            <span class="risk-badge risk-badge-med">🟡 Medium Risk</span>
+                        </div>
+                        <div id="agingAmount31_60" style="font-size:22px; font-weight:900; color:#92400e; margin: 8px 0 4px 0;">Rs. 0.00</div>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
+                            <span id="agingCount31_60">0 Invoices / Debtors</span>
+                            <span id="agingPct31_60" style="font-weight:700;">0.0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Bucket 3: 61 - 90 Days -->
+                    <div class="aging-metric-card bucket-overdue" onclick="filterAgingBucket('61_90')" style="cursor: pointer;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11px; font-weight:800; color:#9a3412; text-transform:uppercase;">61 - 90 Days (Overdue)</span>
+                            <span class="risk-badge risk-badge-high">🟠 High Risk</span>
+                        </div>
+                        <div id="agingAmount61_90" style="font-size:22px; font-weight:900; color:#9a3412; margin: 8px 0 4px 0;">Rs. 0.00</div>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
+                            <span id="agingCount61_90">0 Invoices / Debtors</span>
+                            <span id="agingPct61_90" style="font-weight:700;">0.0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Bucket 4: 90+ Days -->
+                    <div class="aging-metric-card bucket-critical" onclick="filterAgingBucket('90_plus')" style="cursor: pointer;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11px; font-weight:800; color:#991b1b; text-transform:uppercase;">90+ Days (Default Risk)</span>
+                            <span class="risk-badge risk-badge-crit">🔴 Critical</span>
+                        </div>
+                        <div id="agingAmount90_plus" style="font-size:22px; font-weight:900; color:#991b1b; margin: 8px 0 4px 0;">Rs. 0.00</div>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
+                            <span id="agingCount90_plus">0 Invoices / Debtors</span>
+                            <span id="agingPct90_plus" style="font-weight:700;">0.0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Aging Spectrum Bar & Portfolio Health -->
+                <div class="aging-spectrum-wrap">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div style="font-size:13px; font-weight:800; color:#0f172a;">
+                            <i class="fa-solid fa-chart-bar" style="color:#059669; margin-right:4px;"></i> Portfolio Aging Distribution
+                        </div>
+                        <div id="agingHealthScoreBadge" style="font-size:12px; font-weight:800; color:#065f46; background:#dcfce7; padding:4px 10px; border-radius:8px; border:1px solid #bbf7d0;">
+                            Health Score: 100% (Healthy)
+                        </div>
+                    </div>
+                    <div class="aging-spectrum-bar">
+                        <div id="barSegment0_30" class="aging-segment-0-30" style="width: 0%;" title="0-30 Days"></div>
+                        <div id="barSegment31_60" class="aging-segment-31-60" style="width: 0%;" title="31-60 Days"></div>
+                        <div id="barSegment61_90" class="aging-segment-61-90" style="width: 0%;" title="61-90 Days"></div>
+                        <div id="barSegment90_plus" class="aging-segment-90-plus" style="width: 0%;" title="90+ Days"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b; flex-wrap:wrap; gap:6px;">
+                        <span><span style="display:inline-block; width:9px; height:9px; background:#10b981; border-radius:2px; margin-right:4px;"></span> 0-30 Days (Current)</span>
+                        <span><span style="display:inline-block; width:9px; height:9px; background:#f59e0b; border-radius:2px; margin-right:4px;"></span> 31-60 Days (Due)</span>
+                        <span><span style="display:inline-block; width:9px; height:9px; background:#f97316; border-radius:2px; margin-right:4px;"></span> 61-90 Days (Overdue)</span>
+                        <span><span style="display:inline-block; width:9px; height:9px; background:#ef4444; border-radius:2px; margin-right:4px;"></span> 90+ Days (Critical)</span>
+                    </div>
+                </div>
+
+                <!-- Aging Filter Chips & Debtors Table -->
+                <div class="toolbar-filter-box" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="agingFilterPillGroup">
+                        <button type="button" class="sms-chip-btn active" id="pillAgingAll" onclick="filterAgingBucket('ALL')">All Aging (0 Debtors)</button>
+                        <button type="button" class="sms-chip-btn" id="pillAging0_30" onclick="filterAgingBucket('0_30')">0-30 Days</button>
+                        <button type="button" class="sms-chip-btn" id="pillAging31_60" onclick="filterAgingBucket('31_60')">31-60 Days</button>
+                        <button type="button" class="sms-chip-btn" id="pillAging61_90" onclick="filterAgingBucket('61_90')">61-90 Days</button>
+                        <button type="button" class="sms-chip-btn" id="pillAging90_plus" onclick="filterAgingBucket('90_plus')">90+ Days Critical</button>
+                    </div>
+                    <input type="text" class="search-input-field" id="agingSearchInput" placeholder="Filter customer name or phone..." oninput="filterAgingTable()" style="max-width: 250px;">
+                </div>
+
+                <div class="table-card-wrapper">
+                    <div class="table-responsive">
+                        <table class="data-table-dense">
+                            <thead>
+                                <tr>
+                                    <th class="sticky-name-col">Customer Name</th>
+                                    <th>Phone</th>
+                                    <th>Oldest Bill Date</th>
+                                    <th>Days Overdue</th>
+                                    <th>Outstanding (Rs.)</th>
+                                    <th>Risk Level</th>
+                                    <th>Recovery Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agingTableBody">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 25px; color: var(--text-muted);">Analyzing credit aging data...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1826,11 +2376,14 @@
                             metrics, category breakdown and statement export</p>
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-primary-action" onclick="exportReportPDF()" style="background:#1e293b;">
+                            <i class="fa-solid fa-file-pdf" style="color: #f87171;"></i> <span>Export PDF</span>
+                        </button>
                         <button class="btn-primary-action" onclick="exportReportCSV()" style="background:#059669;">
                             <i class="fa-solid fa-file-excel"></i> <span>Export CSV</span>
                         </button>
                         <button class="btn-primary-action" onclick="printFinancialStatement()"
-                            style="background:#1e293b;">
+                            style="background:#334155;">
                             <i class="fa-solid fa-print"></i> <span>Print Audit</span>
                         </button>
                         <button class="btn-primary-action" onclick="shareExecutiveSummaryWhatsApp()"
@@ -2503,7 +3056,7 @@
                     <label>Amount Paying Now (Rs.)</label>
                     <div class="currency-input-wrap">
                         <span class="currency-prefix">Rs.</span>
-                        <input type="number" step="0.01" class="form-control-large" id="settleAmount" required>
+                        <input type="number" step="0.01" class="form-control-large input-glow-green" id="settleAmount" required placeholder="">
                     </div>
                 </div>
 
@@ -2557,16 +3110,30 @@
 
     <!-- Customer History Modal -->
     <div class="modal-overlay" id="modalCustomerHistory">
-        <div class="modal-card" style="max-width: 700px;">
-            <div class="modal-header">
+        <div class="modal-card" style="max-width: 650px; border-radius: 20px; padding: 20px;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
                 <div>
-                    <h3 id="histCustName">Customer History</h3>
-                    <p id="histCustSummary" style="font-size: 12px; color: var(--text-muted);"></p>
+                    <h3 id="histCustName" style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0;">Customer History</h3>
+                    <div id="histCustSummary" style="font-size: 12px; color: #64748b; margin-top: 3px;"></div>
                 </div>
                 <button class="btn-close-modal" onclick="closeModal('modalCustomerHistory')"><i
                         class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="table-responsive" style="max-height: 50vh;">
+
+            <!-- Cycle Toggle Buttons -->
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;" id="histCycleToggleWrap">
+                <button type="button" id="btnHistActiveCycle" class="btn-table-action btn-action-green" onclick="toggleCustomerHistoryView(true)" style="padding: 6px 12px; font-weight: 800; border-radius: 8px;">
+                    <i class="fa-solid fa-bolt"></i> <span>Active Cycle (Since 0.00)</span>
+                </button>
+                <button type="button" id="btnHistFullHistory" class="btn-table-action" onclick="toggleCustomerHistoryView(false)" style="padding: 6px 12px; font-weight: 700; border-radius: 8px;">
+                    <i class="fa-solid fa-list"></i> <span>Full History</span>
+                </button>
+                <button type="button" class="btn-table-action" onclick="window.print()" style="padding: 6px 12px; font-weight: 700; border-radius: 8px; background: #1e293b; color: #ffffff; border-color: #334155;">
+                    <i class="fa-solid fa-file-pdf" style="color: #f87171;"></i> <span>PDF / Print</span>
+                </button>
+            </div>
+
+            <div class="table-responsive" style="max-height: 52vh; border-radius: 12px; border: 1px solid #e2e8f0;">
                 <table class="data-table-dense">
                     <thead>
                         <tr>
@@ -2574,11 +3141,16 @@
                             <th>Type</th>
                             <th>Category</th>
                             <th>Amount (Rs.)</th>
-                            <th>Balance</th>
+                            <th>Running Balance</th>
                         </tr>
                     </thead>
                     <tbody id="custHistoryTableBody"></tbody>
                 </table>
+            </div>
+
+            <div id="histFooterActions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 8px;">
+                <div id="histTotalDueDisplay" style="font-weight: 900; font-size: 14px;"></div>
+                <div id="histActionBtns" style="display: flex; gap: 6px;"></div>
             </div>
         </div>
     </div>
@@ -2665,7 +3237,7 @@
 
         // 2. GLOBAL STATE
         let currentUid = '';
-        let currentBusinessId = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
+        let currentBusinessId = 'DarshanaMadawala';
         let allCredits = [];
         let allCustomers = [];
         let allBankAccounts = [];
@@ -2686,8 +3258,8 @@
         let currentSubscription = {
             plan: 'TRIAL',
             status: 'trial',
-            startDate: '2026-08-21',
-            expireDate: '2026-08-28',
+            startDate: '2026-08-24',
+            expireDate: '2026-08-31',
             monthlyFee: 1000,
             smsBalance: 300,
             smsHeader: 'MADAWALA'
@@ -2745,10 +3317,17 @@
             }
         }
 
-        // SPA Tab Switching with session storage persistence
+        // SPA Tab Switching with local and session storage persistence + hash
         function switchTab(tabId) {
+            if (!tabId) return;
             currentActiveTab = tabId;
+            localStorage.setItem('madawala_active_tab', tabId);
             sessionStorage.setItem('madawala_active_tab', tabId);
+            try {
+                if (window.location.hash !== '#' + tabId) {
+                    history.replaceState(null, null, '#' + tabId);
+                }
+            } catch(e) {}
 
             // Update Views
             document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
@@ -2775,7 +3354,11 @@
                 renderCreditsTable();
             }
             if (tabId === 'customers') renderCustomersTable();
-            if (tabId === 'banking') renderBankCards();
+            if (tabId === 'banking') {
+                renderBankCards();
+                renderBankTransactionsTable();
+            }
+            if (tabId === 'credit-aging') renderCreditAgingDashboard();
             if (tabId === 'reports') generateReports();
             if (tabId === 'subscription') updateSubscriptionUI();
         }
@@ -2792,6 +3375,7 @@
                     renderBankCards();
                     renderBankTransactionsTable();
                 }
+                if (currentActiveTab === 'credit-aging') renderCreditAgingDashboard();
                 if (currentActiveTab === 'reports') generateReports();
                 populateBankAndCustomerSelects();
                 updateSubscriptionUI();
@@ -2901,9 +3485,34 @@
             input.placeholder = 'Type customer name to search...';
             input.autocomplete = 'off';
 
+            // Hidden input for customer ID
+            const hiddenSelect = document.createElement('input');
+            hiddenSelect.type = 'hidden';
+            hiddenSelect.id = inputId + '_hidden';
+            hiddenSelect.name = inputId + '_hidden';
+
             // Create options container
             const optionsDiv = document.createElement('div');
             optionsDiv.className = 'dropdown-options';
+
+            const autoResolveCustomer = () => {
+                const val = input.value.trim().toLowerCase();
+                if (!val) {
+                    hiddenSelect.value = '';
+                    return;
+                }
+                // Match exact or starts-with or includes
+                let match = optionsList.find(o => o.name.toLowerCase() === val) ||
+                            optionsList.find(o => o.name.toLowerCase().startsWith(val)) ||
+                            optionsList.find(o => o.name.toLowerCase().includes(val)) ||
+                            optionsList.find(o => (o.phone || '').includes(val));
+                if (match) {
+                    hiddenSelect.value = match.id;
+                    input.value = match.name;
+                    if (typeof onSelect === 'function') onSelect(match.id);
+                    if (typeof onWizardCustomerSelect === 'function') onWizardCustomerSelect(match.id);
+                }
+            };
 
             // Build options
             const renderOptions = (filter = '') => {
@@ -2920,9 +3529,11 @@
                 }
 
                 optionsDiv.innerHTML = filtered.map(opt =>
-                    `<div class="dropdown-option" data-value="${opt.id}" onclick="selectSearchableOption('${containerId}', '${inputId}', '${opt.id}', '${opt.name.replace(/'/g, "\\'")}', '${opt.phone || ''}')">
-                        <div>${opt.name}</div>
-                        <div class="sub-info">${opt.phone || 'No phone'} • Due: ${formatRs(opt.totalDue || 0)}</div>
+                    `<div class="dropdown-option" data-value="${opt.id}" 
+                          onmousedown="selectSearchableOption('${containerId}', '${inputId}', '${opt.id}', '${opt.name.replace(/'/g, "\\'")}', '${opt.phone || ''}')"
+                          ontouchstart="selectSearchableOption('${containerId}', '${inputId}', '${opt.id}', '${opt.name.replace(/'/g, "\\'")}', '${opt.phone || ''}')">
+                        <div style="font-weight: 700; color: #0f172a;">${opt.name}</div>
+                        <div class="sub-info" style="font-size: 11px; color: #64748b;">${opt.phone || 'No phone'} • Due: ${formatRs(opt.totalDue || 0)}</div>
                     </div>`
                 ).join('');
             };
@@ -2936,27 +3547,32 @@
             input.addEventListener('input', () => {
                 renderOptions(input.value);
                 optionsDiv.classList.add('open');
+                const val = input.value.trim().toLowerCase();
+                const exact = optionsList.find(o => o.name.toLowerCase() === val);
+                if (exact) {
+                    hiddenSelect.value = exact.id;
+                    if (typeof onSelect === 'function') onSelect(exact.id);
+                    if (typeof onWizardCustomerSelect === 'function') onWizardCustomerSelect(exact.id);
+                }
             });
 
             input.addEventListener('blur', () => {
+                autoResolveCustomer();
                 setTimeout(() => {
                     optionsDiv.classList.remove('open');
-                }, 200);
+                }, 300);
             });
 
-            // Expose select function globally
-            window['selectSearchableOption_' + containerId] = function (customerId, customerName, customerPhone) {
-                const cust = optionsList.find(o => o.id === customerId);
-                if (cust) {
-                    input.value = customerName;
-                    if (typeof onSelect === 'function') {
-                        onSelect(customerId);
-                    }
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    autoResolveCustomer();
                     optionsDiv.classList.remove('open');
                 }
-            };
+            });
 
             wrap.appendChild(input);
+            wrap.appendChild(hiddenSelect);
             wrap.appendChild(optionsDiv);
             container.appendChild(wrap);
 
@@ -2964,13 +3580,7 @@
             container._searchableInput = input;
             container._searchableOptions = optionsDiv;
             container._renderOptions = renderOptions;
-
-            // Also add a hidden select for form submission
-            const hiddenSelect = document.createElement('select');
-            hiddenSelect.style.display = 'none';
-            hiddenSelect.id = inputId + '_hidden';
-            hiddenSelect.name = inputId + '_hidden';
-            wrap.appendChild(hiddenSelect);
+            container._onSelectHandler = onSelect;
 
             return {
                 input: input,
@@ -3069,7 +3679,7 @@
                                     <label>Credit Amount (Rs.) *</label>
                                     <div class="currency-input-wrap">
                                         <span class="currency-prefix">Rs.</span>
-                                        <input type="number" step="0.01" class="form-control-large" id="wzGcAmount" required placeholder="0.00">
+                                        <input type="number" step="0.01" class="form-control-large input-glow-red" id="wzGcAmount" required placeholder="">
                                     </div>
                                 </div>
 
@@ -3142,7 +3752,7 @@
                                     <label>Repayment Amount (Rs.) *</label>
                                     <div class="currency-input-wrap">
                                         <span class="currency-prefix">Rs.</span>
-                                        <input type="number" step="0.01" class="form-control-large" id="wzCdAmount" required placeholder="0.00">
+                                        <input type="number" step="0.01" class="form-control-large input-glow-green" id="wzCdAmount" required placeholder="">
                                     </div>
                                 </div>
 
@@ -3180,7 +3790,7 @@
                             <form id="formWizardBanking" onsubmit="handleWizardBanking(event)">
                                 <div class="form-group-large">
                                     <label>Transaction Type *</label>
-                                    <select class="form-control-large" id="wzBmType" required>
+                                    <select class="form-control-large" id="wzBmType" required onchange="const amt = document.getElementById('wzBmAmount'); if(amt){ amt.className = 'form-control-large ' + (this.value==='DEPOSIT'?'input-glow-green':'input-glow-red'); }">
                                         <option value="DEPOSIT">📥 Cash Deposit to Bank</option>
                                         <option value="WITHDRAWAL">📤 Cash Withdrawal from Bank</option>
                                     </select>
@@ -3198,7 +3808,7 @@
                                     <label>Amount (Rs.) *</label>
                                     <div class="currency-input-wrap">
                                         <span class="currency-prefix">Rs.</span>
-                                        <input type="number" step="0.01" class="form-control-large" id="wzBmAmount" required placeholder="0.00">
+                                        <input type="number" step="0.01" class="form-control-large input-glow-green" id="wzBmAmount" required placeholder="">
                                     </div>
                                 </div>
 
@@ -3409,6 +4019,22 @@
             updateWhatsAppSettleUrl();
         }
 
+        function openWhatsAppDirect(phone, text) {
+            const cleanPhone = (phone || '94713446500').replace(/[^0-9]/g, '');
+            const encodedText = encodeURIComponent(text || '');
+            const nativeUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedText}`;
+            const webUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
+
+            try {
+                window.location.href = nativeUrl;
+                setTimeout(() => {
+                    window.open(webUrl, '_blank');
+                }, 600);
+            } catch (e) {
+                window.open(webUrl, '_blank');
+            }
+        }
+
         function updateWhatsAppSettleUrl() {
             const btn = document.getElementById('btnWhatsAppSettleLink');
             if (!btn) return;
@@ -3416,6 +4042,10 @@
             const msg =
                 `*DIGIBIZ SYSTEM — SUBSCRIPTION PAYMENT*\n--------------------------------\n*Business:* MADAWALA TEA SHOP\n*Owner:* Darshana Madawala\n*Current Plan:* ${currentSubscription.plan || 'TRIAL'}\n*Monthly Renewal:* Rs. ${currentSubscription.monthlyFee || 1000}\n*Selected SMS Units:* ${selectedTopupUnits} (Rs. ${selectedTopupUnits})\n*Total Paid:* *Rs. ${totalFee}*\n*Bank Transfer:* Sampath Bank (A/C: 1099 5448 6969)\n--------------------------------\nI have attached my bank transfer slip below. Please renew my subscription.`;
             btn.href = `https://wa.me/94713446500?text=${encodeURIComponent(msg)}`;
+            btn.onclick = function(e) {
+                e.preventDefault();
+                openWhatsAppDirect('94713446500', msg);
+            };
         }
 
         async function saveSmsHeader() {
@@ -3477,43 +4107,211 @@
             }
         }
 
+        function checkSubscriptionPaywallLock() {
+            const sub = currentSubscription || {};
+            const daysLeft = getDaysRemaining(sub.expireDate);
+            const isPaid = sub.status === 'active_paid' || sub.status === 'unlimited' || sub.plan === 'PRO';
+            const paywall = document.getElementById('subscriptionPaywallOverlay');
+            if (paywall) {
+                if (daysLeft <= 0 && !isPaid) {
+                    paywall.style.display = 'flex';
+                } else {
+                    paywall.style.display = 'none';
+                }
+            }
+        }
+
+        async function handlePaywallLicenseActivate() {
+            const input = document.getElementById('paywallLicenseInput');
+            const code = (input?.value || '').trim().toUpperCase();
+            if (!code) return alert('Please enter an activation code.');
+
+            const validCodes = ['MADAWALA2026', 'DIGIBIZPRO', 'TEA1000', 'MADAWALA77'];
+            if (validCodes.includes(code)) {
+                const now = new Date();
+                now.setDate(now.getDate() + 30);
+                const newExp = now.toISOString().slice(0, 10);
+                
+                currentSubscription.plan = 'PRO';
+                currentSubscription.status = 'active_paid';
+                currentSubscription.expireDate = newExp;
+                
+                try {
+                    await db.collection('system_clients').doc('madawalateashop').set({
+                        plan: 'PRO',
+                        status: 'active_paid',
+                        expireDate: newExp,
+                        activatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                } catch(e) { console.warn(e); }
+
+                updateSubscriptionUI();
+                checkSubscriptionPaywallLock();
+                showToast('🎉 Subscription Activated for 30 Days!');
+            } else {
+                alert('Invalid activation key. Please contact DIGIBIZ Support via WhatsApp.');
+            }
+        }
+
+        // 1. REAL-TIME SUBSCRIPTION ENGINE WITH 7-DAY TRIAL & RS. 1,000/MO RULES
+        let subListenerUnsub = null;
         async function syncLiveSubscription() {
             try {
-                const clientDoc = await db.collection('system_clients').doc('madawalateashop').get();
-                if (clientDoc.exists) {
-                    const data = clientDoc.data() || {};
-                    currentSubscription.plan = data.plan || 'TRIAL';
-                    currentSubscription.status = data.status || 'trial';
-                    currentSubscription.startDate = data.startDate || '2026-08-21';
-                    currentSubscription.expireDate = data.expireDate || '2026-08-28';
-                    currentSubscription.monthlyFee = data.monthlyFee || 1000;
-                    currentSubscription.smsBalance = data.smsBalance || 300;
-                    currentSubscription.smsHeader = data.smsHeader || 'MADAWALA';
+                if (subListenerUnsub) subListenerUnsub();
+                
+                subListenerUnsub = db.collection('system_clients').doc('madawalateashop').onSnapshot((doc) => {
+                    if (doc && doc.exists) {
+                        const data = doc.data() || {};
+                        currentSubscription.plan = data.plan || 'TRIAL';
+                        currentSubscription.status = data.status || 'trial';
+                        currentSubscription.startDate = data.startDate || '2026-08-24';
+                        
+                        // Active 2 days remaining trial calculation (expireDate: 2026-08-31)
+                        if (!data.expireDate || data.expireDate === '2026-08-28') {
+                            currentSubscription.expireDate = '2026-08-31';
+                        } else {
+                            currentSubscription.expireDate = data.expireDate;
+                        }
+
+                        currentSubscription.monthlyFee = data.monthlyFee || 1000;
+                        currentSubscription.smsBalance = data.smsBalance || 300;
+                        currentSubscription.smsHeader = data.smsHeader || 'MADAWALA';
+                    } else {
+                        // Setup 2 days left trial expiration
+                        const expStr = '2026-08-31';
+
+                        const clientPayload = {
+                            clientId: 'madawalateashop',
+                            businessName: 'MADAWALA TEA SHOP',
+                            ownerName: 'Darshana Madawala',
+                            email: 'darshanamadawala80@gmail.com',
+                            phone: '0771234567',
+                            businessType: 'credit_ledger',
+                            plan: 'TRIAL',
+                            status: 'trial',
+                            startDate: '2026-08-24',
+                            expireDate: expStr,
+                            monthlyFee: 1000,
+                            smsBalance: 300,
+                            smsHeader: 'MADAWALA',
+                            workspacePath: '/clients/madawalateashop',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        db.collection('system_clients').doc('madawalateashop').set(clientPayload, { merge: true });
+
+                        currentSubscription.plan = 'TRIAL';
+                        currentSubscription.status = 'trial';
+                        currentSubscription.startDate = '2026-08-24';
+                        currentSubscription.expireDate = expStr;
+                        currentSubscription.monthlyFee = 1000;
+                    }
+                    
                     updateSubscriptionUI();
-                } else {
-                    const clientPayload = {
-                        clientId: 'madawalateashop',
-                        businessName: 'MADAWALA TEA SHOP',
-                        ownerName: 'Darshana Madawala',
-                        email: 'darshanamadawala80@gmail.com',
-                        phone: '0771234567',
-                        businessType: 'credit_ledger',
-                        plan: 'TRIAL',
-                        status: 'trial',
-                        startDate: '2026-08-21',
-                        expireDate: '2026-08-28',
-                        monthlyFee: 1000,
-                        smsBalance: 300,
-                        smsHeader: 'MADAWALA',
-                        workspacePath: '/clients/madawalateashop/',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    await db.collection('system_clients').doc('madawalateashop').set(clientPayload, { merge: true });
+                    checkSubscriptionPaywallLock();
+                }, (err) => {
+                    console.warn('[Subscription] Snapshot error:', err);
                     updateSubscriptionUI();
-                }
+                    checkSubscriptionPaywallLock();
+                });
             } catch (e) {
                 console.warn('Subscription sync fallback:', e);
                 updateSubscriptionUI();
+                checkSubscriptionPaywallLock();
+            }
+        }
+
+        // 2. REAL-TIME ONLINE PRESENCE & ACTIVITY TRACKING
+        function initLivePresenceTracking(user) {
+            if (!user) return;
+            const clientDocRef = db.collection('system_clients').doc('madawalateashop');
+            const presenceRef = clientDocRef.collection('presence').doc('live_session');
+
+            const sendPresence = (isOnline) => {
+                const nowSriLanka = new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' });
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                
+                const payload = {
+                    isOnline: isOnline,
+                    userEmail: user.email || 'darshanamadawala80@gmail.com',
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastSeenLocal: nowSriLanka,
+                    device: /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'Android/Mobile Device' : 'Desktop/PC',
+                    browser: navigator.userAgent,
+                    appType: isStandalone ? 'Installed Standalone APK / PWA' : 'Web Browser'
+                };
+
+                presenceRef.set(payload, { merge: true }).catch(console.warn);
+                clientDocRef.set({
+                    isOnlineNow: isOnline,
+                    lastSeenOnline: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastSeenSriLankaTime: nowSriLanka
+                }, { merge: true }).catch(console.warn);
+            };
+
+            // Online ping immediately
+            sendPresence(true);
+
+            // Heartbeat every 45s
+            setInterval(() => {
+                if (!document.hidden) sendPresence(true);
+            }, 45000);
+
+            document.addEventListener('visibilitychange', () => {
+                sendPresence(!document.hidden);
+            });
+
+            window.addEventListener('beforeunload', () => {
+                sendPresence(false);
+            });
+        }
+
+        // 3. AUTOMATED ONCE-A-DAY CLOUD BACKUP
+        async function performDailyCloudBackup(force = false) {
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                const lastBackup = localStorage.getItem('madawala_last_cloud_backup_date');
+                if (!force && lastBackup === today) {
+                    console.log('[Cloud Backup] Today already backed up:', today);
+                    return;
+                }
+
+                const totalCr = (credits || []).filter(c => c.type !== 'REPAYMENT').reduce((s, c) => s + Number(c.amount || 0), 0);
+                const totalColl = (credits || []).reduce((s, c) => s + Number(c.paid || 0), 0);
+                const totalDue = (credits || []).filter(c => c.type !== 'REPAYMENT').reduce((s, c) => s + Number(c.balance || 0), 0);
+
+                const snapshot = {
+                    backupDate: today,
+                    createdLocalTime: new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' }),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    businessName: 'MADAWALA TEA SHOP',
+                    ownerEmail: 'darshanamadawala80@gmail.com',
+                    customersCount: (customers || []).length,
+                    creditsCount: (credits || []).length,
+                    banksCount: (banks || []).length,
+                    bankTransactionsCount: (bankTransactions || []).length,
+                    totalCreditGiven: totalCr,
+                    totalCollections: totalColl,
+                    totalOutstandingDue: totalDue,
+                    customers: customers || [],
+                    credits: credits || [],
+                    banks: banks || [],
+                    bankTransactions: bankTransactions || []
+                };
+
+                await db.collection('system_clients').doc('madawalateashop')
+                        .collection('daily_backups').doc(today)
+                        .set(snapshot, { merge: true });
+
+                await db.collection('system_clients').doc('madawalateashop').set({
+                    lastCloudBackupDate: today,
+                    lastCloudBackupTime: new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' }),
+                    lastCloudBackupTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                localStorage.setItem('madawala_last_cloud_backup_date', today);
+                console.log('✅ [Cloud Backup] Daily backup saved for', today);
+            } catch (err) {
+                console.warn('[Cloud Backup] Daily backup error:', err);
             }
         }
 
@@ -3624,21 +4422,11 @@
         }
 
         function showPWAInstallBanner() {
-            var banner = document.getElementById('pwaInstallBanner');
-            if (!banner) return;
-            if (checkPWAInstalled()) {
-                banner.style.display = 'none';
-                return;
-            }
-            banner.style.display = 'flex';
+            // Disabled: Standalone APK mode active
         }
 
         function closePWAInstallBanner() {
-            var banner = document.getElementById('pwaInstallBanner');
-            if (banner) {
-                banner.style.display = 'none';
-                localStorage.setItem('pwa_banner_dismissed', 'true');
-            }
+            // Disabled: Standalone APK mode active
         }
 
         async function installPWA() {
@@ -3680,61 +4468,362 @@
         // 7. FIRESTORE DATA SYNC & LOCAL CACHE
         // ==========================================
         function updateCreditSummaryCards() {
+            const todayStr = new Date().toISOString().split('T')[0];
             const ids = {
-                totalCredit: document.getElementById('creditSummaryTotalCredit'),
-                collected: document.getElementById('creditSummaryCollected'),
+                todayIssued: document.getElementById('creditSummaryTodayIssued'),
+                todayCollected: document.getElementById('creditSummaryTodayCollected'),
                 outstanding: document.getElementById('creditSummaryOutstanding'),
+                debtorsBadge: document.getElementById('creditSummaryDebtorsBadge'),
                 recovery: document.getElementById('creditSummaryRecovery'),
-                debtors: document.getElementById('creditSummaryDebtors')
+                recoveryCircle: document.getElementById('creditSummaryRecoveryCircle')
             };
 
-            if (!allCredits.length) {
-                if (ids.totalCredit) ids.totalCredit.textContent = '';
-                if (ids.collected) ids.collected.textContent = '';
-                if (ids.outstanding) ids.outstanding.textContent = '';
-                if (ids.recovery) ids.recovery.textContent = '';
-                if (ids.debtors) ids.debtors.textContent = '';
-                return;
-            }
+            const creditSales = allCredits.filter(c => 
+                c.type !== 'REPAYMENT' && c.category !== 'REPAYMENT' && (Number(c.amount || 0) > 0 || (c.type === 'CREDIT' || !c.type))
+            );
 
-            // Calculate totals from all credits
             let totalCredit = 0;
             let totalCollected = 0;
             let outstanding = 0;
+            let todayIssued = 0;
+            let todayCollected = 0;
             let activeDebtorsSet = new Set();
 
-            allCredits.forEach(c => {
-                // Only count CREDIT type or undefined type (legacy records)
-                if (c.type === 'CREDIT' || !c.type) {
-                    const amt = Number(c.amount || 0);
-                    totalCredit += amt;
-                }
-                // All repayments and paid amounts
+            creditSales.forEach(c => {
+                const total = Number(c.amount || 0);
                 const paid = Number(c.paidAmount || 0);
-                totalCollected += paid;
+                const bal = Number(c.balance !== undefined ? c.balance : (total - paid));
 
-                // Calculate balance for each credit
-                const bal = Number(c.balance !== undefined ? c.balance : (Number(c.amount || 0) - Number(c.paidAmount ||
-                0)));
-                if (bal > 0 && c.status !== 'PAID') {
+                totalCredit += total;
+                totalCollected += Math.min(paid, total);
+
+                if (c.date === todayStr) {
+                    todayIssued += total;
+                }
+
+                if (bal > 0 && String(c.status || '').toUpperCase() !== 'PAID') {
                     outstanding += bal;
-                    if (c.customerName) {
-                        activeDebtorsSet.add(c.customerName);
-                    } else if (c.customerId) {
-                        activeDebtorsSet.add(c.customerId);
-                    }
+                    const custKey = c.customerId || c.customerName;
+                    if (custKey) activeDebtorsSet.add(custKey);
+                }
+            });
+
+            allCredits.forEach(r => {
+                if ((r.type === 'REPAYMENT' || r.category === 'REPAYMENT') && r.date === todayStr) {
+                    todayCollected += Number(r.paidAmount || r.amount || 0);
                 }
             });
 
             const recoveryRate = totalCredit > 0 ? ((totalCollected / totalCredit) * 100) : 0;
             const activeDebtors = activeDebtorsSet.size;
 
-            if (ids.totalCredit) ids.totalCredit.textContent = formatRs(totalCredit);
-            if (ids.collected) ids.collected.textContent = formatRs(totalCollected);
+            if (ids.todayIssued) ids.todayIssued.textContent = formatRs(todayIssued);
+            if (ids.todayCollected) ids.todayCollected.textContent = formatRs(todayCollected);
             if (ids.outstanding) ids.outstanding.textContent = formatRs(outstanding);
+            if (ids.debtorsBadge) ids.debtorsBadge.textContent = `${activeDebtors} Debtors`;
             if (ids.recovery) ids.recovery.textContent = `${Number(recoveryRate).toFixed(1)}%`;
-            if (ids.debtors) ids.debtors.textContent = String(activeDebtors || allCustomers.filter(c =>
-                getCustomerCalculatedDue(c) > 0).length);
+            if (ids.recoveryCircle) {
+                ids.recoveryCircle.setAttribute('stroke-dasharray', `${Math.min(100, Math.max(0, recoveryRate)).toFixed(1)}, 100`);
+            }
+        }
+
+        // ==========================================
+        // 7.5 CREDIT AGING & RISK ANALYTICS ENGINE
+        // ==========================================
+        let currentAgingBucketFilter = 'ALL';
+        let agingCustomersCache = [];
+
+        function filterAgingBucket(bucket) {
+            currentAgingBucketFilter = bucket;
+            document.querySelectorAll('#agingFilterPillGroup .sms-chip-btn').forEach(btn => btn.classList.remove('active'));
+            const btn = document.getElementById('pillAging' + (bucket === 'ALL' ? 'All' : bucket));
+            if (btn) btn.classList.add('active');
+            renderCreditAgingTableOnly();
+        }
+
+        function filterAgingTable() {
+            renderCreditAgingTableOnly();
+        }
+
+        function renderCreditAgingDashboard() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Group all active unpaid debts by customer
+            const debtorsMap = {};
+
+            allCredits.forEach(c => {
+                if (c.type === 'REPAYMENT' || c.category === 'REPAYMENT') return;
+                const total = Number(c.amount || 0);
+                const paid = Number(c.paidAmount || 0);
+                const bal = Number(c.balance !== undefined ? c.balance : (total - paid));
+
+                if (bal <= 0 || String(c.status || '').toUpperCase() === 'PAID') return;
+
+                const custKey = c.customerId || c.customerName || 'Unknown';
+                if (!debtorsMap[custKey]) {
+                    const custObj = allCustomers.find(cust => cust.id === c.customerId || cust.name === c.customerName);
+                    debtorsMap[custKey] = {
+                        id: custKey,
+                        customerId: c.customerId || '',
+                        name: c.customerName || (custObj ? custObj.name : 'Unknown Customer'),
+                        phone: c.customerPhone || (custObj ? custObj.phone : ''),
+                        totalDue: 0,
+                        oldestDate: c.date || '',
+                        credits: []
+                    };
+                }
+
+                debtorsMap[custKey].totalDue += bal;
+                debtorsMap[custKey].credits.push(c);
+
+                if (c.date && (!debtorsMap[custKey].oldestDate || c.date < debtorsMap[custKey].oldestDate)) {
+                    debtorsMap[custKey].oldestDate = c.date;
+                }
+            });
+
+            // Calculate age and risk bucket for each debtor
+            agingCustomersCache = Object.values(debtorsMap).map(d => {
+                let daysOverdue = 0;
+                if (d.oldestDate) {
+                    const billDate = new Date(d.oldestDate + 'T00:00:00');
+                    const diffTime = today.getTime() - billDate.getTime();
+                    daysOverdue = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+                }
+
+                let bucket = '0_30';
+                let riskLevel = 'LOW';
+                let riskLabel = '🟢 Low Risk';
+                let riskClass = 'risk-badge-low';
+
+                if (daysOverdue > 90) {
+                    bucket = '90_plus';
+                    riskLevel = 'CRITICAL';
+                    riskLabel = '🔴 Critical';
+                    riskClass = 'risk-badge-crit';
+                } else if (daysOverdue > 60) {
+                    bucket = '61_90';
+                    riskLevel = 'HIGH';
+                    riskLabel = '🟠 High Risk';
+                    riskClass = 'risk-badge-high';
+                } else if (daysOverdue > 30) {
+                    bucket = '31_60';
+                    riskLevel = 'MEDIUM';
+                    riskLabel = '🟡 Medium Risk';
+                    riskClass = 'risk-badge-med';
+                }
+
+                return {
+                    ...d,
+                    daysOverdue: daysOverdue,
+                    bucket: bucket,
+                    riskLevel: riskLevel,
+                    riskLabel: riskLabel,
+                    riskClass: riskClass
+                };
+            });
+
+            // Calculate Bucket Totals
+            let b0_30 = { amount: 0, count: 0 };
+            let b31_60 = { amount: 0, count: 0 };
+            let b61_90 = { amount: 0, count: 0 };
+            let b90_plus = { amount: 0, count: 0 };
+            let totalOutstanding = 0;
+
+            agingCustomersCache.forEach(d => {
+                totalOutstanding += d.totalDue;
+                if (d.bucket === '0_30') { b0_30.amount += d.totalDue; b0_30.count++; }
+                else if (d.bucket === '31_60') { b31_60.amount += d.totalDue; b31_60.count++; }
+                else if (d.bucket === '61_90') { b61_90.amount += d.totalDue; b61_90.count++; }
+                else if (d.bucket === '90_plus') { b90_plus.amount += d.totalDue; b90_plus.count++; }
+            });
+
+            const p0_30 = totalOutstanding > 0 ? ((b0_30.amount / totalOutstanding) * 100) : 0;
+            const p31_60 = totalOutstanding > 0 ? ((b31_60.amount / totalOutstanding) * 100) : 0;
+            const p61_90 = totalOutstanding > 0 ? ((b61_90.amount / totalOutstanding) * 100) : 0;
+            const p90_plus = totalOutstanding > 0 ? ((b90_plus.amount / totalOutstanding) * 100) : 0;
+
+            // Update KPI Cards
+            const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            setTxt('agingAmount0_30', formatRs(b0_30.amount));
+            setTxt('agingCount0_30', `${b0_30.count} Debtors`);
+            setTxt('agingPct0_30', `${p0_30.toFixed(1)}%`);
+
+            setTxt('agingAmount31_60', formatRs(b31_60.amount));
+            setTxt('agingCount31_60', `${b31_60.count} Debtors`);
+            setTxt('agingPct31_60', `${p31_60.toFixed(1)}%`);
+
+            setTxt('agingAmount61_90', formatRs(b61_90.amount));
+            setTxt('agingCount61_90', `${b61_90.count} Debtors`);
+            setTxt('agingPct61_90', `${p61_90.toFixed(1)}%`);
+
+            setTxt('agingAmount90_plus', formatRs(b90_plus.amount));
+            setTxt('agingCount90_plus', `${b90_plus.count} Debtors`);
+            setTxt('agingPct90_plus', `${p90_plus.toFixed(1)}%`);
+
+            // Update Spectrum Bar
+            const setW = (id, w) => { const el = document.getElementById(id); if (el) el.style.width = `${w}%`; };
+            setW('barSegment0_30', p0_30);
+            setW('barSegment31_60', p31_60);
+            setW('barSegment61_90', p61_90);
+            setW('barSegment90_plus', p90_plus);
+
+            // Portfolio Health Index
+            const healthScore = (p0_30 + (p31_60 * 0.7) + (p61_90 * 0.3)).toFixed(0);
+            const healthEl = document.getElementById('agingHealthScoreBadge');
+            if (healthEl) {
+                if (healthScore >= 75) {
+                    healthEl.style.background = '#dcfce7';
+                    healthEl.style.color = '#065f46';
+                    healthEl.style.borderColor = '#bbf7d0';
+                    healthEl.innerHTML = `Portfolio Health: ${healthScore}% (Healthy)`;
+                } else if (healthScore >= 50) {
+                    healthEl.style.background = '#fef3c7';
+                    healthEl.style.color = '#92400e';
+                    healthEl.style.borderColor = '#fde68a';
+                    healthEl.innerHTML = `Portfolio Health: ${healthScore}% (Moderate Risk)`;
+                } else {
+                    healthEl.style.background = '#fee2e2';
+                    healthEl.style.color = '#991b1b';
+                    healthEl.style.borderColor = '#fecdd3';
+                    healthEl.innerHTML = `Portfolio Health: ${healthScore}% (High Risk Alert)`;
+                }
+            }
+
+            const pillAll = document.getElementById('pillAgingAll');
+            if (pillAll) pillAll.textContent = `All Aging (${agingCustomersCache.length} Debtors)`;
+
+            renderCreditAgingTableOnly();
+        }
+
+        function renderCreditAgingTableOnly() {
+            const tbody = document.getElementById('agingTableBody');
+            if (!tbody) return;
+
+            const search = (document.getElementById('agingSearchInput')?.value || '').toLowerCase().trim();
+
+            let list = agingCustomersCache.filter(d => {
+                if (currentAgingBucketFilter !== 'ALL' && d.bucket !== currentAgingBucketFilter) return false;
+                if (search) {
+                    const matchName = (d.name || '').toLowerCase().includes(search);
+                    const matchPhone = (d.phone || '').toLowerCase().includes(search);
+                    if (!matchName && !matchPhone) return false;
+                }
+                return true;
+            });
+
+            list.sort((a, b) => b.daysOverdue - a.daysOverdue || b.totalDue - a.totalDue);
+
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 25px; color: var(--text-muted);">No debtors found matching this aging category.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(d => {
+                const daysBadgeClass = d.daysOverdue > 90 ? 'status-unpaid' : (d.daysOverdue > 30 ? 'status-partial' : 'status-paid');
+                const cleanPhone = (d.phone || '').replace(/[^0-9]/g, '');
+
+                return `
+                    <tr>
+                        <td class="sticky-name-col">
+                            <span style="font-weight: 800; color: #0f172a; cursor: pointer; text-decoration: underline;" onclick="viewCustomerHistory('${d.customerId || d.name}', true)">
+                                ${d.name}
+                            </span>
+                        </td>
+                        <td>${d.phone || '-'}</td>
+                        <td>${d.oldestDate || '-'}</td>
+                        <td>
+                            <span class="status-badge ${daysBadgeClass}" style="font-weight: 800;">
+                                ${d.daysOverdue} Days
+                            </span>
+                        </td>
+                        <td style="font-weight: 900; color: #dc2626; font-size: 14px;">
+                            ${formatRs(d.totalDue)}
+                        </td>
+                        <td>
+                            <span class="risk-badge ${d.riskClass}">
+                                ${d.riskLabel}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 4px; align-items: center;">
+                                ${cleanPhone ? `
+                                    <button class="btn-table-action btn-action-wa" onclick="sendWhatsAppAgingReminder('${d.id}', '${d.bucket}', ${d.totalDue}, ${d.daysOverdue})" title="Send WhatsApp Notice">
+                                        <i class="fa-brands fa-whatsapp"></i> <span>Reminder</span>
+                                    </button>
+                                    <a href="tel:${cleanPhone}" class="btn-table-action" style="background:#f1f5f9; color:#334155;" title="Direct Call">
+                                        <i class="fa-solid fa-phone"></i>
+                                    </a>
+                                ` : ''}
+                                <button class="btn-table-action btn-action-green" onclick="openSettleModalForCustomer('${d.customerId || d.name}')" title="Record Payment">
+                                    <i class="fa-solid fa-hand-holding-dollar"></i> <span>Settle</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function sendWhatsAppAgingReminder(debtorKey, bucket, amount, days) {
+            const debtor = agingCustomersCache.find(d => d.id === debtorKey);
+            if (!debtor || !debtor.phone) {
+                alert('No phone number recorded for this customer.');
+                return;
+            }
+
+            let phone = debtor.phone.replace(/[^0-9]/g, '');
+            if (phone.startsWith('0')) phone = '94' + phone.substring(1);
+            if (phone.length === 9) phone = '94' + phone;
+
+            let msg = '';
+            if (bucket === '90_plus') {
+                msg = `*MADAWALA TEA SHOP - අවසන් ණය ගෙවීමේ දැනුම්දීම*\n\nහිතවත් ${debtor.name} මහතාණෙනි,\nඔබගේ රු. ${formatRs(amount)} ක හිඟ ණය මුදල දින ${days} කට වැඩි කාලයක් තිස්සේ නොගෙවා ඇත. කරුණාකර හැකි ඉක්මනින් මෙම මුදල ගෙවා බේරීමට කටයුතු කරන්න.\n\nස්තූතියි!\nMadawala Tea Shop (077 123 4567)`;
+            } else if (bucket === '61_90' || bucket === '31_60') {
+                msg = `*MADAWALA TEA SHOP - ණය මුදල් පියවීමේ සිහිකැඳවීම*\n\nහිතවත් ${debtor.name} මහතාණෙනි,\nඔබ විසින් ලබාගත් රු. ${formatRs(amount)} ක ණය මුදල සඳහා දින ${days} ක් ගතව ඇත. කරුණාකර එය පියවීමට කාරුණික වන්න.\n\nස්තූතියි!\nMadawala Tea Shop`;
+            } else {
+                msg = `*MADAWALA TEA SHOP - ගිණුම් සටහන*\n\nහිතවත් ${debtor.name},\nඔබගේ වත්මන් හිඟ ණය ශේෂය රු. ${formatRs(amount)} වේ. (දින ${days}).\n\nස්තූතියි!\nMadawala Tea Shop`;
+            }
+
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        // ==========================================
+        // 7.6 UNIVERSAL PDF & EXPORT ENGINE
+        // ==========================================
+        function exportCreditAgingPDF() {
+            window.print();
+        }
+
+        function exportCreditAgingCSV() {
+            if (!agingCustomersCache.length) {
+                alert('No aging records to export.');
+                return;
+            }
+            let csv = 'Customer Name,Phone,Oldest Bill Date,Days Overdue,Outstanding (Rs),Risk Level\n';
+            agingCustomersCache.forEach(d => {
+                csv += `"${d.name}","${d.phone}","${d.oldestDate}",${d.daysOverdue},${d.totalDue},"${d.riskLevel}"\n`;
+            });
+            downloadCSVFile(csv, `Madawala_Credit_Aging_${new Date().toISOString().split('T')[0]}.csv`);
+        }
+
+        function exportBankingPDF() {
+            window.print();
+        }
+
+        function exportReportPDF() {
+            window.print();
+        }
+
+        function downloadCSVFile(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function loadLocalCache() {
@@ -3845,14 +4934,33 @@
         // ==========================================
         function getFilteredCredits() {
             const query = (document.getElementById('creditSearchInput')?.value || '').toLowerCase().trim();
-            const statusFilter = document.getElementById('creditStatusFilter')?.value || 'ALL';
+            const statusFilter = document.getElementById('creditStatusFilter')?.value || 'ACTIVE';
 
             return allCredits.filter(c => {
+                // Only show credit sales in Credit Ledger (repayments are shown in customer statement and update the credit records)
+                if (c.type === 'REPAYMENT' || c.category === 'REPAYMENT' || (Number(c.amount || 0) === 0 && Number(c.paidAmount || 0) > 0)) {
+                    return false;
+                }
+
                 const name = (c.customerName || '').toLowerCase();
                 const phone = (c.customerPhone || '').toLowerCase();
                 const cat = (c.category || '').toLowerCase();
                 const matchesQuery = !query || name.includes(query) || phone.includes(query) || cat.includes(query);
-                const matchesStatus = (statusFilter === 'ALL') || (c.status === statusFilter);
+
+                const total = Number(c.amount || 0);
+                const paid = Number(c.paidAmount || 0);
+                const balance = Number(c.balance !== undefined ? c.balance : (total - paid));
+                const isPaid = balance <= 0 || String(c.status || '').toUpperCase() === 'PAID';
+                const isPartial = balance > 0 && paid > 0;
+                const isUnpaid = balance > 0 && paid === 0;
+
+                let matchesStatus = true;
+                if (statusFilter === 'ACTIVE') matchesStatus = (!isPaid && balance > 0);
+                else if (statusFilter === 'UNPAID') matchesStatus = isUnpaid;
+                else if (statusFilter === 'PARTIAL') matchesStatus = isPartial;
+                else if (statusFilter === 'PAID') matchesStatus = isPaid;
+                else if (statusFilter === 'ALL') matchesStatus = true;
+
                 return matchesQuery && matchesStatus;
             });
         }
@@ -3865,24 +4973,16 @@
             const loadMoreBtnText = document.getElementById('loadMoreBtnText');
             if (!tbody) return;
 
-            // Filter out zero balance entries (PAID status) - but show all if status filter is PAID
-            const statusFilter = document.getElementById('creditStatusFilter')?.value || 'ALL';
-            let activeCredits = filtered;
-            if (statusFilter !== 'PAID') {
-                activeCredits = filtered.filter(c => {
-                    const balance = Number(c.balance !== undefined ? c.balance : ((c.amount || 0) - (c.paidAmount ||
-                    0)));
-                    return balance > 0 && c.status !== 'PAID';
-                });
-            }
-
-            if (!activeCredits.length) {
+            if (!filtered.length) {
+                const statusFilter = document.getElementById('creditStatusFilter')?.value || 'ALL';
                 tbody.innerHTML = `
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 30px; color: #166534; background: #f0fdf4; border-radius: 8px;">
-                                <div style="font-size: 20px;">✅</div>
-                                <div style="font-weight: 700; font-size: 16px;">All debts are fully settled!</div>
-                                <div style="font-size: 13px; color: #64748b; margin-top: 4px;">No outstanding credit records found.</div>
+                            <td colspan="8" style="text-align: center; padding: 24px; color: #166534; background: #f0fdf4; border-radius: 8px;">
+                                <div style="font-size: 20px;">📋</div>
+                                <div style="font-weight: 800; font-size: 14px;">No matching records found</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                                    ${statusFilter !== 'ALL' ? `Filter is set to "${statusFilter}". <button type="button" onclick="document.getElementById('creditStatusFilter').value='ALL'; filterCreditsTable();" style="color:#059669; font-weight:800; background:none; border:none; cursor:pointer; text-decoration:underline;">Show All Records</button>` : 'Add a new credit transaction using the + button above.'}
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -3891,7 +4991,7 @@
             }
 
             // Paginated slice (max 50 at a time)
-            const displayed = activeCredits.slice(0, creditsRenderLimit);
+            const displayed = filtered.slice(0, creditsRenderLimit);
 
             tbody.innerHTML = displayed.map(c => {
                 const total = Number(c.amount || 0);
@@ -3903,12 +5003,16 @@
                 if (displayBalance <= 0) statusBadge = '<span class="status-badge status-paid">PAID</span>';
                 else if (paid > 0) statusBadge = '<span class="status-badge status-partial">PARTIAL</span>';
 
+                const custName = c.customerName || 'Walk-in';
+                const custIdentifier = c.customerId || custName;
+
                 return `
                         <tr>
                             <td><strong>${c.date || '-'}</strong></td>
-                            <td class="sticky-name-col">
-                                <div style="font-weight: 800; color: #0f172a;">${c.customerName || 'Walk-in'}</div>
-                                <div style="font-size: 10.5px; color: var(--text-muted);">${c.customerPhone || ''}</div>
+                            <td class="sticky-name-col" onclick="viewCustomerHistory('${custIdentifier}', true)" style="cursor: pointer;" title="Click to view customer history">
+                                <div style="font-weight: 800; font-size: 13.5px; color: #064e3b; text-decoration: underline; line-height: 1.2;">${custName}</div>
+                                <div style="font-size: 11px; color: var(--text-muted);">${c.customerPhone || ''}</div>
+                                ${displayBalance > 0 ? `<div style="font-size: 11px; font-weight: 800; color: #dc2626; margin-top: 1px;">Bal: ${formatRs(displayBalance)}</div>` : `<div style="font-size: 10.5px; font-weight: 700; color: #16a34a; margin-top: 1px;">Settled</div>`}
                             </td>
                             <td>${c.category || 'Goods'}</td>
                             <td><strong>${formatRs(total)}</strong></td>
@@ -3916,11 +5020,10 @@
                             <td style="color: var(--red-text); font-weight: 800;">${formatRs(displayBalance)}</td>
                             <td>${statusBadge}</td>
                             <td>
-                                <div style="display: flex; gap: 5px;">
+                                <div style="display: flex; gap: 4px; flex-wrap: nowrap;">
                                     ${displayBalance > 0 ? `<button class="btn-table-action btn-action-green" onclick="openSettleModal('${c.id}')" title="Settle"><i class="fa-solid fa-hand-holding-dollar"></i> Settle</button>` : ''}
                                     <button class="btn-table-action" onclick="openEditCreditModal('${c.id}')" title="Edit Transaction"><i class="fa-solid fa-pen-to-square"></i></button>
                                     <button class="btn-table-action btn-action-wa" onclick="sendWhatsAppInvoice('${c.id}')" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
-                                    <button class="btn-table-action" onclick="printReceiptModal('${c.id}')" title="Print"><i class="fa-solid fa-receipt"></i></button>
                                     <button class="btn-table-action btn-action-danger" onclick="deleteCreditRecord('${c.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </td>
@@ -3929,11 +5032,11 @@
             }).join('');
 
             if (loadMoreBar) {
-                if (activeCredits.length > creditsRenderLimit) {
+                if (filtered.length > creditsRenderLimit) {
                     loadMoreBar.style.display = 'block';
                     if (loadMoreBtnText) {
                         loadMoreBtnText.textContent =
-                            `Load More (${displayed.length} of ${activeCredits.length} active records)`;
+                            `Load More (${displayed.length} of ${filtered.length} records)`;
                     }
                 } else {
                     loadMoreBar.style.display = 'none';
@@ -4069,7 +5172,7 @@
 
             if (!allCustomers.length) {
                 tbody.innerHTML =
-                    '<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">No customers added yet.</td></tr>';
+                    '<tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--text-muted);">No customers added yet.</td></tr>';
                 return;
             }
 
@@ -4078,20 +5181,19 @@
 
                 return `
                         <tr>
-                            <td class="sticky-name-col">
-                                <div style="font-weight: 800; font-size: 13.5px; color: #0f172a;">${c.name}</div>
+                            <td class="sticky-name-col" onclick="viewCustomerHistory('${c.id}', true)" style="cursor: pointer;" title="Click to view customer statement">
+                                <div style="font-weight: 800; font-size: 13.5px; color: #064e3b; text-decoration: underline; line-height: 1.2;">${c.name}</div>
+                                ${finalDue > 0 ? `<div style="font-size: 11px; font-weight: 800; color: #dc2626; margin-top: 2px;">Due: ${formatRs(finalDue)}</div>` : `<div style="font-size: 10.5px; font-weight: 700; color: #16a34a; margin-top: 2px;">Settled</div>`}
                             </td>
-                            <td><a href="tel:${c.phone}" style="color: var(--tea-primary); font-weight: 600; text-decoration: none;">${c.phone || '-'}</a></td>
-                            <td>${c.address || '-'}</td>
-                            <td style="color: ${finalDue > 0 ? 'var(--red-text)' : 'var(--green-text)'}; font-weight: 900; font-size: 14.5px;">
+                            <td><a href="tel:${c.phone}" style="color: var(--tea-primary); font-weight: 600; text-decoration: none; font-size: 12.5px;">${c.phone || '-'}</a></td>
+                            <td style="color: ${finalDue > 0 ? 'var(--red-text)' : 'var(--green-text)'}; font-weight: 900; font-size: 13.5px;">
                                 ${formatRs(finalDue)}
                             </td>
                             <td>
-                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                    <button class="btn-table-action" onclick="viewCustomerHistory('${c.id}')"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
-                                    <button class="btn-table-action" onclick="openEditCustomerModal('${c.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                                    ${c.phone ? `<a href="https://wa.me/${c.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn-table-action btn-action-wa" style="text-decoration:none;"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
-                                    ${finalDue > 0 ? `<button class="btn-table-action btn-action-green" onclick="openSettleModalForCustomer('${c.id}')"><i class="fa-solid fa-hand-holding-dollar"></i> Settle</button>` : ''}
+                                <div style="display: flex; gap: 4px; flex-wrap: nowrap;">
+                                    <button class="btn-table-action" onclick="openEditCustomerModal('${c.id}')" title="Edit Customer"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                    ${c.phone ? `<a href="https://wa.me/${c.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn-table-action btn-action-wa" style="text-decoration:none;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                                    ${finalDue > 0 ? `<button class="btn-table-action btn-action-green" onclick="openSettleModalForCustomer('${c.id}')" title="Settle"><i class="fa-solid fa-hand-holding-dollar"></i> Settle</button>` : ''}
                                 </div>
                             </td>
                         </tr>
@@ -4104,8 +5206,7 @@
             const filtered = allCustomers.filter(c => {
                 const name = (c.name || '').toLowerCase();
                 const phone = (c.phone || '').toLowerCase();
-                const address = (c.address || '').toLowerCase();
-                return !q || name.includes(q) || phone.includes(q) || address.includes(q);
+                return !q || name.includes(q) || phone.includes(q);
             });
 
             const tbody = document.getElementById('customersTableBody');
@@ -4113,7 +5214,7 @@
 
             if (!filtered.length) {
                 tbody.innerHTML =
-                    '<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">No customers match your search.</td></tr>';
+                    '<tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--text-muted);">No customers match your search.</td></tr>';
                 return;
             }
 
@@ -4121,18 +5222,17 @@
                 const finalDue = getCustomerCalculatedDue(c);
                 return `
                         <tr>
-                            <td class="sticky-name-col">
-                                <div style="font-weight: 800; font-size: 13.5px; color: #0f172a;">${c.name}</div>
+                            <td class="sticky-name-col" onclick="viewCustomerHistory('${c.id}', true)" style="cursor: pointer;" title="Click to view customer statement">
+                                <div style="font-weight: 800; font-size: 13.5px; color: #064e3b; text-decoration: underline; line-height: 1.2;">${c.name}</div>
+                                ${finalDue > 0 ? `<div style="font-size: 11px; font-weight: 800; color: #dc2626; margin-top: 2px;">Due: ${formatRs(finalDue)}</div>` : `<div style="font-size: 10.5px; font-weight: 700; color: #16a34a; margin-top: 2px;">Settled</div>`}
                             </td>
-                            <td><a href="tel:${c.phone}" style="color: var(--tea-primary); font-weight: 600; text-decoration: none;">${c.phone || '-'}</a></td>
-                            <td>${c.address || '-'}</td>
-                            <td style="color: ${finalDue > 0 ? 'var(--red-text)' : 'var(--green-text)'}; font-weight: 900; font-size: 14.5px;">${formatRs(finalDue)}</td>
+                            <td><a href="tel:${c.phone}" style="color: var(--tea-primary); font-weight: 600; text-decoration: none; font-size: 12.5px;">${c.phone || '-'}</a></td>
+                            <td style="color: ${finalDue > 0 ? 'var(--red-text)' : 'var(--green-text)'}; font-weight: 900; font-size: 13.5px;">${formatRs(finalDue)}</td>
                             <td>
-                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                    <button class="btn-table-action" onclick="viewCustomerHistory('${c.id}')"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
-                                    <button class="btn-table-action" onclick="openEditCustomerModal('${c.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                                    ${c.phone ? `<a href="https://wa.me/${c.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn-table-action btn-action-wa" style="text-decoration:none;"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
-                                    ${finalDue > 0 ? `<button class="btn-table-action btn-action-green" onclick="openSettleModalForCustomer('${c.id}')"><i class="fa-solid fa-hand-holding-dollar"></i> Settle</button>` : ''}
+                                <div style="display: flex; gap: 4px; flex-wrap: nowrap;">
+                                    <button class="btn-table-action" onclick="openEditCustomerModal('${c.id}')" title="Edit Customer"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                    ${c.phone ? `<a href="https://wa.me/${c.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn-table-action btn-action-wa" style="text-decoration:none;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                                    ${finalDue > 0 ? `<button class="btn-table-action btn-action-green" onclick="openSettleModalForCustomer('${c.id}')" title="Settle"><i class="fa-solid fa-hand-holding-dollar"></i> Settle</button>` : ''}
                                 </div>
                             </td>
                         </tr>
@@ -4186,29 +5286,57 @@
 
         function renderBankTransactionsTable() {
             const tbody = document.getElementById('bankTxTableBody');
+            const badge = document.getElementById('bankTxCountBadge');
             if (!tbody) return;
 
-            if (!allBankTransactions.length) {
+            // Combine explicit bank_transactions and bank debt repayments
+            const list = [...allBankTransactions];
+
+            allCredits.forEach(c => {
+                if ((c.type === 'REPAYMENT' || c.category === 'REPAYMENT') && c.paymentMethod === 'BANK') {
+                    const exists = list.some(tx => tx.creditId === c.id || (tx.date === c.date && tx.amount === (c.paidAmount || c.amount) && tx.customerId === c.customerId));
+                    if (!exists) {
+                        const bank = allBankAccounts.find(b => b.id === c.bankAccountId);
+                        list.push({
+                            id: 'rep_' + c.id,
+                            date: c.date || '',
+                            bankName: bank ? bank.bankName : (c.bankName || 'Bank Account'),
+                            accountNumber: bank ? bank.accountNumber : '',
+                            type: 'DEPOSIT',
+                            amount: Number(c.paidAmount || c.amount || 0),
+                            notes: `Debt Repayment (${c.customerName || 'Customer'})`,
+                            createdAt: c.createdAt
+                        });
+                    }
+                }
+            });
+
+            // Sort newest first
+            list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+            if (badge) badge.textContent = `${list.length} Records`;
+
+            if (!list.length) {
                 tbody.innerHTML =
-                    '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No banking transactions recorded.</td></tr>';
+                    '<tr><td colspan="5" style="text-align: center; padding: 25px; color: var(--text-muted);">No banking transactions recorded yet.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = allBankTransactions.map(tx => {
+            tbody.innerHTML = list.map(tx => {
                 const isDeposit = (tx.type || '').toUpperCase() === 'DEPOSIT';
                 return `
-                        <tr>
-                            <td>${tx.date || '-'}</td>
-                            <td><strong>${tx.bankName || 'Bank'}</strong> (${tx.accountNumber || ''})</td>
-                            <td>
-                                <span class="status-badge ${isDeposit ? 'status-paid' : 'status-unpaid'}">
-                                    ${isDeposit ? '📥 DEPOSIT' : '📤 WITHDRAWAL'}
-                                </span>
-                            </td>
-                            <td style="font-weight: 800; color: ${isDeposit ? 'var(--green-text)' : 'var(--red-text)'};">${formatRs(tx.amount)}</td>
-                            <td>${tx.notes || '-'}</td>
-                        </tr>
-                    `;
+                    <tr>
+                        <td>${tx.date || '-'}</td>
+                        <td><strong>${tx.bankName || 'Bank'}</strong> ${tx.accountNumber ? `(${tx.accountNumber})` : ''}</td>
+                        <td>
+                            <span class="status-badge ${isDeposit ? 'status-paid' : 'status-unpaid'}">
+                                ${isDeposit ? '📥 DEPOSIT' : '📤 WITHDRAWAL'}
+                            </span>
+                        </td>
+                        <td style="font-weight: 800; color: ${isDeposit ? 'var(--green-text)' : 'var(--red-text)'};">${formatRs(tx.amount)}</td>
+                        <td>${tx.notes || '-'}</td>
+                    </tr>
+                `;
             }).join('');
         }
 
@@ -4289,16 +5417,16 @@
             let debtorsMap = {};
 
             filtered.forEach(c => {
+                if (c.type === 'REPAYMENT' || c.category === 'REPAYMENT' || (Number(c.amount || 0) === 0 && Number(c.paidAmount || 0) > 0)) {
+                    return;
+                }
+
                 const amt = Number(c.amount || 0);
                 const paid = Number(c.paidAmount || 0);
                 const bal = Number(c.balance !== undefined ? c.balance : (amt - paid));
 
-                if (c.type === 'CREDIT' || !c.type) {
-                    totalCreditIssued += amt;
-                    totalCollections += paid;
-                } else if (c.type === 'REPAYMENT') {
-                    totalCollections += paid;
-                }
+                totalCreditIssued += amt;
+                totalCollections += Math.min(paid, amt);
 
                 // Category tally
                 const cat = c.category || 'Goods';
@@ -4546,14 +5674,30 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
             const hiddenSelect = document.getElementById('wzGcCustomerSearch_hidden');
-            const custId = hiddenSelect ? hiddenSelect.value : '';
+            let custId = hiddenSelect ? hiddenSelect.value : '';
+            const searchInput = document.getElementById('wzGcCustomerSearch');
+            const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+            // Auto match if custId is missing
+            if (!custId && searchVal) {
+                let match = allCustomers.find(c => c.name.toLowerCase() === searchVal) ||
+                            allCustomers.find(c => c.name.toLowerCase().startsWith(searchVal)) ||
+                            allCustomers.find(c => c.name.toLowerCase().includes(searchVal)) ||
+                            allCustomers.find(c => (c.phone || '').includes(searchVal));
+                if (match) {
+                    custId = match.id;
+                    if (hiddenSelect) hiddenSelect.value = match.id;
+                    if (searchInput) searchInput.value = match.name;
+                }
+            }
+
             const category = document.getElementById('wzGcCategory').value;
             const amount = parseFloat(document.getElementById('wzGcAmount').value) || 0;
             const date = document.getElementById('wzGcDate').value;
             const notes = document.getElementById('wzGcNotes').value.trim();
 
             if (!custId) {
-                alert('Please select a customer first!');
+                alert('Please select a customer from the dropdown list or type their name!');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm & Issue Credit</span>';
                 return;
@@ -4645,6 +5789,21 @@
             const date = document.getElementById('wzCdDate').value;
             const notes = document.getElementById('wzCdNotes').value.trim();
 
+            if (method === 'BANK') {
+                if (!allBankAccounts || allBankAccounts.length === 0) {
+                    alert('⚠️ Bank Account Required: No bank accounts are registered in your system. Please add a Bank Account in the "Banking & Cash" tab before recording bank payments.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm & Record Repayment</span>';
+                    return;
+                }
+                if (!bankId) {
+                    alert('⚠️ Bank Account Required: Please select a destination Bank Account from the list.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm & Record Repayment</span>';
+                    return;
+                }
+            }
+
             const cust = allCustomers.find(c => c.id === custId);
             if (!cust) {
                 alert('Selected customer not found!');
@@ -4674,6 +5833,11 @@
             }
 
             try {
+                const cust = allCustomers.find(c => c.id === custId);
+                const totalDue = cust ? getCustomerCalculatedDue(cust) : 0;
+                const actualPayment = (totalDue > 0 && amount > totalDue) ? totalDue : amount;
+                const changeToReturn = (totalDue > 0 && amount > totalDue) ? (amount - totalDue) : 0;
+
                 // 1. Create REPAYMENT record
                 const repaymentData = {
                     businessId: currentBusinessId,
@@ -4682,7 +5846,7 @@
                     customerPhone: custPhone,
                     category: 'REPAYMENT',
                     amount: 0,
-                    paidAmount: amount,
+                    paidAmount: actualPayment,
                     balance: 0,
                     status: 'PAID',
                     paymentMethod: method,
@@ -4707,7 +5871,7 @@
                     getCreditOutstanding(c) > 0 && String(c.status || '').toUpperCase() !== 'PAID'
                 );
 
-                let remainingAmount = amount;
+                let remainingAmount = actualPayment;
 
                 // Sort by oldest first (FIFO)
                 unpaidCredits.sort((a, b) => {
@@ -4751,11 +5915,11 @@
                 // 3. Recalculate customer total due
                 await recalculateCustomerBalance(custId);
 
-                // 4. Bank account update if needed
+                // 4. Bank account update and transaction record if needed
                 if (method === 'BANK' && bankId) {
                     const bank = allBankAccounts.find(b => b.id === bankId);
                     if (bank) {
-                        const newBankBal = (Number(bank.currentBalance || 0) + amount);
+                        const newBankBal = (Number(bank.currentBalance || 0) + actualPayment);
                         bank.currentBalance = newBankBal;
                         await db.collection('businesses')
                             .doc(currentBusinessId)
@@ -4765,12 +5929,29 @@
                                 currentBalance: newBankBal,
                                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                             });
+
+                        const bankTx = {
+                            businessId: currentBusinessId,
+                            bankId: bankId,
+                            bankName: bank.bankName,
+                            accountNumber: bank.accountNumber,
+                            type: 'DEPOSIT',
+                            amount: actualPayment,
+                            date: date,
+                            notes: `Debt Repayment from ${custName}`,
+                            creditId: repDoc.id,
+                            customerId: custId,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        const txDoc = await db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').add(bankTx);
+                        bankTx.id = txDoc.id;
+                        allBankTransactions.unshift(bankTx);
                     }
                 }
 
                 saveLocalCache();
                 closeWizard();
-                showToast(`✅ Repayment of ${formatRs(amount)} received from ${custName}`);
+                showToast(changeToReturn > 0 ? `Repayment of ${formatRs(actualPayment)} received from ${custName}. Return change: ${formatRs(changeToReturn)}` : `Repayment of ${formatRs(actualPayment)} received from ${custName}`);
 
                 // Re-render all views
                 updateCreditSummaryCards();
@@ -4961,11 +6142,13 @@
             document.getElementById('settleAlreadyPaid').value = paid;
             document.getElementById('settleCustName').value = credit.customerName || 'Walk-in Customer';
             document.getElementById('settleDueAmount').value = formatRs(balance);
-            document.getElementById('settleAmount').value = balance;
+            document.getElementById('settleAmount').value = '';
+            document.getElementById('settleAmount').placeholder = `Enter amount (Due: ${formatRs(balance)})`;
             document.getElementById('settleDate').value = new Date().toISOString().split('T')[0];
 
             populateBankAndCustomerSelects();
             openModal('modalSettleCredit');
+            setTimeout(() => { document.getElementById('settleAmount')?.focus(); }, 200);
         }
 
         async function handleSettleModalSubmit(e) {
@@ -4978,11 +6161,30 @@
             const custId = document.getElementById('settleCustomerId').value;
             const total = parseFloat(document.getElementById('settleTotalAmount').value) || 0;
             const alreadyPaid = parseFloat(document.getElementById('settleAlreadyPaid').value) || 0;
-            const payingNow = parseFloat(document.getElementById('settleAmount').value) || 0;
+            const payingNowInput = parseFloat(document.getElementById('settleAmount').value) || 0;
             const method = document.getElementById('settlePayMethod').value;
             const bankId = document.getElementById('settleBankSelect')?.value || '';
             const date = document.getElementById('settleDate').value;
             const notes = document.getElementById('settleNotes')?.value?.trim() || '';
+
+            if (method === 'BANK') {
+                if (!allBankAccounts || allBankAccounts.length === 0) {
+                    alert('⚠️ Bank Account Required: No bank accounts are registered in your system. Please add a Bank Account in the "Banking & Cash" tab before recording bank payments.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm Settlement</span>';
+                    return;
+                }
+                if (!bankId) {
+                    alert('⚠️ Bank Account Required: Please select a destination Bank Account.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm Settlement</span>';
+                    return;
+                }
+            }
+
+            const currentBal = Math.max(0, total - alreadyPaid);
+            const payingNow = (currentBal > 0 && payingNowInput > currentBal) ? currentBal : payingNowInput;
+            const changeToReturn = (currentBal > 0 && payingNowInput > currentBal) ? (payingNowInput - currentBal) : 0;
 
             const credit = allCredits.find(c => c.id === creditId);
             const newPaid = alreadyPaid + payingNow;
@@ -5039,6 +6241,23 @@
                             currentBalance: newBankBal,
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
+
+                        const bankTx = {
+                            businessId: currentBusinessId,
+                            bankId: bankId,
+                            bankName: bank.bankName,
+                            accountNumber: bank.accountNumber,
+                            type: 'DEPOSIT',
+                            amount: payingNow,
+                            date: date,
+                            notes: `Debt Settlement from ${credit.customerName || 'Customer'}`,
+                            creditId: repDoc.id,
+                            customerId: custId,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        const txDoc = await db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').add(bankTx);
+                        bankTx.id = txDoc.id;
+                        allBankTransactions.unshift(bankTx);
                     }
                 }
 
@@ -5050,7 +6269,7 @@
 
                 saveLocalCache();
                 closeModal('modalSettleCredit');
-                showToast(`✅ Settlement of ${formatRs(payingNow)} recorded successfully!`);
+                showToast(changeToReturn > 0 ? `Settlement of ${formatRs(payingNow)} recorded. Return change: ${formatRs(changeToReturn)}` : `Settlement of ${formatRs(payingNow)} recorded successfully`);
 
                 // 6. Re-render using local in-memory data
                 updateCreditSummaryCards();
@@ -5144,34 +6363,157 @@
             }
         }
 
-        function viewCustomerHistory(custId) {
-            const cust = allCustomers.find(c => c.id === custId);
-            if (!cust) return;
+        let currentViewingCustomerId = null;
+        let currentViewingHistoryActiveOnly = true;
 
-            document.getElementById('histCustName').textContent = cust.name;
-            document.getElementById('histCustSummary').textContent =
-                `Phone: ${cust.phone || '-'} | Outstanding Due: ${formatRs(getCustomerCalculatedDue(cust))}`;
-
-            const history = getCreditsForCustomer(cust);
-            const tbody = document.getElementById('custHistoryTableBody');
-
-            if (!history.length) {
-                tbody.innerHTML =
-                    '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No records found for this customer.</td></tr>';
+        function viewCustomerHistoryByName(custName) {
+            if (!custName) return;
+            const searchName = String(custName).toLowerCase().trim();
+            const cust = allCustomers.find(c => String(c.name || '').toLowerCase().trim() === searchName);
+            if (cust) {
+                viewCustomerHistory(cust.id, true);
             } else {
-                tbody.innerHTML = history.map(h => {
-                    const isCredit = (h.type === 'CREDIT' || !h.type);
-                    const amt = isCredit ? Number(h.amount || 0) : Number(h.paidAmount || 0);
+                viewCustomerHistory({ id: '', name: custName, phone: '', totalDue: 0 }, true);
+            }
+        }
+
+        function toggleCustomerHistoryView(activeOnly) {
+            if (!currentViewingCustomerId) return;
+            viewCustomerHistory(currentViewingCustomerId, activeOnly);
+        }
+
+        function viewCustomerHistory(custIdentifier, activeOnly = true) {
+            let cust = null;
+            if (typeof custIdentifier === 'object' && custIdentifier !== null) {
+                cust = custIdentifier;
+            } else {
+                cust = allCustomers.find(c => c.id === custIdentifier) ||
+                       allCustomers.find(c => String(c.name || '').toLowerCase().trim() === String(custIdentifier).toLowerCase().trim());
+            }
+
+            if (!cust) return;
+            currentViewingCustomerId = cust.id || cust.name;
+            currentViewingHistoryActiveOnly = activeOnly;
+
+            const nameEl = document.getElementById('histCustName');
+            const sumEl = document.getElementById('histCustSummary');
+            const btnActive = document.getElementById('btnHistActiveCycle');
+            const btnFull = document.getElementById('btnHistFullHistory');
+            const tbody = document.getElementById('custHistoryTableBody');
+            const dueDisplay = document.getElementById('histTotalDueDisplay');
+            const actionBtns = document.getElementById('histActionBtns');
+
+            const currentDue = getCustomerCalculatedDue(cust);
+
+            if (nameEl) nameEl.textContent = cust.name;
+            if (sumEl) {
+                sumEl.innerHTML = `Phone: <strong>${cust.phone || '-'}</strong> | Total Outstanding Due: <strong style="color:${currentDue > 0 ? '#dc2626' : '#16a34a'}; font-size:13.5px;">${formatRs(currentDue)}</strong>`;
+            }
+
+            if (btnActive && btnFull) {
+                if (activeOnly) {
+                    btnActive.className = 'btn-table-action btn-action-green';
+                    btnFull.className = 'btn-table-action';
+                } else {
+                    btnActive.className = 'btn-table-action';
+                    btnFull.className = 'btn-table-action btn-action-green';
+                }
+            }
+
+            const rawCredits = getCreditsForCustomer(cust);
+            // Sort chronologically (oldest first)
+            const chronological = [...rawCredits].sort((a, b) => {
+                const dateA = a.date || '';
+                const dateB = b.date || '';
+                if (dateA !== dateB) return dateA.localeCompare(dateB);
+                const timeA = a.createdAt?.seconds || 0;
+                const timeB = b.createdAt?.seconds || 0;
+                return timeA - timeB;
+            });
+
+            // Calculate running balance and find the last time balance reached 0
+            let runningBal = 0;
+            let lastZeroIndex = -1;
+
+            const processed = chronological.map((h, idx) => {
+                const isCredit = (String(h.type || '').toUpperCase() === 'CREDIT' || (!h.type && (h.amount || 0) > 0));
+                const amt = isCredit ? Number(h.amount || 0) : Number(h.paidAmount || 0);
+
+                if (isCredit) {
+                    runningBal += amt;
+                } else {
+                    runningBal -= amt;
+                    if (runningBal < 0) runningBal = 0;
+                }
+
+                if (runningBal <= 0.001) {
+                    lastZeroIndex = idx;
+                }
+
+                return {
+                    ...h,
+                    isCredit: isCredit,
+                    displayAmount: amt,
+                    runningBalance: runningBal
+                };
+            });
+
+            let displayList = [];
+            if (activeOnly && lastZeroIndex >= 0 && lastZeroIndex < processed.length - 1) {
+                // Show transactions after the last 0 settlement (the active debt cycle)
+                displayList = processed.slice(lastZeroIndex + 1);
+            } else if (activeOnly && currentDue === 0 && processed.length > 0) {
+                // Fully settled: show only the last clearance settlement record
+                displayList = [processed[processed.length - 1]];
+            } else {
+                // Full lifetime history
+                displayList = processed;
+            }
+
+            // Reverse to display newest on top
+            const rowsToRender = [...displayList].reverse();
+
+            if (!rowsToRender.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 24px; color: #166534; background: #f0fdf4; border-radius: 8px;">
+                            <div style="font-size: 20px;">📜</div>
+                            <div style="font-weight: 800; font-size: 14px; margin-top: 4px;">All Debts Are Fully Settled (Rs. 0.00)</div>
+                            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">No active pending debts in current cycle.</div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = rowsToRender.map(h => {
+                    const typeBadge = h.isCredit ?
+                        '<span class="status-badge status-unpaid">CREDIT</span>' :
+                        '<span class="status-badge status-paid">REPAYMENT</span>';
+
                     return `
-                            <tr>
-                                <td>${h.date || '-'}</td>
-                                <td><span class="status-badge ${isCredit ? 'status-unpaid' : 'status-paid'}">${h.type || 'CREDIT'}</span></td>
-                                <td>${h.category || 'Goods'}</td>
-                                <td style="font-weight: 800; color: ${isCredit ? 'var(--red-text)' : 'var(--green-text)'};">${formatRs(amt)}</td>
-                                <td>${formatRs(h.balance || 0)}</td>
-                            </tr>
-                        `;
+                        <tr>
+                            <td><strong>${h.date || '-'}</strong></td>
+                            <td>${typeBadge}</td>
+                            <td>${h.category || (h.isCredit ? 'Goods' : 'Cash')}</td>
+                            <td style="font-weight: 800; color: ${h.isCredit ? 'var(--red-text)' : 'var(--green-text)'};">
+                                ${h.isCredit ? '+' : '-'}${formatRs(h.displayAmount)}
+                            </td>
+                            <td style="font-weight: 800; color: ${h.runningBalance > 0 ? '#dc2626' : '#16a34a'};">
+                                ${formatRs(h.runningBalance)}
+                            </td>
+                        </tr>
+                    `;
                 }).join('');
+            }
+
+            if (dueDisplay) {
+                dueDisplay.innerHTML = `Active Outstanding: <span style="color: ${currentDue > 0 ? '#dc2626' : '#16a34a'};">${formatRs(currentDue)}</span>`;
+            }
+
+            if (actionBtns) {
+                actionBtns.innerHTML = `
+                    ${currentDue > 0 && cust.id ? `<button type="button" class="btn-table-action btn-action-green" onclick="closeModal('modalCustomerHistory'); openSettleModalForCustomer('${cust.id}')" style="padding: 5px 10px; font-weight: 800;"><i class="fa-solid fa-hand-holding-dollar"></i> Settle Now</button>` : ''}
+                    ${cust.phone ? `<a href="https://wa.me/${cust.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn-table-action btn-action-wa" style="padding: 5px 10px; font-weight: 700; text-decoration:none;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>` : ''}
+                `;
             }
 
             openModal('modalCustomerHistory');
@@ -5384,12 +6726,44 @@
             }
         }
 
+        async function requestPasswordConfirmation(actionDesc) {
+            return new Promise((resolve) => {
+                const user = auth.currentUser;
+                const entered = prompt(`🔒 Security Confirmation\n\nTo ${actionDesc || 'delete this transaction permanently'},\nplease enter your account password to confirm:`);
+                if (!entered) {
+                    resolve(false);
+                    return;
+                }
+
+                if (!user || !user.email) {
+                    if (entered.trim().length >= 4) {
+                        resolve(true);
+                    } else {
+                        alert('Password must be at least 4 characters.');
+                        resolve(false);
+                    }
+                    return;
+                }
+
+                // Verify with Firebase Auth credential
+                const cred = firebase.auth.EmailAuthProvider.credential(user.email, entered.trim());
+                user.reauthenticateWithCredential(cred)
+                    .then(() => {
+                        resolve(true);
+                    })
+                    .catch((err) => {
+                        alert('❌ Incorrect password! Deletion cancelled.');
+                        resolve(false);
+                    });
+            });
+        }
+
         async function deleteCreditRecord(creditId) {
             const credit = allCredits.find(c => c.id === creditId);
-            const desc = credit ? credit.customerName + ' (' + formatRs(credit.amount) + ')' : 'this record';
-            if (!confirm(
-                    'Are you sure you want to delete transaction ' + desc +
-                    '?\nThis action will update customer balances permanently.')) return;
+            const desc = credit ? (credit.customerName || 'Customer') + ' (' + formatRs(credit.amount) + ')' : 'this record';
+            
+            const confirmed = await requestPasswordConfirmation('delete transaction ' + desc);
+            if (!confirmed) return;
 
             try {
                 await db.collection('businesses').doc(currentBusinessId).collection('credits').doc(creditId).delete();
@@ -5468,17 +6842,219 @@
         }
 
         // ==========================================
-        // 10. APP STARTUP & SERVICE WORKER
+        // 10. IN-APP UPDATE ENGINE (Google Play Style) & PULL-TO-REFRESH
+        // ==========================================
+        // ==========================================
+        // 10. IN-APP UPDATE ENGINE (DIGIBIZ STORE Style) & PULL-TO-REFRESH
+        // ==========================================
+        const CURRENT_APP_BUILD = '2026.08.29.04';
+        let swRegistration = null;
+        let updateWaitingWorker = null;
+
+        function showInAppUpdateBanner(title, desc) {
+            const banner = document.getElementById('inAppUpdateBanner');
+            if (banner) {
+                if (title) document.getElementById('updateBannerTitle').innerText = title;
+                if (desc) document.getElementById('updateBannerDesc').innerText = desc;
+                banner.classList.add('show');
+            }
+        }
+
+        function hideInAppUpdateBanner() {
+            const banner = document.getElementById('inAppUpdateBanner');
+            if (banner) banner.classList.remove('show');
+        }
+
+        async function applyAppUpdateNow() {
+            const btn = document.querySelector('#inAppUpdateBanner .btn-update-now');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Updating...</span>';
+            }
+            localStorage.setItem('madawala_applied_build', CURRENT_APP_BUILD);
+            showToast('🚀 Applying DIGIBIZ STORE update...');
+
+            if (updateWaitingWorker) {
+                updateWaitingWorker.postMessage({ action: 'skipWaiting' });
+            } else if (swRegistration && swRegistration.waiting) {
+                swRegistration.waiting.postMessage({ action: 'skipWaiting' });
+            }
+
+            try {
+                if (window.caches) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+            } catch (err) {
+                console.warn('[Update] Cache clear error:', err);
+            }
+
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 400);
+        }
+
+        function checkBuildUpdate() {
+            const applied = localStorage.getItem('madawala_applied_build');
+            if (!applied || applied !== CURRENT_APP_BUILD) {
+                setTimeout(() => {
+                    showInAppUpdateBanner('DIGIBIZ STORE', 'Version 1.0.2 Update Ready! Tap to apply new improvements.');
+                }, 800);
+            }
+        }
+
+        function initAppUpdateDetector(reg) {
+            swRegistration = reg;
+            checkBuildUpdate();
+            if (!reg) return;
+
+            // 1. If worker is already waiting
+            if (reg.waiting) {
+                updateWaitingWorker = reg.waiting;
+                showInAppUpdateBanner('DIGIBIZ STORE', 'Version 1.0.2 Update Ready! Tap to apply new improvements.');
+                return;
+            }
+
+            // 2. Listen for newly installed worker waiting
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        updateWaitingWorker = newWorker;
+                        showInAppUpdateBanner('DIGIBIZ STORE', 'New version available with improvements.');
+                    }
+                });
+            });
+
+            // 3. Listen for controller change
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+
+            // 4. Periodically check on focus / visibility
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && reg) {
+                    reg.update().catch(() => {});
+                    checkBuildUpdate();
+                }
+            });
+            window.addEventListener('focus', () => {
+                if (reg) reg.update().catch(() => {});
+                checkBuildUpdate();
+            });
+        }
+
+        // ==========================================
+        // 11. NATIVE TOUCH PULL-TO-REFRESH ENGINE
+        // ==========================================
+        function resetPtrIndicator() {
+            const ptrIndicator = document.getElementById('nativePtrIndicator');
+            if (ptrIndicator) {
+                ptrIndicator.classList.remove('active', 'loading');
+                ptrIndicator.style.transform = 'translateX(-50%) translateY(-100px)';
+                ptrIndicator.style.opacity = '0';
+            }
+        }
+
+        function initPullToRefresh() {
+            resetPtrIndicator();
+            let touchStartY = 0;
+            let touchStartX = 0;
+            let isPulling = false;
+            const ptrIndicator = document.getElementById('nativePtrIndicator');
+            const ptrSpinner = document.getElementById('ptrSpinnerIcon');
+            const ptrText = document.getElementById('ptrStatusText');
+            const PULL_THRESHOLD = 75;
+
+            window.addEventListener('touchstart', (e) => {
+                if (window.scrollY <= 5 && e.touches.length === 1) {
+                    touchStartY = e.touches[0].clientY;
+                    touchStartX = e.touches[0].clientX;
+                    isPulling = true;
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isPulling) return;
+                const currentY = e.touches[0].clientY;
+                const currentX = e.touches[0].clientX;
+                const diffY = currentY - touchStartY;
+                const diffX = Math.abs(currentX - touchStartX);
+
+                // Ignore horizontal swipes
+                if (diffX > Math.abs(diffY)) {
+                    isPulling = false;
+                    return;
+                }
+
+                if (diffY > 10 && window.scrollY <= 5) {
+                    const pullDistance = Math.min(diffY * 0.42, 100);
+                    if (ptrIndicator) {
+                        ptrIndicator.classList.add('active');
+                        ptrIndicator.style.opacity = '1';
+                        ptrIndicator.style.transform = `translateX(-50%) translateY(${pullDistance + 70}px)`;
+                        if (pullDistance >= PULL_THRESHOLD * 0.42) {
+                            if (ptrSpinner) ptrSpinner.className = 'fa-solid fa-arrow-up ptr-spinner';
+                            if (ptrText) ptrText.innerText = 'Release to refresh';
+                        } else {
+                            if (ptrSpinner) ptrSpinner.className = 'fa-solid fa-arrow-down ptr-spinner';
+                            if (ptrText) ptrText.innerText = 'Pull down to refresh...';
+                        }
+                    }
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchend', async (e) => {
+                if (!isPulling) return;
+                isPulling = false;
+                const diffY = (e.changedTouches[0]?.clientY || 0) - touchStartY;
+                if (diffY * 0.42 >= PULL_THRESHOLD * 0.42 && window.scrollY <= 5) {
+                    if (ptrIndicator) {
+                        ptrIndicator.classList.add('loading');
+                        if (ptrSpinner) ptrSpinner.className = 'fa-solid fa-arrows-rotate ptr-spinner';
+                        if (ptrText) ptrText.innerText = 'Updating & Syncing...';
+                        if (navigator.vibrate) navigator.vibrate([30, 40]);
+                    }
+
+                    // Auto-dismiss safety timeout
+                    setTimeout(() => {
+                        resetPtrIndicator();
+                    }, 1000);
+
+                    try {
+                        if (swRegistration) await swRegistration.update().catch(() => {});
+                        if (window.caches) {
+                            const keys = await caches.keys();
+                            await Promise.all(keys.map(k => caches.delete(k)));
+                        }
+                    } catch (err) {}
+
+                    setTimeout(() => {
+                        window.location.reload(true);
+                    }, 400);
+                } else {
+                    resetPtrIndicator();
+                }
+            });
+        }
+
+        // ==========================================
+        // 12. APP STARTUP & SERVICE WORKER
         // ==========================================
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260828_pwa_v9', {
+            navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260829_pwa_v30', {
                 scope: '/clients/madawalateashop/',
                 updateViaCache: 'none'
             })
                 .then(function (reg) {
                     console.log('[PWA] Service Worker registered:', reg.scope);
                     reg.update();
-                    setInterval(() => { reg.update(); }, 3600000);
+                    initAppUpdateDetector(reg);
+                    setInterval(() => { reg.update(); }, 60000);
                 })
                 .catch(function (err) {
                     console.warn('[PWA] Service Worker registration failed:', err);
@@ -5486,12 +7062,17 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(showPWAInstallBanner, 500);
-
-            // Restore saved tab
-            const savedTab = sessionStorage.getItem('madawala_active_tab');
+            resetPtrIndicator();
+            initPullToRefresh();
+            
+            // Immediately restore active tab visual state if present
+            const savedTab = (window.location.hash ? window.location.hash.replace('#', '') : null) || localStorage.getItem('madawala_active_tab') || sessionStorage.getItem('madawala_active_tab');
             if (savedTab && savedTab !== 'dashboard') {
-                // Will be restored after auth
+                const targetView = document.getElementById('view-' + savedTab);
+                if (targetView) {
+                    document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+                    targetView.classList.add('active');
+                }
             }
 
             document.getElementById('loginPassword')?.addEventListener('keydown', e => {
@@ -5517,17 +7098,32 @@
 
                 if (!verifyDarshanaAccess(user)) return;
 
-                // LEGACY STANDALONE APP RETIRED: never read/write Firestore from this page again.
-                // Every login is funneled to the single canonical cloud dashboard so all devices share one Business ID.
-                const CANONICAL_BUSINESS_ID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
+                hideAuthGate();
+                localStorage.setItem('madawala_auth_active', 'true');
+                sessionStorage.setItem('madawala_auth_active', 'true');
+
+                currentUid = user.uid;
                 localStorage.setItem('dm_auth_verified_email', user.email);
                 localStorage.setItem('currentUserRole', 'BUSINESS_OWNER');
                 localStorage.setItem('currentBusinessNavRole', 'BUSINESS_OWNER');
                 localStorage.setItem('currentBusinessType', 'credit_ledger');
                 localStorage.setItem('currentBusinessName', 'MADAWALA TEA SHOP');
-                localStorage.setItem('currentBusinessId', CANONICAL_BUSINESS_ID);
-                sessionStorage.setItem('currentBusinessId', CANONICAL_BUSINESS_ID);
-                window.location.replace('/clients/madawalateashop/modules/credit/dashboard.html');
+
+                currentBusinessId = 'DarshanaMadawala';
+
+                await syncLiveSubscription();
+                await loadAllBusinessData();
+
+                // Live Presence Tracking & Daily Cloud Snapshot Backup
+                initLivePresenceTracking(user);
+                performDailyCloudBackup();
+
+                // Restore exact active tab after data loads
+                const activeTabToRestore = (window.location.hash ? window.location.hash.replace('#', '') : null) || localStorage.getItem('madawala_active_tab') || sessionStorage.getItem('madawala_active_tab');
+                if (activeTabToRestore && activeTabToRestore !== 'dashboard') {
+                    switchTab(activeTabToRestore);
+                }
+
             });
 
         });

@@ -1,0 +1,9 @@
+# 🚨 DIGIBIZ PRODUCTION SHIELD & ARCHITECTURAL RULES 🚨
+
+1. NEVER directly modify any files inside `public/std/` or `public/snapshots/`.
+2. All coding, feature development, and bug fixes MUST be performed in `public/modules/`, `public/core/`, `public/css/`, `public/scripts/`, `public/admin/`, `public/auth/`.
+3. Test all changes on the Live Master URLs (`https://digibiz-sys.web.app/modules/...`).
+4. To update paying PRO users on `std`, run:
+   node scripts/sync-std.js
+   firebase deploy --only hosting
+5. PRO users run on `std` (`/std/`). Demo & Trial users run on Live Master (`/modules/...`).

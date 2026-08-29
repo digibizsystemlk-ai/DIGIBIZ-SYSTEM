@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <script src="/royal_arabian/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Attendance, Advances & Payroll — Coconut Vertical</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
+    <script src="/royal_arabian/core/firebase-init.js?v=100"></script>
+    <script src="/royal_arabian/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/royal_arabian/core/event-validation.js?v=4"></script>
+    <script src="/royal_arabian/core/event-bus.js?v=4"></script>
+    <script src="/royal_arabian/core/accounts-core.js?v=4"></script>
+    <script src="/royal_arabian/core/auth-roles.js?v=2265"></script>
+    <script src="/royal_arabian/core/business-types.js?v=80"></script>
+    <script src="/royal_arabian/core/aggregate-utils.js"></script>
+    <script src="/royal_arabian/core/dashboard-core.js?v=2265"></script>
+    <script src="/royal_arabian/core/subscription-manager.js?v=4"></script>
+    <script src="/royal_arabian/core/sidebar.js?v=2116"></script>
+    <link rel="stylesheet" href="coconut.css">
+    <script src="coconut-common.js?v=82"></script>
+    <style>
+        .att-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .att-tab-btn {
+            padding: 10px 22px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 50px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .att-tab-btn:hover {
+            background: #f1f5f9;
+            color: #0f3b2c;
+        }
+        .att-tab-btn.active {
+            background: #0f3b2c;
+            color: #ffffff;
+            border-color: #0f3b2c;
+            box-shadow: 0 4px 12px rgba(15, 59, 44, 0.25);
+        }
+        .att-status-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+        .att-status-btn.present { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .att-status-btn.half { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .att-status-btn.absent { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .att-status-btn.active-status {
+            box-shadow: 0 0 0 2px #0f3b2c;
+            transform: scale(1.04);
+            font-weight: 800;
+        }
+        .payslip-box {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            margin: 0 auto;
+            font-family: monospace;
+        }
+        @media print {
+            body { margin-left: 0 !important; }
+            .c-header, .att-tabs, .no-print { display: none !important; }
+            .payslip-print-area { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="c-container">
+        <!-- Header -->
+        <div class="c-header">
+            <div class="c-header-left">
+                <h1>👷 සේවක පැමිණීම, අත්තිකාරම් සහ වැටුප් (Attendance & Payroll)</h1>
+                <p>Track yard crew attendance, disburse & recover employee advances, and calculate monthly payroll.</p>
+            </div>
+            <div class="c-header-actions">
+                <a href="staff.html" class="c-btn c-btn-secondary">👥 Personnel Roster</a>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="att-tabs no-print">
+            <button type="button" class="att-tab-btn active" id="tabBtnAttendance" onclick="switchAttTab('attendance')">
+                <span>📅</span> දෛනික පැමිණීම (Daily Attendance)
+            </button>
+            <button type="button" class="att-tab-btn" id="tabBtnAdvances" onclick="switchAttTab('advances')">
+                <span>💸</span> අත්තිකාරම් කළමනාකරණය (Advances)
+            </button>
+            <button type="button" class="att-tab-btn" id="tabBtnPayroll" onclick="switchAttTab('payroll')">
+                <span>📊</span> මාසික වැටුප් හා වාර්තා (Monthly Payroll)
+            </button>
+        </div>
+
+        <!-- TAB 1: Daily Attendance Sheet -->
+        <div id="tabContentAttendance">
+            <div class="c-card">
+                <div class="c-card-header" style="flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <div class="c-card-title">📝 දෛනික පැමිණීම් ලේඛනය (Daily Time & Attendance)</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <label style="font-size:12.5px; font-weight:700; color:#475569;">දිනය (Date):</label>
+                            <input type="date" id="attDate" class="c-input" style="width:160px; padding:6px 10px;">
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="c-btn c-btn-secondary c-btn-sm" id="btnClockInAll">
+                            🟢 සියල්ලන්ගේම පැමිණීම (08:00 AM)
+                        </button>
+                        <button type="button" class="c-btn c-btn-secondary c-btn-sm" id="btnClockOutAll">
+                            🔴 සියල්ලන්ගේම පිටවීම (05:00 PM)
+                        </button>
+                        <button type="button" class="c-btn c-btn-primary c-btn-sm" id="btnSaveAttendance">
+                            💾 පැමිණීම සුරකින්න (Save Attendance)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>සේවකයා (Employee)</th>
+                                <th>දෛනික වැටුප (Daily Rate)</th>
+                                <th style="width:125px;">ආපු වේලාව (In)</th>
+                                <th style="width:125px;">ගිය වේලාව (Out)</th>
+                                <th style="text-align:center;">වැඩ කළ පැය</th>
+                                <th style="text-align:center;">තත්වය (Status)</th>
+                                <th style="width:105px; text-align:right;">OT පැය</th>
+                                <th style="text-align:right;">දවසේ වැටුප (Earned)</th>
+                                <th>සටහන (Task / Note)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attTableBody">
+                            <tr><td colspan="9" class="text-center" style="padding:24px;">කාර්ය මණ්ඩල ලේඛනය ලබා ගනිමින් පවතී...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Employee Advance Management -->
+        <div id="tabContentAdvances" style="display:none;">
+            <div class="c-grid-2">
+                <!-- Record Advance Form -->
+                <div class="c-card">
+                    <div class="c-card-header">
+                        <div class="c-card-title">💵 නව අත්තිකාරම් මුදලක් ලබා දීම (Issue Advance)</div>
+                        <span class="c-badge c-badge-warning">Auto GL Ledger Entry</span>
+                    </div>
+                    <form id="advanceForm">
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>දිනය (Date) *</label>
+                                <input type="date" id="advDate" class="c-input" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>සේවකයා (Employee) *</label>
+                                <select id="advEmployee" class="c-select" required>
+                                    <option value="">සේවකයෙකු තෝරන්න...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>අත්තිකාරම් මුදල (Amount in LKR) *</label>
+                                <input type="number" id="advAmount" class="c-input" min="100" step="50" placeholder="e.g. 5000.00" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>ගෙවූ ක්‍රමය (Payment Mode) *</label>
+                                <select id="advMode" class="c-select" required>
+                                    <option value="CASH">Cash (අත්පිට මුදලින්)</option>
+                                    <option value="BANK">Bank Transfer (බැංකු මාරු)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="c-form-group" style="margin-bottom:16px;">
+                            <label>හේතුව / සටහන (Reason / Remarks)</label>
+                            <input type="text" id="advRemarks" class="c-input" placeholder="e.g. හදිසි වෛද්‍ය වියදමකට / Emergency loan">
+                        </div>
+                        <button type="submit" class="c-btn c-btn-primary" style="width:100%;" id="btnSaveAdvance">
+                            💾 අත්තිකාරම සටහන් කරන්න (Record & Post GL)
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Advance Balance Summary Cards -->
+                <div>
+                    <div class="c-card" style="margin-bottom:14px;">
+                        <div class="c-card-header">
+                            <div class="c-card-title">📊 සේවක අත්තිකාරම් ශේෂය (Advances Summary)</div>
+                        </div>
+                        <div style="padding:16px 20px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <div style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+                                    <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">මෙම මස ලබාදුන් මුළු අත්තිකාරම්</div>
+                                    <div style="font-size:20px; font-weight:800; color:#d97706; margin-top:2px;" id="advMonthTotal">Rs. 0.00</div>
+                                </div>
+                                <div style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+                                    <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">අඩු කිරීමට ඇති ඉතිරි ශේෂය</div>
+                                    <div style="font-size:20px; font-weight:800; color:#dc2626; margin-top:2px;" id="advPendingBalance">Rs. 0.00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advance History Table -->
+                    <div class="c-card">
+                        <div class="c-card-header">
+                            <div class="c-card-title">📜 මෑත අත්තිකාරම් සටහන්</div>
+                        </div>
+                        <div class="c-table-wrapper" style="max-height:260px; overflow-y:auto;">
+                            <table class="c-table">
+                                <thead>
+                                    <tr>
+                                        <th>දිනය</th>
+                                        <th>සේවකයා</th>
+                                        <th style="text-align:right;">මුදල (Rs.)</th>
+                                        <th>තත්වය</th>
+                                        <th style="text-align:center;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="advancesHistoryBody">
+                                    <tr><td colspan="5" class="text-center" style="padding:16px;">ලබාදුන් අත්තිකාරම් වාර්තා නොමැත.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Monthly Payroll & Wage Calculator -->
+        <div id="tabContentPayroll" style="display:none;">
+            <div class="c-card">
+                <div class="c-card-header" style="flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <div class="c-card-title">💰 මාසික වැටුප් සහ දීමනා ගණනය කිරීම් (Monthly Payroll)</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <label style="font-size:12.5px; font-weight:700; color:#475569;">මාසය (Month):</label>
+                            <input type="month" id="payrollMonth" class="c-input" style="width:160px; padding:6px 10px;">
+                            <button type="button" class="c-btn c-btn-secondary c-btn-sm" id="btnRecalculatePayroll">
+                                🔄 ගණනය කරන්න (Calculate)
+                            </button>
+                        </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px;">
+                    <div style="background:#f8fafc; padding:14px; border-radius:12px; border:1px solid #e2e8f0;">
+                        <div style="font-size:11.5px; font-weight:700; color:#64748b; text-transform:uppercase;">සේවක සංඛ්‍යාව (Crew)</div>
+                        <div style="font-size:22px; font-weight:800; color:#0f3b2c; margin-top:2px;" id="kpiStaffCount">0</div>
+                    </div>
+                    <div style="background:#f0fdf4; padding:14px; border-radius:12px; border:1px solid #bbf7d0;">
+                        <div style="font-size:11.5px; font-weight:700; color:#166534; text-transform:uppercase;">උපයාගත් මුළු දළ වැටුප (Gross)</div>
+                        <div style="font-size:22px; font-weight:800; color:#166534; margin-top:2px;" id="kpiGrossSalary">Rs. 0.00</div>
+                    </div>
+                    <div style="background:#fffbeb; padding:14px; border-radius:12px; border:1px solid #fde68a;">
+                        <div style="font-size:11.5px; font-weight:700; color:#92400e; text-transform:uppercase;">අඩු කළ මුළු අත්තිකාරම් (Advances)</div>
+                        <div style="font-size:22px; font-weight:800; color:#dc2626; margin-top:2px;" id="kpiAdvancesTotal">Rs. 0.00</div>
+                    </div>
+                    <div style="background:#f0fdf4; padding:14px; border-radius:12px; border:1px solid #86efac;">
+                        <div style="font-size:11.5px; font-weight:700; color:#166534; text-transform:uppercase;">ගෙවිය යුතු ශුද්ධ වැටුප (Net Wages)</div>
+                        <div style="font-size:22px; font-weight:800; color:#0f3b2c; margin-top:2px;" id="kpiNetSalary">Rs. 0.00</div>
+                    </div>
+                </div>
+
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>සේවකයා (Employee)</th>
+                                <th>තනතුර (Role)</th>
+                                <th style="text-align:right;">දෛනික වැටුප (Rate)</th>
+                                <th style="text-align:center;">පැමිණි දින (Full)</th>
+                                <th style="text-align:center;">අර්ධ දින (Half)</th>
+                                <th style="text-align:center;">OT පැය</th>
+                                <th style="text-align:right;">උපයාගත් මුළු වැටුප (Gross)</th>
+                                <th style="text-align:right; color:#dc2626;">අත්තිකාරම් අඩු කිරීම (Advances)</th>
+                                <th style="text-align:right; color:#0f3b2c; font-weight:800;">ශුද්ධ ගෙවිය යුතු වැටුප (Net Pay)</th>
+                                <th style="text-align:center;">ක්‍රියාකාරකම</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payrollTableBody">
+                            <tr><td colspan="10" class="text-center" style="padding:24px;">මාසය තෝරා "ගණනය කරන්න" ඔබන්න...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Payslip View / Print Modal -->
+    <div class="c-modal-overlay" id="payslipModal">
+        <div class="c-modal" style="max-width:550px;">
+            <div class="c-modal-header">
+                <h3>📄 සේවක වැටුප් පත්‍රිකාව (Payslip)</h3>
+                <button type="button" class="c-modal-close" id="btnClosePayslipModal">×</button>
+            </div>
+            <div id="payslipContent" style="padding:16px 0;"></div>
+            <div class="c-modal-actions no-print">
+                <button type="button" class="c-btn c-btn-secondary" id="btnCancelPayslip">Close</button>
+                <button type="button" class="c-btn c-btn-primary" onclick="window.print()">🖨️ Print Payslip</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settlement Confirmation Modal -->
+    <div class="c-modal-overlay" id="settleModal">
+        <div class="c-modal" style="max-width:480px;">
+            <div class="c-modal-header">
+                <h3>💳 වැටුප් ගෙවීම තහවුරු කිරීම (Settle Salary)</h3>
+                <button type="button" class="c-modal-close" id="btnCloseSettleModal">×</button>
+            </div>
+            <form id="settleForm">
+                <input type="hidden" id="setStaffId">
+                <div style="padding:14px 0;">
+                    <div style="font-size:14px; font-weight:700; color:#0f3b2c;" id="setStaffName"></div>
+                    <div style="font-size:13px; color:#64748b; margin-top:4px;" id="setPeriodText"></div>
+                    
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:14px; margin:14px 0;">
+                        <div style="font-size:12px; color:#166534; font-weight:700;">ගෙවීමට ඇති ශුද්ධ මුදල (Net Payable):</div>
+                        <div style="font-size:24px; font-weight:800; color:#0f3b2c;" id="setNetAmt">Rs. 0.00</div>
+                    </div>
+
+                    <div class="c-form-group" style="margin-bottom:12px;">
+                        <label>ගෙවීම් මාධ්‍යය (Payment Account) *</label>
+                        <select id="setAccount" class="c-select" required>
+                            <option value="CASH">Cash in Hand (1-1010-01 අත්පිට මුදල්)</option>
+                            <option value="BANK">Bank Account (1-1020-01 බැංකු ගිණුම)</option>
+                        </select>
+                    </div>
+
+                    <div class="c-form-group">
+                        <label>ගෙවීම් දිනය (Payment Date) *</label>
+                        <input type="date" id="setDate" class="c-input" required>
+                    </div>
+                </div>
+                <div class="c-modal-actions">
+                    <button type="button" class="c-btn c-btn-secondary" id="btnCancelSettle">Cancel</button>
+                    <button type="submit" class="c-btn c-btn-primary" id="btnConfirmSettle">✅ Settle & Post GL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="attendance.js?v=82"></script>
+</body>
+</html>

@@ -1,0 +1,2971 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DIGIBIZ News, Updates & Guides — නිල පුවත් සහ භාවිත උපදෙස්</title>
+    
+    <meta name="description" content="DIGIBIZ ව්‍යාපාරික පද්ධතියේ නවතම විශේෂාංග, යාවත්කාලීන (Updates), භාවිත උපදෙස් (Guides) සහ නිවේදන.">
+    <meta name="keywords" content="DIGIBIZ, Cloud POS, Business System, Sri Lanka POS, Software Updates, ERP, Inventory Management">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="DIGIBIZ News & Updates">
+    <meta property="og:title" id="ogTitle" content="DIGIBIZ News, Updates & Guides — නිල පුවත් සහ භාවිත උපදෙස්">
+    <meta property="og:description" id="ogDesc" content="DIGIBIZ ව්‍යාපාරික පද්ධතියේ නවතම විශේෂාංග, යාවත්කාලීන සහ භාවිත උපදෙස්.">
+    <meta property="og:image" id="ogImage" content="https://digibiz-sys.web.app/assets/images/referral-banner.jpg?v=3">
+    <meta property="og:url" id="ogUrl" content="https://digibiz-sys.web.app/blog.html">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="twTitle" content="DIGIBIZ News & Updates">
+    <meta name="twitter:description" id="twDesc" content="DIGIBIZ ව්‍යාපාරික පද්ධතියේ නවතම විශේෂාංග සහ භාවිත උපදෙස්.">
+    <meta name="twitter:image" id="twImage" content="https://digibiz-sys.web.app/assets/images/referral-banner.jpg?v=3">
+
+    <!-- PWA & Theme -->
+    <link rel="manifest" href="/blog-manifest.json">
+    <meta name="theme-color" content="#061510">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DIGIBIZ Blog">
+    
+    <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+    <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-messaging-compat.js"></script>
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/core/pwa-init.js?v=2"></script>
+
+    <style>
+        :root {
+            --bg0: #061510;
+            --bg1: #0a1f18;
+            --bg2: #0f3b2c;
+            --card-bg: rgba(15, 30, 24, 0.75);
+            --card-border: rgba(52, 211, 153, 0.15);
+            --card-hover-border: rgba(52, 211, 153, 0.45);
+            --mint: #34d399;
+            --emerald: #10b981;
+            --accent: #ffd966;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-sub: #cbd5e1;
+            --nav-h: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans Sinhala', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(165deg, var(--bg0) 0%, var(--bg1) 40%, var(--bg2) 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Glass Container & Utilities */
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Navigation */
+        /* Header Navigation matching index.html */
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
+            padding-top: env(safe-area-inset-top, 0px);
+            z-index: 1000;
+            background: rgba(6, 21, 16, 0.92);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .header-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+            height: var(--nav-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #10b981, #0f3b2c);
+            display: grid;
+            place-items: center;
+            font-size: 18px;
+            font-weight: 900;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+
+        .brand-text {
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: var(--accent);
+            line-height: 1.1;
+        }
+
+        .brand-sub {
+            display: none;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        @media (min-width: 400px) {
+            .brand-sub { display: block; }
+        }
+
+        .nav-desktop {
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (min-width: 960px) {
+            .nav-desktop { display: flex; }
+        }
+
+        .nav-desktop a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13.5px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .nav-desktop a:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .btn-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-pill:active { transform: scale(0.98); }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #fbbf24, var(--accent));
+            color: #0a1f18;
+            box-shadow: 0 6px 20px rgba(255, 217, 102, 0.25);
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .burger {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(15, 59, 44, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            color: var(--accent);
+        }
+
+        @media (min-width: 960px) {
+            .burger { display: none; }
+        }
+
+        .burger span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 1px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        html.drawer-open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        html.drawer-open .burger span:nth-child(2) { opacity: 0; }
+        html.drawer-open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            backdrop-filter: blur(4px);
+        }
+        html.drawer-open .drawer-overlay { opacity: 1; pointer-events: auto; }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(320px, 88vw);
+            height: 100dvh;
+            background: linear-gradient(180deg, #0a2a22 0%, #0f3b2c 100%);
+            z-index: 1002;
+            transform: translateX(100%);
+            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: calc(env(safe-area-inset-top, 0px) + 72px) 20px 24px;
+            border-left: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: -12px 0 40px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        html.drawer-open .drawer { transform: translateX(0); }
+
+        .drawer a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14.5px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .drawer a:hover, .drawer a:focus-visible {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: var(--accent);
+        }
+
+        main {
+            padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 16px);
+        }
+
+
+
+        /* Hero Section */
+        .blog-hero {
+            padding: 48px 0 32px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(52, 211, 153, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 30px;
+            color: var(--mint);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .blog-hero h1 {
+            font-size: 38px;
+            font-weight: 900;
+            letter-spacing: -0.8px;
+            margin-bottom: 14px;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .blog-hero p {
+            font-size: 16px;
+            color: var(--text-muted);
+            max-width: 680px;
+            margin: 0 auto 28px;
+            line-height: 1.6;
+        }
+
+        /* Search & Filter Controls */
+        .controls-wrap {
+            max-width: 760px;
+            margin: 0 auto 36px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .search-box-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            font-size: 15px;
+            color: #ffffff;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .search-box:focus {
+            border-color: var(--mint);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 17px;
+        }
+
+        .clear-search-btn {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.12);
+            border: none;
+            color: #cbd5e1;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* Category Filter Tabs */
+        .category-tabs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-sub);
+            padding: 9px 18px;
+            border-radius: 24px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cat-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .cat-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border-color: #34d399;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+
+        /* Featured Hero Post */
+        .featured-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 21, 16, 0.85) 100%);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 40px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .featured-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--mint);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(52, 211, 153, 0.2);
+        }
+
+        .featured-visual {
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            min-height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .featured-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .featured-visual .emoji-big {
+            font-size: 84px;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+        }
+
+        .featured-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: fit-content;
+            margin-bottom: 14px;
+        }
+
+        .badge-features { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .badge-tips { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+        .badge-announcements { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+        .badge-general { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+
+        .featured-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.35;
+            margin-bottom: 12px;
+        }
+
+        .featured-desc {
+            font-size: 14.5px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .post-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Blog Grid - Wide Vertical Stack Feed */
+        .posts-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            margin-bottom: 60px;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .post-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            cursor: pointer;
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(12px);
+            min-height: 240px;
+        }
+
+        .post-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--card-hover-border);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .card-cover {
+            height: 100%;
+            min-height: 240px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 21, 16, 0.9) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: transform 0.4s ease;
+        }
+
+        .post-card:hover .card-cover img {
+            transform: scale(1.04);
+        }
+
+        .card-cover .emoji-center {
+            font-size: 64px;
+            filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));
+        }
+
+        .card-body {
+            padding: 28px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 21px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.45;
+            margin: 12px 0 12px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-desc {
+            font-size: 14.5px;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 18px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 16px;
+            margin-top: auto;
+        }
+
+        .read-more-link {
+            color: var(--mint);
+            font-size: 14px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 900px) {
+            .post-card {
+                grid-template-columns: 1fr;
+            }
+            .card-cover {
+                height: 220px;
+                min-height: 220px;
+            }
+            .card-body {
+                padding: 22px;
+            }
+            .card-title {
+                font-size: 18px;
+            }
+        }
+
+        /* Loading / Empty States */
+        .state-wrap {
+            text-align: center;
+            padding: 80px 20px;
+            grid-column: 1 / -1;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(52, 211, 153, 0.2);
+            border-top-color: var(--mint);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal Single Post Detailed View */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(3, 10, 8, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 10000;
+            display: none;
+            overflow-y: auto;
+            padding: 24px 16px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .reader-modal {
+            max-width: 1100px;
+            width: 100%;
+            margin: 30px auto;
+            background: #0d1e17;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+            position: relative;
+            animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .reader-close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .reader-close-btn:hover {
+            background: rgba(239, 68, 68, 0.8);
+            transform: scale(1.05);
+        }
+
+        .reader-hero {
+            height: 300px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, #061510 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reader-hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .reader-hero .emoji-huge {
+            font-size: 96px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+
+        .reader-body {
+            padding: 36px 40px;
+        }
+
+        .reader-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1.35;
+            margin: 14px 0 16px;
+        }
+
+        .reader-meta-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .reader-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .author-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .author-info strong {
+            display: block;
+            font-size: 13.5px;
+            color: #fff;
+        }
+
+        .author-info small {
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+
+        /* Share Buttons Bar */
+        .share-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 24px 0 28px;
+        }
+
+        .share-label {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-right: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .share-wa {
+            background: #25D366;
+            color: #ffffff;
+        }
+        .share-wa:hover {
+            background: #1eb956;
+            transform: translateY(-1px);
+        }
+
+        .share-fb {
+            background: #1877F2;
+            color: #ffffff;
+        }
+        .share-fb:hover {
+            background: #1464cc;
+            transform: translateY(-1px);
+        }
+
+        .share-copy {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .share-copy:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .share-native {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+        }
+
+        /* Formatted Content Typography */
+        .reader-content {
+            font-size: 15.5px;
+            line-height: 1.8;
+            color: #e2e8f0;
+        }
+
+        .reader-content h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 28px 0 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .reader-content h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--mint);
+            margin: 22px 0 10px;
+        }
+
+        .reader-content p {
+            margin-bottom: 16px;
+        }
+
+        .reader-content ul, .reader-content ol {
+            margin: 14px 0 20px 24px;
+        }
+
+        .reader-content li {
+            margin-bottom: 8px;
+        }
+
+        .reader-content blockquote {
+            background: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid var(--mint);
+            padding: 14px 18px;
+            border-radius: 0 12px 12px 0;
+            margin: 20px 0;
+            font-style: italic;
+            color: #cbd5e1;
+        }
+
+        .reader-content .callout-box {
+            background: rgba(255, 217, 102, 0.1);
+            border: 1px solid rgba(255, 217, 102, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px 0;
+            color: #fef08a;
+        }
+
+        .reader-content .callout-tip {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(52, 211, 153, 0.4);
+            color: #a7f3d0;
+        }
+
+        .reader-content .callout-warning, .reader-content .callout-caution {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        /* Responsive Markdown Tables */
+        .table-responsive-wrap {
+            width: 100%;
+            overflow-x: auto;
+            margin: 24px 0 28px;
+            border-radius: 14px;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            background: rgba(10, 24, 18, 0.95);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .rich-content-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+            color: #e2e8f0;
+        }
+
+        .rich-content-table thead tr {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.15) 100%);
+            border-bottom: 2px solid rgba(52, 211, 153, 0.4);
+        }
+
+        .rich-content-table th {
+            padding: 14px 16px;
+            font-weight: 800;
+            color: #34d399;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .rich-content-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            line-height: 1.5;
+        }
+
+        .rich-content-table tbody tr:hover {
+            background: rgba(52, 211, 153, 0.06);
+        }
+
+        .rich-content-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Image Wrappers in Content */
+        .content-img-wrap {
+            margin: 28px 0;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #061510;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-img-wrap img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 16px 16px 0 0;
+            margin: 0;
+            border: none;
+        }
+
+        .img-caption {
+            padding: 10px 16px;
+            font-size: 12.5px;
+            color: var(--mint);
+            background: rgba(6, 20, 15, 0.9);
+            border-top: 1px solid rgba(52, 211, 153, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        /* Code & Receipt Blocks */
+        .code-block-wrap {
+            margin: 24px 0;
+            border-radius: 14px;
+            background: #040d09;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-copy-code {
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: var(--mint);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-copy-code:hover {
+            background: var(--mint);
+            color: #04100c;
+        }
+
+        .code-block-wrap pre {
+            margin: 0;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #a7f3d0;
+        }
+
+        .inline-code {
+            background: rgba(52, 211, 153, 0.15);
+            color: #6ee7b7;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+
+        /* Math / Formula Blocks */
+        .math-block {
+            margin: 20px 0;
+            padding: 16px 20px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(6, 25, 18, 0.9) 0%, rgba(12, 38, 28, 0.9) 100%);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+        .math-icon {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--mint);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .math-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fef08a;
+            line-height: 1.6;
+        }
+
+        .content-divider {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.3), transparent);
+            margin: 32px 0;
+        }
+
+        /* In-Article Conversion Card (DIGIBIZ.PRO Lead Engine) */
+        .pro-conversion-card {
+            margin: 36px 0 16px;
+            padding: 28px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 32, 24, 0.95) 100%);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(16, 185, 129, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pro-conversion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pro-badge-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pro-tag-live {
+            background: rgba(16, 185, 129, 0.25);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            font-size: 11px;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .pro-tag-trial {
+            background: rgba(251, 191, 36, 0.2);
+            color: #ffd966;
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 14px;
+        }
+
+        .pro-conversion-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .pro-conversion-lead {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .pro-perks-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+            margin-bottom: 22px;
+        }
+
+        .pro-perk-item {
+            font-size: 13px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pro-perk-item i {
+            color: #34d399;
+            font-size: 14px;
+        }
+
+        .pro-conversion-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-pro-hero-trial {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 12px 22px;
+            border-radius: 14px;
+            text-decoration: none;
+            border: 1px solid #34d399;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-pro-hero-trial:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.55);
+        }
+
+        .btn-pro-hero-login {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #f8fafc;
+            font-weight: 700;
+            font-size: 13.5px;
+            padding: 12px 18px;
+            border-radius: 14px;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .btn-pro-hero-login:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Top Push Notification Banner */
+        .push-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 21, 16, 0.95) 100%);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            animation: modalSlideUp 0.3s ease;
+        }
+
+        .push-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .push-banner-icon {
+            font-size: 28px;
+            color: #ffd966;
+            filter: drop-shadow(0 2px 8px rgba(255, 217, 102, 0.4));
+        }
+
+        .push-banner-content strong {
+            display: block;
+            font-size: 14.5px;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .push-banner-content p {
+            font-size: 12.5px;
+            color: #cbd5e1;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .push-banner-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-push-allow {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border: 1px solid #34d399;
+            font-weight: 800;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-push-allow:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-ghost-subtle {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12.5px;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+
+        .btn-ghost-subtle:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-bell {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f8fafc;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-bell:hover {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--mint);
+            color: var(--mint);
+        }
+
+        .btn-bell.subscribed {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #34d399;
+            color: #34d399;
+        }
+
+        /* Toast Feedback */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 20000;
+            background: #10b981;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13.5px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .blog-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .footer-brand {
+            font-size: 18px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        /* Reader Comments & Moderation Section */
+        .comments-section {
+            margin-top: 32px;
+            padding-top: 28px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comments-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .comments-header h4 {
+            font-size: 17px;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comments-count-badge {
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            color: var(--mint);
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .comment-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px 18px;
+        }
+
+        .comment-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .comment-author-name {
+            font-weight: 800;
+            font-size: 14px;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .comment-author-contact {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .comment-stars {
+            color: #fbbf24;
+            font-size: 13px;
+            letter-spacing: 2px;
+        }
+
+        .comment-text {
+            font-size: 13.5px;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .comment-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .comment-pending-badge {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #f59e0b;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .no-comments-msg {
+            text-align: center;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* Comment Composer */
+        .comment-composer-box {
+            background: rgba(6, 21, 16, 0.85);
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .comment-composer-box h5 {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: var(--mint);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comment-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .comment-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #cbd5e1;
+            margin-bottom: 4px;
+        }
+
+        .comment-input, .comment-textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: #ffffff;
+            font-size: 13.5px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .comment-input:focus, .comment-textarea:focus {
+            border-color: var(--mint);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .comment-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .star-rating-picker {
+            display: flex;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #475569;
+        }
+
+        .star-rating-picker .star-item {
+            transition: color 0.15s;
+        }
+
+        .star-rating-picker .star-item.active {
+            color: #fbbf24;
+        }
+
+        .btn-submit-comment {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            padding: 10px 20px;
+            font-size: 13.5px;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-submit-comment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Browse More Articles Section */
+        .browse-more-articles-wrap {
+            margin: 40px 0 20px;
+            text-align: center;
+        }
+
+        .btn-browse-more-articles {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 18px 28px;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 800;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+            transition: all 0.25s ease;
+        }
+
+        .btn-browse-more-articles:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5);
+            background: linear-gradient(135deg, #047857 0%, #059669 100%);
+        }
+
+        /* Top-Tier Mobile & Tablet Publication Styles (Blogger / Modern Blog Tier) */
+        @media (max-width: 900px) {
+            :root {
+                --nav-h: 56px;
+            }
+            .header-inner {
+                padding: 0 14px;
+                height: 56px;
+            }
+            .blog-hero {
+                padding: 24px 12px 18px;
+            }
+            .hero-pill {
+                font-size: 10.5px;
+                padding: 5px 12px;
+                margin-bottom: 12px;
+            }
+            .blog-hero h1 {
+                font-size: 22px;
+                line-height: 1.3;
+                margin-bottom: 8px;
+            }
+            .blog-hero p {
+                font-size: 13.5px;
+                line-height: 1.55;
+                margin-bottom: 18px;
+                padding: 0 4px;
+            }
+            .search-box-wrap {
+                margin-bottom: 14px;
+            }
+            .search-box {
+                padding: 12px 16px 12px 42px;
+                font-size: 13.5px;
+                border-radius: 14px;
+            }
+
+            /* Horizontal Swipe Category Bar on Mobile */
+            .category-tabs {
+                display: flex;
+                gap: 8px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding: 4px 4px 12px;
+                margin: 0 -4px 16px;
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+            }
+            .category-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            .cat-btn {
+                flex-shrink: 0;
+                padding: 8px 14px;
+                font-size: 12.5px;
+                white-space: nowrap;
+                border-radius: 999px;
+            }
+
+            /* Clean Mobile Blog Cards */
+            .posts-grid {
+                gap: 18px;
+                margin-bottom: 40px;
+            }
+            .post-card {
+                grid-template-columns: 1fr;
+                border-radius: 20px;
+                min-height: auto;
+            }
+            .card-cover {
+                height: 200px;
+                min-height: 200px;
+            }
+            .card-body {
+                padding: 18px 16px;
+            }
+            .card-title {
+                font-size: 17.5px;
+                line-height: 1.4;
+                margin: 8px 0 8px;
+            }
+            .card-desc {
+                font-size: 13px;
+                line-height: 1.55;
+                margin-bottom: 14px;
+                -webkit-line-clamp: 2;
+            }
+            .card-footer {
+                padding-top: 12px;
+            }
+            .post-meta {
+                font-size: 11.5px;
+                gap: 8px;
+            }
+            .read-more-link {
+                font-size: 13px;
+            }
+
+            /* Mobile Reader Modal - Edge to edge luxury reading */
+            .modal-overlay {
+                padding: 0;
+                background: #061510;
+            }
+            .reader-modal {
+                margin: 0;
+                border-radius: 0;
+                border: none;
+                min-height: 100dvh;
+                box-shadow: none;
+                background: #061510;
+            }
+            .reader-hero {
+                height: 220px;
+            }
+            .reader-body {
+                padding: 22px 16px 40px;
+            }
+            .reader-title {
+                font-size: 20px;
+                line-height: 1.35;
+                margin: 12px 0 14px;
+            }
+            .reader-meta-bar {
+                padding-bottom: 14px;
+                margin-bottom: 18px;
+            }
+            .share-bar {
+                padding: 10px 12px;
+                gap: 6px;
+                margin: 16px 0 22px;
+            }
+            .share-label {
+                width: 100%;
+                margin-bottom: 4px;
+                font-size: 11.5px;
+            }
+            .share-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                flex: 1;
+                justify-content: center;
+            }
+            .reader-content {
+                font-size: 15px;
+                line-height: 1.75;
+            }
+            .reader-content h2 {
+                font-size: 18px;
+                margin: 24px 0 12px;
+            }
+            .reader-content h3 {
+                font-size: 16px;
+                margin: 20px 0 10px;
+            }
+            .reader-content p {
+                font-size: 14.5px;
+                line-height: 1.7;
+                margin-bottom: 14px;
+            }
+
+            /* Responsive Tables on Mobile with Horizontal Swipe */
+            .table-responsive-wrap {
+                margin: 16px 0 20px;
+                border-radius: 12px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .rich-content-table th, .rich-content-table td {
+                padding: 10px 12px;
+                font-size: 12.5px;
+                white-space: nowrap;
+            }
+
+            /* Images and Code */
+            .content-img-wrap {
+                margin: 18px 0;
+            }
+            .content-img-wrap img {
+                border-radius: 12px;
+            }
+            .code-block-wrap pre {
+                padding: 14px;
+                font-size: 12px;
+            }
+
+            /* Action Buttons & Comments */
+            .btn-browse-more-articles {
+                padding: 15px 18px;
+                font-size: 14.5px;
+                border-radius: 14px;
+            }
+            .pro-conversion-card {
+                padding: 20px 16px;
+            }
+            .pro-conversion-actions {
+                flex-direction: column;
+            }
+            .btn-pro-hero-trial, .btn-pro-hero-login {
+                width: 100%;
+                justify-content: center;
+            }
+            .comment-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation matching index.html -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="/index.html">
+                <span class="brand-mark">D</span>
+                <div>
+                    <div class="brand-text">DIGIBIZ</div>
+                    <div class="brand-sub">BUSINESS SYSTEM</div>
+                </div>
+            </a>
+            <nav class="nav-desktop" aria-label="Main">
+                <a href="/blog.html" id="navBlog" class="btn-pill" style="background:rgba(52,211,153,0.14);border:1.5px solid rgba(52,211,153,0.45);color:var(--mint);font-weight:800;font-size:14px;padding:8px 16px;box-shadow:0 2px 10px rgba(16,185,129,0.25);display:inline-flex;align-items:center;gap:6px;">📰 News and Update</a>
+                <a href="/index.html#features" id="navFeatures" style="font-weight:700;font-size:13.5px;color:var(--text-sub);text-decoration:none;padding:8px 12px;">Features</a>
+                <a href="/index.html#business-types" id="navBusinesses" style="font-weight:700;font-size:13.5px;color:var(--text-sub);text-decoration:none;padding:8px 12px;">Businesses</a>
+                <a href="/index.html#demo" id="navDemo" style="color:var(--accent);font-weight:800;font-size:13.5px;text-decoration:none;padding:8px 12px;">🎮 Live Demo</a>
+                <a href="/index.html#pricing" id="navPricing" style="font-weight:700;font-size:13.5px;color:var(--text-sub);text-decoration:none;padding:8px 12px;">Pricing</a>
+                <button type="button" class="btn-pill btn-bell" id="btnToggleNotifications" title="Get Push Notifications for new updates" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:var(--text-main);padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border-radius:12px;">
+                    <i class="fa-regular fa-bell" id="bellIcon"></i> <span id="bellBtnText">Alerts</span>
+                </button>
+                <a href="/auth/login.html" class="btn-pill btn-ghost" id="navLogin" style="font-weight:700;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#e2e8f0;padding:10px 18px;border-radius:12px;text-decoration:none;">Login</a>
+                <a href="/auth/register.html" class="btn-pill btn-gold" id="navTryFree" style="font-weight:900;background:linear-gradient(135deg, #fbbf24, #ffd966);color:#000000;padding:10px 18px;border-radius:12px;text-decoration:none;box-shadow:0 4px 14px rgba(255,217,102,0.35);">Try Free</a>
+            </nav>
+            <button type="button" class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer matching index.html -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <aside class="drawer" id="drawer" aria-hidden="true">
+        <a href="/blog.html" data-close-drawer id="drawerBlog" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);color:var(--mint);font-weight:800;font-size:15px;padding:12px;border-radius:12px;display:block;margin-bottom:6px;">📰 News and Update</a>
+        <a href="/index.html#features" data-close-drawer id="drawerFeatures">Features</a>
+        <a href="/index.html#business-types" data-close-drawer id="drawerBusinesses">Businesses</a>
+        <a href="/index.html#demo" data-close-drawer id="drawerDemo" style="color:var(--accent);font-weight:800;">🎮 Live Demo</a>
+        <a href="/index.html#pricing" data-close-drawer id="drawerPricing">Pricing</a>
+        <a href="/auth/login.html" data-close-drawer id="drawerLogin">Login</a>
+        <a href="/auth/register.html" data-close-drawer id="drawerTryFree" style="color:#000000;font-weight:900;background:linear-gradient(135deg, #fbbf24, #ffd966);text-align:center;border-radius:12px;padding:12px;margin-top:6px;display:block;">Try Free</a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Top Push Notification Banner -->
+        <div id="pushPermissionBanner" class="push-banner" style="display:none;">
+            <div class="push-banner-content">
+                <div class="push-banner-icon">🔔</div>
+                <div>
+                    <strong>නව පද්ධති යාවත්කාලීන ක්ෂණිකව ඔබගේ උපාංගයට ලබාගන්න!</strong>
+                    <p>DIGIBIZ වෙතින් නිකුත් වන නව විශේෂාංග, Tips & Guides ක්ෂණික Push Notifications මඟින් දැනගැනීමට සක්‍රීය කරන්න.</p>
+                </div>
+            </div>
+            <div class="push-banner-actions">
+                <button type="button" id="btnAllowPush" class="btn-push-allow">
+                    <i class="fa-solid fa-bell"></i> සක්‍රීය කරන්න (Enable)
+                </button>
+                <button type="button" id="btnDismissPush" class="btn-ghost-subtle">පසුව (Later)</button>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="blog-hero">
+            <div class="hero-pill">
+                <i class="fa-solid fa-bullhorn"></i> Official Announcements & Updates
+            </div>
+            <h1>DIGIBIZ නිල පුවත් සහ පද්ධති යාවත්කාලීන</h1>
+            <p>නවතම විශේෂාංග, භාවිත උපදෙස්, පද්ධති යාවත්කාලීන සහ ව්‍යාපාරික දැනුම එකම තැනකින් ලබාගන්න.</p>
+
+            <!-- Search & Controls -->
+            <div class="controls-wrap">
+                <div class="search-box-wrap">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="blogSearchInput" class="search-box" placeholder="ලිපි සහ යාවත්කාලීන සොයන්න (Search posts by title, features...)" autocomplete="off">
+                    <button type="button" id="btnClearSearch" class="clear-search-btn" title="Clear search">✕</button>
+                </div>
+
+                <!-- Category Filter Tabs -->
+                <div class="category-tabs">
+                    <button type="button" class="cat-btn active" data-category="all">
+                        <i class="fa-solid fa-layer-group"></i> සියල්ල (All)
+                    </button>
+                    <button type="button" class="cat-btn" data-category="features">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> නව විශේෂාංග (Features)
+                    </button>
+                    <button type="button" class="cat-btn" data-category="tips">
+                        <i class="fa-solid fa-lightbulb"></i> භාවිත උපදෙස් (Tips & Guides)
+                    </button>
+                    <button type="button" class="cat-btn" data-category="announcements">
+                        <i class="fa-solid fa-bullhorn"></i> නිවේදන (Announcements)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Post Spotlight -->
+        <div id="featuredPostContainer" style="display:none;"></div>
+
+        <!-- Posts Grid -->
+        <div id="postsGrid" class="posts-grid">
+            <div class="state-wrap">
+                <div class="spinner"></div>
+                <div style="color:var(--text-muted);font-size:14px;">නවතම ලිපි ලබාගනිමින් පවතී... (Loading latest updates...)</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Single Post Detailed Modal Reader -->
+    <div id="readerModal" class="modal-overlay" aria-hidden="true">
+        <div class="reader-modal">
+            <button type="button" class="reader-close-btn" id="btnCloseReader" aria-label="Close reader">✕</button>
+            <div class="reader-hero" id="modalHero">
+                <span class="emoji-huge" id="modalEmoji">📰</span>
+            </div>
+            <div class="reader-body">
+                <div id="modalBadge"></div>
+                <h1 class="reader-title" id="modalTitle"></h1>
+                
+                <div class="reader-meta-bar">
+                    <div class="reader-author">
+                        <div class="author-avatar" id="modalAuthorAvatar">D</div>
+                        <div class="author-info">
+                            <strong id="modalAuthorName">DIGIBIZ Team</strong>
+                            <small id="modalDate"></small>
+                        </div>
+                    </div>
+                    <div style="font-size:12.5px;color:var(--text-muted);">
+                        <i class="fa-regular fa-clock"></i> <span id="modalReadTime">3 min read</span>
+                    </div>
+                </div>
+
+                <!-- Direct Social Share Buttons -->
+                <div class="share-bar">
+                    <span class="share-label"><i class="fa-solid fa-share-nodes"></i> Share:</span>
+                    <button type="button" class="share-btn share-wa" id="btnShareWhatsApp">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button type="button" class="share-btn share-fb" id="btnShareFacebook">
+                        <i class="fa-brands fa-facebook"></i> Facebook
+                    </button>
+                    <button type="button" class="share-btn share-native" id="btnShareNative" style="display:none;">
+                        <i class="fa-solid fa-share"></i> Share More
+                    </button>
+                    <button type="button" class="share-btn share-copy" id="btnCopyLink">
+                        <i class="fa-solid fa-link"></i> Copy Link
+                    </button>
+                </div>
+
+                <!-- Formatted Article Content -->
+                <div class="reader-content" id="modalContent"></div>
+
+                <!-- In-Article High Conversion Action Card (DIGIBIZ.PRO) -->
+                <div class="pro-conversion-card">
+                    <div class="pro-conversion-header">
+                        <div class="pro-badge-group">
+                            <span class="pro-tag-live">🚀 DIGIBIZ.PRO ENTERPRISE</span>
+                            <span class="pro-tag-trial">7-Day Full Free Trial</span>
+                        </div>
+                    </div>
+                    <h3 class="pro-conversion-title">ඔබේ ව්‍යාපාරයත් අදම Cloud Technology මඟින් බලගන්වන්න!</h3>
+                    <p class="pro-conversion-lead">
+                        ශ්‍රී ලංකාවේ ඕනෑම Retail, Auto Care, Spare Parts, Tire Centre, Pharmacy, Wholesale, Restaurant හෝ Production ව්‍යාපාරයකට ගැළපෙන එකම පූර්ණ Cloud කළමනාකරණ පද්ධතිය.
+                    </p>
+                    <div class="pro-perks-grid">
+                        <div class="pro-perk-item"><i class="fa-solid fa-circle-check"></i> Lightning-Fast POS & Digital Invoicing</div>
+                        <div class="pro-perk-item"><i class="fa-solid fa-circle-check"></i> Real-time Stock & Low Stock Alerts</div>
+                        <div class="pro-perk-item"><i class="fa-solid fa-circle-check"></i> Daily / Monthly Real Profit Analytics</div>
+                        <div class="pro-perk-item"><i class="fa-solid fa-circle-check"></i> 100% Zero-Leak Production Vault Security</div>
+                    </div>
+                    <div class="pro-conversion-actions">
+                        <a href="https://digibiz-pro.web.app/auth/register.html" target="_blank" rel="noopener" class="btn-pro-hero-trial">
+                            <span>නොමිලේ අත්හදා බලන්න (Try DIGIBIZ.PRO Free)</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                        <a href="https://digibiz-pro.web.app/" target="_blank" rel="noopener" class="btn-pro-hero-login">
+                            <i class="fa-solid fa-building"></i> <span>🏢 Business Login (PRO)</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Interactive Reader Comments & Inquiries (Moderated by Admin) -->
+                <div class="comments-section" id="postCommentsSection">
+                    <div class="comments-header">
+                        <h4><i class="fa-solid fa-comments" style="color:var(--mint);"></i> පාඨක ප්‍රතිචාර හා විමසීම් (Reader Comments)</h4>
+                        <span class="comments-count-badge" id="commentsCountBadge">0 Comments</span>
+                    </div>
+
+                    <!-- Comments Feed -->
+                    <div id="commentsList" class="comments-list">
+                        <div class="no-comments-msg" id="noCommentsMsg">තවමත් ප්‍රතිචාර නොමැත. ඔබේ අදහස පළමුවෙන්ම එක් කරන්න!</div>
+                    </div>
+
+                    <!-- Submit Comment Composer Box -->
+                    <div class="comment-composer-box">
+                        <h5><i class="fa-solid fa-pen-nib"></i> ඔබේ අදහස / විමසීම මෙහි සටහන් කරන්න:</h5>
+                        <form id="commentForm">
+                            <div class="comment-form-grid">
+                                <div>
+                                    <label class="comment-label">ඔබේ නම (Your Name) *</label>
+                                    <input type="text" id="commentAuthorName" class="comment-input" placeholder="උදා: කසුන් පෙරේරා" required>
+                                </div>
+                                <div>
+                                    <label class="comment-label">ව්‍යාපාර වර්ගය හෝ දුරකථන අංකය (Optional)</label>
+                                    <input type="text" id="commentAuthorContact" class="comment-input" placeholder="උදා: Retail Super / 0771234567">
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom:12px;">
+                                <label class="comment-label">තරු ඇගයීම (Rating)</label>
+                                <div class="star-rating-picker" id="starRatingPicker">
+                                    <span class="star-item active" data-val="1">★</span>
+                                    <span class="star-item active" data-val="2">★</span>
+                                    <span class="star-item active" data-val="3">★</span>
+                                    <span class="star-item active" data-val="4">★</span>
+                                    <span class="star-item active" data-val="5">★</span>
+                                </div>
+                                <input type="hidden" id="commentRatingVal" value="5">
+                            </div>
+
+                            <div style="margin-bottom:12px;">
+                                <label class="comment-label">ප්‍රතිචාරය / විමසීම (Your Feedback / Inquiry) *</label>
+                                <textarea id="commentBody" class="comment-textarea" placeholder="මෙම පද්ධතිය ගැන ඔබේ අදහස හෝ විමසීමට අවශ්‍ය දේ මෙහි ලියන්න..." required></textarea>
+                            </div>
+
+                            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                                <small style="color:var(--text-muted);font-size:12px;">
+                                    <i class="fa-solid fa-shield-halved"></i> ඔබගේ ප්‍රතිචාරය Admin අනුමැතියෙන් පසු සජීවීව පළ වේ.
+                                </small>
+                                <button type="submit" class="btn-submit-comment" id="btnSubmitComment">
+                                    <i class="fa-solid fa-paper-plane"></i> ප්‍රතිචාරය යොමු කරන්න
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Prominent Browse More Articles Action -->
+                <div class="browse-more-articles-wrap">
+                    <button type="button" class="btn-browse-more-articles" id="btnBackToListLarge">
+                        <i class="fa-solid fa-arrow-left"></i> -- වෙනත් ලිපි වලට යන්න (Browse More Articles) --
+                    </button>
+                </div>
+
+                <!-- Bottom Action Row -->
+                <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <a href="https://digibiz-sys.web.app/#demo" target="_blank" rel="noopener" class="btn-pill btn-biz" style="font-size:14px;padding:12px 24px;">
+                        <i class="fa-solid fa-laptop-code"></i> Live Demo පරීක්ෂා කරන්න (https://digibiz-sys.web.app/#demo)
+                    </a>
+                    <a href="https://digibiz-pro.web.app/" target="_blank" rel="noopener" class="btn-pill btn-biz" style="background:#0f172a;border:1px solid #38bdf8;color:#38bdf8;font-size:14px;padding:12px 24px;">
+                        <i class="fa-solid fa-building"></i> 🏢 Business Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Action completed</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="blog-footer">
+        <div class="container">
+            <div class="footer-brand">DIGIBIZ NEWS & UPDATES</div>
+            <p>Smart Universal Business Management Platform · Powering Modern Sri Lankan Enterprises</p>
+            <p style="margin-top:8px;font-size:12px;">&copy; 2026 DIGIBIZ Universal. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Blog Portal Core Script -->
+    <script>
+        (function() {
+            'use strict';
+
+            const state = {
+                posts: [],
+                filteredPosts: [],
+                currentCategory: 'all',
+                searchQuery: '',
+                activePost: null,
+                deferredPrompt: null
+            };
+
+            const $ = (id) => document.getElementById(id);
+
+            // Toast helper
+            function showToast(msg) {
+                const t = $('toast');
+                $('toastMsg').textContent = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 2400);
+            }
+
+            // Category badge generator
+            function getCategoryBadge(cat, label) {
+                const c = String(cat || 'features').toLowerCase();
+                const text = label || (c === 'features' ? 'නව විශේෂාංග' : c === 'tips' ? 'භාවිත උපදෙස්' : c === 'announcements' ? 'පද්ධති නිවේදන' : 'විශේෂ යාවත්කාලීන');
+                let cls = 'badge-general';
+                if (c === 'features') cls = 'badge-features';
+                else if (c === 'tips') cls = 'badge-tips';
+                else if (c === 'announcements') cls = 'badge-announcements';
+                return `<span class="badge-pill ${cls}"><i class="fa-solid fa-tag"></i> ${text}</span>`;
+            }
+
+            // Estimate read time
+            function getReadTime(content) {
+                const words = String(content || '').trim().split(/\s+/).length;
+                const mins = Math.max(1, Math.ceil(words / 150));
+                return `${mins} min read (${mins} මිනිත්තු කියවීමක්)`;
+            }
+
+            // Format date string
+            function formatDate(val) {
+                if (!val) return '2026-08-22';
+                if (val.toDate) {
+                    const d = val.toDate();
+                    return d.toLocaleDateString('en-CA');
+                }
+                if (typeof val === 'string') return val.slice(0, 10);
+                return '2026-08-22';
+            }
+
+            // Comprehensive Markdown parser for rich content, tables, images, code, and math
+            function parseMarkdown(md) {
+                if (!md) return '';
+                let text = String(md).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+                // 1. Extract Code Blocks (``` ... ```)
+                const codeBlocks = [];
+                text = text.replace(/```([a-zA-Z0-9_\-]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                    const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+                    const escapedCode = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const titleText = (lang || 'CODE / RECEIPT').toUpperCase();
+                    codeBlocks.push(`<div class="code-block-wrap"><div class="code-block-header"><span><i class="fa-solid fa-code"></i> ${titleText}</span><button type="button" class="btn-copy-code" onclick="navigator.clipboard.writeText(this.closest('.code-block-wrap').querySelector('code').innerText);alert('Copied to clipboard!');"><i class="fa-regular fa-copy"></i> Copy</button></div><pre><code>${escapedCode}</code></pre></div>`);
+                    return placeholder;
+                });
+
+                // 2. Extract Math Blocks ($$ ... $$)
+                const mathBlocks = [];
+                text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+                    const placeholder = `__MATH_BLOCK_${mathBlocks.length}__`;
+                    let clean = formula.replace(/\\text\{([^}]+)\}/g, '$1')
+                        .replace(/\\times/g, ' × ')
+                        .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1 ÷ $2)');
+                    clean = clean.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    mathBlocks.push(`<div class="math-block"><div class="math-icon"><i class="fa-solid fa-calculator"></i> සූත්‍රය (Calculation Formula):</div><div class="math-formula">${clean}</div></div>`);
+                    return placeholder;
+                });
+
+                // Helper for inline markdown parsing
+                function parseInline(str) {
+                    if (!str) return '';
+                    let s = String(str);
+                    s = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    s = s.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+                    s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    s = s.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    s = s.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+                    s = s.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--mint);font-weight:700;">$1</a>');
+                    return s;
+                }
+
+                // 3. Process Tables
+                const lines = text.split('\n');
+                const processedLines = [];
+                let inTable = false;
+                let tableLines = [];
+
+                const flushTable = () => {
+                    if (tableLines.length === 0) return;
+                    if (tableLines.length >= 2) {
+                        let html = '<div class="table-responsive-wrap"><table class="rich-content-table">';
+                        const headerCells = tableLines[0].split('|').map(c => c.trim()).filter((c, i, arr) => (i > 0 && i < arr.length - 1) || (arr.length === 1 && c));
+                        html += '<thead><tr>';
+                        headerCells.forEach(cell => {
+                            html += `<th>${parseInline(cell)}</th>`;
+                        });
+                        html += '</tr></thead><tbody>';
+
+                        const startRow = tableLines[1].includes('-') ? 2 : 1;
+                        for (let r = startRow; r < tableLines.length; r++) {
+                            const cells = tableLines[r].split('|').map(c => c.trim()).filter((c, i, arr) => (i > 0 && i < arr.length - 1) || (arr.length === 1 && c));
+                            if (cells.length > 0) {
+                                html += '<tr>';
+                                cells.forEach(cell => {
+                                    html += `<td>${parseInline(cell)}</td>`;
+                                });
+                                html += '</tr>';
+                            }
+                        }
+                        html += '</tbody></table></div>';
+                        processedLines.push(html);
+                    } else {
+                        tableLines.forEach(l => processedLines.push(l));
+                    }
+                    tableLines = [];
+                    inTable = false;
+                };
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+                        inTable = true;
+                        tableLines.push(line);
+                    } else {
+                        if (inTable) flushTable();
+                        processedLines.push(line);
+                    }
+                }
+                if (inTable) flushTable();
+
+                text = processedLines.join('\n');
+
+                // 4. Images: ![alt](url)
+                text = text.replace(/!\[(.*?)\]\((.*?)\)/gim, (m, alt, src) => {
+                    const caption = alt ? `<div class="img-caption"><i class="fa-regular fa-image"></i> ${parseInline(alt)}</div>` : '';
+                    return `<div class="content-img-wrap"><img src="${src}" alt="${alt}" loading="lazy">${caption}</div>`;
+                });
+
+                // 5. Headers
+                text = text.replace(/^#### (.*$)/gim, (m, h) => `<h4>${parseInline(h)}</h4>`);
+                text = text.replace(/^### (.*$)/gim, (m, h) => `<h3>${parseInline(h)}</h3>`);
+                text = text.replace(/^## (.*$)/gim, (m, h) => `<h2>${parseInline(h)}</h2>`);
+                text = text.replace(/^# (.*$)/gim, (m, h) => `<h2>${parseInline(h)}</h2>`);
+
+                // 6. Horizontal Rules
+                text = text.replace(/^(\-{3,}|\*{3,})$/gim, '<hr class="content-divider">');
+
+                // 7. Callouts & Blockquotes
+                text = text.replace(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*([\s\S]*?)(?=\n\n|\n(?!>)|$)/gim, (m, type, body) => {
+                    const t = type.toUpperCase();
+                    const icon = t === 'TIP' ? '⚡' : t === 'WARNING' || t === 'CAUTION' ? '⚠️' : '💡';
+                    const cleanBody = body.replace(/^>\s?/gm, '');
+                    return `<div class="callout-box callout-${type.toLowerCase()}"><strong>${icon} ${t}:</strong> ${parseInline(cleanBody)}</div>`;
+                });
+                text = text.replace(/^>\s*(.*)$/gim, (m, q) => `<blockquote>${parseInline(q)}</blockquote>`);
+
+                // 8. Lists
+                text = text.replace(/^\s*[\-\*]\s+(.*)$/gim, (m, li) => `<li>${parseInline(li)}</li>`);
+                text = text.replace(/(<li>.*?<\/li>(\s*<li>.*?<\/li>)*)/gis, '<ul>$1</ul>');
+                text = text.replace(/<\/ul>\s*<ul>/gim, '');
+
+                // 9. Paragraphs
+                const paragraphs = text.split(/\n\n+/);
+                text = paragraphs.map(p => {
+                    p = p.trim();
+                    if (!p) return '';
+                    if (p.startsWith('<h2') || p.startsWith('<h3') || p.startsWith('<h4') || 
+                        p.startsWith('<ul') || p.startsWith('<ol') || p.startsWith('<blockquote') || 
+                        p.startsWith('<div') || p.startsWith('<hr') || p.startsWith('__CODE_BLOCK_') || p.startsWith('__MATH_BLOCK_')) {
+                        return p;
+                    }
+                    return `<p>${p.split('\n').map(l => parseInline(l)).join('<br>')}</p>`;
+                }).join('\n');
+
+                // 10. Restore Code & Math Blocks
+                codeBlocks.forEach((cb, idx) => {
+                    text = text.replace(`__CODE_BLOCK_${idx}__`, cb);
+                });
+                mathBlocks.forEach((mb, idx) => {
+                    text = text.replace(`__MATH_BLOCK_${idx}__`, mb);
+                });
+
+                return text;
+            }
+
+            // Load blog posts from Firestore
+            async function loadPosts() {
+                try {
+                    const db = firebase.firestore();
+                    // Fast index-free query for published posts
+                    let snap;
+                    try {
+                        snap = await db.collection('blog_posts').where('published', '==', true).get();
+                    } catch(e) {
+                        snap = await db.collection('blog_posts').get();
+                    }
+
+                    state.posts = snap.docs.map(doc => {
+                        const d = doc.data() || {};
+                        let sortTime = 0;
+                        if (d.createdAt && typeof d.createdAt.toDate === 'function') {
+                            sortTime = d.createdAt.toDate().getTime();
+                        } else if (d.createdAt && d.createdAt.seconds) {
+                            sortTime = d.createdAt.seconds * 1000;
+                        } else if (d.createdAt) {
+                            sortTime = new Date(d.createdAt).getTime() || 0;
+                        } else if (d.date) {
+                            sortTime = new Date(d.date).getTime() || 0;
+                        }
+
+                        return {
+                            id: doc.id,
+                            title: d.title || 'DIGIBIZ System Update',
+                            category: d.category || 'features',
+                            categoryLabel: d.categoryLabel || '',
+                            icon: d.icon || '🚀',
+                            desc: d.desc || d.summary || '',
+                            content: d.content || d.desc || '',
+                            imageUrl: d.imageUrl || '',
+                            author: d.author || 'DIGIBIZ Engineering',
+                            date: d.date || formatDate(d.createdAt),
+                            createdAt: d.createdAt,
+                            sortTime,
+                            published: d.published !== false
+                        };
+                    }).filter(p => p.published);
+
+                    // Sort newest first
+                    state.posts.sort((a, b) => b.sortTime - a.sortTime);
+
+                    applyFilterAndRender();
+                    checkUrlForDeepLink();
+                } catch (err) {
+                    console.error('[Blog] Error loading posts:', err);
+                    $('postsGrid').innerHTML = `
+                        <div class="state-wrap">
+                            <div style="font-size:36px;margin-bottom:12px;">⚠️</div>
+                            <div style="color:#ef4444;font-weight:700;margin-bottom:8px;">දත්ත ලබාගැනීමේදී දෝෂයක් සිදුවිය.</div>
+                            <div style="color:var(--text-muted);font-size:13px;">කරුණාකර මොහොතකින් නැවත උත්සාහ කරන්න.</div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Filter and render posts
+            function applyFilterAndRender() {
+                const q = state.searchQuery.trim().toLowerCase();
+                const cat = state.currentCategory;
+
+                state.filteredPosts = state.posts.filter(p => {
+                    const matchCat = cat === 'all' || p.category === cat;
+                    const matchQuery = !q || 
+                        p.title.toLowerCase().includes(q) || 
+                        p.desc.toLowerCase().includes(q) || 
+                        p.content.toLowerCase().includes(q);
+                    return matchCat && matchQuery;
+                });
+
+                renderGrid();
+            }
+
+            // Render Wide Feed Cards
+            function renderGrid() {
+                const grid = $('postsGrid');
+                const displayPosts = state.filteredPosts;
+
+                if (displayPosts.length === 0) {
+                    grid.innerHTML = `
+                        <div class="state-wrap">
+                            <div style="font-size:42px;margin-bottom:12px;">🔍</div>
+                            <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:6px;">ලිපි කිසිවක් හමු නොවීය (No posts found)</div>
+                            <div style="color:var(--text-muted);font-size:13.5px;">වෙනත් සෙවුම් වචනයක් හෝ Category එකක් තෝරා බලන්න.</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = displayPosts.map(p => {
+                    const coverHtml = p.imageUrl 
+                        ? `<img src="${p.imageUrl}" alt="${p.title}">` 
+                        : `<span class="emoji-center">${p.icon || '📰'}</span>`;
+
+                    return `
+                        <article class="post-card" onclick="window.openBlogReader('${p.id}')">
+                            <div class="card-cover">
+                                ${coverHtml}
+                            </div>
+                            <div class="card-body">
+                                <div>${getCategoryBadge(p.category, p.categoryLabel)}</div>
+                                <h3 class="card-title">${p.title}</h3>
+                                <p class="card-desc">${p.desc}</p>
+                                <div class="card-footer">
+                                    <div class="post-meta">
+                                        <span><i class="fa-regular fa-calendar"></i> ${p.date}</span>
+                                        <span><i class="fa-solid fa-user-check"></i> ${p.author || 'DIGIBIZ'}</span>
+                                    </div>
+                                    <span class="read-more-link">කියවන්න (Read Guide) <i class="fa-solid fa-arrow-right"></i></span>
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            }
+
+            // Open Single Post Detailed Modal Reader
+            window.openBlogReader = function(postId) {
+                const post = state.posts.find(p => p.id === postId);
+                if (!post) return;
+
+                state.activePost = post;
+
+                // Sync unread acknowledgment to localStorage
+                try {
+                    localStorage.setItem('digibiz_last_read_blog_id', post.id);
+                } catch(e) {}
+
+                // Update URL for easy sharing & deep linking
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('id', post.id);
+                window.history.replaceState({ postId: post.id }, post.title, currentUrl.toString());
+
+                // Update OpenGraph meta tags dynamically
+                if ($('ogTitle')) $('ogTitle').setAttribute('content', `${post.title} — DIGIBIZ News`);
+                if ($('ogDesc')) $('ogDesc').setAttribute('content', post.desc);
+                if (post.imageUrl && $('ogImage')) $('ogImage').setAttribute('content', post.imageUrl);
+
+                // Populate Modal Data
+                $('modalTitle').textContent = post.title;
+                $('modalBadge').innerHTML = getCategoryBadge(post.category, post.categoryLabel);
+                $('modalAuthorName').textContent = post.author || 'DIGIBIZ Official';
+                $('modalAuthorAvatar').textContent = (post.author || 'D').charAt(0).toUpperCase();
+                $('modalDate').textContent = `පළ කළ දිනය: ${post.date}`;
+                $('modalReadTime').textContent = getReadTime(post.content);
+
+                // Hero Graphic
+                if (post.imageUrl) {
+                    $('modalHero').innerHTML = `<img src="${post.imageUrl}" alt="${post.title}">`;
+                } else {
+                    $('modalHero').innerHTML = `<span class="emoji-huge">${post.icon || '🚀'}</span>`;
+                }
+
+                // Rich Parsed Content
+                $('modalContent').innerHTML = parseMarkdown(post.content);
+
+                // Load Reader Comments
+                loadCommentsForPost(post.id);
+
+                // Show Modal
+                const modal = $('readerModal');
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            };
+
+            // Reader Comments Engine
+            async function loadCommentsForPost(postId) {
+                const listEl = $('commentsList');
+                const countBadge = $('commentsCountBadge');
+                if (!listEl) return;
+
+                listEl.innerHTML = '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:12px;"><i class="fa-solid fa-spinner fa-spin"></i> ප්‍රතිචාර පූරණය වෙමින් පවතී...</div>';
+
+                try {
+                    const db = firebase.firestore();
+                    const snap = await db.collection('blog_comments')
+                        .where('postId', '==', postId)
+                        .get();
+
+                    const isSuperAdmin = window.currentUserIsSuperAdmin || false;
+                    const allComments = [];
+
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        data.id = doc.id;
+                        allComments.push(data);
+                    });
+
+                    // Sort by createdAt desc
+                    allComments.sort((a, b) => {
+                        const tA = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds : 0;
+                        const tB = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds : 0;
+                        return tB - tA;
+                    });
+
+                    const displayComments = allComments.filter(c => c.approved || isSuperAdmin);
+
+                    if (countBadge) {
+                        const approvedCount = allComments.filter(c => c.approved).length;
+                        countBadge.textContent = `${approvedCount} Comments`;
+                    }
+
+                    if (displayComments.length === 0) {
+                        listEl.innerHTML = '<div class="no-comments-msg">තවමත් ප්‍රතිචාර නොමැත. ඔබේ අදහස පළමුවෙන්ම එක් කරන්න!</div>';
+                        return;
+                    }
+
+                    listEl.innerHTML = displayComments.map(c => {
+                        const stars = '★'.repeat(c.rating || 5) + '☆'.repeat(Math.max(0, 5 - (c.rating || 5)));
+                        const dateStr = c.createdAt && c.createdAt.toDate ? c.createdAt.toDate().toLocaleDateString('si-LK') : 'මෑතකදී';
+                        const pendingTag = !c.approved ? '<span class="comment-pending-badge">⏳ Pending Admin Approval</span>' : '';
+                        const contactTag = c.authorContact ? `<span class="comment-author-contact">(${safe(c.authorContact)})</span>` : '';
+
+                        return `
+                            <div class="comment-card">
+                                <div class="comment-card-top">
+                                    <div class="comment-author-name">
+                                        <i class="fa-solid fa-circle-user" style="color:var(--mint);"></i>
+                                        <span>${safe(c.authorName || 'පාඨකයා')}</span>
+                                        ${contactTag}
+                                        ${pendingTag}
+                                    </div>
+                                    <div class="comment-stars">${stars}</div>
+                                </div>
+                                <div class="comment-text">${safe(c.comment)}</div>
+                                <div class="comment-date"><i class="fa-regular fa-clock"></i> ${dateStr}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                } catch(err) {
+                    console.warn('[Blog] Could not load comments:', err);
+                    listEl.innerHTML = '<div class="no-comments-msg">ප්‍රතිචාර ලබාගැනීමේදී දෝෂයක් සිදුවිය.</div>';
+                }
+            }
+
+            function setStarRating(ratingVal) {
+                const stars = document.querySelectorAll('#starRatingPicker .star-item');
+                $('commentRatingVal').value = ratingVal;
+                stars.forEach(star => {
+                    const val = parseInt(star.dataset.val);
+                    if (val <= ratingVal) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+            }
+
+            function initCommentsEngine() {
+                // Star Rating Selection
+                document.querySelectorAll('#starRatingPicker .star-item').forEach(star => {
+                    star.addEventListener('click', () => {
+                        const val = parseInt(star.dataset.val) || 5;
+                        setStarRating(val);
+                    });
+                });
+
+                // Comment Submission
+                const form = $('commentForm');
+                if (form) {
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        if (!state.activePost) return;
+
+                        const authorName = $('commentAuthorName').value.trim();
+                        const authorContact = $('commentAuthorContact').value.trim();
+                        const rating = parseInt($('commentRatingVal').value) || 5;
+                        const comment = $('commentBody').value.trim();
+
+                        if (!authorName || !comment) return;
+
+                        const btn = $('btnSubmitComment');
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> යොමු වෙමින් පවතී...';
+
+                        try {
+                            const db = firebase.firestore();
+                            await db.collection('blog_comments').add({
+                                postId: state.activePost.id,
+                                postTitle: state.activePost.title,
+                                authorName,
+                                authorContact: authorContact || '',
+                                rating,
+                                comment,
+                                approved: false,
+                                status: 'pending',
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+
+                            showToast('🎉 ඔබගේ ප්‍රතිචාරය ලැබුණි! Admin අනුමැතියෙන් පසු එය ප්‍රදර්ශනය වනු ඇත.');
+                            form.reset();
+                            setStarRating(5);
+                            loadCommentsForPost(state.activePost.id);
+                        } catch(err) {
+                            console.error('[Blog] Comment submission error:', err);
+                            showToast('ප්‍රතිචාරය යැවීමේදී දෝෂයක් සිදුවිය.');
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ප්‍රතිචාරය යොමු කරන්න';
+                        }
+                    });
+                }
+            }
+
+            // Close Single Post Reader
+            function closeReader() {
+                const modal = $('readerModal');
+                modal.classList.remove('active');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                state.activePost = null;
+
+                // Clean up query param
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.delete('id');
+                window.history.replaceState({}, document.title, currentUrl.pathname);
+            }
+
+            // Check URL for direct deep link on page load
+            function checkUrlForDeepLink() {
+                const params = new URLSearchParams(window.location.search);
+                const postId = params.get('id') || (window.location.hash ? window.location.hash.replace('#', '') : null);
+                if (postId) {
+                    window.openBlogReader(postId);
+                }
+            }
+
+            // Share Functions
+            function shareWhatsApp() {
+                if (!state.activePost) return;
+                const post = state.activePost;
+                const postUrl = `${window.location.origin}/blog.html?id=${post.id}`;
+                const text = `📰 *${post.title}*\n\n${post.desc}\n\n👉 සම්පූර්ණ විස්තරය කියවන්න:\n${postUrl}`;
+                const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+                window.open(waUrl, '_blank');
+            }
+
+            function shareFacebook() {
+                if (!state.activePost) return;
+                const postUrl = `${window.location.origin}/blog.html?id=${state.activePost.id}`;
+                const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`;
+                window.open(fbUrl, '_blank', 'width=600,height=400');
+            }
+
+            function copyLink() {
+                if (!state.activePost) return;
+                const postUrl = `${window.location.origin}/blog.html?id=${state.activePost.id}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(postUrl).then(() => {
+                        showToast('ලිපියේ Link එක Clipboard එකට Copy විය!');
+                    }).catch(() => {
+                        fallbackCopy(postUrl);
+                    });
+                } else {
+                    fallbackCopy(postUrl);
+                }
+            }
+
+            function fallbackCopy(text) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('ලිපියේ Link එක Copy විය!');
+                } catch(e) {
+                    prompt('Copy this link:', text);
+                }
+                document.body.removeChild(ta);
+            }
+
+            async function shareNative() {
+                if (!state.activePost || !navigator.share) return;
+                const post = state.activePost;
+                const postUrl = `${window.location.origin}/blog.html?id=${post.id}`;
+                try {
+                    await navigator.share({
+                        title: post.title,
+                        text: post.desc,
+                        url: postUrl
+                    });
+                } catch(e) {}
+            }
+
+            // Attach UI Events
+            function attachEvents() {
+                // Category Filter Click
+                document.querySelectorAll('.cat-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        state.currentCategory = btn.dataset.category;
+                        applyFilterAndRender();
+                    });
+                });
+
+                // Search Input
+                const searchInput = $('blogSearchInput');
+                const clearBtn = $('btnClearSearch');
+                searchInput.addEventListener('input', (e) => {
+                    state.searchQuery = e.target.value;
+                    clearBtn.style.display = state.searchQuery ? 'flex' : 'none';
+                    applyFilterAndRender();
+                });
+
+                clearBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    state.searchQuery = '';
+                    clearBtn.style.display = 'none';
+                    applyFilterAndRender();
+                    searchInput.focus();
+                });
+
+                // Reader Modal Actions
+                $('btnCloseReader').addEventListener('click', closeReader);
+                if ($('btnBackToList')) $('btnBackToList').addEventListener('click', closeReader);
+                if ($('btnBackToListLarge')) $('btnBackToListLarge').addEventListener('click', closeReader);
+                $('readerModal').addEventListener('click', (e) => {
+                    if (e.target === $('readerModal')) closeReader();
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && $('readerModal').classList.contains('active')) {
+                        closeReader();
+                    }
+                });
+
+                // Social Sharing
+                $('btnShareWhatsApp').addEventListener('click', shareWhatsApp);
+                $('btnShareFacebook').addEventListener('click', shareFacebook);
+                $('btnCopyLink').addEventListener('click', copyLink);
+
+                if (navigator.share) {
+                    $('btnShareNative').style.display = 'inline-flex';
+                    $('btnShareNative').addEventListener('click', shareNative);
+                }
+
+                // Push Notification Controls
+                $('btnToggleNotifications').addEventListener('click', () => {
+                    if (Notification.permission === 'granted') {
+                        showToast('✓ ඔබ දැනටමත් පද්ධති දැනුම්දීම් ලබාගැනීමට ලියාපදිංචි වී ඇත.');
+                    } else {
+                        requestNotificationPermission();
+                    }
+                });
+
+                $('btnAllowPush').addEventListener('click', requestNotificationPermission);
+                $('btnDismissPush').addEventListener('click', () => {
+                    $('pushPermissionBanner').style.display = 'none';
+                    try {
+                        localStorage.setItem('digibiz_push_banner_dismissed_at', String(Date.now()));
+                    } catch(e) {}
+                });
+
+                // Mobile Drawer Toggle
+                function closeDrawer() {
+                    document.documentElement.classList.remove('drawer-open');
+                    if ($('drawer')) $('drawer').setAttribute('aria-hidden', 'true');
+                    if ($('burger')) $('burger').setAttribute('aria-expanded', 'false');
+                }
+
+                if ($('burger')) {
+                    $('burger').addEventListener('click', function () {
+                        const open = !document.documentElement.classList.contains('drawer-open');
+                        document.documentElement.classList.toggle('drawer-open', open);
+                        if ($('drawer')) $('drawer').setAttribute('aria-hidden', open ? 'false' : 'true');
+                        this.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    });
+                }
+                if ($('drawerOverlay')) $('drawerOverlay').addEventListener('click', closeDrawer);
+                document.querySelectorAll('[data-close-drawer]').forEach(function (a) {
+                    a.addEventListener('click', closeDrawer);
+                });
+            }
+
+            // Web Push Notification & FCM Token Lifecycle Management
+            function updatePushBellUI(isSubscribed) {
+                const bell = $('btnToggleNotifications');
+                const text = $('bellBtnText');
+                const icon = $('bellIcon');
+                if (!bell) return;
+
+                if (isSubscribed) {
+                    bell.classList.add('subscribed');
+                    if (text) text.textContent = 'Alerts On';
+                    if (icon) {
+                        icon.className = 'fa-solid fa-bell';
+                    }
+                } else {
+                    bell.classList.remove('subscribed');
+                    if (text) text.textContent = 'Alerts';
+                    if (icon) {
+                        icon.className = 'fa-regular fa-bell';
+                    }
+                }
+            }
+
+            async function saveFcmTokenToFirestore(fcmToken) {
+                if (!fcmToken || typeof fcmToken !== 'string') return;
+                try {
+                    const db = firebase.firestore();
+                    // Clean token hash for document id
+                    const tokenDocId = 'sub_' + btoa(fcmToken.slice(-28)).replace(/[^a-zA-Z0-9]/g, '_');
+                    await db.collection('blog_subscribers').doc(tokenDocId).set({
+                        fcmToken: fcmToken,
+                        subscribedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        userAgent: navigator.userAgent || '',
+                        language: navigator.language || 'si',
+                        platform: navigator.platform || 'web',
+                        active: true
+                    }, { merge: true });
+
+                    localStorage.setItem('digibiz_blog_fcm_token', fcmToken);
+                    localStorage.setItem('digibiz_blog_notifications_enabled', 'true');
+                    updatePushBellUI(true);
+                } catch (err) {
+                    console.warn('[FCM] Error saving token to Firestore:', err);
+                }
+            }
+
+            async function requestNotificationPermission() {
+                try {
+                    if (!('Notification' in window)) {
+                        showToast('ඔබගේ Browser එක Push Notifications සඳහා සහාය නොදක්වයි.');
+                        return;
+                    }
+
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        showToast('Push Notifications අවසර ලබාදී නොමැත.');
+                        $('pushPermissionBanner').style.display = 'none';
+                        return;
+                    }
+
+                    showToast('🔔 Notification Token සක්‍රීය වෙමින් පවතී...');
+
+                    // Register service worker if needed
+                    let swReg = null;
+                    if ('serviceWorker' in navigator) {
+                        swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(e => {
+                            console.warn('[FCM] SW reg warning:', e);
+                            return null;
+                        });
+                    }
+
+                    if (firebase.messaging) {
+                        const messaging = firebase.messaging();
+                        const tokenOpts = swReg ? { serviceWorkerRegistration: swReg } : {};
+                        const currentToken = await messaging.getToken(tokenOpts).catch(async (err) => {
+                            console.warn('[FCM] getToken default fallback:', err);
+                            return await messaging.getToken();
+                        });
+
+                        if (currentToken) {
+                            await saveFcmTokenToFirestore(currentToken);
+                            $('pushPermissionBanner').style.display = 'none';
+                            showToast('🔔 දැනුම්දීම් සාර්ථකව සක්‍රීය කරන ලදී! (Notifications Enabled)');
+                        } else {
+                            showToast('Notification Token එකක් ලබාගැනීමට නොහැකි විය.');
+                        }
+                    } else {
+                        updatePushBellUI(true);
+                        $('pushPermissionBanner').style.display = 'none';
+                        showToast('🔔 දැනුම්දීම් අවසර ලබාදුනි.');
+                    }
+                } catch (err) {
+                    console.error('[FCM] Permission request error:', err);
+                    showToast('දැනුම්දීම් සක්‍රීය කිරීමේදී දෝෂයක් සිදුවිය.');
+                }
+            }
+
+            async function initPushNotificationSystem() {
+                try {
+                    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+
+                    // Register Background Service Worker
+                    navigator.serviceWorker.register('/firebase-messaging-sw.js').then((reg) => {
+                        console.log('[FCM] Background SW Registered:', reg.scope);
+                    }).catch((err) => {
+                        console.warn('[FCM] SW Register notice:', err);
+                    });
+
+                    // Check existing permission state
+                    if (Notification.permission === 'granted') {
+                        updatePushBellUI(true);
+                        if (firebase.messaging) {
+                            const messaging = firebase.messaging();
+                            const swReg = await navigator.serviceWorker.ready.catch(() => null);
+                            const tokenOpts = swReg ? { serviceWorkerRegistration: swReg } : {};
+                            const token = await messaging.getToken(tokenOpts).catch(() => null);
+                            if (token) {
+                                saveFcmTokenToFirestore(token);
+                            }
+
+                            // Handle foreground messages
+                            messaging.onMessage((payload) => {
+                                console.log('[FCM] Foreground notification received:', payload);
+                                const title = (payload.notification && payload.notification.title) || '📰 DIGIBIZ Update';
+                                const body = (payload.notification && payload.notification.body) || '';
+                                showToast(`${title}: ${body}`);
+                            });
+                        }
+                    } else if (Notification.permission === 'default') {
+                        // Check if dismissed recently (within 3 days)
+                        const dismissedAt = Number(localStorage.getItem('digibiz_push_banner_dismissed_at') || 0);
+                        const daysAgo = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
+                        if (daysAgo > 3) {
+                            setTimeout(() => {
+                                const banner = $('pushPermissionBanner');
+                                if (banner && Notification.permission === 'default') {
+                                    banner.style.display = 'flex';
+                                }
+                            }, 2000);
+                        }
+                    }
+                } catch (err) {
+                    console.warn('[FCM] Notification initialization notice:', err);
+                }
+            }
+
+            // Initialize on DOM ready
+            document.addEventListener('DOMContentLoaded', () => {
+                attachEvents();
+                initCommentsEngine();
+                loadPosts();
+                initPushNotificationSystem();
+            });
+
+        })();
+    </script>
+</body>
+</html>

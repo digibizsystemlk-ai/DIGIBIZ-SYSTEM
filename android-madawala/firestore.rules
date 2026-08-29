@@ -1,0 +1,174 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for security and multi-tenancy
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data
+        : null;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        (request.auth.token != null && request.auth.token.role == 'SUPER_ADMIN') ||
+        (getUserData() != null && getUserData().role == 'SUPER_ADMIN')
+      );
+    }
+
+    function belongsToBusiness(businessId) {
+      return isAuthenticated();
+    }
+
+    // Users Collection Protection (Allow self-linking businessId from staff_registry)
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      
+      allow create, update: if isAuthenticated() && (
+        isSuperAdmin() ||
+        request.auth.uid == userId ||
+        (request.resource.data != null && request.resource.data.businessId != null && belongsToBusiness(request.resource.data.businessId))
+      );
+
+      allow delete: if isAuthenticated() && isSuperAdmin();
+    }
+
+    // Staff Registry Protection (Allow authenticated staff to read and link their own staff mapping)
+    match /staff_registry/{email} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Business Tenant Collection & Subcollections Protection
+    match /businesses/{businessId} {
+      allow read, write: if belongsToBusiness(businessId);
+
+      match /{allSubcollections=**} {
+        allow read, write: if belongsToBusiness(businessId);
+      }
+    }
+
+    // Public Digital Invoices / Bills (Read-only get by ID for direct receipt viewing)
+    match /buying_history/{docId} {
+      allow get: if true;
+      allow list: if isAuthenticated() && (isSuperAdmin() || (resource != null && belongsToBusiness(resource.data.businessId)));
+      allow write: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (request.resource != null && request.resource.data != null && belongsToBusiness(request.resource.data.businessId)) ||
+        (resource != null && resource.data != null && belongsToBusiness(resource.data.businessId))
+      );
+    }
+
+    // Tenant Scoped Multi-level Collections (e.g. /products/{businessId}/list/{doc}, /orders/{businessId}/list/{doc}, /journal/{businessId}/entries/{doc})
+    match /{collectionName}/{businessId} {
+      allow read, write: if belongsToBusiness(businessId) || (
+        isAuthenticated() && resource != null && resource.data != null && (
+          (resource.data.businessId != null && belongsToBusiness(resource.data.businessId)) ||
+          (resource.data.ownerId != null && (resource.data.ownerId == request.auth.uid || isSuperAdmin())) ||
+          (resource.data.userId != null && (resource.data.userId == request.auth.uid || isSuperAdmin()))
+        )
+      );
+
+      match /{allSubcollections=**} {
+        allow read, write: if belongsToBusiness(businessId);
+      }
+    }
+
+    // Root-level Multi-tenant Collections (e.g. /customers/{docId} where doc contains businessId, or account_balances/bid__ACCOUNT, raw_materials/bid_RM)
+    match /{collectionName}/{docId} {
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        belongsToBusiness(docId) ||
+        (docId.size() > 0 && docId.split('_').size() > 1 && belongsToBusiness(docId.split('_')[0])) ||
+        (resource != null && resource.data != null && (
+          (resource.data.businessId != null && belongsToBusiness(resource.data.businessId)) ||
+          (resource.data.assignedBusiness != null && belongsToBusiness(resource.data.assignedBusiness)) ||
+          (resource.data.companyId != null && belongsToBusiness(resource.data.companyId)) ||
+          (resource.data.ownerId != null && (resource.data.ownerId == request.auth.uid || isSuperAdmin())) ||
+          (resource.data.userId != null && (resource.data.userId == request.auth.uid || isSuperAdmin()))
+        ))
+      );
+      
+      allow create: if isAuthenticated() && (
+        isSuperAdmin() ||
+        belongsToBusiness(docId) ||
+        (docId.size() > 0 && docId.split('_').size() > 1 && belongsToBusiness(docId.split('_')[0])) ||
+        (request.resource.data != null && request.resource.data.businessId != null && belongsToBusiness(request.resource.data.businessId)) ||
+        (request.resource.data != null && request.resource.data.assignedBusiness != null && belongsToBusiness(request.resource.data.assignedBusiness)) ||
+        (request.resource.data != null && request.resource.data.companyId != null && belongsToBusiness(request.resource.data.companyId)) ||
+        (request.resource.data != null && request.resource.data.ownerId != null && request.resource.data.ownerId == request.auth.uid) ||
+        (request.resource.data != null && request.resource.data.userId != null && request.resource.data.userId == request.auth.uid)
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        isSuperAdmin() ||
+        belongsToBusiness(docId) ||
+        (docId.size() > 0 && docId.split('_').size() > 1 && belongsToBusiness(docId.split('_')[0])) ||
+        (resource != null && resource.data != null && (
+          (resource.data.businessId != null && belongsToBusiness(resource.data.businessId)) ||
+          (resource.data.assignedBusiness != null && belongsToBusiness(resource.data.assignedBusiness)) ||
+          (resource.data.companyId != null && belongsToBusiness(resource.data.companyId)) ||
+          (resource.data.ownerId != null && (resource.data.ownerId == request.auth.uid || isSuperAdmin())) ||
+          (resource.data.userId != null && (resource.data.userId == request.auth.uid || isSuperAdmin()))
+        ))
+      );
+    }
+
+    // Audit Logs Collection Protection
+    match /audit_logs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isSuperAdmin() || (resource != null && resource.data != null && belongsToBusiness(resource.data.businessId));
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // Client Version Control & System Health Protection
+    match /client_version_control/{vcId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /system_announcements/{id} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /system_health/{id} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // Blog & News Posts Protection (Public read for published posts, Super Admin write)
+    match /blog_posts/{postId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // Blog Web Push Notification Subscribers
+    match /blog_subscribers/{subId} {
+      allow create, update: if true;
+      allow read, delete: if isSuperAdmin();
+    }
+
+    // Blog Reader Comments & Inquiries (Public submit with approved: false, Super Admin moderate & approve)
+    match /blog_comments/{commentId} {
+      allow create: if request.resource.data.approved == false || isSuperAdmin();
+      allow read: if resource.data.approved == true || isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // Special Leads (Public registration landing lead form)
+    match /special_leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if isSuperAdmin();
+    }
+
+    // 2FA OTP collection is strictly locked to Cloud Functions Admin SDK
+    match /mfa_otps/{email} {
+      allow read, write: if false;
+    }
+  }
+}

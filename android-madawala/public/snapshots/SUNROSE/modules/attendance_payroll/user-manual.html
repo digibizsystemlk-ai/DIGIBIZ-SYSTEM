@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 භාවිත මාර්ගෝපදේශය (User Manual) - DIGIBIZ Attendance & Payroll</title>
+    
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase Standard Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="/snapshots/SUNROSE/core/firebase-init.js"></script>
+    <script src="/snapshots/SUNROSE/core/business-types.js?v=9999"></script>
+    <script src="/snapshots/SUNROSE/core/sidebar.js?v=2116"></script>
+
+    <style>
+        :root {
+            --primary-dark: #0f172a;
+            --primary-emerald: #047857;
+            --emerald-light: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            --accent-purple: #7c3aed;
+            --accent-amber: #d97706;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --bg-canvas: #f8fafc;
+            --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-canvas); color: var(--text-dark); min-height: 100vh; padding-bottom: 60px; }
+        #sidebar-container { position: fixed; left: 0; top: 0; z-index: 1000; }
+        .main-wrapper { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+        /* Hero Header */
+        .manual-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%);
+            border-radius: var(--radius-lg);
+            padding: 36px 32px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.25);
+            margin-bottom: 28px;
+        }
+        .manual-hero::after {
+            content: "📖";
+            position: absolute;
+            right: 20px;
+            bottom: -20px;
+            font-size: 140px;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: #34d399;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .manual-hero h1 { font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 10px; }
+        .manual-hero p { color: #cbd5e1; font-size: 15px; line-height: 1.6; max-width: 850px; }
+
+        /* Search & Quick Jump Nav */
+        .quick-nav-bar {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 18px 22px;
+            margin-bottom: 28px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .search-box-wrap { position: relative; flex: 1; min-width: 280px; }
+        .search-box-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-box-wrap input:focus { border-color: var(--primary-emerald); box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.15); }
+        .search-box-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 16px; }
+        
+        .quick-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .quick-chip {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .quick-chip:hover { background: var(--primary-emerald); color: #ffffff; border-color: var(--primary-emerald); }
+
+        /* Step Card Styling */
+        .step-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid #e2e8f0;
+            padding: 30px;
+            margin-bottom: 28px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+        .step-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 20px; border-bottom: 1.5px solid #f1f5f9; padding-bottom: 16px; }
+        .step-number-badge {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            flex-shrink: 0;
+            box-shadow: 0 6px 14px rgba(4, 120, 87, 0.25);
+        }
+        .step-title-wrap h2 { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+        .step-subtitle { font-size: 13.5px; color: var(--text-muted); font-weight: 600; }
+        .step-body { color: #334155; font-size: 14.5px; line-height: 1.75; }
+
+        .sub-section-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 20px 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guide-list { list-style: none; margin: 12px 0 18px 0; }
+        .guide-list li { position: relative; padding-left: 28px; margin-bottom: 12px; font-size: 14.5px; color: #1e293b; }
+        .guide-list li::before { content: "✓"; position: absolute; left: 0; top: 1px; color: #047857; font-weight: 900; font-size: 16px; background: #dcfce7; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .feature-box-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            margin: 16px 0;
+        }
+        .feature-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+        .feature-box strong { color: #0f172a; display: block; margin-bottom: 4px; font-size: 14px; }
+        .feature-box p { font-size: 13px; color: #64748b; margin: 0; }
+
+        .tip-box {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-left: 4px solid #d97706;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-top: 18px;
+            font-size: 13.5px;
+            color: #78350f;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .formula-box {
+            background: #f3e8ff;
+            border: 1px solid #d8b4fe;
+            border-left: 4px solid #7c3aed;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-top: 14px;
+            font-size: 13.5px;
+            color: #581c87;
+        }
+
+        .action-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #047857;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 800;
+            text-decoration: none;
+            margin-top: 18px;
+            box-shadow: 0 4px 12px rgba(4, 120, 87, 0.2);
+            transition: all 0.2s;
+        }
+        .action-link-btn:hover { background: #065f46; transform: translateY(-1px); }
+
+        .table-simple {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            font-size: 13.5px;
+        }
+        .table-simple th, .table-simple td {
+            border: 1px solid #cbd5e1;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .table-simple th { background: #f1f5f9; font-weight: 800; color: #0f172a; }
+
+        .manual-footer { text-align: center; padding: 24px; color: #94a3b8; font-size: 13px; font-weight: 600; }
+
+        @media (max-width: 768px) {
+            .manual-hero { padding: 24px 20px; }
+            .manual-hero h1 { font-size: 24px; }
+            .step-card { padding: 20px 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar-container"></div>
+
+    <div class="main-wrapper">
+        <!-- Hero Header -->
+        <div class="manual-hero">
+            <div class="hero-badge"><i class="fa-solid fa-book-open"></i> Complete HR, Attendance & Payroll Manual</div>
+            <h1>📖 භාවිත මාර්ගෝපදේශය (User Manual)</h1>
+            <p>DIGIBIZ Attendance & Payroll පද්ධතිය භාවිත කර සේවකයින් ලියාපදිංචිය, දෛනික පැමිණීම්, ෂිෆ්ට් සේවා කාල, අතිකාල (OT), ණය කළමනාකරණය, සහ මාසික වැටුප් පත්‍රිකා (Payslips) සකස්කිරීමේ පියවරෙන් පියවර සම්පූර්ණ අත්පොත.</p>
+        </div>
+
+        <!-- Search & Quick Navigation -->
+        <div class="quick-nav-bar">
+            <div class="search-box-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="manualSearchInput" placeholder="මාර්ගෝපදේශය තුළ අවශ්‍ය විස්තරයක් සොයන්න..." oninput="filterManualSteps()">
+            </div>
+            <div class="quick-links">
+                <a href="#step1" class="quick-chip"><i class="fa-solid fa-sliders"></i> 1. ආයතන සැකසුම්</a>
+                <a href="#step2" class="quick-chip"><i class="fa-solid fa-users"></i> 2. සේවක ලියාපදිංචිය</a>
+                <a href="#step3" class="quick-chip"><i class="fa-solid fa-calendar-days"></i> 3. ෂිෆ්ට් හා නිවාඩු දින</a>
+                <a href="#step4" class="quick-chip"><i class="fa-solid fa-qrcode"></i> 4. පැමිණීම් හා QR ස්කෑනරය</a>
+                <a href="#step5" class="quick-chip"><i class="fa-solid fa-file-invoice-dollar"></i> 5. වැටුප් හා Payslips</a>
+                <a href="#step6" class="quick-chip"><i class="fa-solid fa-calculator"></i> 6. සූත්‍ර හා ගණනය කිරීම්</a>
+            </div>
+        </div>
+
+        <!-- STEPS CONTAINER -->
+        <div id="stepsContainer">
+            
+            <!-- STEP 1: BUSINESS SETUP -->
+            <div class="step-card" id="step1">
+                <div class="step-header">
+                    <div class="step-number-badge">01</div>
+                    <div class="step-title-wrap">
+                        <h2>පද්ධතියට පිවිසීම සහ ආයතනික තොරතුරු සැකසීම (Business Setup & Profile)</h2>
+                        <div class="step-subtitle">Business Account Verification, Multi-Tenant Isolation & Profile Details</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <p>DIGIBIZ Attendance & Payroll පද්ධතිය 100% ක් Multi-Tenant ආරක්‍ෂාව සහිතව සකස් කර ඇති අතර, සෑම ආයතනයකටම ඔවුන්ගේම වෙන්වූ දත්ත ගබඩාවක් පවතී.</p>
+                    
+                    <div class="sub-section-title"><i class="fa-solid fa-circle-check" style="color:#047857;"></i> ආරම්භක පියවර:</div>
+                    <ul class="guide-list">
+                        <li>Super Admin Impersonation Mode හෝ ආයතනික Login එක මගින් පද්ධතියට පිවිසෙන්න.</li>
+                        <li><strong>Business Profile (Settings)</strong> වෙත ගොස් ආයතනයේ නම, ලිපිනය, දුරකථන අංක, සහ EPF ලියාපදිංචි අංකය ඇතුළත් කරන්න.</li>
+                        <li>මෙම තොරතුරු Payslips, EPF C-Form වාර්තා සහ Bank Salary Transfer ගොනු වල ස්වයංක්‍රීයව මුද්‍රණය වේ.</li>
+                    </ul>
+
+                    <div class="tip-box">
+                        <i class="fa-solid fa-lightbulb" style="font-size:18px;"></i>
+                        <div><strong>වැදගත්:</strong> ආයතනික තොරතුරු වෙනස් කළ සැනින් Payslips වල මුද්‍රණය වන ශීර්ෂය (Letterhead) ක්ෂණිකව යාවත්කාලීන වේ.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: EMPLOYEE REGISTRATION -->
+            <div class="step-card" id="step2">
+                <div class="step-header">
+                    <div class="step-number-badge">02</div>
+                    <div class="step-title-wrap">
+                        <h2>සේවකයින් ලියාපදිංචිය සහ වැටුප් දත්ත ඇතුළත් කිරීම (Employee Directory & Salary Setup)</h2>
+                        <div class="step-subtitle">Employee Profile, Basic Salary, Allowances, Loans & Savings Fund</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <p>ආයතනයේ සේවය කරන සියලුම සේවකයින්ගේ මූලික විස්තර සහ වැටුප් සංරචක ඇතුළත් කිරීම <strong>[Employees]</strong> පිටුව හරහා සිදුකෙරේ.</p>
+
+                    <div class="sub-section-title"><i class="fa-solid fa-user-plus" style="color:#047857;"></i> සේවකයෙකු ලියාපදිංචි කරන ආකාරය:</div>
+                    <ul class="guide-list">
+                        <li><strong>[Employees]</strong> පිටුවට ගොස් <strong>"+ Add New Employee"</strong> බටන් එක Click කරන්න.</li>
+                        <li>සේවක අංකය (Emp ID), EPF සාමාජික අංකය, සම්පූර්ණ නම, NIC සහ දුරකථන අංකය ඇතුළත් කරන්න.</li>
+                        <li>සේවක වර්ගය තෝරන්න (<strong>EPF Staff</strong> හෝ <strong>Casual Staff</strong>).</li>
+                        <li><strong>මූලික වැටුප (Basic Salary)</strong>: රුපියල් වලින් සඳහන් කරන්න (උදා: Rs. 30,000.00).</li>
+                        <li><strong>ස්ථාවර දීමනා (Fixed Allowances)</strong>: ගමන් දීමනා (Travel), නිපැයුම් දීමනා (Production), පැමිණීමේ දීමනා (Attendance Allowance) සටහන් කරන්න.</li>
+                    </ul>
+
+                    <div class="sub-section-title"><i class="fa-solid fa-hand-holding-dollar" style="color:#047857;"></i> ණය (Loan) සහ අත්තිකාරම් (Advance) ඇතුළත් කිරීම:</div>
+                    <div class="feature-box-grid">
+                        <div class="feature-box">
+                            <strong>1. Loan Breakdown Management</strong>
+                            <p>ණය මුදලක් ලබා දී ඇත්නම්: Total Loan Amount, Repaid Loan Amount, සහ Remaining Installments ගණන ඇතුළත් කරන්න. පද්ධතිය මගින් මාසික වාරිකය (උදා: `60000 - 15000 - 3 = 45000 / 3 = 5000.00`) ස්වයංක්‍රීයව ගණනය කරයි.</p>
+                        </div>
+                        <div class="feature-box">
+                            <strong>2. Salary Advance & Savings Fund</strong>
+                            <p>ලබාගත් වැටුප් අත්තිකාරම් (Salary Advance) සහ ඉතිරිකිරීම් අරමුදල (Savings Fund) සඳහා අගයන් ඇතුළත් කරන්න. Advance Sheet වලදී මේ දෙකෙහි එකතුව ස්වයංක්‍රීයව ලින්ක් වේ.</p>
+                        </div>
+                    </div>
+
+                    <a href="/modules/attendance_payroll/employees.html" class="action-link-btn"><i class="fa-solid fa-users"></i> Employees පිටුවට යන්න ➔</a>
+                </div>
+            </div>
+
+            <!-- STEP 3: SHIFTS & HOLIDAYS -->
+            <div class="step-card" id="step3">
+                <div class="step-header">
+                    <div class="step-number-badge">03</div>
+                    <div class="step-title-wrap">
+                        <h2>ෂිෆ්ට් (Shifts) සහ රජයේ/වෙළඳ නිවාඩු කළමනාකරණය (Shifts & Mercantile Holidays)</h2>
+                        <div class="step-subtitle">Work Schedules, Saturday Half-Day Rules & 100% Sundry OT Engine</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <p>ආයතනයේ සේවකයින් සේවයේ නිරතවන වේලාවන් සහ අතිකාල (OT) ගණනය වන ආකාරය <strong>[Shifts]</strong> පිටුව මගින් පාලනය වේ.</p>
+
+                    <table class="table-simple">
+                        <thead>
+                            <tr>
+                                <th>දිනය / අවස්ථාව</th>
+                                <th>මූලික සේවා කාලය (Basic Duty)</th>
+                                <th>අතිකාල ගණනය (OT Rate)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <li><strong>සඳුදා - සිකුරාදා (Weekdays)</strong></li>
+                                <td>පැය 8.0 (07:30 AM - 04:30 PM)</td>
+                                <td>පැය 8 ට වැඩි කාලය Normal OT (1.5x Rate)</td>
+                            </tr>
+                            <tr>
+                                <li><strong>සෙනසුරාදා (Saturday Duty)</strong></li>
+                                <td>පැය 5.0 (07:30 AM - 12:30 PM) + 1h Lunch Break</td>
+                                <td>පස්වරු 01:30 න් පසු සේවය Normal OT (1.5x Rate)</td>
+                            </tr>
+                            <tr>
+                                <li><strong>ඉරිදා (Sunday Work)</strong></li>
+                                <td>පැය 0.0 (සම්පූර්ණ නිවාඩු දිනය)</td>
+                                <td>මුළු සේවා කාලයම 100% <strong>Sundry OT (2.0x Rate)</strong></td>
+                            </tr>
+                            <tr>
+                                <li><strong>🇱🇰 රජයේ/වෙළඳ නිවාඩු දින (Mercantile Holidays)</strong></li>
+                                <td>පැය 0.0 (සම්පූර්ණ නිවාඩු දිනය)</td>
+                                <td>මුළු සේවා කාලයම 100% <strong>Sundry OT (2.0x Rate)</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="tip-box">
+                        <i class="fa-solid fa-calendar-check" style="font-size:18px;"></i>
+                        <div><strong>Mercantile Holidays Engine:</strong> 2026 වසරේ පෝය දින, නිදහස් දින, අලුත් අවුරුදු ආදී සියලුම ශ්‍රී ලංකා රජයේ හා වෙළඳ නිවාඩු දින 25 පද්ධතිය තුළ ස්වයංක්‍රීයව සක්‍රිය කර ඇත. <strong>[Attendance Log]</strong> හි ඇති <strong>"🇱🇰 Mercantile Holidays (2026)"</strong> බටන් එකෙන් කැලැන්ඩරය නිරීක්ෂණය කළ හැක.</div>
+                    </div>
+
+                    <a href="/modules/attendance_payroll/shifts.html" class="action-link-btn"><i class="fa-solid fa-calendar-days"></i> Shifts පිටුවට යන්න ➔</a>
+                </div>
+            </div>
+
+            <!-- STEP 4: DAILY ATTENDANCE & QR SCANNER -->
+            <div class="step-card" id="step4">
+                <div class="step-header">
+                    <div class="step-number-badge">04</div>
+                    <div class="step-title-wrap">
+                        <h2>දෛනික පැමිණීම් සහ Mobile QR ස්කෑනරය (Daily Attendance & Gate Pass)</h2>
+                        <div class="step-subtitle">QR Mobile Scanner, In/Out Clocking, Timesheet & Gate Pass Log</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <p>සේවකයින්ගේ දෛනික පැමිණීමේ සහ පිටවීමේ වේලාවන් ක්‍රම කිහිපයකින් පද්ධතියට සටහන් කළ හැක.</p>
+
+                    <div class="sub-section-title"><i class="fa-solid fa-qrcode" style="color:#047857;"></i> පැමිණීම් සටහන් කිරීමේ ක්‍රම:</div>
+                    <ul class="guide-list">
+                        <li><strong>1. Mobile QR Scanner</strong>: ජංගම දුරකථනයෙන් සේවකයාගේ QR කේතය හෝ Emp ID එක Scan කර පැමිණීම (IN) සහ පිටවීම (OUT) සටහන් කිරීම.</li>
+                        <li><strong>2. Manual Attendance Log Entry</strong>: <strong>[Attendance Log]</strong> පිටුවේ ඇති <strong>"+ Add Attendance Log"</strong> මගින් Admin විසින් වේලාවන් ඇතුළත් කිරීම.</li>
+                        <li><strong>3. Gate Pass (බාහිර රාජකාරි පිටත්වීම්)</strong>: සේවකයින් පෞද්ගලික හෝ ආයතනික රාජකාරි සඳහා පිටතට යන විට Gate Pass සටහන් කිරීම.</li>
+                    </ul>
+
+                    <a href="/modules/attendance_payroll/attendancelog.html" class="action-link-btn"><i class="fa-solid fa-clock"></i> Attendance Log පිටුවට යන්න ➔</a>
+                </div>
+            </div>
+
+            <!-- STEP 5: PAYROLL & PAYSLIPS -->
+            <div class="step-card" id="step5">
+                <div class="step-header">
+                    <div class="step-number-badge">05</div>
+                    <div class="step-title-wrap">
+                        <h2>මාසික වැටුප් ගණනය, Advance Sheets සහ Payslips (Payroll & Reports)</h2>
+                        <div class="step-subtitle">Automated Monthly Payroll, Payslip Printing, EPF C-Form & Bank Transfer CSV</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <p>මාසයේ අවසානයේ තනි ක්ලික් එකකින් සියලුම සේවකයින්ගේ වැටුප් වාර්තාව (Pay Report) සකස් කර Payslips මුද්‍රණය කිරීම <strong>[Payroll]</strong> පිටුවෙන් සිදුකෙරේ.</p>
+
+                    <div class="sub-section-title"><i class="fa-solid fa-gears" style="color:#047857;"></i> මාසික වැටුප් සකස් කිරීමේ පියවර:</div>
+                    <ul class="guide-list">
+                        <li><strong>[Payroll]</strong> පිටුවට ගොස් <strong>"Payroll Month"</strong> (උදා: `2026-08`) තෝරන්න.</li>
+                        <li><strong>"Recalculate Payroll"</strong> බටන් එක Click කරන්න. පද්ධතිය මගින් සියලුම සේවකයින්ගේ පැමිණීම් ලොග් විශ්ලේෂණය කර OT, Allowance සහ Deductions ස්වයංක්‍රීයව ගණනය කරයි.</li>
+                        <li><strong>[📄 Payslip]</strong> බටන් එක Click කර සේවකයාගේ Official Payslip Modal එක Open කරගන්න.</li>
+                        <li><strong>"Print / Export PDF"</strong> බටන් එක එබීමෙන් A4 කොළයකට Payslip එක මුද්‍රණය කරගන්න.</li>
+                    </ul>
+
+                    <div class="sub-section-title"><i class="fa-solid fa-file-excel" style="color:#047857;"></i> Advance Sheets සහ බැංකු වාර්තා Export කිරීම:</div>
+                    <div class="feature-box-grid">
+                        <div class="feature-box">
+                            <strong>Sheet 1: Permanent Advance</strong>
+                            <p>ස්ථීර සේවකයින්ගේ Savings Fund + Salary Advance එකතු වී Total Amount (උදා: Rs. 10,000.00) සෑදෙන නිල Advance Sheet එක මුද්‍රණය කිරීමට.</p>
+                        </div>
+                        <div class="feature-box">
+                            <strong>Peoples Bank & EPF C-Form</strong>
+                            <p>සේවකයින්ගේ වැටුප් බැංකුවට යැවීම සඳහා Peoples Bank CSV ගොනුව සහ EPF 8% + 12% C-Form වාර්තාව Single-Click එකෙන් ඩවුන්ලෝඩ් කරගන්න.</p>
+                        </div>
+                    </div>
+
+                    <a href="/modules/attendance_payroll/payroll.html" class="action-link-btn"><i class="fa-solid fa-file-invoice-dollar"></i> Payroll පිටුවට යන්න ➔</a>
+                </div>
+            </div>
+
+            <!-- STEP 6: FORMULAS & TROUBLESHOOTING -->
+            <div class="step-card" id="step6">
+                <div class="step-header">
+                    <div class="step-number-badge">06</div>
+                    <div class="step-title-wrap">
+                        <h2>ගණනය කිරීමේ සූත්‍ර සහ නිතර අසන ප්‍රශ්න (Formulas & Troubleshooting)</h2>
+                        <div class="step-subtitle">No-Pay Rates, Late Minute Rates, OT Formulas & System Syncing</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <p>පද්ධතිය තුළ අගයන් ගණනය වන ආකාරය සහ සූත්‍ර පහත පරිදි වේ:</p>
+
+                    <div class="formula-box">
+                        <strong>📌 ප්‍රධාන ගණනය කිරීමේ සූත්‍ර (Core Payroll Formulas):</strong>
+                        <ul style="margin-top:8px;line-height:1.8;">
+                            <li><strong>Daily No-Pay Rate (පැමිණීම් නැති දින කප්පාදුව)</strong> = `Basic Salary ÷ 30` (උදා: `55000 / 30 = 1833.33` per day)</li>
+                            <li><strong>Late Minutes Deduct Rate (පරක්කු පැමිණීම්)</strong> = `Basic ÷ 200 ÷ 60 × 3` per min (උදා: `55000 / 200 / 60 * 3 = 13.75` per min)</li>
+                            <li><strong>Normal OT Hourly Rate (1.5x)</strong> = `(Basic Salary ÷ 200) × 1.5`</li>
+                            <li><strong>Sundry OT Hourly Rate (2.0x)</strong> = `(Basic Salary ÷ 200) × 2.0`</li>
+                            <li><strong>Loan Repayment Balance Formula</strong> = `Total Loan - Repaid Loan - Remaining Installments` (උදා: `60000 - 15000 - 3 = 45000`)</li>
+                        </ul>
+                    </div>
+
+                    <div class="tip-box">
+                        <i class="fa-solid fa-arrows-rotate" style="font-size:18px;"></i>
+                        <div><strong>Cloud Data Sync:</strong> වෙනත් පරිගණකයකින් හෝ ජංගම දුරකථනයකින් සටහන් කළ දත්ත ක්ෂණිකව ලබා ගැනීමට <strong>"Sync Cloud Data"</strong> බටන් එක භාවිත කරන්න.</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="manual-footer">
+            DIGIBIZ Universal Business System • Attendance & Payroll Complete User Manual • All Rights Reserved
+        </div>
+    </div>
+
+    <script>
+        function filterManualSteps() {
+            const query = (document.getElementById('manualSearchInput').value || '').trim().toLowerCase();
+            const cards = document.querySelectorAll('.step-card');
+
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (!query || text.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

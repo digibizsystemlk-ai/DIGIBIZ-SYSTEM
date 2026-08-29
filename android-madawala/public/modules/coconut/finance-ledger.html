@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance & Ledger Hub — Coconut Vertical</title>
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/core/event-validation.js?v=4"></script>
+    <script src="/core/event-bus.js?v=4"></script>
+    <script src="/core/accounts-core.js?v=4"></script>
+    <script src="/core/auth-roles.js?v=2265"></script>
+    <script src="/core/business-types.js?v=83"></script>
+    <script src="/core/aggregate-utils.js"></script>
+    <script src="/core/dashboard-core.js?v=2265"></script>
+    <script src="/core/subscription-manager.js?v=4"></script>
+    <script src="/core/sidebar.js?v=2116"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="coconut.css">
+    <script src="coconut-common.js?v=84"></script>
+    <style>
+        .fin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .fin-tab-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .fin-tab-btn:hover {
+            background: #f1f5f9;
+            color: #0f3b2c;
+        }
+        .fin-tab-btn.active {
+            background: #0f3b2c;
+            color: #ffffff;
+            border-color: #0f3b2c;
+            box-shadow: 0 4px 12px rgba(15, 59, 44, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+    <main class="c-container">
+        <div class="c-header">
+            <div class="c-header-left">
+                <h1>💰 Finance & Ledger Hub (මූල්‍ය හා ණය කළමනාකරණය)</h1>
+                <p>Real-time cash & banking, customer credit receivables, supplier payables, and GL settlements.</p>
+            </div>
+            <div class="c-header-actions">
+                <button type="button" class="c-btn c-btn-primary" id="btnOpenNewTx">➕ Cash / Bank Transfer</button>
+                <a href="accounting.html" class="c-btn c-btn-accent">📁 General Ledger</a>
+            </div>
+        </div>
+
+        <!-- Top Navigation Sub-Tabs -->
+        <div class="fin-tabs">
+            <button type="button" class="fin-tab-btn active" id="tabBtnBanking" onclick="switchFinTab('banking')">
+                <span>🏛️</span> මුදල් සහ බැංකු (Cash & Bank)
+            </button>
+            <button type="button" class="fin-tab-btn" id="tabBtnReceivables" onclick="switchFinTab('receivables')">
+                <span>📥</span> අපට ලැබිය යුතු ණය (Customer Receivables)
+            </button>
+            <button type="button" class="fin-tab-btn" id="tabBtnPayables" onclick="switchFinTab('payables')">
+                <span>📤</span> අප ගෙවිය යුතු ණය (Supplier Payables)
+            </button>
+            <button type="button" class="fin-tab-btn" id="tabBtnSettlements" onclick="switchFinTab('settlements')">
+                <span>💳</span> ගෙවීම් හා ලැබීම් පියවීම (Settlements Hub)
+            </button>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB 1: Cash & Bank Movement                              -->
+        <!-- ======================================================== -->
+        <div id="tabContentBanking">
+            <!-- Cash & Bank Live Balances -->
+            <div class="c-hero-banner">
+                <div>
+                    <div class="c-hero-stat-label">Cash in Drawer (පෙට්ටියේ මුදල්)</div>
+                    <div class="c-hero-stat-val" id="liveCashBalance">Rs. 0.00</div>
+                    <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">GL Account 1-1010-01</div>
+                </div>
+                <div>
+                    <div class="c-hero-stat-label">Bank Account (බැංකු ගිණුම)</div>
+                    <div class="c-hero-stat-val" id="liveBankBalance" style="color:#38bdf8;">Rs. 0.00</div>
+                    <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">GL Account 1-1020-01</div>
+                </div>
+                <div>
+                    <div class="c-hero-stat-label">Total Liquid Cash Flow (මුළු ද්‍රවශීල මුදල්)</div>
+                    <div class="c-hero-stat-val" id="liveTotalLiquid" style="color:#34d399;">Rs. 0.00</div>
+                    <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Total accessible cash reserves</div>
+                </div>
+            </div>
+
+            <!-- Transactions History -->
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">📜 Banking & Cash Movement History (මුදල් හුවමාරු වාර්තා)</div>
+                    <input type="text" id="searchBankingTx" class="c-input" placeholder="Search transfer/slip..." style="width:240px; padding:6px 12px; font-size:12.5px;">
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>Transfer / Transaction Type</th>
+                                <th>Description / Reference</th>
+                                <th class="text-right">Cash Impact</th>
+                                <th class="text-right">Bank Impact</th>
+                                <th class="text-right">Amount (LKR)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bankTxTableBody">
+                            <tr><td colspan="6" class="text-center" style="padding:20px;">Loading finance transactions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB 2: Customer Receivables (අපට ලැබිය යුතු ණය)          -->
+        <!-- ======================================================== -->
+        <div id="tabContentReceivables" style="display:none;">
+            <!-- Receivables KPI Cards -->
+            <div class="c-hero-banner" style="background:linear-gradient(135deg, #064e3b 0%, #0f766e 100%);">
+                <div>
+                    <div class="c-hero-stat-label">Total Outstanding Receivables (මුළු ලැබිය යුතු ණය)</div>
+                    <div class="c-hero-stat-val" id="recTotalBalance" style="color:#fde047;">Rs. 0.00</div>
+                    <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">GL Account 1-1030-01 (Customers)</div>
+                </div>
+                <div>
+                    <div class="c-hero-stat-label">Active Debtors (ණය හිමි ගැණුම්කරුවන්)</div>
+                    <div class="c-hero-stat-val" id="recDebtorsCount" style="color:#ffffff;">0 Customers</div>
+                    <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Accounts with unpaid credit</div>
+                </div>
+                <div>
+                    <div class="c-hero-stat-label">Total Collections Recorded</div>
+                    <div class="c-hero-stat-val" id="recTotalCollected" style="color:#34d399;">Rs. 0.00</div>
+                    <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Settled customer payments</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">📥 Customer Credit Receivables Ledger (ගැණුම්කරුවන්ගේ ණය ලේඛනය)</div>
+                    <input type="text" id="searchReceivables" class="c-input" placeholder="Search customer name / phone..." style="width:260px; padding:6px 12px; font-size:12.5px;">
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Customer Name (ගැණුම්කරු)</th>
+                                <th>Phone</th>
+                                <th>Area / Town</th>
+                                <th class="text-right">Outstanding Debt (ලැබිය යුතු මුදල)</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receivablesTableBody">
+                            <tr><td colspan="6" class="text-center" style="padding:24px;">Loading customer receivables...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB 3: Supplier Payables (අප ගෙවිය යුතු ණය / Cheques)   -->
+        <!-- ======================================================== -->
+        <div id="tabContentPayables" style="display:none;">
+            <!-- Payables KPI Cards -->
+            <div class="c-hero-banner" style="background:linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);">
+                <div>
+                    <div class="c-hero-stat-label">Total Outstanding Payables (අප ගෙවිය යුතු මුළු ණය)</div>
+                    <div class="c-hero-stat-val" id="payTotalBalance" style="color:#fca5a5;">Rs. 0.00</div>
+                    <div style="font-size:12px; color:#fecaca; margin-top:2px;">GL Accounts 2-2010-01 & 2-2020-01</div>
+                </div>
+                <div>
+                    <div class="c-hero-stat-label">Active Creditors (ණය හිමි සැපයුම්කරුවන්)</div>
+                    <div class="c-hero-stat-val" id="payCreditorsCount" style="color:#ffffff;">0 Suppliers</div>
+                    <div style="font-size:12px; color:#fecaca; margin-top:2px;">Suppliers with pending dues / cheques</div>
+                </div>
+                <div>
+                    <div class="c-hero-stat-label">Total Supplier Disbursements</div>
+                    <div class="c-hero-stat-val" id="payTotalDisbursed" style="color:#86efac;">Rs. 0.00</div>
+                    <div style="font-size:12px; color:#fecaca; margin-top:2px;">Payments disbursed to suppliers</div>
+                </div>
+            </div>
+
+            <div class="c-card">
+                <div class="c-card-header">
+                    <div class="c-card-title">📤 Supplier Credit Payables Ledger (සැපයුම්කරුවන්ට ගෙවිය යුතු ණය)</div>
+                    <input type="text" id="searchPayables" class="c-input" placeholder="Search supplier name / area..." style="width:260px; padding:6px 12px; font-size:12.5px;">
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Supplier Name (සැපයුම්කරු)</th>
+                                <th>Phone</th>
+                                <th>Area / Estate Location</th>
+                                <th class="text-right">Payable Balance (ගෙවිය යුතු මුදල)</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payablesTableBody">
+                            <tr><td colspan="6" class="text-center" style="padding:24px;">Loading supplier payables...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB 4: Settlements Hub (මුදල් ලැබීම් සහ ගෙවීම් පියවීම)   -->
+        <!-- ======================================================== -->
+        <div id="tabContentSettlements" style="display:none;">
+            <div class="c-grid-2">
+                <!-- Customer Payment Receipt -->
+                <div class="c-card">
+                    <div class="c-card-header">
+                        <div class="c-card-title">📥 Customer Payment Receipt (මුදල් ලැබීම්)</div>
+                        <span class="c-badge c-badge-success">Reduces AR</span>
+                    </div>
+
+                    <form id="customerReceiptForm">
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Receipt Date *</label>
+                                <input type="date" id="crDate" class="c-input" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Customer (ගැණුම්කරු) *</label>
+                                <select id="crCustomer" class="c-select" required>
+                                    <option value="">Select Customer...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="c-cart-total-box" style="margin-bottom:14px; background:#fffbeb; border-color:#fde68a;">
+                            <div style="font-size:12px; color:#92400e;">
+                                Current Outstanding Receivable: <strong id="crCurBalance" style="color:var(--c-danger);">Rs. 0.00</strong>
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Amount Received (LKR) *</label>
+                                <input type="number" id="crAmount" class="c-input" min="0.01" step="any" placeholder="e.g. 50000.00" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Payment Method *</label>
+                                <select id="crPaymentMode" class="c-select" required>
+                                    <option value="CASH">Cash in Drawer (පෙට්ටියට)</option>
+                                    <option value="BANK">Bank Deposit / Transfer (බැංකුවට)</option>
+                                    <option value="CHEQUE">Cheque Received (චෙක්පත්)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="c-form-group" style="margin-bottom:16px;">
+                            <label>Receipt Reference / Notes</label>
+                            <input type="text" id="crNotes" class="c-input" placeholder="e.g. Settled for Invoice #INV-12345">
+                        </div>
+
+                        <button type="submit" class="c-btn c-btn-primary c-btn-lg" style="width:100%;" id="btnSaveCustReceipt">
+                            📥 Record Customer Receipt & Update Ledger
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Supplier Payment Disbursement -->
+                <div class="c-card">
+                    <div class="c-card-header">
+                        <div class="c-card-title">📤 Pay Supplier (සැපයුම්කරු ගෙවීම්)</div>
+                        <span class="c-badge c-badge-danger">Reduces AP</span>
+                    </div>
+
+                    <form id="supplierDisburseForm">
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Payment Date *</label>
+                                <input type="date" id="sdDate" class="c-input" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Supplier (සැපයුම්කරු) *</label>
+                                <select id="sdSupplier" class="c-select" required>
+                                    <option value="">Select Supplier...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="c-cart-total-box" style="margin-bottom:14px; background:#fef2f2; border-color:#fecaca;">
+                            <div style="font-size:12px; color:#991b1b;">
+                                Current Payable to Supplier: <strong id="sdCurBalance" style="color:var(--c-danger);">Rs. 0.00</strong>
+                            </div>
+                        </div>
+
+                        <div class="c-form-row">
+                            <div class="c-form-group">
+                                <label>Amount Disbursed (LKR) *</label>
+                                <input type="number" id="sdAmount" class="c-input" min="0.01" step="any" placeholder="e.g. 75000.00" required>
+                            </div>
+                            <div class="c-form-group">
+                                <label>Paid From *</label>
+                                <select id="sdPaymentMode" class="c-select" required>
+                                    <option value="CASH">Cash in Drawer (පෙට්ටියෙන්)</option>
+                                    <option value="BANK">Bank Account / Transfer (බැංකුවෙන්)</option>
+                                    <option value="CHEQUE">Company Cheque (චෙක්පතක්)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="c-form-group" style="margin-bottom:16px;">
+                            <label>Voucher Reference / Notes</label>
+                            <input type="text" id="sdNotes" class="c-input" placeholder="e.g. Voucher #V-8912 / Coconut Settlement">
+                        </div>
+
+                        <button type="submit" class="c-btn c-btn-primary c-btn-lg" style="width:100%;" id="btnSaveSupDisburse">
+                            📤 Record Supplier Payment & Update Ledger
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Activity Logs Table -->
+            <div class="c-card" style="margin-top:16px;">
+                <div class="c-card-header">
+                    <div class="c-card-title">📜 Settlement & Payment Activity Log (ගෙවීම් හා ලැබීම් ඉතිහාසය)</div>
+                </div>
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>Type</th>
+                                <th>Party Name</th>
+                                <th>Method</th>
+                                <th class="text-right">Amount (LKR)</th>
+                                <th>Notes</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="settlementHistoryTableBody">
+                            <tr><td colspan="7" class="text-center" style="padding:20px;">No settlements recorded yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cash / Bank Transfer Modal -->
+    <div class="c-modal-overlay" id="transferModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3>➕ Record Cash / Bank Transaction</h3>
+                <button type="button" class="c-modal-close" id="btnCloseTxModal">×</button>
+            </div>
+            <form id="transferForm">
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Transaction Date *</label>
+                        <input type="date" id="txDate" class="c-input" required>
+                    </div>
+                    <div class="c-form-group">
+                        <label>Transaction Type *</label>
+                        <select id="txType" class="c-select" required>
+                            <option value="CASH_DEPOSIT">Cash Deposit (Drawer → Bank)</option>
+                            <option value="CASH_WITHDRAWAL">Cash Withdrawal (Bank → Drawer)</option>
+                            <option value="CAPITAL_INJECTION">Owner Capital Injection (නව ප්‍රාග්ධනය)</option>
+                            <option value="OWNER_DRAWING">Owner Drawing / Personal (හිමිකරු ලබාගැනීම්)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="c-form-group" style="margin-bottom:12px;">
+                    <label>Amount (මුදල - LKR) *</label>
+                    <input type="number" id="txAmount" class="c-input" min="0.01" step="any" placeholder="e.g. 50000.00" required>
+                </div>
+
+                <div class="c-form-group" style="margin-bottom:16px;">
+                    <label>Bank Slip # / Description *</label>
+                    <input type="text" id="txNotes" class="c-input" placeholder="e.g. BOC Deposit Slip #9182" required>
+                </div>
+
+                <div class="c-modal-footer">
+                    <button type="button" class="c-btn c-btn-secondary" id="btnCancelTx">Cancel</button>
+                    <button type="submit" class="c-btn c-btn-primary" id="btnSaveTx">Post Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="finance-ledger.js?v=84"></script>
+</body>
+</html>

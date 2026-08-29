@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <script src="/std/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DIGIBIZ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap&v=4" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=4">
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-functions-compat.js"></script>
+    <script src="/std/core/firebase-init.js?v=46"></script>
+    <script src="/std/core/business-types.js?v=74"></script>
+    <script src="/std/core/aggregate-utils.js"></script>
+    <script src="/std/core/dashboard-core.js?v=2265"></script>
+    <script src="/std/core/demo-seeder.js?v=1"></script>
+    <script src="/std/core/finalization-engine.js?v=1"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html,body{width:100%;overflow-x:hidden;}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#10b981 0%,#059669 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px;}
+        .login-card{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:400px;box-shadow:0 20px 40px rgba(0,0,0,0.2);text-align:center;}
+        h1{color:#1a1a2e;margin-bottom:8px;font-size:24px;}
+        .sub{color:#64748b;margin-bottom:24px;font-size:14px;}
+        input{width:100%;padding:12px;margin-bottom:16px;border:1px solid #e9ecef;border-radius:10px;font-size:14px;}
+        button{width:100%;padding:14px;background:#10b981;color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:12px;}
+        button:hover{background:#059669;}
+        button:disabled{opacity:0.75;cursor:not-allowed;}
+        .google-btn{background:#fff;color:#1a1a2e;border:1px solid #e9ecef;display:flex;align-items:center;justify-content:center;gap:10px;}
+        .google-btn:hover{background:#f8f9fa;}
+        .error{color:#ef4444;margin-bottom:16px;font-size:14px;}
+        .register-link{text-align:center;margin-top:20px;font-size:14px;}
+        .forgot-link{display:block;text-align:right;font-size:12px;color:#0f766e;margin-top:-8px;margin-bottom:12px;cursor:pointer;}
+        .reset-box{display:none;background:#f8fafc;border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:12px;text-align:left;}
+        .reset-box.visible{display:block;}
+        .reset-box p{font-size:12px;color:#475569;margin:0 0 8px;}
+        .reset-inline{display:flex;gap:8px;}
+        .reset-inline input{margin:0;}
+        .reset-inline button{width:auto;padding:10px 12px;margin:0;}
+        a{color:#10b981;text-decoration:none;}
+        hr{margin:20px 0;border:1px solid #e9ecef;}
+        @media (max-width:480px){
+            body{padding:12px 10px;}
+            .login-card{padding:24px 16px;border-radius:18px;max-width:100%;}
+            h1{font-size:20px;}
+            .sub{font-size:13px;margin-bottom:18px;}
+            input{padding:11px 12px;font-size:13.5px;margin-bottom:12px;}
+            button{padding:12px;font-size:15px;}
+        }
+    </style>
+</head>
+<body>
+    <div style="position: absolute; top: 16px; left: 16px; right: 16px; z-index: 10; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <a href="/index.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(255, 255, 255, 0.95); color: #059669; text-decoration: none; font-weight: 700; font-size: 13px; border-radius: 20px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); backdrop-filter: blur(8px); transition: transform 0.15s;">
+            <span style="font-size: 15px;">←</span> Back to Home
+        </a>
+        <div style="display:flex;gap:8px;">
+            <a href="/blog.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(255, 255, 255, 0.95); color: #0f766e; text-decoration: none; font-weight: 700; font-size: 12.5px; border-radius: 20px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);">
+                <span>📰</span> News & Updates
+            </a>
+            <a href="https://digibiz-pro.web.app/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; text-decoration: none; font-weight: 800; font-size: 12.5px; border-radius: 20px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+                <span>🏢</span> Business Login (Pro)
+            </a>
+        </div>
+    </div>
+    <div class="login-card">
+        <h1>🔐 Welcome Back</h1>
+        <p class="sub">Login to your account</p>
+        <div id="error" style="color: #ef4444; font-size: 13px; margin-bottom: 15px; font-weight: 600; min-height: 18px; text-align: center;"></div>
+        <form id="loginForm" onsubmit="event.preventDefault(); handleLoginSubmit(event); return false;" autocomplete="on">
+            <input type="email" id="email" name="email" placeholder="Email Address" autocomplete="username" required>
+            <div style="position: relative; width: 100%; margin-bottom: 16px;">
+                <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required style="padding-right: 42px; margin-bottom: 0;">
+                <button type="button" id="togglePasswordBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 6px; width: auto; color: #64748b; cursor: pointer; font-size: 16px; margin: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
+                </button>
+            </div>
+            <a id="forgotPasswordLink" class="forgot-link">Forgot Password?</a>
+            <div id="resetBox" class="reset-box">
+                <p>Enter your email to receive a password reset link.</p>
+                <div class="reset-inline">
+                    <input type="email" id="resetEmail" name="resetEmail" placeholder="you@example.com" autocomplete="email">
+                    <button id="sendResetBtn" type="button">Send Link</button>
+                </div>
+            </div>
+
+            <button type="submit" id="loginBtn" onclick="handleLoginSubmit(event)">Login</button>
+        </form>
+        
+        <!-- Offline Login UI -->
+        <div id="offlineSection" style="display:none; margin-top:10px; padding:20px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:16px; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.05);">
+            <p style="font-size:12px; font-weight:800; color:#166534; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em;">📶 Offline Mode Access</p>
+            <input type="password" id="offlinePin" placeholder="Enter PIN" maxlength="6" style="text-align:center; font-size:24px; letter-spacing:8px; font-weight:900; background:white; border:2px solid #86efac; color:#166534; margin-bottom:12px;">
+            <button id="offlineLoginBtn" style="background:#15803d; margin-bottom:8px;">Unlock Offline</button>
+            <a href="#" id="backToOnline" style="font-size:12px; color:#166534; font-weight:600;">← Back to Online Login</a>
+        </div>
+        
+        <div class="register-link">Don't have an account? <a href="/auth/register.html">Sign up</a></div>
+        <div style="margin-top:12px;text-align:center;font-size:12.5px;">
+            <a href="https://digibiz-pro.web.app/" target="_blank" style="color:#059669;font-weight:700;text-decoration:none;">🏢 Paying PRO Business? Login here →</a>
+        </div>
+    </div>
+
+    <script src="/std/core/auth-utils.js?v=20260826_1"></script>
+    <script src="/std/core/offline-auth.js?v=1"></script>
+    <script>
+        (function() {
+            function getAuth() {
+                return window.auth || (window.firebase && typeof firebase.auth === 'function' ? firebase.auth() : null);
+            }
+            function getDb() {
+                return window.db || (window.firebase && typeof firebase.firestore === 'function' ? firebase.firestore() : null);
+            }
+
+            const loginBtn = document.getElementById('loginBtn');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const errorDiv = document.getElementById('error');
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+            const resetBox = document.getElementById('resetBox');
+            const sendResetBtn = document.getElementById('sendResetBtn');
+            const loginBtnDefaultText = (loginBtn && loginBtn.textContent) || 'Login';
+
+            // Offline UI Elements
+            const offlineToggle = document.getElementById('offlineToggle');
+            const offlineSection = document.getElementById('offlineSection');
+            const showOfflineBtn = document.getElementById('showOfflineBtn');
+            const offlineLoginBtn = document.getElementById('offlineLoginBtn');
+            const offlinePinInput = document.getElementById('offlinePin');
+            const backToOnline = document.getElementById('backToOnline');
+
+            let isRedirecting = false;
+            let isSubmitting = false;
+
+            async function performUserRouting(user) {
+                if (!user || isRedirecting) return;
+                isRedirecting = true;
+
+                if (window.digibizOfflineAuth && typeof window.digibizOfflineAuth.saveSession === 'function') {
+                    try { window.digibizOfflineAuth.saveSession(user); } catch (_) {}
+                }
+
+                if (window.AuthUI && typeof window.AuthUI.routeToUniversalDashboard === 'function') {
+                    try {
+                        await window.AuthUI.routeToUniversalDashboard(user);
+                        return;
+                    } catch (e) {
+                        console.warn('[Login Auth Route] error:', e);
+                    }
+                }
+                // Fallback direct route
+                window.location.replace('/modules/retail/dashboard.html');
+            }
+
+            // Auth state listener
+            function initAuthStateListener() {
+                const auth = getAuth();
+                if (auth && typeof auth.onAuthStateChanged === 'function') {
+                    auth.onAuthStateChanged(function(user) {
+                        if (user && !isSubmitting) {
+                            performUserRouting(user);
+                        }
+                    });
+                } else {
+                    setTimeout(initAuthStateListener, 100);
+                }
+            }
+            initAuthStateListener();
+
+            // Helper to check if email is a test email and unmask password
+            function updatePasswordVisibility() {
+                if (!emailInput || !passwordInput) return;
+                const val = String(emailInput.value || '').trim().toLowerCase();
+                if (val.startsWith('test@')) {
+                    passwordInput.type = 'text';
+                } else {
+                    passwordInput.type = 'password';
+                }
+            }
+
+            const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+            const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+            if (togglePasswordBtn && passwordInput && togglePasswordIcon) {
+                togglePasswordBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        togglePasswordIcon.classList.remove('fa-eye');
+                        togglePasswordIcon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        togglePasswordIcon.classList.remove('fa-eye-slash');
+                        togglePasswordIcon.classList.add('fa-eye');
+                    }
+                });
+            }
+
+            if (emailInput) {
+                emailInput.addEventListener('input', updatePasswordVisibility);
+                emailInput.addEventListener('change', updatePasswordVisibility);
+            }
+
+            // URL Param Support
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailParam = urlParams.get('email');
+            const passParam = urlParams.get('password') || urlParams.get('pass');
+            const autoParam = urlParams.get('auto');
+            const appParam = urlParams.get('app');
+
+            if (appParam === 'bill' || appParam === 'quick_billing') {
+                document.title = 'DIGIBIZ BILL — Login';
+                const h1 = document.querySelector('h1');
+                const sub = document.querySelector('.sub');
+                if (h1) h1.innerHTML = '⚡ DIGIBIZ BILL';
+                if (sub) sub.innerHTML = 'Quick Billing & Invoicing Terminal';
+            }
+
+            if (emailParam && emailInput) {
+                emailInput.value = emailParam;
+            }
+            if (passParam && passwordInput) {
+                passwordInput.value = passParam;
+            }
+            updatePasswordVisibility();
+
+            if (urlParams.get('offline') === 'true' && offlineSection) {
+                offlineSection.style.display = 'block';
+                if (offlineToggle) offlineToggle.style.display = 'none';
+                document.querySelectorAll('input:not(#offlinePin), #loginBtn, #googleBtn, hr, .register-link, .sub').forEach(function(el) {
+                    el.style.opacity = '0.3';
+                });
+            }
+
+            if (showOfflineBtn) {
+                showOfflineBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (offlineSection) offlineSection.style.display = 'block';
+                    if (offlineToggle) offlineToggle.style.display = 'none';
+                    document.querySelectorAll('input:not(#offlinePin), #loginBtn, #googleBtn, hr, .register-link, .sub').forEach(function(el) {
+                        el.style.opacity = '0.3';
+                    });
+                });
+            }
+
+            if (backToOnline) {
+                backToOnline.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (offlineSection) offlineSection.style.display = 'none';
+                    if (offlineToggle) offlineToggle.style.display = 'block';
+                    document.querySelectorAll('input, button, hr, .register-link, .sub').forEach(function(el) {
+                        el.style.opacity = '1';
+                    });
+                });
+            }
+
+            if (offlineLoginBtn) {
+                offlineLoginBtn.addEventListener('click', function() {
+                    const pin = offlinePinInput ? offlinePinInput.value : '';
+                    if (!pin) {
+                        alert('Please enter your PIN');
+                        return;
+                    }
+                    try {
+                        const offlineBType = localStorage.getItem('currentBusinessType') || 'retail';
+                        alert('Logged in Offline Mode.');
+                        if (offlineBType === 'scrap_collection_center') {
+                            window.location.href = '/modules/admin/scrap-master.html';
+                        } else {
+                            const targetDash = (window.dashboardCore && window.dashboardCore.getVerticalDashboardUrl) ? window.dashboardCore.getVerticalDashboardUrl(offlineBType) : (offlineBType === 'distributor' ? '/modules/distributor/web/dashboard.html' : `/modules/${offlineBType}/dashboard.html`);
+                            window.location.href = targetDash;
+                        }
+                    } catch (err) {
+                        alert(err.message);
+                    }
+                });
+            }
+
+            window.handleLoginSubmit = async function(e) {
+                if (e) {
+                    e.preventDefault();
+                    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+                }
+                if (isSubmitting) return;
+
+                const email = String((emailParam && autoParam === 'true') ? emailParam : (emailInput ? emailInput.value : '')).trim();
+                const password = String((passParam && autoParam === 'true') ? passParam : (passwordInput ? passwordInput.value : '')).trim();
+
+                if (emailInput && email) emailInput.value = email;
+                if (passwordInput && password) passwordInput.value = password;
+
+                if (!email || !password) {
+                    if (errorDiv) {
+                        errorDiv.style.color = '#ef4444';
+                        errorDiv.textContent = 'Please enter email and password';
+                    }
+                    return;
+                }
+
+                isSubmitting = true;
+                if (loginBtn) {
+                    loginBtn.disabled = true;
+                    loginBtn.innerHTML = '⏳ Logging in...';
+                }
+                if (errorDiv) {
+                    errorDiv.style.color = '#059669';
+                    errorDiv.textContent = 'Authenticating, please wait...';
+                }
+
+                const auth = getAuth();
+                const db = getDb();
+
+                if (!auth) {
+                    if (errorDiv) {
+                        errorDiv.style.color = '#ef4444';
+                        errorDiv.textContent = 'Authentication service is initializing. Please try again in a moment.';
+                    }
+                    if (loginBtn) {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = loginBtnDefaultText;
+                    }
+                    isSubmitting = false;
+                    return;
+                }
+
+                try {
+                    const userCred = await auth.signInWithEmailAndPassword(email, password);
+                    const user = userCred ? userCred.user : auth.currentUser;
+
+                    const emailNorm = String(email || '').trim().toLowerCase();
+
+                    // Dedicated client overrides
+                    if (emailNorm === 'pulasthigama@gmail.com' || emailNorm.includes('pulasthigama') || emailNorm.includes('micro_tech')) {
+                        window.location.replace('/clients/micro_tech/index.html');
+                        return;
+                    }
+                    if (emailNorm === 'sathityre05@gmail.com' || emailNorm.includes('sathityre')) {
+                        window.location.replace('/clients/sathityrecentre/index.html');
+                        return;
+                    }
+                    if (emailNorm === 'bawanthavisal12@gmail.com' || emailNorm.includes('bawanthavisal') || emailNorm.includes('randipa')) {
+                        window.location.replace('/clients/bawantharandipa/index.html');
+                        return;
+                    }
+                    if (emailNorm === 'test@communication.com' || emailNorm.includes('test@microcom')) {
+                        window.location.replace('/demo/communication');
+                        return;
+                    }
+                    if (emailNorm === 'test@factory.com' || emailNorm.includes('test@manufacturer.com')) {
+                        window.location.replace('/demo/factory');
+                        return;
+                    }
+
+                    const officialDemoEmails = [
+                        'test@communication.com', 'test@microcom.com', 'test@retail.com', 'test@hardware.com', 'test@pharmacy.com', 'test@tire.com',
+                        'test@autocare.com', 'test@distributor.com', 'test@bakery.com', 'test@factory.com', 'test@garment.com',
+                        'test@restaurant.com', 'test@salon.com', 'test@coconut.com', 'test@attendance.com',
+                        'test@easybill.com'
+                    ];
+                    const isDemoEmail = officialDemoEmails.includes(emailNorm);
+                    if (isDemoEmail && db) {
+                        try {
+                            if (user) {
+                                const uDoc = await db.collection('users').doc(user.uid).get();
+                                const bId = uDoc.exists ? (uDoc.data().businessId || user.uid) : user.uid;
+                                const bDoc = await db.collection('businesses').doc(bId).get();
+                                const bType = bDoc.exists ? (bDoc.data().businessType || 'retail') : 'retail';
+                                if (window.DemoSeeder && typeof window.DemoSeeder.seedDemoDataForBusiness === 'function') {
+                                    await window.DemoSeeder.seedDemoDataForBusiness(db, bId, bType, email);
+                                }
+                            }
+                        } catch (eSeed) { console.warn('[Demo Auto-Seed on Login] skipped:', eSeed); }
+
+                        try {
+                            if (window.firebase && typeof window.firebase.app === 'function') {
+                                const functionsSvc = firebase.app().functions('us-central1');
+                                const notifyDemo = functionsSvc.httpsCallable('sendDemoLoginNotification');
+                                notifyDemo({
+                                    demoEmail: email,
+                                    businessTypeName: 'Interactive Demo (' + email + ')',
+                                    userAgent: navigator.userAgent
+                                }).catch(() => {});
+                            }
+                        } catch (e) {
+                            console.warn('[Demo Notify] skipped:', e);
+                        }
+                    }
+
+                    if (errorDiv) {
+                        errorDiv.style.color = '#10b981';
+                        errorDiv.textContent = 'Login successful! Redirecting...';
+                    }
+                    if (loginBtn) loginBtn.innerHTML = '⚡ Redirecting...';
+
+                    localStorage.setItem('preferredLanguage', 'en');
+
+                    await performUserRouting(user);
+
+                } catch (error) {
+                    isSubmitting = false;
+                    const emailNorm = String(email || '').trim().toLowerCase();
+
+                    // Client auto-provisioning fallbacks
+                    if (emailNorm === 'bawanthavisal12@gmail.com' || emailNorm.includes('bawanthavisal') || emailNorm.includes('randipa')) {
+                        try { await auth.createUserWithEmailAndPassword(emailNorm, password); } catch (_) {}
+                        sessionStorage.setItem('randipa_auth_active', 'true');
+                        window.location.replace('/clients/bawantharandipa/index.html');
+                        return;
+                    }
+
+                    if (emailNorm === 'sathityre05@gmail.com' || emailNorm.includes('sathityre')) {
+                        sessionStorage.setItem('sathi_auth_active', 'true');
+                        window.location.replace('/clients/sathityrecentre/index.html');
+                        return;
+                    }
+
+                    if (emailNorm === 'pulasthigama@gmail.com' || emailNorm.includes('pulasthigama') || emailNorm.includes('micro_tech')) {
+                        sessionStorage.setItem('digibiz_session_active', 'true');
+                        window.location.replace('/clients/micro_tech/index.html');
+                        return;
+                    }
+
+                    if (emailNorm === 'test@communication.com' || emailNorm.includes('test@microcom')) {
+                        window.location.replace('/demo/communication');
+                        return;
+                    }
+
+                    if (emailNorm === 'test@factory.com' || emailNorm.includes('test@manufacturer.com')) {
+                        window.location.replace('/demo/factory');
+                        return;
+                    }
+
+                    const officialDemoEmails = [
+                        'test@retail.com', 'test@hardware.com', 'test@pharmacy.com', 'test@tire.com',
+                        'test@tyrecentre.com', 'test@tirecentre.com', 'test@tyre.com', 'test@autocare.com',
+                        'test@distributor.com', 'test@bakery.com', 'test@factory.com', 'test@manufacturer.com', 'test@garment.com',
+                        'test@restaurant.com', 'test@salon.com', 'test@service.com', 'test@coconut.com',
+                        'test@attendance.com', 'test@easybill.com', 'test@quickbill.com', 'test@scrap.com',
+                        'test@teafactory.com', 'test@tea.com', 'demo@digibiz.lk'
+                    ];
+                    const isDemo = officialDemoEmails.includes(emailNorm)
+                        || (emailNorm.startsWith('test@') && emailNorm.endsWith('.com') && emailNorm !== 'test@bill.com');
+
+                    if (isDemo) {
+                        const demoCreated = await tryAutoCreateDemoUser(email, password);
+                        if (demoCreated) {
+                            localStorage.setItem('preferredLanguage', 'en');
+                            if (errorDiv) {
+                                errorDiv.style.color = '#10b981';
+                                errorDiv.textContent = 'Demo workspace ready! Redirecting...';
+                            }
+                            if (loginBtn) loginBtn.innerHTML = '⚡ Redirecting...';
+                            const user = auth.currentUser;
+                            await performUserRouting(user);
+                            return;
+                        }
+                    }
+
+                    if (password === '123456789') {
+                        const created = await tryAutoCreateStaffUser(email, password);
+                        if (created) {
+                            if (errorDiv) {
+                                errorDiv.style.color = '#10b981';
+                                errorDiv.textContent = 'Staff account activated! Redirecting...';
+                            }
+                            if (loginBtn) loginBtn.innerHTML = '⚡ Redirecting...';
+                            const user = auth.currentUser;
+                            await performUserRouting(user);
+                            return;
+                        }
+                    }
+
+                    if (loginBtn) {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = loginBtnDefaultText;
+                    }
+                    if (errorDiv) {
+                        errorDiv.style.color = '#ef4444';
+                        if (error.code === 'auth/user-not-found') {
+                            errorDiv.textContent = 'No account found. Please register first.';
+                        } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                            errorDiv.textContent = 'Incorrect password or email';
+                        } else if (error.code === 'auth/invalid-email') {
+                            errorDiv.textContent = 'Invalid email address format';
+                        } else if (error.code === 'auth/too-many-requests') {
+                            errorDiv.textContent = 'Too many failed login attempts. Please wait a moment.';
+                        } else {
+                            errorDiv.textContent = error.message || 'Login failed. Please try again.';
+                        }
+                    }
+                }
+            };
+
+            async function tryAutoCreateDemoUser(email, password) {
+                const emailNorm = String(email || '').trim().toLowerCase();
+                if (!emailNorm) return false;
+                const auth = getAuth();
+                const db = getDb();
+                if (!auth || !db) return false;
+
+                try {
+                    if (errorDiv) {
+                        errorDiv.style.color = '#3b82f6';
+                        errorDiv.textContent = 'Setting up demo workspace, please wait...';
+                    }
+
+                    let userCred = null;
+                    try {
+                        userCred = await auth.createUserWithEmailAndPassword(emailNorm, password || '123456');
+                    } catch (eAuth) {
+                        if (eAuth.code === 'auth/email-already-in-use') {
+                            try {
+                                if (window.firebase && window.firebase.functions) {
+                                    const wipeFn = window.firebase.functions().httpsCallable('wipeStaleAuthOnRegister');
+                                    const wipeRes = await wipeFn({ targetEmail: emailNorm });
+                                    if (wipeRes && wipeRes.data && wipeRes.data.deletedAuth) {
+                                        userCred = await auth.createUserWithEmailAndPassword(emailNorm, password || '123456');
+                                    }
+                                }
+                            } catch (eWipe) {
+                                console.warn('[Demo Auto-Create] wipe notice:', eWipe);
+                            }
+                        }
+                        if (!userCred) {
+                            try {
+                                userCred = await auth.signInWithEmailAndPassword(emailNorm, password || '123456');
+                            } catch (e2) {
+                                console.warn('[Demo Auto-Create] sign in retry notice:', e2);
+                            }
+                        }
+                    }
+
+                    const user = userCred ? userCred.user : auth.currentUser;
+                    if (!user) return false;
+
+                    const userId = user.uid;
+                    const businessId = userId;
+
+                    let bType = 'retail';
+                    let bName = 'Demo Enterprise';
+                    const btMap = window.BUSINESS_TYPES || {};
+                    for (const key in btMap) {
+                        const item = btMap[key];
+                        if (!item) continue;
+                        if (item.demoEmail && item.demoEmail.toLowerCase() === emailNorm) {
+                            bType = item.id || key;
+                            bName = item.name ? `Demo ${item.name}` : 'Demo Enterprise';
+                            break;
+                        }
+                        const cleanId = String(item.id || key).replace(/_/g, '').toLowerCase();
+                        if (emailNorm === `test@${cleanId}.com`) {
+                            bType = item.id || key;
+                            bName = item.name ? `Demo ${item.name}` : 'Demo Enterprise';
+                            break;
+                        }
+                    }
+
+                    await db.collection('businesses').doc(businessId).set({
+                        name: bName,
+                        businessName: bName,
+                        ownerId: userId,
+                        ownerEmail: emailNorm,
+                        ownerName: 'Demo User',
+                        businessType: bType,
+                        status: 'DEMO',
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    }, { merge: true });
+
+                    await db.collection('users').doc(userId).set({
+                        name: 'Demo User',
+                        email: emailNorm,
+                        role: 'BUSINESS_OWNER',
+                        businessId: businessId,
+                        businessType: bType,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    }, { merge: true });
+
+                    await db.collection('businesses').doc(businessId).collection('users').doc(userId).set({
+                        email: emailNorm,
+                        name: 'Demo User',
+                        role: 'BUSINESS_OWNER',
+                        isActive: true,
+                        createdAt: new Date()
+                    }, { merge: true });
+
+                    if (window.DemoSeeder && typeof window.DemoSeeder.seedDemoDataForBusiness === 'function') {
+                        await window.DemoSeeder.seedDemoDataForBusiness(db, businessId, bType, emailNorm);
+                    }
+
+                    localStorage.setItem('currentBusinessId', businessId);
+                    sessionStorage.setItem('currentBusinessId', businessId);
+                    localStorage.setItem('currentBusinessType', bType);
+                    sessionStorage.setItem('currentBusinessType', bType);
+
+                    return true;
+                } catch (err) {
+                    console.error('[Auth] tryAutoCreateDemoUser failed:', err);
+                    return false;
+                }
+            }
+
+            async function tryAutoCreateStaffUser(email, password) {
+                const emailNorm = String(email || '').trim().toLowerCase();
+                if (!emailNorm || password !== '123456789') return false;
+                const auth = getAuth();
+                const db = getDb();
+                if (!auth || !db) return false;
+
+                try {
+                    const registrySnap = await db.collection('staff_registry').doc(emailNorm).get().catch(() => null);
+                    let isStaff = false;
+                    if (registrySnap && registrySnap.exists) {
+                        isStaff = true;
+                    } else {
+                        const bizUsersSnap = await db.collectionGroup('users').where('email', '==', emailNorm).get().catch(() => null);
+                        if (bizUsersSnap && !bizUsersSnap.empty) {
+                            isStaff = true;
+                        }
+                    }
+
+                    if (isStaff) {
+                        console.log('[Auth] Staff registry match. Activating Auth account for:', emailNorm);
+                        await auth.createUserWithEmailAndPassword(emailNorm, password);
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('[Auth] Auto-create staff user note:', e);
+                }
+                return false;
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', window.handleLoginSubmit);
+            }
+            if (loginBtn) {
+                loginBtn.addEventListener('click', window.handleLoginSubmit);
+            }
+
+            if (emailParam && passParam && autoParam === 'true') {
+                setTimeout(function() {
+                    if (emailInput && emailParam) emailInput.value = emailParam;
+                    if (passwordInput && passParam) passwordInput.value = passParam;
+                    window.handleLoginSubmit();
+                }, 300);
+            }
+
+            if (forgotPasswordLink && resetBox) {
+                forgotPasswordLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    resetBox.classList.toggle('visible');
+                    const resetEmailInput = document.getElementById('resetEmail');
+                    if (resetEmailInput && emailInput) {
+                        resetEmailInput.value = emailInput.value || '';
+                    }
+                });
+            }
+
+            if (sendResetBtn) {
+                sendResetBtn.addEventListener('click', async function() {
+                    const resetEmailInput = document.getElementById('resetEmail');
+                    const email = String(resetEmailInput ? resetEmailInput.value : '').trim();
+                    if (!email) {
+                        if (errorDiv) {
+                            errorDiv.style.color = '#ef4444';
+                            errorDiv.textContent = 'Please enter your email for password reset.';
+                        }
+                        return;
+                    }
+                    const auth = getAuth();
+                    if (!auth) return;
+                    try {
+                        sendResetBtn.disabled = true;
+                        sendResetBtn.textContent = 'Sending...';
+                        await auth.sendPasswordResetEmail(email);
+                        if (errorDiv) {
+                            errorDiv.style.color = '#059669';
+                            errorDiv.textContent = 'Password reset link sent. Check your inbox.';
+                        }
+                    } catch (error) {
+                        if (errorDiv) {
+                            errorDiv.style.color = '#ef4444';
+                            errorDiv.textContent = error.message || 'Failed to send reset link.';
+                        }
+                    } finally {
+                        sendResetBtn.disabled = false;
+                        sendResetBtn.textContent = 'Send Link';
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

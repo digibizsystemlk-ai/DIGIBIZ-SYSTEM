@@ -1,0 +1,28 @@
+{
+  "name": "digibiz_master",
+  "version": "1.0.0",
+  "description": "",
+  "main": "import-data.js",
+  "scripts": {
+    "bootstrap:tea-factory": "node scripts/bootstrap-tea-factory-business.js",
+    "bootstrap:mw-staff-user": "node scripts/upsert-mw-staff-biz-user.js",
+    "e2e:setup-data": "node scripts/setup-e2e-test-data.js",
+    "test:e2e:distributor": "playwright test tests/e2e --project=chromium",
+    "test:e2e:all": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "firebase": "^12.13.0",
+    "firebase-admin": "^13.8.0",
+    "pdf-parse": "^2.4.5",
+    "pdf2json": "^4.0.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.6.0",
+    "dotenv": "^17.2.3"
+  }
+}

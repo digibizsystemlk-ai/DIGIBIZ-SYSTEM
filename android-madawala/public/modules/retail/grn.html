@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goods Received Notes (GRN) - DIGIBIZ Retail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/core/auth-roles.js?v=2265"></script>
+    <script src="/core/dashboard-core.js?v=2265"></script>
+    <script src="/core/ui-helpers.js?v=1"></script>
+    <script src="/core/sidebar.js?v=2116"></script>
+    <script src="/modules/retail/js/location-stock-core.js?v=2265"></script>
+    
+    <style>
+        html.digibiz-sidebar-reserved body { margin-left: 260px; }
+        @media (max-width: 768px) { html.digibiz-sidebar-reserved body { margin-left: 0; } }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 0; }
+        .main-content { padding: 30px; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .header h1 { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: #0f172a; margin: 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 18px 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .stat-card .label { font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-card .value { font-size: 22px; font-weight: 800; color: #0f172a; font-family: 'Outfit', sans-serif; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+        .tab-btn { padding: 10px 20px; background: none; border: none; font-size: 14px; font-weight: 700; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+        .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-bar input, .filter-bar select { padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; }
+        .filter-bar input:focus, .filter-bar select:focus { border-color: #3b82f6; }
+        .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .card-header h3 { margin: 0; font-size: 15px; font-weight: 700; }
+        .card-body { padding: 0; }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        .data-table th, .data-table td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; }
+        .data-table th { background: #f8fafc; font-weight: 700; color: #475569; }
+        .data-table tr:hover { background: #f8fafc; }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-received { background: #dcfce7; color: #166534; }
+        .badge-reversed { background: #fee2e2; color: #991b1b; }
+        .badge-cancelled { background: #f1f5f9; color: #64748b; }
+        .btn-primary { background: #3b82f6; color: white; border: none; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-outline { background: white; color: #475569; border: 1.5px solid #cbd5e1; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 15px; }
+        .modal-content { background: white; border-radius: 14px; padding: 24px; max-width: 940px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .purchase-item { display: grid; grid-template-columns: 2.8fr 1.6fr 90px 75px 110px 95px 36px; gap: 8px; align-items: center; margin-bottom: 8px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .purchase-item input, .purchase-item select { padding: 7px 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px; width: 100%; box-sizing: border-box; }
+        .remove-item-btn { background: #fee2e2; color: #ef4444; border: none; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        footer { margin-top: 40px; text-align: center; font-size: 12px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-truck-loading" style="color:#3b82f6;"></i> Goods Received Notes (GRN)</h1>
+                <p style="margin:4px 0 0; color:#64748b; font-size:13px;">Manage inventory stock receipts, supplier bills, and partial cash/credit settlements.</p>
+            </div>
+            <button class="btn-primary" id="openCreatePOBtn"><i class="fas fa-plus"></i> Create New GRN</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total GRN Value</div>
+                <div class="value" id="totalPOValue">Rs. 0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total Paid Amount</div>
+                <div class="value" id="totalPaidValue" style="color:#166534;">Rs. 0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Supplier Outstanding (Due)</div>
+                <div class="value" id="totalDueValue" style="color:#dc2626;">Rs. 0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Active Suppliers</div>
+                <div class="value" id="supplierCount">0</div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="purchases"><i class="fas fa-list"></i> GRN History & Drafts</button>
+        </div>
+        
+        <!-- GRN History Tab -->
+        <div id="tab-purchases" class="tab-pane active">
+            <div class="filter-bar">
+                <input type="text" id="searchPO" placeholder="Search by GRN number or supplier...">
+                <select id="poStatusFilter">
+                    <option value="all">All GRN Status</option>
+                    <option value="pending">Pending Receipt</option>
+                    <option value="received">Received / Completed</option>
+                    <option value="reversed">Reversed / Corrected</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <input type="date" id="startDate">
+                <input type="date" id="endDate">
+                <button id="filterPOBtn" class="btn-primary" style="padding:7px 14px;"><i class="fas fa-search"></i> Filter</button>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-invoice"></i> Goods Received Notes</h3>
+                    <span id="poCount" style="font-weight:700; color:#64748b; font-size:12px;"></span>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>GRN #</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Location</th>
+                                <th>Items</th>
+                                <th>Total Bill</th>
+                                <th>Paid Amount</th>
+                                <th>Outstanding (ගෙවිය යුතු)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="poList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Global Datalists for Product and Location Type-to-Search -->
+        <datalist id="poGlobalProductsDatalist"></datalist>
+        <datalist id="poGlobalLocationsDatalist"></datalist>
+
+        <footer>
+            DIGIBIZ Retail Management System © 2026. Location-aware Stock & Accounting Sync Active.
+        </footer>
+    </div>
+    
+    <!-- New Purchase / GRN Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content" style="max-width: 940px; width: 96%; max-height: 90vh; overflow-y: auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 id="purchaseModalTitle" style="margin:0; font-size:18px; font-weight:800; color:#0f172a;"><i class="fas fa-file-import" style="color:#3b82f6;"></i> Create New Goods Received Note (GRN)</h3>
+                <button type="button" id="modalTopCloseBtn" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">✕</button>
+            </div>
+            
+            <!-- Top Controls Grid -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1.3fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px; text-align: left;">Supplier (සැපයුම්කරු) <span style="color:#ef4444;">*</span></label>
+                    <select id="poSupplierSelect" style="width: 100%; padding: 8px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px;"></select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px; text-align: left;">Invoice / GRN No</label>
+                    <input type="text" id="poGrnNo" placeholder="e.g. GRN-1001" style="width: 100%; padding: 8px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; margin-bottom: 0;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px; text-align: left;">Bill Date</label>
+                    <input type="date" id="poBillDate" style="width: 100%; padding: 8px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; margin-bottom: 0;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px; text-align: left;">Payment Mode (ගෙවීම් ක්‍රමය)</label>
+                    <select id="poPaymentMode" style="width: 100%; padding: 8px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight:700;">
+                        <option value="CASH">💵 Cash (සම්පූර්ණ මුදල්)</option>
+                        <option value="PARTIAL_CASH">⚖️ Partial Cash (කොටසක් මුදලින් + ණය)</option>
+                        <option value="CREDIT">🤝 Full Credit (සම්පූර්ණ ණයට - 0 Paid)</option>
+                        <option value="BANK">🏦 Bank / Card Transfer</option>
+                        <option value="CHEQUE">📄 Cheque (චෙක්පත් මඟින්)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bank Account Selection Field (Visible on Bank / Card) -->
+            <div id="poBankField" style="display:none; margin-bottom:12px; padding:10px 14px; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:10px;">
+                <label style="display:block; font-size:12px; font-weight:700; color:#1e40af; margin-bottom:4px;"><i class="fas fa-university"></i> Select Source Bank Account (මුදල් ගෙවන බැංකු ගිණුම) <span style="color:#ef4444;">*</span></label>
+                <select id="poBankAccountSelect" style="width:100%; padding:8px 10px; border:1.5px solid #3b82f6; border-radius:8px; font-size:13px; font-weight:600; background:#fff;"></select>
+                <span style="font-size:11px; color:#64748b;">ගෙවීම් මුදල මෙම බැංකු ගිණුමෙන් ස්වයංක්‍රීයව අඩු වේ.</span>
+            </div>
+
+            <!-- Cheque Details -->
+            <div id="chequeDetails" style="display:none; margin-bottom:12px; padding:12px 15px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:10px;">
+                <strong style="font-size:13px; color:#334155; display:block; margin-bottom:8px;"><i class="fas fa-money-check" style="color:#6366f1;"></i> Cheque Details (චෙක්පත් විස්තර)</strong>
+                <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr; gap:12px;">
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:700; color:#475569; margin-bottom:4px;">Drawn Bank Account (බැංකු ගිණුම) <span style="color:#ef4444;">*</span></label>
+                        <select id="poChequeBankSelect" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:0; font-size:12.5px; font-weight:600; background:#fff;"></select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:700; color:#475569; margin-bottom:4px;">Cheque No (චෙක් අංකය) <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="poChequeNo" placeholder="e.g. 902814" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:0; font-size:13px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:700; color:#475569; margin-bottom:4px;">Cheque Date (දිනය) <span style="color:#ef4444;">*</span></label>
+                        <input type="date" id="poChequeDate" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:0; font-size:13px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Table Header -->
+            <div style="display:grid; grid-template-columns: 2.8fr 1.6fr 90px 75px 110px 95px 36px; gap:8px; align-items:center; margin-bottom:8px; font-size:12px; font-weight:700; color:#475569; background:#f1f5f9; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+                <div>Product Name (භාණ්ඩය)</div>
+                <div>Location (ස්ථානය)</div>
+                <div style="text-align:right;">Qty / Wt</div>
+                <div>Unit</div>
+                <div style="text-align:right;">Unit Cost</div>
+                <div style="text-align:center;">Restock Lvl</div>
+                <div></div>
+            </div>
+
+            <div id="poItemsList" style="max-height:260px; overflow-y:auto; margin-bottom:10px;"></div>
+            <button id="addItemBtn" class="btn-outline" style="width:100%;margin-bottom:12px; padding:8px; font-weight:700;"><i class="fas fa-plus"></i> Add Item</button>
+            
+            <!-- Total & Split Payment Breakdown -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:10px 14px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0;">
+                <span style="font-size:13px; font-weight:700; color:#475569;">Total GRN Bill Amount:</span>
+                <strong style="font-size:18px; color:#10b981;"><span id="poTotal">Rs. 0.00</span></strong>
+            </div>
+
+            <!-- Partial / Split Payment Box -->
+            <div id="paymentBreakdownBox" style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:12px; padding:14px 16px; background:#f0fdf4; border-radius:10px; border:1.5px solid #86efac;">
+                <div>
+                    <label style="display:block; font-size:12.5px; font-weight:800; color:#166534; margin-bottom:4px;"><i class="fas fa-hand-holding-dollar"></i> Amount Paid Now (දැනට ගෙවන මුදල - Rs.):</label>
+                    <input type="number" id="poAmountPaid" step="any" min="0" placeholder="0.00" oninput="onAmountPaidInput()" style="width:100%; padding:9px 12px; border:2px solid #16a34a; border-radius:8px; font-size:15px; font-weight:800; color:#14532d; margin-bottom:3px; background:#fff;">
+                    <span style="font-size:11px; color:#4b5563;">මුදලින් කොටසක් පමණක් ගෙවන්නේ නම් මුදල මෙහි ඇතුළත් කරන්න</span>
+                </div>
+                <div>
+                    <label style="display:block; font-size:12.5px; font-weight:800; color:#991b1b; margin-bottom:4px;"><i class="fas fa-file-invoice-dollar"></i> Outstanding / Due (ඉතිරි ණය මුදල):</label>
+                    <div id="poBalanceDue" style="font-size:18px; font-weight:800; color:#dc2626; padding:6px 0;">Rs. 0.00</div>
+                    <span style="font-size:11px; color:#64748b;">සැපයුම්කරුට ගෙවිය යුතු ණය (Accounts Payable) ලෙස සටහන් වේ</span>
+                </div>
+            </div>
+            
+            <textarea id="poNotes" placeholder="Notes / Remarks (optional)" rows="2" style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:8px; font-family:inherit; margin-bottom:12px;"></textarea>
+            
+            <div class="modal-buttons" style="display:flex; gap:10px; justify-content:flex-end; align-items:center; flex-wrap:wrap;">
+                <button type="button" class="btn-outline" id="closePOModal">Cancel</button>
+                <button type="button" class="btn-outline" id="saveDraftPOBtn" style="border-color:#cbd5e1; color:#475569;"><i class="fas fa-file-alt"></i> Save as Draft (කෙටුම්පතක්)</button>
+                <button type="button" class="btn-primary" id="savePOBtn" style="background:#10b981; border-color:#10b981; padding:9px 18px; font-weight:700;"><i class="fas fa-check-circle"></i> Save & Receive Stock (තොගයට එක් කරන්න)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receive Stock Modal -->
+    <div id="receiveModal" class="modal">
+        <div class="modal-content" style="max-width: 650px;">
+            <h3><i class="fas fa-boxes" style="color:#10b981;"></i> Receive & Complete GRN</h3>
+            <p id="receivePONo" style="margin-bottom:15px; font-size:13px; color:#475569; line-height:1.5;"></p>
+            <div id="receiveItems" style="max-height:350px; overflow-y:auto; margin-bottom:15px;"></div>
+            <div class="modal-buttons">
+                <button class="btn-outline" id="closeReceiveModal">Cancel</button>
+                <button class="btn-primary" id="confirmReceiveBtn">Confirm Receipt & Update Stock</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete / Reversal Modal -->
+    <div id="reversalModal" class="modal">
+        <div class="modal-content" style="max-width: 520px;">
+            <h3 style="color:#ef4444;"><i class="fas fa-trash-alt"></i> Delete / Reverse GRN (මකා දැමීම)</h3>
+            <p id="reversalPONo" style="font-size:13px; color:#64748b; margin-bottom:12px;"></p>
+            <div style="background:#fee2e2; border-left:4px solid #ef4444; padding:12px; border-radius:8px; font-size:12.5px; color:#991b1b; margin-bottom:15px; line-height:1.5;">
+                <strong>⚠️ අවවාදයයි (Automated Stock Rollback):</strong><br>
+                මෙම GRN එක දැනටමත් Store එකට Receive කර ඇත. Delete කිරීමෙන්:<br>
+                1. ඊට අදාළ භාණ්ඩ ප්‍රමාණයන් Inventory එකෙන් ස්වයංක්‍රීයව අඩු වේ (Stock Reversal).<br>
+                2. ගිණුම්කරණ පද්ධතියේ ප්‍රතිවිරුද්ධ සටහනක් (Reversal Journal Entry) ලියවේ.<br>
+                3. බැංකුවෙන් ගෙවූ මුදල් තිබුණේ නම් එය නැවත බැංකු ගිණුමට බැර වේ.
+            </div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">මකා දැමීමට හේතුව (Reason for Delete - අනිවාර්යයි):</label>
+            <textarea id="reversalReasonInput" placeholder="හේතුව ඇතුළත් කරන්න (උදා: වැරදි බිල්පතක් ඇතුළත් වීම, ඇණවුම අවලංගු වීම)..." rows="3" style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-family:inherit;"></textarea>
+            <div class="modal-buttons" style="margin-top:15px;">
+                <button class="btn-outline" id="closeReversalModalBtn">Cancel</button>
+                <button class="btn-primary" id="confirmReversalBtn" style="background:#ef4444; border-color:#ef4444; padding:9px 16px; font-weight:700;"><i class="fas fa-trash-alt"></i> Delete & Reverse Stock</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View GRN Modal -->
+    <div id="viewPOModal" class="modal">
+        <div class="modal-content" style="max-width: 680px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 id="viewPOTitle"><i class="fas fa-file-invoice"></i> GRN Details</h3>
+                <span id="viewPOStatusBadge" class="badge"></span>
+            </div>
+            <div id="viewPOContent" style="font-size:13px; line-height:1.6; max-height:450px; overflow-y:auto;"></div>
+            <div class="modal-buttons" style="margin-top:15px;">
+                <button class="btn-outline" id="closeViewPOModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Product Modal (Dynamic during PO creation) -->
+    <div id="newProductModal" class="modal" style="z-index: 3000;">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3>Create New Product</h3>
+            <input type="text" id="newProductCode" placeholder="Product Code (e.g. P001)">
+            <input type="text" id="newProductBrand" placeholder="Brand Name (e.g. BrandName)">
+            <input type="text" id="newProductModel" placeholder="Model Name (optional)">
+            <input type="text" id="newProductName" placeholder="Product Name">
+            <label style="display:block; margin-top:12px; margin-bottom:4px; font-size:12px; font-weight:600; color:#64748b; text-align: left;">Product Category</label>
+            <input type="text" id="newProductCategory" list="categoryOptions" placeholder="Type or Select Category">
+            <datalist id="categoryOptions"></datalist>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#64748b; margin-bottom:4px; text-align: left;">Selling Type (මාදිලිය)</label>
+                    <select id="newProductSellType" style="width:100%; padding:10px; border:1.5px solid #e2e8f0; border-radius:10px;" onchange="onNewProductSellTypeChange()">
+                        <option value="pcs">Unit (ගණන් කර - Pcs)</option>
+                        <option value="weight">Weight (කිරා මැන - Kg/g)</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#64748b; margin-bottom:4px; text-align: left;">Unit (ඒකකය)</label>
+                    <select id="newProductUnit" style="width:100%; padding:10px; border:1.5px solid #e2e8f0; border-radius:10px;">
+                        <option value="Pcs">Pcs (ගණන් කර)</option>
+                        <option value="kg">Kilograms (kg)</option>
+                        <option value="g">Grams (g)</option>
+                        <option value="Pack">Pack</option>
+                        <option value="Box">Box</option>
+                        <option value="Bottle">Bottle</option>
+                    </select>
+                </div>
+            </div>
+
+            <input type="number" id="newProductPrice" placeholder="Selling / Discount Price (Rs.)" step="any">
+            <input type="number" id="newProductNormalPrice" placeholder="Normal Price / MRP (Rs.) (optional)" step="any">
+            <input type="number" id="newProductCost" placeholder="Cost Price (Rs.)" step="any">
+            <input type="number" id="newProductStock" placeholder="Initial Stock" value="0" step="any">
+            <input type="number" id="newProductRestockLevel" placeholder="Restock Level (Reorder Alert Limit)">
+            <input type="text" id="newProductBarcode" placeholder="Barcode (optional)">
+            <div class="modal-buttons">
+                <button class="btn-outline" id="closeNewProductModalBtn">Cancel</button>
+                <button class="btn-primary" id="saveNewProductBtn">Save & Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBusinessId = null;
+        let currentUser = null;
+        let currentUserProfile = null;
+        let products = [];
+        let suppliers = [];
+        let purchaseOrders = [];
+        let businessLocations = [];
+        let businessBankAccounts = [];
+        let userPreferredLocation = 'MAIN';
+        let userManuallyEditedPaid = false;
+
+        function formatCurrency(amount){
+            return 'Rs. ' + (Number(amount) || 0).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        
+        function showToast(msg, isError = false){
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.backgroundColor = isError ? '#ef4444' : '#10b981';
+            toast.style.color = 'white';
+            toast.style.padding = '12px 20px';
+            toast.style.borderRadius = '8px';
+            toast.style.zIndex = '9999';
+            toast.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.1)';
+            toast.style.fontSize = '13.5px';
+            toast.style.fontWeight = '600';
+            toast.innerHTML = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3500);
+        }
+
+        async function initPage(){
+            auth.onAuthStateChanged(async (user) => {
+                if(!user){
+                    window.location.href = '/login.html';
+                    return;
+                }
+                currentUser = user;
+                
+                try {
+                    let bid = null;
+                    const isImpersonating = localStorage.getItem('digibiz_impersonate_active') === 'true';
+                    if (isImpersonating) {
+                        bid = localStorage.getItem('digibiz_impersonate_biz_id') || localStorage.getItem('currentBusinessId');
+                    }
+                    if (!bid) {
+                        const userDoc = await db.collection('users').doc(user.uid).get();
+                        if (userDoc.exists && userDoc.data().businessId) bid = userDoc.data().businessId;
+                    }
+                    if (!bid && window.dashboardCore && typeof window.dashboardCore.getContext === 'function') {
+                        const ctx = await window.dashboardCore.getContext(user);
+                        if (ctx && ctx.businessId) bid = ctx.businessId;
+                    }
+                    if (!bid && user.email) {
+                        const reg = await db.collection('staff_registry').doc(user.email.toLowerCase().trim()).get();
+                        if (reg.exists && reg.data().businessId) bid = reg.data().businessId;
+                    }
+                    currentBusinessId = bid || localStorage.getItem('currentBusinessId') || user.uid;
+                } catch (e) {
+                    currentBusinessId = localStorage.getItem('currentBusinessId') || user.uid;
+                }
+
+                if (window.AuthRoles) {
+                    try {
+                        currentUserProfile = await window.AuthRoles.getUserProfile(user.uid);
+                    } catch (e) {
+                        console.warn('[GRN] getUserProfile fallback:', e);
+                    }
+                }
+
+                try {
+                    businessLocations = await LocationStockCore.getBusinessLocations(currentBusinessId);
+                    userPreferredLocation = (await LocationStockCore.getUserPreferredLocation(user.uid)) || (businessLocations[0]?.id || 'MAIN');
+                } catch(eLoc) {
+                    console.warn('[GRN] Locations load error:', eLoc);
+                }
+
+                await Promise.all([
+                    loadProducts(),
+                    loadSuppliers(),
+                    loadBankAccounts(),
+                    loadPurchaseOrders()
+                ]);
+
+                setupEventListeners();
+            });
+        }
+
+        async function loadBankAccounts() {
+            businessBankAccounts = [];
+            try {
+                const snap = await db.collection('bank_accounts').doc(currentBusinessId).collection('accounts').get();
+                snap.forEach(doc => {
+                    businessBankAccounts.push({ id: doc.id, ...doc.data() });
+                });
+                updateBankAccountSelects();
+            } catch (e) {
+                console.warn('[GRN] Error loading bank accounts:', e);
+            }
+        }
+
+        function updateBankAccountSelects() {
+            const bankSelect = document.getElementById('poBankAccountSelect');
+            const chqBankSelect = document.getElementById('poChequeBankSelect');
+            const optsHtml = businessBankAccounts.length > 0
+                ? '<option value="">-- Select Bank Account (බැංකු ගිණුම තෝරන්න) --</option>' + businessBankAccounts.map(b => '<option value="' + b.id + '">' + b.bankName + ' - ' + b.accountNo + ' (' + (b.accountName || 'Account') + ') [Bal: Rs. ' + (Number(b.balance)||0).toLocaleString('en-LK', {minimumFractionDigits:2}) + ']</option>').join('')
+                : '<option value="">⚠️ No Bank Accounts Found (Please add in Banking Management)</option>';
+
+            if (bankSelect) bankSelect.innerHTML = optsHtml;
+            if (chqBankSelect) chqBankSelect.innerHTML = optsHtml;
+        }
+
+        function populateCategoryDatalist(){
+            const listEl = document.getElementById('categoryOptions');
+            if(!listEl) return;
+            const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
+            listEl.innerHTML = cats.map(c => '<option value="' + c + '">').join('');
+        }
+
+        function populateGlobalDatalists(){
+            const pListEl = document.getElementById('poGlobalProductsDatalist');
+            if(pListEl) {
+                pListEl.innerHTML = products.map(p => {
+                    const code = p.code || p.id;
+                    const price = p.cost || p.price || 0;
+                    return '<option value="' + p.name + ' (' + code + ')" data-id="' + p.id + '" data-code="' + code + '" data-price="' + price + '" data-unit="' + (p.unit || 'Pcs') + '" data-cost="' + (p.cost || 0) + '">' + p.name + ' - Rs. ' + price + '</option>';
+                }).join('');
+            }
+
+            const lListEl = document.getElementById('poGlobalLocationsDatalist');
+            if(lListEl) {
+                const locs = (businessLocations && businessLocations.length > 0) ? businessLocations : [{ id: 'MAIN', name: 'Main Store / Head Office', code: 'MAIN' }];
+                lListEl.innerHTML = locs.map(l => {
+                    return '<option value="' + (l.name || l.code || l.id) + ' (' + (l.code || l.id) + ')" data-id="' + l.id + '">' + (l.code || l.id) + '</option>';
+                }).join('');
+            }
+        }
+
+        async function loadProducts(){
+            const snapshot = await db.collection('products').doc(currentBusinessId).collection('list').get();
+            products = [];
+            snapshot.forEach(doc => products.push({id: doc.id, ...doc.data()}));
+            populateCategoryDatalist();
+            populateGlobalDatalists();
+        }
+        
+        async function loadSuppliers(){
+            suppliers = [];
+            const suppMap = new Map();
+            try {
+                const subSnap = await db.collection('suppliers').doc(currentBusinessId).collection('list').get();
+                subSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (d.name) {
+                        suppMap.set(doc.id, { id: doc.id, name: d.name, phone: d.phone || d.mobile || '' });
+                    }
+                });
+
+                const ordSnap = await db.collection('purchases').doc(currentBusinessId).collection('orders').limit(100).get();
+                ordSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (d.supplierId && d.supplierName && !suppMap.has(d.supplierId)) {
+                        suppMap.set(d.supplierId, { id: d.supplierId, name: d.supplierName });
+                    }
+                });
+            } catch (e) {
+                console.warn('[GRN] Supplier fetch error:', e);
+            }
+            suppliers = Array.from(suppMap.values());
+            document.getElementById('supplierCount').innerHTML = suppliers.length;
+            updateSupplierSelect();
+        }
+        
+        function updateSupplierSelect(){
+            const select = document.getElementById('poSupplierSelect');
+            if(select) {
+                select.innerHTML = '<option value="">Select Supplier (සැපයුම්කරු තෝරන්න)</option>' + 
+                    suppliers.map(s => '<option value="' + s.id + '">' + s.name + '</option>').join('');
+            }
+        }
+        
+        async function loadPurchaseOrders(){
+            try {
+                let snapshot = null;
+                try {
+                    snapshot = await db.collection('purchases').doc(currentBusinessId).collection('orders').get();
+                } catch (eOrder) {
+                    console.warn('[GRN] get orders error:', eOrder);
+                }
+                purchaseOrders = [];
+                if (snapshot) {
+                    snapshot.forEach(doc => purchaseOrders.push({ id: doc.id, ...doc.data() }));
+                }
+                
+                purchaseOrders.sort((a, b) => {
+                    const timeA = a.createdAt?.toDate?.()?.getTime() || (a.createdAt instanceof Date ? a.createdAt.getTime() : (a.billDate ? new Date(a.billDate).getTime() : 0));
+                    const timeB = b.createdAt?.toDate?.()?.getTime() || (b.createdAt instanceof Date ? b.createdAt.getTime() : (b.billDate ? new Date(b.billDate).getTime() : 0));
+                    return timeB - timeA;
+                });
+
+                renderPurchaseOrders();
+                updateStats();
+            } catch (err) {
+                console.error('[GRN] Error loading purchase orders:', err);
+            }
+        }
+        
+        function renderPurchaseOrders(){
+            const tbody = document.getElementById('poList');
+            const term = (document.getElementById('searchPO')?.value || '').toLowerCase().trim();
+            const status = document.getElementById('poStatusFilter')?.value || 'all';
+            const startDate = document.getElementById('startDate')?.value;
+            const endDate = document.getElementById('endDate')?.value;
+
+            const filtered = purchaseOrders.filter(po => {
+                if(status !== 'all' && po.status !== status) return false;
+                if(term) {
+                    const matchNo = (po.poNo || po.id || '').toLowerCase().includes(term);
+                    const matchSupp = (po.supplierName || '').toLowerCase().includes(term);
+                    if(!matchNo && !matchSupp) return false;
+                }
+                if (startDate || endDate) {
+                    const poDate = po.createdAt?.toDate?.() || new Date(po.date || po.billDate || 0);
+                    if (startDate && poDate < new Date(startDate)) return false;
+                    if (endDate) {
+                        const eD = new Date(endDate);
+                        eD.setHours(23, 59, 59, 999);
+                        if (poDate > eD) return false;
+                    }
+                }
+                return true;
+            });
+
+            if(filtered.length === 0){
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#64748b;">No GRN records found</td></tr>';
+                document.getElementById('poCount').innerHTML = '0 records';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(po => {
+                let statusClass = 'badge-pending';
+                let statusText = 'Pending';
+                if (po.status === 'received') {
+                    statusClass = 'badge-received';
+                    statusText = 'Received';
+                } else if (po.status === 'reversed') {
+                    statusClass = 'badge-reversed';
+                    statusText = 'Reversed';
+                } else if (po.status === 'cancelled') {
+                    statusClass = 'badge-cancelled';
+                    statusText = 'Cancelled';
+                }
+
+                const modeLabel = { 'CASH': '💵 Cash', 'PARTIAL_CASH': '⚖️ Partial Cash', 'CREDIT': '🤝 Credit', 'BANK': '🏦 Bank', 'CHEQUE': '📄 Cheque' }[po.paymentMode] || '💵 Cash';
+                const isCheque = po.paymentMode === 'CHEQUE' && po.chequeNo;
+
+                const itemLocations = [...new Set((po.items || []).map(it => it.locationId || 'MAIN'))];
+                const locLabels = itemLocations.map(lid => {
+                    const lObj = (businessLocations || []).find(l => l.id === lid);
+                    return lObj ? (lObj.name || lObj.code || lid) : lid;
+                });
+                const locDisplay = locLabels.length > 0 ? locLabels.join(', ') : 'MAIN';
+
+                const totalVal = Number(po.total) || 0;
+                const paidVal = po.amountPaid !== undefined ? Number(po.amountPaid) : totalVal;
+                const dueVal = po.balanceDue !== undefined ? Number(po.balanceDue) : Math.max(0, totalVal - paidVal);
+
+                let paidColumnHtml = '<strong style="color:#166534;">' + formatCurrency(paidVal) + '</strong><br><small style="color:#64748b;">' + modeLabel + (isCheque ? ' (#' + po.chequeNo + ')' : '') + '</small>';
+                const isChequeMode = String(po.paymentMode || '').toUpperCase() === 'CHEQUE';
+                let dueColumnHtml = '';
+                if (isChequeMode && po.chequeStatus !== 'cleared') {
+                    dueColumnHtml = `<span class="badge" style="background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; border:1px solid #fde68a; padding:4px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-file-signature"></i> Cheque Issued (${po.chequeNo ? '#' + po.chequeNo : 'Pending'})</span>`;
+                } else if (dueVal > 0) {
+                    dueColumnHtml = '<span class="badge" style="background:#fee2e2; color:#991b1b; font-size:11.5px; font-weight:800; padding:4px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-exclamation-circle"></i> Due: ' + formatCurrency(dueVal) + '</span>';
+                } else {
+                    dueColumnHtml = '<span class="badge" style="background:#dcfce7; color:#166534; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-check"></i> Paid</span>';
+                }
+
+                return `<tr>
+                    <td><strong>${po.poNo || po.id}</strong></td>
+                    <td>${po.billDate || (po.createdAt?.toDate ? po.createdAt.toDate().toISOString().split('T')[0] : 'N/A')}</td>
+                    <td>${po.supplierName || 'General Supplier'}</td>
+                    <td><span class="badge" style="background:#eff6ff; color:#1e40af; font-size:11.5px;"><i class="fas fa-map-marker-alt" style="color:#3b82f6;"></i> ${locDisplay}</span></td>
+                    <td>${po.items?.length || 0}</td>
+                    <td><strong style="font-size:13.5px;">${formatCurrency(po.total)}</strong></td>
+                    <td>${paidColumnHtml}</td>
+                    <td>${dueColumnHtml}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+                            ${po.status === 'pending' ? `<button class="btn-primary" onclick="receiveStock('${po.id}')" style="padding:4px 8px; font-size:11.5px;" title="Receive Stock into Store"><i class="fas fa-boxes"></i> Receive</button>` : ''}
+                            <button class="btn-outline" onclick="window.editGRN('${po.id}')" style="padding:4px 8px; font-size:11.5px; color:#2563eb; border-color:#93c5fd;" title="Edit GRN (සංශෝධනය කරන්න)"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn-outline" onclick="window.deleteOrReverseGRN('${po.id}')" style="padding:4px 8px; font-size:11.5px; color:#dc2626; border-color:#fca5a5;" title="${po.status === 'received' ? 'Delete GRN & Reverse Stock (තොගය ආපසු හරවා මකා දමන්න)' : 'Delete GRN (මකා දමන්න)'}"><i class="fas fa-trash-alt"></i> Delete</button>
+                            <button class="btn-outline" onclick="viewPO('${po.id}')" style="padding:4px 8px; font-size:11.5px;" title="View Details"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </td>
+                 </tr>`;
+            }).join('');
+            document.getElementById('poCount').innerHTML = filtered.length + ' records';
+        }
+        
+        function updateStats(){
+            const validPOs = purchaseOrders.filter(po => po.status !== 'reversed' && po.status !== 'cancelled');
+            const total = validPOs.reduce((sum, po) => sum + (po.total || 0), 0);
+            const totalPaid = validPOs.reduce((sum, po) => sum + (po.amountPaid !== undefined ? Number(po.amountPaid) : Number(po.total || 0)), 0);
+            const totalDue = validPOs.reduce((sum, po) => {
+                const tot = Number(po.total || 0);
+                const pd = po.amountPaid !== undefined ? Number(po.amountPaid) : tot;
+                return sum + (po.balanceDue !== undefined ? Number(po.balanceDue) : Math.max(0, tot - pd));
+            }, 0);
+            
+            document.getElementById('totalPOValue').innerHTML = formatCurrency(total);
+            document.getElementById('totalPaidValue').innerHTML = formatCurrency(totalPaid);
+            document.getElementById('totalDueValue').innerHTML = formatCurrency(totalDue);
+            document.getElementById('supplierCount').innerHTML = suppliers.length;
+        }
+        
+        function addPurchaseItem(existing = null){
+            const list = document.getElementById('poItemsList');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'purchase-item';
+            
+            const pId = existing?.productId || '';
+            const pName = existing?.productName || '';
+            const pCode = existing?.productCode || pId;
+            const pUnit = existing?.unit || 'Pcs';
+            const pPrice = existing?.unitPrice || existing?.costPrice || existing?.price || 0;
+            const pQty = existing?.inputQty !== undefined ? existing.inputQty : (existing?.quantity || 1);
+            const pRestock = (existing?.restockLevel !== undefined && existing?.restockLevel !== null && existing?.restockLevel !== 'null') ? existing.restockLevel : '';
+            const pLocId = existing?.locationId || userPreferredLocation || 'MAIN';
+            const locObj = (businessLocations || []).find(l => l.id === pLocId || l.code === pLocId);
+            const pLocDisplay = locObj ? (locObj.name || locObj.code) + ' (' + (locObj.code || locObj.id) + ')' : pLocId;
+            
+            itemDiv.innerHTML = '<div>' +
+                    '<input type="text" class="po-product-search" list="poGlobalProductsDatalist" placeholder="Search product name or code..." value="' + (pName ? (pName + (pCode ? ' ('+pCode+')' : '')) : '') + '" autocomplete="off">' +
+                    '<input type="hidden" class="po-product-id" value="' + pId + '">' +
+                '</div>' +
+                '<div>' +
+                    '<input type="text" class="po-location-search" list="poGlobalLocationsDatalist" placeholder="Select Location..." value="' + pLocDisplay + '" autocomplete="off">' +
+                    '<input type="hidden" class="po-location-id" value="' + pLocId + '">' +
+                '</div>' +
+                '<div>' +
+                    '<input type="number" class="po-qty" placeholder="Qty" value="' + pQty + '" min="0.001" step="any" oninput="updatePOTotal()">' +
+                '</div>' +
+                '<div>' +
+                    '<select class="po-unit-select" onchange="updatePOTotal()">' +
+                        '<option value="Pcs" ' + (pUnit === 'Pcs' ? 'selected' : '') + '>Pcs</option>' +
+                        '<option value="kg" ' + (pUnit === 'kg' ? 'selected' : '') + '>kg</option>' +
+                        '<option value="g" ' + (pUnit === 'g' ? 'selected' : '') + '>g</option>' +
+                        '<option value="Pack" ' + (pUnit === 'Pack' ? 'selected' : '') + '>Pack</option>' +
+                        '<option value="Box" ' + (pUnit === 'Box' ? 'selected' : '') + '>Box</option>' +
+                        '<option value="Bottle" ' + (pUnit === 'Bottle' ? 'selected' : '') + '>Bottle</option>' +
+                    '</select>' +
+                '</div>' +
+                '<div>' +
+                    '<input type="number" class="po-price" placeholder="Cost" value="' + pPrice + '" min="0" step="any" oninput="updatePOTotal()">' +
+                '</div>' +
+                '<div>' +
+                    '<input type="number" class="po-restock" placeholder="Restock" value="' + pRestock + '" min="0" step="1" title="Restock alert threshold">' +
+                '</div>' +
+                '<div>' +
+                    '<button type="button" class="remove-item-btn" onclick="window.removePurchaseItem(this)"><i class="fas fa-trash"></i></button>' +
+                '</div>';
+            
+            list.appendChild(itemDiv);
+
+            const searchInput = itemDiv.querySelector('.po-product-search');
+            const idHidden = itemDiv.querySelector('.po-product-id');
+            const priceInput = itemDiv.querySelector('.po-price');
+            const unitSelect = itemDiv.querySelector('.po-unit-select');
+            const restockInput = itemDiv.querySelector('.po-restock');
+
+            searchInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                const match = products.find(p => (p.name + ' (' + (p.code || p.id) + ')') === val || p.name === val || p.code === val);
+                if(match) {
+                    idHidden.value = match.id;
+                    if(match.cost) priceInput.value = match.cost;
+                    else if(match.price) priceInput.value = match.price;
+                    if(match.unit) unitSelect.value = match.unit;
+                    if(match.restockLevel !== undefined) restockInput.value = match.restockLevel;
+                    updatePOTotal();
+                } else {
+                    idHidden.value = '';
+                }
+            });
+
+            const locSearchInput = itemDiv.querySelector('.po-location-search');
+            const locIdHidden = itemDiv.querySelector('.po-location-id');
+            locSearchInput.addEventListener('input', (e) => {
+                const val = e.target.value.trim();
+                const match = (businessLocations || []).find(l => ((l.name || l.code) + ' (' + (l.code || l.id) + ')') === val || l.name === val || l.code === val || l.id === val);
+                if(match) {
+                    locIdHidden.value = match.id;
+                } else {
+                    locIdHidden.value = val;
+                }
+            });
+
+            updatePOTotal();
+        }
+        
+        function calculateCurrentPOTotal(){
+            let total = 0;
+            const items = document.querySelectorAll('.purchase-item');
+            items.forEach(item => {
+                const qty = parseFloat(item.querySelector('.po-qty')?.value) || 0;
+                const price = parseFloat(item.querySelector('.po-price')?.value) || 0;
+                const unit = item.querySelector('.po-unit-select')?.value || 'Pcs';
+                let actualQty = qty;
+                if(unit === 'g') actualQty = qty / 1000;
+                total += actualQty * price;
+            });
+            return total;
+        }
+
+        function updatePOTotal(){
+            const total = calculateCurrentPOTotal();
+            document.getElementById('poTotal').innerHTML = formatCurrency(total);
+            
+            const paidInput = document.getElementById('poAmountPaid');
+            const payMode = document.getElementById('poPaymentMode')?.value || 'CASH';
+
+            if (!userManuallyEditedPaid) {
+                if (payMode === 'CREDIT') {
+                    paidInput.value = 0;
+                } else {
+                    paidInput.value = total > 0 ? total : '';
+                }
+            }
+            calculatePOPaymentBreakdown();
+        }
+
+        function onAmountPaidInput() {
+            userManuallyEditedPaid = true;
+            const total = calculateCurrentPOTotal();
+            const paidInput = document.getElementById('poAmountPaid');
+            const modeSelect = document.getElementById('poPaymentMode');
+            const paid = parseFloat(paidInput?.value) || 0;
+
+            if (modeSelect && modeSelect.value !== 'BANK' && modeSelect.value !== 'CHEQUE') {
+                if (paid === 0 && total > 0) {
+                    modeSelect.value = 'CREDIT';
+                } else if (paid > 0 && paid < total) {
+                    modeSelect.value = 'PARTIAL_CASH';
+                } else if (paid >= total) {
+                    modeSelect.value = 'CASH';
+                }
+            }
+            calculatePOPaymentBreakdown();
+        }
+
+        function calculatePOPaymentBreakdown() {
+            const total = calculateCurrentPOTotal();
+            const paidInput = document.getElementById('poAmountPaid');
+            let paid = parseFloat(paidInput?.value);
+            if (isNaN(paid) || paid < 0) {
+                paid = 0;
+            }
+            const due = Math.max(0, total - paid);
+            const dueEl = document.getElementById('poBalanceDue');
+            if (dueEl) {
+                dueEl.textContent = formatCurrency(due);
+                dueEl.style.color = due > 0 ? '#dc2626' : '#16a34a';
+            }
+        }
+
+        // Edit GRN handler
+        window.editGRN = async (poId) => {
+            const po = purchaseOrders.find(p => p.id === poId);
+            if(!po) return;
+
+            if (po.status === 'received') {
+                const proceed = confirm(
+                    '⚠️ අවවාදයයි (Transactional Edit):\n\nමෙම GRN එක (' + (po.poNo || po.id) + ') දැනටමත් Receive කර ඇත.\nEdit කිරීමේදී පැරණි Stock සහ Accounting Journal Transaction එක සම්පූර්ණයෙන්ම Reversal වී නව සංශෝධිත GRN එක ලියවෙනු ඇත.\n\nඉදිරියට යාමට අවශ්‍යද?'
+                );
+                if (!proceed) return;
+            }
+
+            window.editingPOId = poId;
+            window.editingOldPOStatus = po.status;
+            userManuallyEditedPaid = true;
+
+            document.getElementById('purchaseModalTitle').innerHTML = '<i class="fas fa-edit" style="color:#3b82f6;"></i> Edit Goods Received Note: ' + (po.poNo || po.id);
+            document.getElementById('savePOBtn').innerHTML = '<i class="fas fa-check-circle"></i> Update & Receive Stock';
+
+            document.getElementById('poSupplierSelect').value = po.supplierId || '';
+            document.getElementById('poGrnNo').value = po.grnNo || po.poNo || po.id;
+            document.getElementById('poBillDate').value = po.billDate || (po.createdAt?.toDate?.() ? po.createdAt.toDate().toISOString().split('T')[0] : '');
+            
+            const payMode = po.paymentMode || 'CASH';
+            document.getElementById('poPaymentMode').value = payMode;
+            
+            const bankField = document.getElementById('poBankField');
+            const chequeEl = document.getElementById('chequeDetails');
+
+            if (payMode === 'BANK' || payMode === 'CARD') {
+                bankField.style.display = 'block';
+                chequeEl.style.display = 'none';
+                if (po.bankAccountId) document.getElementById('poBankAccountSelect').value = po.bankAccountId;
+            } else if (payMode === 'CHEQUE') {
+                bankField.style.display = 'none';
+                chequeEl.style.display = 'block';
+                if (po.bankAccountId) document.getElementById('poChequeBankSelect').value = po.bankAccountId;
+                document.getElementById('poChequeNo').value = po.chequeNo || '';
+                document.getElementById('poChequeDate').value = po.chequeDate || '';
+            } else {
+                bankField.style.display = 'none';
+                chequeEl.style.display = 'none';
+            }
+
+            document.getElementById('poNotes').value = po.notes || '';
+
+            const listEl = document.getElementById('poItemsList');
+            listEl.innerHTML = '';
+            (po.items || []).forEach(item => {
+                addPurchaseItem(item);
+            });
+
+            const paidInput = document.getElementById('poAmountPaid');
+            if (paidInput) {
+                paidInput.value = po.amountPaid !== undefined ? po.amountPaid : po.total;
+            }
+            calculatePOPaymentBreakdown();
+
+            document.getElementById('purchaseModal').style.display = 'flex';
+        };
+
+        // Delete / Reverse GRN handler
+        window.deleteOrReverseGRN = async (poId) => {
+            const po = purchaseOrders.find(p => p.id === poId);
+            if(!po) return;
+
+            if (po.status === 'received') {
+                window.openReversalModal(poId);
+            } else {
+                if (confirm('Are you sure you want to permanently delete GRN: ' + (po.poNo || po.id) + '?')) {
+                    try {
+                        await db.collection('purchases').doc(currentBusinessId).collection('orders').doc(poId).delete();
+                        showToast('GRN ' + (po.poNo || po.id) + ' deleted successfully!');
+                        await loadPurchaseOrders();
+                    } catch (err) {
+                        console.error('[GRN] Delete error:', err);
+                        showToast('Error deleting GRN: ' + err.message, true);
+                    }
+                }
+            }
+        };
+        
+        async function createPurchaseOrder(autoReceive = true){
+            if (!currentBusinessId) {
+                showToast('Business ID not loaded. Please refresh.', true);
+                return;
+            }
+
+            const supplierSelect = document.getElementById('poSupplierSelect');
+            const supplierId = supplierSelect?.value;
+            if (!supplierId) {
+                showToast('කරුණාකර සැපයුම්කරු (Supplier) තෝරන්න', true);
+                return;
+            }
+            const supplierName = (supplierSelect && supplierSelect.selectedIndex >= 0) ? (supplierSelect.options[supplierSelect.selectedIndex]?.textContent || 'Supplier') : 'Supplier';
+            
+            const grnNo = document.getElementById('poGrnNo')?.value?.trim() || '';
+            const billDate = document.getElementById('poBillDate')?.value || new Date().toISOString().split('T')[0];
+            
+            const rawItems = document.querySelectorAll('.purchase-item');
+            if (!rawItems || rawItems.length === 0) {
+                showToast('Please add at least one item', true);
+                return;
+            }
+
+            const items = [];
+            for (const item of rawItems) {
+                const prodHiddenVal = item.querySelector('.po-product-id')?.value?.trim();
+                const prodSearchVal = item.querySelector('.po-product-search')?.value?.trim();
+                const locHiddenVal = item.querySelector('.po-location-id')?.value?.trim();
+                const locSearchVal = item.querySelector('.po-location-search')?.value?.trim();
+                const qty = parseFloat(item.querySelector('.po-qty')?.value) || 0;
+                const unit = item.querySelector('.po-unit-select')?.value || 'Pcs';
+                const price = parseFloat(item.querySelector('.po-price')?.value) || 0;
+                const restockLevelVal = item.querySelector('.po-restock')?.value;
+                const restockLevel = (restockLevelVal !== '' && restockLevelVal !== undefined && restockLevelVal !== null) ? parseInt(restockLevelVal) : null;
+                
+                if (!prodSearchVal && !prodHiddenVal) continue;
+                if (qty <= 0) continue;
+
+                let matchedProduct = products.find(p => p.id === prodHiddenVal || p.code === prodHiddenVal || p.id === prodSearchVal);
+                if (!matchedProduct && prodSearchVal) {
+                    matchedProduct = products.find(p => p.name?.toLowerCase() === prodSearchVal.toLowerCase() || (p.code && p.code.toLowerCase() === prodSearchVal.toLowerCase()));
+                }
+
+                let productId = matchedProduct ? matchedProduct.id : prodHiddenVal;
+                let productName = matchedProduct ? matchedProduct.name : (prodSearchVal || 'Product');
+                const prodUnit = matchedProduct?.unit || (matchedProduct?.sellType === 'weight' ? 'kg' : unit);
+
+                if (!matchedProduct || !productId) {
+                    try {
+                        const newProdDocRef = db.collection('products').doc(currentBusinessId).collection('list').doc();
+                        productId = newProdDocRef.id;
+                        const newProdData = {
+                            id: productId,
+                            code: productId.substring(0, 8).toUpperCase(),
+                            name: productName,
+                            unit: unit,
+                            sellType: (unit === 'kg' || unit === 'g') ? 'weight' : 'pcs',
+                            price: price > 0 ? (price * 1.25) : 0,
+                            cost: price,
+                            stock: 0,
+                            restockLevel: restockLevel,
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        };
+                        await newProdDocRef.set(newProdData);
+                        products.push(newProdData);
+                        populateGlobalDatalists();
+                    } catch (eprod) {
+                        console.warn('[GRN] Auto-create product error:', eprod);
+                    }
+                }
+
+                let rawLocInput = locSearchVal || locHiddenVal || userPreferredLocation || 'MAIN';
+                let matchedLoc = (businessLocations || []).find(l => 
+                    l.id?.toLowerCase() === rawLocInput.toLowerCase() || 
+                    l.code?.toLowerCase() === rawLocInput.toLowerCase() || 
+                    l.name?.toLowerCase() === rawLocInput.toLowerCase()
+                );
+
+                let locationId = matchedLoc ? matchedLoc.id : null;
+                if (!matchedLoc && rawLocInput.trim()) {
+                    const newLocCode = rawLocInput.trim().toUpperCase().replace(/[s_-]+/g, '_').substring(0, 24);
+                    const newLocName = locSearchVal ? locSearchVal.trim() : rawLocInput.trim();
+                    try {
+                        const newLocDocRef = db.collection('locations').doc(currentBusinessId).collection('list').doc(newLocCode);
+                        const newLocData = {
+                            id: newLocCode,
+                            code: newLocCode,
+                            name: newLocName,
+                            address: '',
+                            isActive: true,
+                            isDefault: false,
+                            createdAt: new Date()
+                        };
+                        await newLocDocRef.set(newLocData, { merge: true });
+                        if (!businessLocations.some(b => b.id === newLocCode)) {
+                            businessLocations.push(newLocData);
+                        }
+                        populateGlobalDatalists();
+                        locationId = newLocCode;
+                        
+                        if (currentUser) {
+                            LocationStockCore.setUserPreferredLocation(currentUser.uid, newLocCode);
+                        }
+                        userPreferredLocation = newLocCode;
+                    } catch (eLoc) {
+                        console.warn('[GRN] Auto-save new location error:', eLoc);
+                        locationId = newLocCode || 'MAIN';
+                    }
+                } else if (matchedLoc) {
+                    locationId = matchedLoc.id;
+                    if (currentUser) {
+                        LocationStockCore.setUserPreferredLocation(currentUser.uid, locationId);
+                    }
+                    userPreferredLocation = locationId;
+                } else {
+                    locationId = 'MAIN';
+                }
+
+                let actualQty = qty;
+                if (unit === 'g' && prodUnit === 'kg') {
+                    actualQty = qty / 1000;
+                }
+
+                items.push({
+                    productId: productId,
+                    productName: productName,
+                    locationId: locationId,
+                    quantity: actualQty,
+                    inputQty: qty,
+                    unit: unit,
+                    prodUnit: prodUnit,
+                    unitPrice: price,
+                    restockLevel: restockLevel,
+                    total: actualQty * price
+                });
+            }
+
+            if (items.length === 0) {
+                showToast('Please enter at least one valid item with quantity > 0', true);
+                return;
+            }
+
+            const total = items.reduce((sum, i) => sum + i.total, 0);
+            const poNo = grnNo || (window.editingPOId ? window.editingPOId : 'GRN-' + Date.now());
+            const notes = document.getElementById('poNotes')?.value || '';
+            
+            const paymentMode = document.getElementById('poPaymentMode')?.value || 'CASH';
+            let bankAccountId = null;
+            let bankAccountName = null;
+            let chequeNo = null;
+            let chequeDate = null;
+
+            // Bank Account Validation for Bank/Card payment
+            if (paymentMode === 'BANK' || paymentMode === 'CARD') {
+                const bSelect = document.getElementById('poBankAccountSelect');
+                bankAccountId = bSelect?.value;
+                if (!bankAccountId) {
+                    showToast('කරුණාකර වලංගු බැංකු ගිණුමක් තෝරන්න (Bank account required for bank payment)', true);
+                    return;
+                }
+                const bObj = businessBankAccounts.find(b => b.id === bankAccountId);
+                bankAccountName = bObj ? (bObj.bankName + ' - ' + bObj.accountNo) : 'Bank Account';
+            }
+
+            // Cheque Validation for Cheque payment
+            if (paymentMode === 'CHEQUE') {
+                const chqBankSelect = document.getElementById('poChequeBankSelect');
+                bankAccountId = chqBankSelect?.value;
+                chequeNo = document.getElementById('poChequeNo')?.value?.trim();
+                chequeDate = document.getElementById('poChequeDate')?.value;
+
+                if (!bankAccountId) {
+                    showToast('කරුණාකර චෙක්පත නිකුත් කරන බැංකු ගිණුම තෝරන්න (Bank account required)', true);
+                    return;
+                }
+                if (!chequeNo) {
+                    showToast('කරුණාකර චෙක්පත් අංකය ඇතුළත් කරන්න (Cheque No required)', true);
+                    return;
+                }
+                if (!chequeDate) {
+                    showToast('කරුණාකර චෙක්පත් දිනය තෝරන්න (Cheque Date required)', true);
+                    return;
+                }
+                const bObj = businessBankAccounts.find(b => b.id === bankAccountId);
+                bankAccountName = bObj ? (bObj.bankName + ' - ' + bObj.accountNo) : 'Bank Account';
+            }
+
+            // Partial Payment calculations
+            const rawPaid = parseFloat(document.getElementById('poAmountPaid')?.value);
+            let amountPaid = total;
+            if (paymentMode === 'CREDIT') {
+                amountPaid = 0;
+            } else if (!isNaN(rawPaid) && rawPaid >= 0) {
+                amountPaid = Math.min(total, rawPaid);
+            }
+            const balanceDue = Math.max(0, total - amountPaid);
+            const paymentStatus = balanceDue === 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'unpaid');
+            
+            const isEditing = Boolean(window.editingPOId);
+            const isPrevReceived = isEditing && window.editingOldPOStatus === 'received';
+
+            const saveBtn = document.getElementById('savePOBtn');
+            const draftBtn = document.getElementById('saveDraftPOBtn');
+            if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; }
+            if (draftBtn) draftBtn.disabled = true;
+
+            try {
+                if (isPrevReceived) {
+                    showToast('Reversing previous version before applying update...');
+                    await LocationStockCore.reverseGRNTransactional({
+                        businessId: currentBusinessId,
+                        poId: window.editingPOId,
+                        reversalReason: 'GRN edited & re-issued by ' + (currentUser?.email || 'user'),
+                        currentUser: currentUser,
+                        userProfile: currentUserProfile
+                    });
+                }
+
+                const poData = {
+                    id: poNo,
+                    poNo: poNo,
+                    supplierId: supplierId,
+                    supplierName: supplierName,
+                    grnNo: poNo,
+                    billDate: billDate,
+                    items: items,
+                    total: total,
+                    amountPaid: amountPaid,
+                    balanceDue: balanceDue,
+                    notes: notes,
+                    status: 'pending',
+                    paymentStatus: paymentStatus,
+                    paymentMode: paymentMode,
+                    bankAccountId: bankAccountId,
+                    bankAccountName: bankAccountName,
+                    chequeNo: chequeNo,
+                    chequeDate: chequeDate,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    createdBy: currentUser?.email || currentUser?.uid || 'user'
+                };
+
+                await db.collection('purchases').doc(currentBusinessId).collection('orders').doc(poNo).set(poData, { merge: true });
+
+                if (autoReceive) {
+                    const receiveItems = items.map(it => ({
+                        productId: it.productId,
+                        productName: it.productName,
+                        locationId: it.locationId,
+                        receivedQty: it.quantity,
+                        costPrice: it.unitPrice,
+                        unit: it.unit
+                    }));
+
+                    await LocationStockCore.receiveGRNTransactional({
+                        businessId: currentBusinessId,
+                        po: poData,
+                        receiveItems: receiveItems,
+                        currentUser: currentUser
+                    });
+                    showToast('GRN ' + poNo + ' saved and stock successfully received into store!');
+                } else {
+                    showToast('GRN ' + poNo + ' saved as draft / pending!');
+                }
+
+                window.editingPOId = null;
+                window.editingOldPOStatus = null;
+                userManuallyEditedPaid = false;
+
+                document.getElementById('poGrnNo').value = '';
+                document.getElementById('poBillDate').value = '';
+                document.getElementById('poPaymentMode').value = 'CASH';
+                document.getElementById('poBankField').style.display = 'none';
+                document.getElementById('poChequeNo').value = '';
+                document.getElementById('poChequeDate').value = '';
+                document.getElementById('chequeDetails').style.display = 'none';
+                document.getElementById('poAmountPaid').value = '';
+                if (supplierSelect) supplierSelect.value = '';
+                document.getElementById('purchaseModalTitle').innerHTML = '<i class="fas fa-file-import" style="color:#3b82f6;"></i> Create New Goods Received Note (GRN)';
+                document.getElementById('savePOBtn').innerHTML = '<i class="fas fa-check-circle"></i> Save & Receive Stock (තොගයට එක් කරන්න)';
+                
+                document.getElementById('purchaseModal').style.display = 'none';
+                await loadPurchaseOrders();
+                await loadProducts();
+            } catch (err) {
+                console.error('[GRN] Error saving GRN:', err);
+                showToast('Failed to save GRN: ' + err.message, true);
+            } finally {
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-check-circle"></i> Save & Receive Stock (තොගයට එක් කරන්න)'; }
+                if (draftBtn) draftBtn.disabled = false;
+            }
+        }
+        
+        window.receiveStock = function(poId){
+            const po = purchaseOrders.find(p => p.id === poId);
+            if(!po) return;
+            
+            document.getElementById('receivePONo').innerHTML = 'GRN Number: <strong>' + (po.poNo || po.id) + '</strong> | Supplier: <strong>' + (po.supplierName || 'General Supplier') + '</strong>';
+            
+            const list = document.getElementById('receiveItems');
+            list.innerHTML = (po.items || []).map((item, idx) => {
+                const locObj = (businessLocations || []).find(l => l.id === item.locationId);
+                const locName = locObj ? (locObj.name || locObj.code) : (item.locationId || 'MAIN');
+                return '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid #f1f5f9; background:#fff; border-radius:8px; margin-bottom:6px; border:1px solid #e2e8f0;">' +
+                    '<div>' +
+                        '<strong>' + (item.productName || 'Product') + '</strong><br>' +
+                        '<small style="color:#64748b;">Target Store: <span style="font-weight:700; color:#1e40af;">' + locName + '</span> | Cost: ' + formatCurrency(item.unitPrice) + '</small>' +
+                    '</div>' +
+                    '<div style="display:flex; align-items:center; gap:8px;">' +
+                        '<input type="number" id="receiveQty_' + idx + '" value="' + item.quantity + '" min="0.001" step="any" style="width:90px; padding:6px; border:1px solid #cbd5e1; border-radius:6px; text-align:right;">' +
+                        '<span style="font-size:12px; font-weight:600; color:#475569;">' + (item.unit || 'Pcs') + '</span>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            document.getElementById('confirmReceiveBtn').onclick = () => confirmReceive(poId);
+            document.getElementById('receiveModal').style.display = 'flex';
+        };
+        
+        async function confirmReceive(poId){
+            const po = purchaseOrders.find(p => p.id === poId);
+            if(!po) return;
+            
+            const receiveItems = [];
+            (po.items || []).forEach((item, idx) => {
+                const qtyInput = document.getElementById('receiveQty_' + idx);
+                const qty = parseFloat(qtyInput?.value) || item.quantity;
+                receiveItems.push({
+                    productId: item.productId,
+                    productName: item.productName,
+                    locationId: item.locationId || userPreferredLocation || 'MAIN',
+                    receivedQty: qty,
+                    costPrice: item.unitPrice,
+                    unit: item.unit
+                });
+            });
+            
+            const btn = document.getElementById('confirmReceiveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Stock & Ledger...';
+            
+            try {
+                await LocationStockCore.receiveGRNTransactional({
+                    businessId: currentBusinessId,
+                    po: po,
+                    receiveItems: receiveItems,
+                    currentUser: currentUser
+                });
+
+                showToast('Stock received and location balances updated successfully!');
+                document.getElementById('receiveModal').style.display = 'none';
+                await loadPurchaseOrders();
+                await loadProducts();
+            } catch (err) {
+                console.error('[GRN] Receive error:', err);
+                showToast(err.message || 'Error receiving stock', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Confirm Receipt & Update Stock';
+            }
+        }
+        
+        window.viewPO = (poId) => {
+            const po = purchaseOrders.find(p => p.id === poId);
+            if(!po) return;
+            
+            document.getElementById('viewPOTitle').innerHTML = '<i class="fas fa-file-invoice"></i> GRN: ' + (po.poNo || po.id);
+            const badge = document.getElementById('viewPOStatusBadge');
+            badge.className = 'badge badge-' + (po.status || 'pending');
+            badge.textContent = (po.status || 'Pending').toUpperCase();
+            
+            const totalVal = Number(po.total) || 0;
+            const paidVal = po.amountPaid !== undefined ? Number(po.amountPaid) : totalVal;
+            const dueVal = po.balanceDue !== undefined ? Number(po.balanceDue) : Math.max(0, totalVal - paidVal);
+
+            let bankInfoHtml = '';
+            if (po.bankAccountName) {
+                bankInfoHtml = `<div><strong>Bank Account:</strong> ${po.bankAccountName}</div>`;
+            }
+            if (po.paymentMode === 'CHEQUE' && po.chequeNo) {
+                bankInfoHtml += `<div><strong>Cheque:</strong> #${po.chequeNo} (Date: ${po.chequeDate || '-'})</div>`;
+            }
+
+            const itemsRows = (po.items || []).map(i => {
+                const locObj = (businessLocations || []).find(l => l.id === i.locationId);
+                const locName = locObj ? (locObj.name || locObj.code) : (i.locationId || 'MAIN');
+                return `<tr>
+                    <td>${i.productName || 'Product'}</td>
+                    <td><span class="badge" style="background:#eff6ff; color:#1e40af;">${locName}</span></td>
+                    <td style="text-align:right;">${i.quantity} ${i.unit || ''}</td>
+                    <td style="text-align:right;">${formatCurrency(i.unitPrice)}</td>
+                    <td style="text-align:right;"><strong>${formatCurrency(i.total || (i.quantity * i.unitPrice))}</strong></td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('viewPOContent').innerHTML = `
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px; background:#f8fafc; padding:12px; border-radius:8px;">
+                    <div><strong>Supplier:</strong> ${po.supplierName || 'General Supplier'}</div>
+                    <div><strong>Bill Date:</strong> ${po.billDate || 'N/A'}</div>
+                    <div><strong>Payment Mode:</strong> ${po.paymentMode || 'CASH'}</div>
+                    <div><strong>Total Bill:</strong> <span style="font-size:16px; font-weight:800; color:#10b981;">${formatCurrency(po.total)}</span></div>
+                    <div><strong>Paid Amount:</strong> <span style="font-size:15px; font-weight:700; color:#166534;">${formatCurrency(paidVal)}</span></div>
+                    <div><strong>Balance Due (ණය):</strong> <span style="font-size:15px; font-weight:800; color:${dueVal > 0 ? '#dc2626' : '#10b981'};">${formatCurrency(dueVal)}</span></div>
+                    ${bankInfoHtml}
+                    ${po.notes ? `<div style="grid-column: span 2;"><strong>Notes:</strong> ${po.notes}</div>` : ''}
+                </div>
+                <table class="data-table" style="margin-top:10px;">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Location</th>
+                            <th style="text-align:right;">Qty</th>
+                            <th style="text-align:right;">Cost Price</th>
+                            <th style="text-align:right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsRows}
+                    </tbody>
+                </table>`;
+            document.getElementById('viewPOModal').style.display = 'flex';
+        };
+
+        // Reversal Handlers
+        window.openReversalModal = (poId) => {
+            const po = purchaseOrders.find(p => p.id === poId);
+            if(!po) return;
+            window.currentReversingPOId = poId;
+            document.getElementById('reversalPONo').innerHTML = 'GRN: <strong>' + (po.poNo || po.id) + '</strong> | Supplier: <strong>' + (po.supplierName || 'General Supplier') + '</strong> | Amount: <strong>' + formatCurrency(po.total) + '</strong>';
+            document.getElementById('reversalReasonInput').value = '';
+            document.getElementById('reversalModal').style.display = 'flex';
+        };
+
+        function onNewProductSellTypeChange() {
+            const type = document.getElementById('newProductSellType').value;
+            const unitSelect = document.getElementById('newProductUnit');
+            if (type === 'weight') {
+                unitSelect.innerHTML = '<option value="kg">Kilograms (kg)</option><option value="g">Grams (g)</option>';
+            } else {
+                unitSelect.innerHTML = '<option value="Pcs">Pcs (ගණන් කර)</option><option value="Pack">Pack</option><option value="Box">Box</option><option value="Bottle">Bottle</option>';
+            }
+        }
+
+        async function saveNewProduct() {
+            const code = document.getElementById('newProductCode').value.trim();
+            const brand = document.getElementById('newProductBrand').value.trim();
+            const model = document.getElementById('newProductModel').value.trim();
+            const name = document.getElementById('newProductName').value.trim();
+            const category = document.getElementById('newProductCategory').value.trim();
+            const sellType = document.getElementById('newProductSellType').value;
+            const unit = document.getElementById('newProductUnit').value;
+            const price = parseFloat(document.getElementById('newProductPrice').value) || 0;
+            const normalPrice = parseFloat(document.getElementById('newProductNormalPrice').value) || 0;
+            const cost = parseFloat(document.getElementById('newProductCost').value) || 0;
+            const stock = parseFloat(document.getElementById('newProductStock').value) || 0;
+            const restockLevel = parseInt(document.getElementById('newProductRestockLevel').value) || 0;
+            const barcode = document.getElementById('newProductBarcode').value.trim();
+
+            if (!name) {
+                showToast('Product Name is required!', true);
+                return;
+            }
+
+            const btn = document.getElementById('saveNewProductBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                const prodRef = db.collection('products').doc(currentBusinessId).collection('list').doc();
+                const prodData = {
+                    id: prodRef.id,
+                    code: code || prodRef.id.substring(0, 8).toUpperCase(),
+                    brand: brand,
+                    model: model,
+                    name: name,
+                    category: category,
+                    sellType: sellType,
+                    unit: unit,
+                    price: price,
+                    normalPrice: normalPrice,
+                    cost: cost,
+                    stock: stock,
+                    restockLevel: restockLevel,
+                    barcode: barcode,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+
+                await prodRef.set(prodData);
+                products.push(prodData);
+                populateGlobalDatalists();
+                populateCategoryDatalist();
+
+                showToast('Product "' + name + '" added successfully!');
+                document.getElementById('newProductModal').style.display = 'none';
+
+                addPurchaseItem({
+                    productId: prodRef.id,
+                    productName: name,
+                    productCode: prodData.code,
+                    unit: unit,
+                    unitPrice: cost || price,
+                    quantity: 1,
+                    restockLevel: restockLevel
+                });
+            } catch (err) {
+                console.error('Error saving new product:', err);
+                showToast('Failed to save product!', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Save & Add';
+            }
+        }
+
+        function setupEventListeners(){
+            function bindClick(id, fn) {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('click', fn);
+            }
+
+            const modeSelect = document.getElementById('poPaymentMode');
+            if (modeSelect) {
+                modeSelect.addEventListener('change', function() {
+                    const bankField = document.getElementById('poBankField');
+                    const chequeEl = document.getElementById('chequeDetails');
+                    const paidInput = document.getElementById('poAmountPaid');
+                    const total = calculateCurrentPOTotal();
+
+                    if (this.value === 'BANK' || this.value === 'CARD') {
+                        if (bankField) bankField.style.display = 'block';
+                        if (chequeEl) chequeEl.style.display = 'none';
+                        if (!userManuallyEditedPaid && paidInput) paidInput.value = total > 0 ? total : '';
+                    } else if (this.value === 'CHEQUE') {
+                        if (bankField) bankField.style.display = 'none';
+                        if (chequeEl) chequeEl.style.display = 'block';
+                        if (!userManuallyEditedPaid && paidInput) paidInput.value = total > 0 ? total : '';
+                    } else if (this.value === 'CREDIT') {
+                        if (bankField) bankField.style.display = 'none';
+                        if (chequeEl) chequeEl.style.display = 'none';
+                        if (paidInput) paidInput.value = 0;
+                        userManuallyEditedPaid = true;
+                    } else if (this.value === 'PARTIAL_CASH') {
+                        if (bankField) bankField.style.display = 'none';
+                        if (chequeEl) chequeEl.style.display = 'none';
+                        if (paidInput) {
+                            paidInput.focus();
+                            paidInput.select();
+                        }
+                    } else {
+                        if (bankField) bankField.style.display = 'none';
+                        if (chequeEl) chequeEl.style.display = 'none';
+                        if (!userManuallyEditedPaid && paidInput) paidInput.value = total > 0 ? total : '';
+                    }
+                    calculatePOPaymentBreakdown();
+                });
+            }
+
+            bindClick('openCreatePOBtn', () => {
+                window.editingPOId = null;
+                window.editingOldPOStatus = null;
+                userManuallyEditedPaid = false;
+                document.getElementById('purchaseModalTitle').innerHTML = '<i class="fas fa-file-import" style="color:#3b82f6;"></i> Create New Goods Received Note (GRN)';
+                document.getElementById('savePOBtn').innerHTML = '<i class="fas fa-check-circle"></i> Save & Receive Stock (තොගයට එක් කරන්න)';
+                document.getElementById('poGrnNo').value = '';
+                document.getElementById('poBillDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('poPaymentMode').value = 'CASH';
+                document.getElementById('poBankField').style.display = 'none';
+                document.getElementById('chequeDetails').style.display = 'none';
+                document.getElementById('poAmountPaid').value = '';
+                document.getElementById('poItemsList').innerHTML = '';
+                addPurchaseItem();
+                document.getElementById('purchaseModal').style.display = 'flex';
+            });
+
+            bindClick('modalTopCloseBtn', () => {
+                document.getElementById('purchaseModal').style.display = 'none';
+                window.editingPOId = null;
+                window.editingOldPOStatus = null;
+                userManuallyEditedPaid = false;
+            });
+
+            bindClick('addItemBtn', () => addPurchaseItem());
+            bindClick('closePOModal', () => {
+                const el = document.getElementById('purchaseModal');
+                if(el) el.style.display = 'none';
+                window.editingPOId = null;
+                window.editingOldPOStatus = null;
+                userManuallyEditedPaid = false;
+            });
+            bindClick('savePOBtn', () => createPurchaseOrder(true));
+            bindClick('saveDraftPOBtn', () => createPurchaseOrder(false));
+            bindClick('closeReceiveModal', () => { const el = document.getElementById('receiveModal'); if(el) el.style.display = 'none'; });
+            bindClick('filterPOBtn', () => renderPurchaseOrders());
+            bindClick('closeViewPOModalBtn', () => { const el = document.getElementById('viewPOModal'); if(el) el.style.display = 'none'; });
+            bindClick('closeNewProductModalBtn', () => { const el = document.getElementById('newProductModal'); if(el) el.style.display = 'none'; });
+            bindClick('saveNewProductBtn', saveNewProduct);
+            bindClick('closeReversalModalBtn', () => { const el = document.getElementById('reversalModal'); if(el) el.style.display = 'none'; window.currentReversingPOId = null; });
+            
+            bindClick('confirmReversalBtn', () => {
+                const poId = window.currentReversingPOId;
+                if(!poId) return;
+                const reason = document.getElementById('reversalReasonInput')?.value?.trim();
+                if(!reason) {
+                    showToast('Please enter a reversal reason (හේතුව අනිවාර්යයි)', true);
+                    return;
+                }
+                const btn = document.getElementById('confirmReversalBtn');
+                if(btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reversing...'; }
+                LocationStockCore.reverseGRNTransactional({
+                    businessId: currentBusinessId,
+                    poId: poId,
+                    reversalReason: reason,
+                    currentUser: currentUser,
+                    userProfile: currentUserProfile
+                }).then(() => {
+                    showToast('GRN transaction reversed successfully!');
+                    const revModal = document.getElementById('reversalModal');
+                    if(revModal) revModal.style.display = 'none';
+                    loadPurchaseOrders();
+                    loadProducts();
+                }).catch(err => {
+                    console.error('[GRN] Reversal error:', err);
+                    showToast(err.message || 'Error reversing GRN', true);
+                }).finally(() => {
+                    if(btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash-alt"></i> Delete & Reverse Stock'; }
+                });
+            });
+
+            document.getElementById('searchPO')?.addEventListener('input', renderPurchaseOrders);
+            document.getElementById('poStatusFilter')?.addEventListener('change', renderPurchaseOrders);
+            document.getElementById('startDate')?.addEventListener('change', renderPurchaseOrders);
+            document.getElementById('endDate')?.addEventListener('change', renderPurchaseOrders);
+        }
+
+        window.onload = initPage;
+    </script>
+</body>
+</html>

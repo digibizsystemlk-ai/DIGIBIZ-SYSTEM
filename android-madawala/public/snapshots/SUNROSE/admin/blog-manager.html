@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="/snapshots/SUNROSE/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog & News Manager — Super Admin Console | DIGIBIZ</title>
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-functions-compat.js"></script>
+    
+    <script src="/snapshots/SUNROSE/core/firebase-init.js?v=100"></script>
+    <script src="/snapshots/SUNROSE/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/snapshots/SUNROSE/core/sidebar.js?v=2116"></script>
+    <link rel="stylesheet" href="/snapshots/SUNROSE/admin/admin.css?v=2041">
+
+    <style>
+        .blog-admin-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        .header-action-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .btn-create-post {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 12px 22px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn-create-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+        }
+
+        /* Post Item Card / Table */
+        .posts-table-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+        }
+
+        .table-filter-bar {
+            padding: 16px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .admin-search-input {
+            padding: 9px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 13.5px;
+            min-width: 260px;
+            outline: none;
+        }
+
+        .admin-search-input:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        .admin-select {
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 13.5px;
+            background: #fff;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table.admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13.5px;
+        }
+
+        table.admin-table th {
+            background: #f8fafc;
+            padding: 12px 18px;
+            font-weight: 700;
+            color: #64748b;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        table.admin-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        table.admin-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .post-title-cell {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .post-icon-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+        }
+
+        .badge-published {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-draft {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .btn-action-icon:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .btn-action-delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        /* Modal Composer Styling */
+        .admin-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: none;
+            overflow-y: auto;
+            padding: 24px 16px;
+        }
+
+        .admin-modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .composer-modal {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            margin: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .composer-header {
+            padding: 20px 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .composer-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .form-input, .form-textarea {
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Formatting Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            background: #f1f5f9;
+            padding: 6px;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .tool-btn {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+        }
+
+        .tool-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .editor-textarea {
+            border-radius: 0 0 10px 10px;
+            min-height: 240px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13.5px;
+            line-height: 1.6;
+        }
+
+        /* Emoji Palette */
+        .emoji-palette {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .emoji-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-btn:hover {
+            background: #e2e8f0;
+            transform: scale(1.1);
+        }
+
+        .composer-footer {
+            padding: 16px 24px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .image-preview-box {
+            margin-top: 8px;
+            border-radius: 10px;
+            max-height: 140px;
+            overflow: hidden;
+            display: none;
+            position: relative;
+        }
+
+        .image-preview-box img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .btn-remove-img {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(220, 38, 38, 0.85);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="blog-admin-wrap admin-wrap">
+        <!-- Top Nav Info -->
+        <div class="top">
+            <div>
+                <h1>📰 Blog & News Management Console</h1>
+                <p>Compose, edit, and broadcast system announcements, updates, and user guides.</p>
+            </div>
+            <div>
+                <a href="/blog.html" target="_blank" class="btn alt" style="font-weight:700;">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Public Blog
+                </a>
+            </div>
+        </div>
+
+        <!-- Metrics Overview -->
+        <div class="stats">
+            <div class="stat"><div class="k">Total Posts</div><div class="v" id="stTotalPosts">0</div></div>
+            <div class="stat"><div class="k">Published Posts</div><div class="v" id="stPublishedPosts" style="color:#10b981;">0</div></div>
+            <div class="stat"><div class="k">Drafts / Pending Approval</div><div class="v" id="stDraftPosts" style="color:#f59e0b;">0</div></div>
+            <div class="stat"><div class="k">Reader Comments</div><div class="v" id="stTotalComments" style="color:#0284c7;">0</div></div>
+            <div class="stat"><div class="k">Pending Comments</div><div class="v" id="stPendingComments" style="color:#ef4444;">0</div></div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="header-action-row">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button type="button" class="btn-create-post" id="btnOpenNewPostModal">
+                    <i class="fa-solid fa-plus"></i> නව ලිපියක් ලියන්න (Compose New Post)
+                </button>
+                <button type="button" class="btn alt" id="btnLoadReleaseTemplate" style="background:#0f172a;color:#38bdf8;border:1px solid #38bdf8;font-weight:700;">
+                    <i class="fa-solid fa-rocket"></i> 🚀 New PRO Version Release Note
+                </button>
+            </div>
+            <div style="font-size:13px;color:#64748b;">
+                <i class="fa-solid fa-circle-info"></i> All published posts automatically trigger the pulsing green envelope on client screens.
+            </div>
+        </div>
+
+        <!-- Posts Table Card -->
+        <div class="posts-table-card">
+            <div class="table-filter-bar">
+                <div class="filter-group">
+                    <input type="text" id="adminSearchInput" class="admin-search-input" placeholder="Search by title, category...">
+                    <select id="filterCategory" class="admin-select">
+                        <option value="all">All Categories (සියල්ල)</option>
+                        <option value="features">Features (නව විශේෂාංග)</option>
+                        <option value="tips">Tips & Guides (භාවිත උපදෙස්)</option>
+                        <option value="announcements">Announcements (නිවේදන)</option>
+                    </select>
+                    <select id="filterStatus" class="admin-select">
+                        <option value="all">All Status</option>
+                        <option value="published">Published Only</option>
+                        <option value="draft">Drafts / Pending Approval</option>
+                    </select>
+                </div>
+                <button type="button" id="btnRefreshList" class="btn alt" style="padding:8px 14px;font-size:13px;">
+                    <i class="fa-solid fa-rotate-right"></i> Refresh Posts
+                </button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">Icon</th>
+                            <th>Article Title & Excerpt</th>
+                            <th style="width:140px;">Category</th>
+                            <th style="width:110px;">Date</th>
+                            <th style="width:120px;">Status</th>
+                            <th style="width:170px;text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postsTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:40px;color:#64748b;">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading blog posts...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reader Comments & Feedback Moderation Console -->
+        <div class="posts-table-card" style="margin-top:24px;" id="commentsModerationSection">
+            <div style="padding:18px 22px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                <div>
+                    <h2 style="font-size:16px;font-weight:800;color:#0f172a;margin:0;display:flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-comments" style="color:#0284c7;"></i> Reader Comments & Feedback Moderation
+                    </h2>
+                    <p style="font-size:12.5px;color:#64748b;margin:3px 0 0 0;">Review reader inquiries. Only approved comments appear on the public blog.</p>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <select id="filterCommentsStatus" class="admin-select">
+                        <option value="all">All Comments</option>
+                        <option value="pending" selected>Pending Approval Only</option>
+                        <option value="approved">Approved Comments Only</option>
+                    </select>
+                    <button type="button" id="btnRefreshComments" class="btn alt" style="padding:8px 14px;font-size:13px;">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:160px;">Post Title</th>
+                            <th style="width:160px;">Reader & Contact</th>
+                            <th style="width:90px;">Rating</th>
+                            <th>Feedback / Inquiry Text</th>
+                            <th style="width:110px;">Date</th>
+                            <th style="width:130px;">Status</th>
+                            <th style="width:150px;text-align:right;">Moderation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="commentsTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:30px;color:#64748b;">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading comments...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Composer Modal -->
+    <div id="composerModal" class="admin-modal-overlay">
+        <div class="composer-modal">
+            <div class="composer-header">
+                <div>
+                    <h2 id="modalComposerTitle" style="font-size:18px;font-weight:800;margin:0;color:#0f172a;">Compose New Blog Post</h2>
+                    <p style="font-size:12.5px;color:#64748b;margin:2px 0 0 0;">Create rich content with Markdown, emojis, and banner image</p>
+                </div>
+                <button type="button" id="btnCloseComposer" class="btn alt" style="padding:6px 12px;">✕</button>
+            </div>
+
+            <div class="composer-body">
+                <form id="postComposerForm">
+                    <input type="hidden" id="formPostId">
+
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label class="form-label" for="formTitle">Post Title (මාතෘකාව) *</label>
+                        <input type="text" id="formTitle" class="form-input" placeholder="උදා: දින 365 ක සැබෑ ලාභ විශ්ලේෂණ පද්ධතිය හඳුන්වා දීම" required>
+                    </div>
+
+                    <!-- Category & Category Label -->
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="formCategory">Category (වර්ගීකරණය) *</label>
+                            <select id="formCategory" class="admin-select" style="width:100%;">
+                                <option value="features">features (නව විශේෂාංග)</option>
+                                <option value="tips">tips (භාවිත උපදෙස්)</option>
+                                <option value="announcements">announcements (පද්ධති නිවේදන)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="formCategoryLabel">Category Label (පෙන්වන නම)</label>
+                            <input type="text" id="formCategoryLabel" class="form-input" placeholder="උදා: නව විශේෂාංගය / TIPS">
+                        </div>
+                    </div>
+
+                    <!-- Icon & Emoji Picker -->
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="formIcon">Emoji Icon</label>
+                            <input type="text" id="formIcon" class="form-input" value="📈" maxlength="8">
+                            <div class="emoji-palette">
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('📈')">📈</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('🚀')">🚀</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('💡')">💡</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('📢')">📢</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('⚡')">⚡</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('🛡️')">🛡️</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('💰')">💰</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('📦')">📦</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('💬')">💬</button>
+                                <button type="button" class="emoji-btn" onclick="selectEmoji('🔒')">🔒</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="formAuthor">Author / Team Badge</label>
+                            <input type="text" id="formAuthor" class="form-input" value="DIGIBIZ Engineering">
+                        </div>
+                    </div>
+
+                    <!-- Short Summary / Excerpt -->
+                    <div class="form-group">
+                        <label class="form-label" for="formDesc">Short Excerpt / Summary (සාරාංශය - 1-2 වාක්‍ය) *</label>
+                        <textarea id="formDesc" class="form-textarea" placeholder="ප්‍රධාන කාඩ්පත්වල සහ Notification වල පෙන්වන කෙටි සාරාංශය..." required></textarea>
+                    </div>
+
+                    <!-- Banner Image Upload / Link -->
+                    <div class="form-group">
+                        <label class="form-label">Banner Image (Optional)</label>
+                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                            <input type="file" id="formImageFile" accept="image/*" style="font-size:13px;">
+                            <span style="font-size:12px;color:#64748b;">OR</span>
+                            <input type="url" id="formImageUrl" class="form-input" placeholder="Image URL (https://...)" style="flex:1;min-width:200px;">
+                        </div>
+                        <div id="imagePreviewBox" class="image-preview-box">
+                            <img id="imagePreview" src="" alt="Banner Preview">
+                            <button type="button" class="btn-remove-img" id="btnRemoveImage">Remove Image</button>
+                        </div>
+                    </div>
+
+                    <!-- Full Markdown Content Editor -->
+                    <div class="form-group">
+                        <label class="form-label" for="formContent">Full Article Content (Markdown Rich Text) *</label>
+                        <div class="toolbar">
+                            <button type="button" class="tool-btn" onclick="insertMd('## ')"><b>H2</b></button>
+                            <button type="button" class="tool-btn" onclick="insertMd('### ')"><b>H3</b></button>
+                            <button type="button" class="tool-btn" onclick="insertWrapMd('**', '**')"><b>B</b></button>
+                            <button type="button" class="tool-btn" onclick="insertWrapMd('*', '*')"><i>I</i></button>
+                            <button type="button" class="tool-btn" onclick="insertMd('* ')">• List</button>
+                            <button type="button" class="tool-btn" onclick="insertMd('1. ')">1. Numbered</button>
+                            <button type="button" class="tool-btn" onclick="insertMd('> [!NOTE]\n> ')">💡 Note Box</button>
+                            <button type="button" class="tool-btn" onclick="insertMd('> [!TIP]\n> ')">⚡ Tip Box</button>
+                            <button type="button" class="tool-btn" onclick="insertWrapMd('[', '](https://)')">🔗 Link</button>
+                        </div>
+                        <textarea id="formContent" class="form-textarea editor-textarea" placeholder="ලිපියේ සම්පූර්ණ විස්තරය මෙහි ලියන්න... (Supports Markdown headings, lists, notes, and bold text)" required></textarea>
+                    </div>
+
+                    <!-- Date & Publish Status -->
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="formDate">Publish Date</label>
+                            <input type="date" id="formDate" class="form-input">
+                        </div>
+                        <div class="form-group" style="justify-content:center;gap:10px;">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:13.5px;color:#0f172a;">
+                                <input type="checkbox" id="formPublished" checked style="width:18px;height:18px;accent-color:#10b981;">
+                                <span>Publish Immediately (සජීවීව පළ කරන්න)</span>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:13.5px;color:#0369a1;">
+                                <input type="checkbox" id="formSendPush" checked style="width:18px;height:18px;accent-color:#0284c7;">
+                                <span>🔔 Send Web Push Notification to Subscribers</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="composer-footer">
+                <button type="button" class="btn alt" id="btnCancelComposer">Cancel</button>
+                <button type="button" class="btn-create-post" id="btnSavePost">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Save & Broadcast
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Action completed</div>
+
+    <!-- Script -->
+    <script src="/snapshots/SUNROSE/admin/blog-manager.js?v=101"></script>
+</body>
+</html>

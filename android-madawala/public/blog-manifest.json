@@ -1,0 +1,41 @@
+{
+  "name": "DIGIBIZ News & Updates",
+  "short_name": "DIGIBIZ Blog",
+  "description": "Latest news, system updates, guides, and business insights from DIGIBIZ Universal Business Platform.",
+  "lang": "si",
+  "start_url": "/blog.html",
+  "id": "/digibiz-blog-pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "theme_color": "#061510",
+  "background_color": "#061510",
+  "orientation": "portrait-primary",
+  "categories": ["news", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

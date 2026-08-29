@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.web.digibiz_sys.twa",
+      "sha256_cert_fingerprints": [
+        "F4:3E:9C:8F:B2:82:21:A9:99:81:80:9D:0B:F5:38:0F:3A:C7:4F:D0:FF:62:1C:96:51:56:9C:83:AA:80:18:CB"
+      ]
+    }
+  }
+]

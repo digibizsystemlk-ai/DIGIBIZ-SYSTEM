@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff & Permissions Hub - DIGIBIZ™</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        html.digibiz-sidebar-reserved body { margin-left: 260px; }
+        @media (max-width:768px) { html.digibiz-sidebar-reserved body { margin-left: 0; } }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/core/auth-roles.js?v=2105"></script>
+    <script src="/core/aggregate-utils.js"></script>
+    <script src="/core/dashboard-core.js?v=2105"></script>
+    <script src="/core/sidebar.js?v=2105"></script>
+    <style>
+        :root {
+            --primary: #0f766e;
+            --primary-dark: #115e59;
+            --primary-light: #f0fdf4;
+            --accent: #10b981;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); line-height: 1.5; min-height: 100vh; }
+        .main { padding: 28px 36px; max-width: 1380px; margin: 0 auto; }
+        @media (max-width: 768px) { .main { padding: 18px 14px; } }
+
+        .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; }
+        .page-subtitle { color: var(--text-muted); font-size: 13.5px; margin-top: 4px; font-weight: 500; }
+
+        /* Navigation Tabs */
+        .hub-tabs {
+            display: flex;
+            gap: 8px;
+            background: #e2e8f0;
+            padding: 5px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            width: fit-content;
+            flex-wrap: wrap;
+        }
+        .hub-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .hub-tab-btn:hover { color: #0f172a; }
+        .hub-tab-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 22px 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .card-title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 16px; color: #0f172a; display: flex; align-items: center; justify-content: space-between; }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) auto;
+            gap: 12px;
+            align-items: center;
+        }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        input, select {
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 14px;
+            font-family: inherit;
+            background: #ffffff;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+        input:focus, select:focus { border-color: var(--primary); }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 11px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-outline {
+            background: #ffffff;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-outline:hover { background: #f0fdf4; }
+
+        /* Table */
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th {
+            background: #f8fafc;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13.5px;
+            vertical-align: middle;
+        }
+        tr:hover td { background: #fafafa; }
+        tr.owner-row { background: #f0fdf4; }
+
+        .staff-name-wrap { display: flex; align-items: center; gap: 10px; }
+        .staff-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: #e2e8f0;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .role-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+        .role-pill.owner { background: #dcfce7; color: #166534; }
+        .role-pill.cashier { background: #e0f2fe; color: #0369a1; }
+        .role-pill.manager { background: #fef3c7; color: #92400e; }
+        .role-pill.rep { background: #f3e8ff; color: #6b21a8; }
+        .role-pill.other { background: #f1f5f9; color: #475569; }
+
+        /* Permissions Matrix */
+        .search-box { position: relative; margin-bottom: 16px; max-width: 450px; }
+        .search-box input { padding-left: 36px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+
+        .matrix-table th.role-col { text-align: center; min-width: 110px; }
+        .matrix-cat-row { background: #f1f5f9; font-weight: 800; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        .matrix-cat-row td { padding: 8px 16px; }
+
+        /* Switches */
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #cbd5e1; transition: .25s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .25s; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(18px); }
+        input:disabled + .slider { opacity: 0.4; cursor: not-allowed; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, .45); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+        .modal-panel { background: #fff; border-radius: 16px; max-width: 450px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-title { font-family: 'Outfit', sans-serif; font-size: 19px; font-weight: 800; margin-bottom: 16px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12.5px; font-weight: 700; color: #475569; margin-bottom: 5px; }
+
+        .toast-msg { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: #fff; padding: 12px 20px; border-radius: 12px; font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 10px; z-index: 10000; opacity: 0; transform: translateY(20px); transition: all 0.3s; pointer-events: none; }
+        .toast-msg.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="page-header">
+            <div>
+                <div class="page-title">
+                    <span>👥</span>
+                    <span>Staff & Permissions Hub</span>
+                </div>
+                <div class="page-subtitle" id="bizContextSubtitle">
+                    Manage business staff accounts, roles, and granular security permissions in one place.
+                </div>
+            </div>
+            <div id="bizTypeBadge" style="font-size: 12px; font-weight: 800; background: #e0f2fe; color: #0369a1; padding: 6px 14px; border-radius: 12px;">
+                Loading...
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="hub-tabs">
+            <button type="button" class="hub-tab-btn active" onclick="switchHubTab('staff')" id="tabBtn-staff">
+                <i class="fas fa-users"></i> <span>Staff Accounts (සේවක ගිණුම්)</span>
+            </button>
+            <button type="button" class="hub-tab-btn" onclick="switchHubTab('permissions')" id="tabBtn-permissions">
+                <i class="fas fa-shield-alt"></i> <span>Permissions Matrix (අවසර සැකසුම්)</span>
+            </button>
+            <button type="button" class="hub-tab-btn" onclick="switchHubTab('roles')" id="tabBtn-roles">
+                <i class="fas fa-tags"></i> <span>Custom Roles (අභිරුචි තනතුරු)</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: Staff Accounts -->
+        <div class="tab-content active" id="tab-staff">
+            <!-- Add Staff Form -->
+            <div class="card">
+                <div class="card-title">
+                    <span>➕ Create Staff Account</span>
+                    <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Default Password: <strong>123456789</strong></span>
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <input type="text" id="staffName" placeholder="Staff Name (e.g. Kasun Perera)">
+                    </div>
+                    <div>
+                        <input type="email" id="staffEmail" placeholder="Staff Email (e.g. kasun@gmail.com)">
+                    </div>
+                    <div>
+                        <select id="staffRole">
+                            <option value="">Loading roles...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="button" class="btn-primary" id="addStaffBtn">
+                            <i class="fas fa-user-plus"></i> <span>Add Staff</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Universal Rep Mobile Link (Distributor ONLY) -->
+            <div class="card" id="repMobileLinkCard" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0;">
+                <div class="card-title" style="color:#0f766e;">
+                    <span>📱 Universal Rep Mobile Order Link</span>
+                </div>
+                <p style="font-size:13px; color:#334155; margin-bottom:12px;">
+                    Send this order terminal link to your Sales Reps via WhatsApp (Default Rep Password: <strong>123456789</strong>):
+                </p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <input type="text" readonly id="quickRepOrderUrl"
+                        style="flex:1; min-width:280px; font-weight:600; background:#fff;"
+                        value="https://digibiz-sys.web.app/modules/distributor/web/distributor-repapp.html">
+                    <button type="button" onclick="copyRepLink()" class="btn-primary">
+                        <i class="fas fa-copy"></i> <span>Copy Link</span>
+                    </button>
+                    <a href="https://digibiz-sys.web.app/modules/distributor/web/distributor-repapp.html" target="_blank" class="btn-outline">
+                        <i class="fas fa-external-link-alt"></i> <span>Open Form</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Linked Staff List -->
+            <div class="card">
+                <div class="card-title">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span>📋 Active Staff Members</span>
+                        <span id="staffCountBadge" style="font-size:12px; background:#f1f5f9; padding:4px 10px; border-radius:20px; color:#475569; font-weight:700;">0 Members</span>
+                    </div>
+                    <button type="button" class="btn-outline" style="font-size:11px; color:#64748b; border-color:#cbd5e1;" onclick="purgeCorruptGhostRows()">
+                        <i class="fas fa-broom"></i> <span>Clean Corrupt Entries</span>
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Staff Member</th>
+                                <th>Email</th>
+                                <th>Assigned Role</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffRows">
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading staff directory...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Permissions Matrix -->
+        <div class="tab-content" id="tab-permissions">
+            <div class="card">
+                <div class="card-title">
+                    <span>🛡️ Granular Permissions Matrix (RBAC)</span>
+                    <button type="button" class="btn-primary" id="savePermissionsBtn">
+                        <i class="fas fa-check-circle"></i> <span>Save All Permissions</span>
+                    </button>
+                </div>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">
+                    Configure exact menu access and operation permissions for each staff role. Changes sync real-time across terminals.
+                </p>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="permSearch" placeholder="Search permission or feature (e.g. Sales, Stock, Expenses...)" onkeyup="filterPermissions()">
+                </div>
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="matrix-table" id="permTable">
+                        <thead id="permHeader" style="position:sticky; top:0; z-index:10;">
+                            <!-- Injected dynamically -->
+                        </thead>
+                        <tbody id="permBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Custom Roles -->
+        <div class="tab-content" id="tab-roles">
+            <div class="card">
+                <div class="card-title">
+                    <span>✨ Create Custom Business Role</span>
+                </div>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">
+                    Define custom roles tailored to your business structure (e.g. "Senior Cashier", "Floor Supervisor", "Inventory Clerk").
+                </p>
+                <div style="display:flex; gap:10px; max-width:500px; margin-bottom:20px;">
+                    <input type="text" id="newRoleName" placeholder="New Role Name (e.g. Floor Supervisor)">
+                    <button type="button" class="btn-primary" id="addCustomRoleBtn">
+                        <i class="fas fa-plus"></i> <span>Add Role</span>
+                    </button>
+                </div>
+                <div>
+                    <h4 style="font-size:14px; font-weight:800; margin-bottom:10px; color:#334155;">Active Custom Roles:</h4>
+                    <div id="customRolesContainer" style="display:flex; flex-wrap:wrap; gap:8px;">
+                        <span style="font-size:13px; color:#94a3b8;">No custom roles defined.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Staff Modal -->
+    <div id="staffEditModal" class="modal">
+        <div class="modal-panel">
+            <div class="modal-title">✏️ Edit Staff Details</div>
+            <input type="hidden" id="editStaffUid">
+            <div class="form-group">
+                <label>Staff Full Name</label>
+                <input id="editStaffName" type="text">
+            </div>
+            <div class="form-group">
+                <label>Staff Email</label>
+                <input id="editStaffEmail" type="email" readonly style="background:#f1f5f9; cursor:not-allowed;">
+            </div>
+            <div class="form-group">
+                <label>Assigned Role</label>
+                <select id="editStaffRole"></select>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="button" class="btn-outline" onclick="closeEditModal()">Cancel</button>
+                <button type="button" class="btn-primary" id="saveStaffEditBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-msg">
+        <i class="fas fa-check-circle" style="color:#34d399; font-size:18px;"></i>
+        <span id="toastText">Changes saved successfully!</span>
+    </div>
+
+    <script>
+        const MW_MASTER_EMAIL = 'mwtradingsolutions@gmail.com';
+        const MW_BUSINESS_ID = 'YRMbB6aq4CMevSrLWkQvoVMtc8b2';
+        let currentUser = null;
+        let context = { businessId: null, businessType: null };
+        let activeRoles = [];
+        let currentPermissions = {};
+        let loadedStaffDocs = [];
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            const txt = document.getElementById('toastText');
+            if (txt) txt.textContent = msg;
+            if (t) {
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
+            }
+        }
+
+        function isMwMasterEmail(user) {
+            return String(user && user.email || '').trim().toLowerCase() === MW_MASTER_EMAIL;
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function switchHubTab(tabName) {
+            document.querySelectorAll('.hub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+            const btn = document.getElementById(`tabBtn-${tabName}`);
+            const content = document.getElementById(`tab-${tabName}`);
+            if (btn) btn.classList.add('active');
+            if (content) content.classList.add('active');
+
+            // Update URL query param cleanly without reload
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.set('tab', tabName);
+                window.history.replaceState({}, '', url.toString());
+            } catch (e) {}
+        }
+
+        function getRoleBadgeClass(role) {
+            const r = String(role || '').toUpperCase();
+            if (r.includes('OWNER') || r.includes('ADMIN')) return 'owner';
+            if (r.includes('CASHIER')) return 'cashier';
+            if (r.includes('MANAGER')) return 'manager';
+            if (r.includes('REP')) return 'rep';
+            return 'other';
+        }
+
+        async function loadRolesAndDropdowns() {
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : (context ? context.businessId : null);
+            const bizType = context ? context.businessType : null;
+            if (!bid) return;
+
+            try {
+                const configSnap = await window.db.collection('businesses').doc(bid).collection('configs').doc('roles').get();
+                const customRoles = configSnap.exists ? (configSnap.data().list || []) : [];
+                const stdRoles = window.getStandardRolesForBusinessType ? window.getStandardRolesForBusinessType(bizType) : [];
+
+                let optionsHtml = '<option value="">-- Select Role --</option>';
+                stdRoles.forEach(r => {
+                    optionsHtml += `<option value="${r.id}">${r.label}</option>`;
+                });
+                if (customRoles.length > 0) {
+                    optionsHtml += '<optgroup label="Custom Roles">';
+                    customRoles.forEach(r => {
+                        const val = r.toUpperCase().replace(/\s+/g, '_');
+                        optionsHtml += `<option value="${val}">${r}</option>`;
+                    });
+                    optionsHtml += '</optgroup>';
+                }
+
+                const sRole = document.getElementById('staffRole');
+                const eRole = document.getElementById('editStaffRole');
+                if (sRole) sRole.innerHTML = optionsHtml;
+                if (eRole) eRole.innerHTML = optionsHtml;
+
+                // Render custom roles tags in Tab 3
+                const customContainer = document.getElementById('customRolesContainer');
+                if (customContainer) {
+                    if (customRoles.length === 0) {
+                        customContainer.innerHTML = '<span style="font-size:13px; color:#94a3b8;">No custom roles defined yet.</span>';
+                    } else {
+                        customContainer.innerHTML = customRoles.map(r => `
+                            <span style="background:#f1f5f9; padding:6px 14px; border-radius:20px; font-size:12.5px; font-weight:700; color:#334155; display:inline-flex; align-items:center; gap:8px; border:1px solid #cbd5e1;">
+                                ${escapeHtml(r)}
+                                <i class="fas fa-times" onclick="deleteCustomRole('${r}')" style="cursor:pointer; color:#ef4444;" title="Delete Role"></i>
+                            </span>
+                        `).join('');
+                    }
+                }
+            } catch (e) {
+                console.warn('[Staff] loadRolesAndDropdowns error:', e);
+            }
+        }
+
+        async function loadStaff() {
+            const body = document.getElementById('staffRows');
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : (context ? context.businessId : null);
+            if (!bid) {
+                body.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center;">Business context not resolved.</td></tr>';
+                return;
+            }
+
+            try {
+                const snap = await window.db.collection('businesses').doc(bid).collection('users').get();
+                const uid = currentUser && currentUser.uid;
+                const mw = isMwMasterEmail(currentUser);
+                loadedStaffDocs = [];
+                const rows = [];
+
+                if (mw && uid) {
+                    const ownerName = currentUser.displayName || 'Master Owner';
+                    rows.push(`
+                        <tr class="owner-row">
+                            <td>
+                                <div class="staff-name-wrap">
+                                    <div class="staff-avatar" style="background:#10b981; color:#fff;">👑</div>
+                                    <div><strong>${escapeHtml(ownerName)}</strong></div>
+                                </div>
+                            </td>
+                            <td>${escapeHtml(MW_MASTER_EMAIL)}</td>
+                            <td><span class="role-pill owner">BUSINESS OWNER</span></td>
+                            <td style="text-align:right;"><span style="color:#10b981; font-weight:700; font-size:12px;">Primary Owner</span></td>
+                        </tr>
+                    `);
+                }
+
+                snap.docs.forEach(doc => {
+                    const row = doc.data() || {};
+                    // Filter out ghost / empty entries
+                    if (!row.name && !row.email && !row.role) return;
+                    if (mw && uid && doc.id === uid) return;
+
+                    loadedStaffDocs.push({ id: doc.id, ...row });
+
+                    // Auto-sync existing staff into staff_registry for immediate access
+                    if (row.email && bid) {
+                        const emailNorm = String(row.email).trim().toLowerCase();
+                        window.db.collection('staff_registry').doc(emailNorm).set({
+                            businessId: bid,
+                            role: row.role || 'CASHIER',
+                            email: emailNorm,
+                            name: row.name || 'Staff'
+                        }, { merge: true }).catch(() => {});
+                    }
+
+                    const initial = (row.name || row.email || 'S').charAt(0).toUpperCase();
+                    const roleBand = String(row.role || 'STAFF').toUpperCase();
+                    const badgeClass = getRoleBadgeClass(roleBand);
+
+                    rows.push(`
+                        <tr>
+                            <td>
+                                <div class="staff-name-wrap">
+                                    <div class="staff-avatar">${initial}</div>
+                                    <div>
+                                        <div style="font-weight:700; color:#0f172a;">${escapeHtml(row.name || 'Staff Member')}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color:#475569;">${escapeHtml(row.email || '-')}</td>
+                            <td><span class="role-pill ${badgeClass}">${escapeHtml(roleBand)}</span></td>
+                            <td style="text-align:right;">
+                                <button type="button" class="btn-outline" style="padding:5px 10px; font-size:12px;" onclick="openEditStaff('${doc.id}')">
+                                    <i class="fas fa-edit"></i> <span>Edit</span>
+                                </button>
+                                <button type="button" class="btn-outline" style="padding:5px 10px; font-size:12px; color:#ef4444; border-color:#fecaca;" onclick="deleteStaffMember('${doc.id}')">
+                                    <i class="fas fa-trash"></i> <span>Delete</span>
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                const badge = document.getElementById('staffCountBadge');
+                if (badge) badge.textContent = `${rows.length} Members`;
+                body.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No staff members added yet. Use the form above to add your first staff member.</td></tr>';
+            } catch (e) {
+                console.error('[Staff] loadStaff error:', e);
+                body.innerHTML = `<tr><td colspan="4" style="color:#ef4444; text-align:center;">Error loading staff: ${e.message}</td></tr>`;
+            }
+        }
+
+        async function purgeCorruptGhostRows() {
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : (context ? context.businessId : null);
+            if (!bid) return;
+            try {
+                const snap = await window.db.collection('businesses').doc(bid).collection('users').get();
+                let purgedCount = 0;
+                const batch = window.db.batch();
+                snap.docs.forEach(doc => {
+                    const row = doc.data() || {};
+                    if (!row.name && !row.email && !row.role) {
+                        batch.delete(doc.ref);
+                        purgedCount++;
+                    }
+                });
+                if (purgedCount > 0) {
+                    await batch.commit();
+                    showToast(`🧹 Purged ${purgedCount} empty/corrupt records successfully!`);
+                    await loadStaff();
+                } else {
+                    showToast('✅ No corrupt or empty records found.');
+                }
+            } catch (e) {
+                console.warn('Purge error:', e);
+                showToast('Error purging records: ' + e.message);
+            }
+        }
+
+        async function addCustomRole() {
+            const name = document.getElementById('newRoleName').value.trim();
+            if (!name) return alert('Please enter a role name');
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : context.businessId;
+            const ref = window.db.collection('businesses').doc(bid).collection('configs').doc('roles');
+            const snap = await ref.get();
+            let list = snap.exists ? (snap.data().list || []) : [];
+            if (list.includes(name)) return alert('Role already exists');
+            list.push(name);
+            await ref.set({ list });
+            document.getElementById('newRoleName').value = '';
+            showToast(`Role "${name}" created successfully!`);
+            await loadRolesAndDropdowns();
+            await initPermissionsMatrix();
+        }
+
+        async function deleteCustomRole(name) {
+            if (!confirm(`Delete custom role "${name}"?`)) return;
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : context.businessId;
+            const ref = window.db.collection('businesses').doc(bid).collection('configs').doc('roles');
+            const snap = await ref.get();
+            let list = (snap.data().list || []).filter(r => r !== name);
+            await ref.set({ list });
+            showToast(`Role "${name}" deleted.`);
+            await loadRolesAndDropdowns();
+            await initPermissionsMatrix();
+        }
+
+        function openEditStaff(uid) {
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : context.businessId;
+            window.db.collection('businesses').doc(bid).collection('users').doc(uid).get().then(snap => {
+                if (!snap.exists) return;
+                const d = snap.data();
+                document.getElementById('editStaffUid').value = uid;
+                document.getElementById('editStaffName').value = d.name || '';
+                document.getElementById('editStaffEmail').value = d.email || '';
+                document.getElementById('editStaffRole').value = d.role || '';
+                document.getElementById('staffEditModal').style.display = 'flex';
+            });
+        }
+
+        function closeEditModal() {
+            document.getElementById('staffEditModal').style.display = 'none';
+        }
+
+        async function saveStaffEdit() {
+            const uid = document.getElementById('editStaffUid').value;
+            const name = document.getElementById('editStaffName').value.trim();
+            const role = document.getElementById('editStaffRole').value;
+            if (!name || !role) return alert('Name and role are required');
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : context.businessId;
+            await window.db.collection('businesses').doc(bid).collection('users').doc(uid).update({ name, role, updatedAt: new Date() });
+            closeEditModal();
+            showToast('Staff member updated successfully!');
+            await loadStaff();
+            await initPermissionsMatrix();
+        }
+
+        async function deleteStaffMember(uid) {
+            if (currentUser && uid === currentUser.uid) return alert('Cannot delete self account.');
+            if (!confirm('Are you sure you want to remove this staff member from your business?')) return;
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : context.businessId;
+            await window.db.collection('businesses').doc(bid).collection('users').doc(uid).delete();
+            showToast('Staff member removed.');
+            await loadStaff();
+        }
+
+        function copyRepLink() {
+            const input = document.getElementById('quickRepOrderUrl');
+            if (!input) return;
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            showToast('📱 Rep Mobile Order Link copied to clipboard!');
+        }
+
+        /* --- Permissions Matrix Logic --- */
+        async function initPermissionsMatrix() {
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : (context ? context.businessId : null);
+            const bizType = context ? context.businessType : null;
+            if (!bid) return;
+
+            try {
+                activeRoles = await window.getBusinessStaffRoles(bid, bizType);
+
+                const snap = await window.db.collection('businesses').doc(bid).collection('configs').doc('permissions').get();
+                currentPermissions = snap.exists ? snap.data() : {};
+
+                renderPermHeader();
+                renderPermMatrix();
+            } catch (e) {
+                console.warn('[Staff] initPermissionsMatrix error:', e);
+            }
+        }
+
+        function renderPermHeader() {
+            const header = document.getElementById('permHeader');
+            if (!header) return;
+            let html = `<tr><th style="min-width:320px;">MODULE / CAPABILITY</th>`;
+            activeRoles.forEach(role => {
+                html += `<th class="role-col">${role.replace(/_/g, ' ')}</th>`;
+            });
+            html += `</tr>`;
+            header.innerHTML = html;
+        }
+
+        function renderPermMatrix() {
+            const body = document.getElementById('permBody');
+            if (!body) return;
+            const registry = window.MASTER_PERMISSIONS || [];
+
+            const groups = {};
+            registry.forEach(p => {
+                if (!groups[p.category]) groups[p.category] = [];
+                groups[p.category].push(p);
+            });
+
+            let html = '';
+            for (const cat in groups) {
+                html += `<tr class="matrix-cat-row"><td colspan="${activeRoles.length + 1}">📁 ${cat}</td></tr>`;
+                groups[cat].forEach(p => {
+                    html += `<tr class="perm-row">
+                        <td>
+                            <div style="font-weight:700; color:#0f172a;">${escapeHtml(p.label)}</div>
+                            <div style="font-size:11px; color:#64748b; font-family:monospace;">${p.id}</div>
+                            <div style="font-size:11.5px; color:#065f46; margin-top:6px; padding:6px 10px; background:#f0fdf4; border-radius:6px; border-left:3px solid #10b981;">
+                                ${escapeHtml(p.status || '')}
+                            </div>
+                        </td>`;
+
+                    activeRoles.forEach(role => {
+                        const band = window.DigibizDistributorPermissions.roleBand(role);
+                        let isChecked = false;
+                        if (currentPermissions[band] && currentPermissions[band].hasOwnProperty(p.id)) {
+                            isChecked = currentPermissions[band][p.id];
+                        } else {
+                            isChecked = (p.defaultRoles || []).includes(band);
+                        }
+
+                        const isDisabled = (band === 'OWNER' && (p.id === 'canSettingsChange' || p.id === 'canStaffMutate' || p.id === 'canBusinessInfoEdit'));
+
+                        html += `
+                            <td style="text-align:center;">
+                                <label class="switch">
+                                    <input type="checkbox" data-role="${band}" data-key="${p.id}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                            </td>
+                        `;
+                    });
+                    html += `</tr>`;
+                });
+            }
+            body.innerHTML = html;
+        }
+
+        function filterPermissions() {
+            const query = (document.getElementById('permSearch').value || '').toLowerCase();
+            const rows = document.querySelectorAll('.perm-row');
+            const catRows = document.querySelectorAll('.matrix-cat-row');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? 'table-row' : 'none';
+            });
+            catRows.forEach(row => {
+                row.style.display = query ? 'none' : 'table-row';
+            });
+        }
+
+        async function saveAllPermissions() {
+            const btn = document.getElementById('savePermissionsBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : (context ? context.businessId : null);
+            if (!bid) {
+                alert('No business ID resolved');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                return;
+            }
+
+            const payload = {};
+            activeRoles.forEach(r => {
+                const band = window.DigibizDistributorPermissions.roleBand(r);
+                if (!payload[band]) payload[band] = {};
+            });
+
+            document.querySelectorAll('#permBody input[type="checkbox"]').forEach(input => {
+                const role = input.getAttribute('data-role');
+                const key = input.getAttribute('data-key');
+                if (role && key) {
+                    if (!payload[role]) payload[role] = {};
+                    payload[role][key] = input.checked;
+                }
+            });
+
+            try {
+                const businessRef = window.db.collection('businesses').doc(bid);
+                const batch = window.db.batch();
+
+                // 1. Save master permissions config
+                batch.set(businessRef.collection('configs').doc('permissions'), payload);
+
+                // 2. Mirror to Permission Bridge + Version bump
+                batch.update(businessRef, {
+                    rbacConfig: payload,
+                    permVersion: Date.now()
+                });
+
+                await batch.commit();
+
+                // Clear session cache
+                sessionStorage.removeItem(`digibiz_perms_v2_${bid}`);
+                currentPermissions = payload;
+
+                showToast('✅ All permissions updated and synchronized successfully!');
+            } catch (e) {
+                console.error('Save permissions error:', e);
+                alert('Error saving permissions: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        /* --- Add Staff Handler --- */
+        document.getElementById('addStaffBtn').onclick = async () => {
+            const name = document.getElementById('staffName').value.trim();
+            const email = document.getElementById('staffEmail').value.trim().toLowerCase();
+            const role = document.getElementById('staffRole').value;
+
+            if (!name) return alert('Please enter Staff Name');
+            if (!email || !email.includes('@')) return alert('Please enter a valid Staff Email');
+            if (!role) return alert('Please select a Staff Role');
+
+            const addBtn = document.getElementById('addStaffBtn');
+            addBtn.disabled = true;
+            addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
+            const bid = isMwMasterEmail(currentUser) ? MW_BUSINESS_ID : context.businessId;
+
+            try {
+                let createdUid = null;
+                // 1. Pre-create Firebase Auth credentials
+                try {
+                    const secApp = firebase.apps.find(a => a.name === 'StaffCreatorApp') ||
+                        firebase.initializeApp(firebase.app().options, 'StaffCreatorApp');
+                    const cred = await secApp.auth().createUserWithEmailAndPassword(email, '123456789');
+                    if (cred && cred.user) {
+                        createdUid = cred.user.uid;
+                    }
+                    await secApp.auth().signOut();
+                } catch (secErr) {
+                    console.log('[Staff] Secondary Auth notice:', secErr.message);
+                }
+
+                const batch = window.db.batch();
+
+                // 2. Save in business sub-collection by email
+                const bizUserRef = window.db.collection('businesses').doc(bid).collection('users').doc(email);
+                batch.set(bizUserRef, { name, email, role, uid: createdUid || email, linkedAt: new Date() }, { merge: true });
+
+                // 3. If UID was created, also save by UID
+                if (createdUid) {
+                    const bizUserUidRef = window.db.collection('businesses').doc(bid).collection('users').doc(createdUid);
+                    batch.set(bizUserUidRef, { name, email, role, uid: createdUid, linkedAt: new Date() }, { merge: true });
+
+                    const userDocRef = window.db.collection('users').doc(createdUid);
+                    batch.set(userDocRef, { name, email, role, businessId: bid, createdAt: new Date() }, { merge: true });
+                }
+
+                // 4. Save in staff_registry for instantaneous multi-tenant discovery & permission authorization
+                const globalRegistryRef = window.db.collection('staff_registry').doc(email);
+                batch.set(globalRegistryRef, { businessId: bid, role, email, name, addedAt: new Date() }, { merge: true });
+
+                await batch.commit();
+
+                document.getElementById('staffName').value = '';
+                document.getElementById('staffEmail').value = '';
+                showToast(`Staff member "${name}" added successfully!`);
+                await loadStaff();
+                await initPermissionsMatrix();
+            } catch (err) {
+                console.error('[Staff] Add staff error:', err);
+                alert('Failed to add staff: ' + err.message);
+            } finally {
+                addBtn.disabled = false;
+                addBtn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Add Staff</span>';
+            }
+        };
+
+        document.getElementById('addCustomRoleBtn').onclick = addCustomRole;
+        document.getElementById('saveStaffEditBtn').onclick = saveStaffEdit;
+        document.getElementById('savePermissionsBtn').onclick = saveAllPermissions;
+
+        // Init Lifecycle
+        window.auth.onAuthStateChanged(async user => {
+            if (!user) {
+                window.location.href = '/';
+                return;
+            }
+            currentUser = user;
+
+            try {
+                const fetched = await window.dashboardCore.getContext(user);
+                context = fetched || { businessId: null, businessType: null };
+
+                if (isMwMasterEmail(user)) {
+                    context.businessId = MW_BUSINESS_ID;
+                    context.businessType = 'distributor';
+                }
+
+                const bid = context.businessId;
+                const bType = context.businessType || 'retail';
+
+                // Display badge
+                const badge = document.getElementById('bizTypeBadge');
+                if (badge) badge.textContent = `Business Category: ${bType.toUpperCase()}`;
+
+                // Show Universal Rep link ONLY for distributor
+                const repCard = document.getElementById('repMobileLinkCard');
+                if (repCard) {
+                    repCard.style.display = (bType === 'distributor') ? 'block' : 'none';
+                }
+
+                await loadRolesAndDropdowns();
+                await loadStaff();
+                await initPermissionsMatrix();
+
+                // Check tab param
+                const urlParams = new URLSearchParams(window.location.search);
+                const initialTab = urlParams.get('tab') || 'staff';
+                if (initialTab && ['staff', 'permissions', 'roles'].includes(initialTab)) {
+                    switchHubTab(initialTab);
+                }
+            } catch (err) {
+                console.error('[Staff] Hub Init error:', err);
+            }
+        });
+
+        window.openEditStaff = openEditStaff;
+        window.closeEditModal = closeEditModal;
+        window.deleteStaffMember = deleteStaffMember;
+        window.deleteCustomRole = deleteCustomRole;
+        window.purgeCorruptGhostRows = purgeCorruptGhostRows;
+        window.copyRepLink = copyRepLink;
+        window.switchHubTab = switchHubTab;
+        window.filterPermissions = filterPermissions;
+    </script>
+</body>
+
+</html>

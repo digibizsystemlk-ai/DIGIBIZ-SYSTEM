@@ -1,0 +1,278 @@
+{
+  "functions": {
+    "source": "functions"
+  },
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/modules/retail/purchases.html",
+        "destination": "/modules/retail/grn.html",
+        "type": 301
+      },
+      {
+        "source": "/modules/tire_centre/purchases.html",
+        "destination": "/modules/tire_centre/grn.html",
+        "type": 301
+      },
+      {
+        "source": "/v/:id",
+        "destination": "/view-bill.html?id=:id",
+        "type": 301
+      },
+      {
+        "source": "/a/:s/:b",
+        "destination": "/advance-history.html?sup=:s&bid=:b",
+        "type": 301
+      },
+      {
+        "source": "/l/:id",
+        "destination": "/loan-history.html?hl=:id",
+        "type": 301
+      },
+      {
+        "source": "/wl/:id",
+        "destination": "/view-weekly-loan.html?id=:id",
+        "type": 301
+      },
+      {
+        "source": "/dl/:id",
+        "destination": "/view-daily-loan.html?id=:id",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/demo/communication",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/demo/communication/**",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/demo/factory",
+        "destination": "/clients/demo_factory_and_manufacturing/index.html"
+      },
+      {
+        "source": "/demo/factory/**",
+        "destination": "/clients/demo_factory_and_manufacturing/index.html"
+      },
+      {
+        "source": "/demo/manufacturing",
+        "destination": "/clients/demo_factory_and_manufacturing/index.html"
+      },
+      {
+        "source": "/demo/manufacturing/**",
+        "destination": "/clients/demo_factory_and_manufacturing/index.html"
+      },
+      {
+        "source": "/clients/sathityrecentre",
+        "destination": "/clients/sathityrecentre/index.html"
+      },
+      {
+        "source": "/clients/sathityrecentre/**",
+        "destination": "/clients/sathityrecentre/index.html"
+      },
+      {
+        "source": "/clients/bawantharandipa",
+        "destination": "/clients/bawantharandipa/index.html"
+      },
+      {
+        "source": "/clients/bawantharandipa/**",
+        "destination": "/clients/bawantharandipa/index.html"
+      },
+      {
+        "source": "/clients/demo_factory_and_manufacturing",
+        "destination": "/clients/demo_factory_and_manufacturing/index.html"
+      },
+      {
+        "source": "/clients/demo_factory_and_manufacturing/**",
+        "destination": "/clients/demo_factory_and_manufacturing/index.html"
+      },
+      {
+        "source": "/clients/demo_communication_phone_repair_center",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/clients/demo_communication_phone_repair_center/**",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/clients/micro_tech",
+        "destination": "/clients/micro_tech/index.html"
+      },
+      {
+        "source": "/clients/micro_tech/**",
+        "destination": "/clients/micro_tech/index.html"
+      },
+      {
+        "source": "/clients/microcommunication",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/clients/microcommunication/**",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/clients/madawalateashop",
+        "destination": "/clients/madawalateashop/index.html"
+      },
+      {
+        "source": "/clients/madawalateashop/**",
+        "destination": "/clients/madawalateashop/index.html"
+      },
+      {
+        "source": "/clients/:slug",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/clients/:slug/**",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/c/:slug",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/c/:slug/**",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/modules/communication/dashboard.html",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/modules/communication/**",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/microcom",
+        "destination": "/clients/microcommunication/index.html"
+      },
+      {
+        "source": "/std/**",
+        "destination": "/std/**"
+      },
+      {
+        "source": "/sunrose/**",
+        "destination": "/sunrose/**"
+      },
+      {
+        "source": "/royal_arabian/**",
+        "destination": "/royal_arabian/**"
+      },
+      {
+        "source": "/v2026_08_17/**",
+        "destination": "/snapshots/STABLE_FREEZE_2026_08_17/**"
+      },
+      {
+        "source": "/v_2026_08_17/**",
+        "destination": "/snapshots/STABLE_FREEZE_2026_08_17/**"
+      },
+      {
+        "source": "/v2026_08_11/**",
+        "destination": "/snapshots/STABLE_FREEZE_2026_08_11/**"
+      },
+      {
+        "source": "/v_2026_08_11/**",
+        "destination": "/snapshots/STABLE_FREEZE_2026_08_11/**"
+      },
+      {
+        "source": "/distributor-repapp",
+        "destination": "/modules/distributor/web/distributor-repapp.html"
+      },
+      {
+        "source": "/distributor-refapp",
+        "destination": "/modules/distributor/web/distributor-repapp.html"
+      },
+      {
+        "source": "/modules/quick_billing/dashboard.html",
+        "destination": "/modules/quick_billing/app.html"
+      },
+      {
+        "source": "/std/modules/quick_billing/dashboard.html",
+        "destination": "/std/modules/quick_billing/app.html"
+      },
+      {
+        "source": "/bill",
+        "destination": "/modules/quick_billing/app.html"
+      },
+      {
+        "source": "/billing",
+        "destination": "/modules/quick_billing/app.html"
+      },
+      {
+        "source": "/quickbill",
+        "destination": "/modules/quick_billing/app.html"
+      },
+      {
+        "source": "/app",
+        "destination": "/modules/quick_billing/app.html"
+      },
+      {
+        "source": "/rep",
+        "destination": "/modules/distributor/web/distributor-repapp.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "SAMEORIGIN"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Strict-Transport-Security",
+            "value": "max-age=31536000; includeSubDomains; preload"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "geolocation=(self), microphone=(), camera=()"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          }
+        ]
+      }
+    ]
+  }
+}

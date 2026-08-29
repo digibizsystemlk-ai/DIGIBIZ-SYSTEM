@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en" class="digibiz-credit-app">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Banking & Accounts — DARSHANA MADAWALA</title>
+    <link rel="manifest" href="/clients/madawalateashop/manifest.json">
+    <meta name="theme-color" content="#064e3b">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <script src="/clients/madawalateashop/core/firebase-init.js"></script>
+    <script src="/clients/madawalateashop/core/sidebar.js?v=20260823_owner_v135"></script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --royal: #1e40af;
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 60px; padding-top: 0 !important; }
+
+        #digibizMobileTopbar, #digibizMobileMenuToggle { display: none !important; }
+
+        .app-container { max-width: 1050px; margin: 0 auto; padding: 8px 12px 24px 12px; }
+
+        /* 2-LINE UNIFIED TOP HEADER */
+        .unified-header-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 8px 12px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hdr-line-1 { display: flex; align-items: center; justify-content: space-between; }
+        .hdr-left { display: flex; align-items: center; gap: 8px; }
+
+        .btn-hdr {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-hdr:active { background: #e2e8f0; transform: scale(0.95); }
+
+        .app-title-wrap { display: flex; align-items: center; gap: 6px; }
+        .app-title-wrap h1 { font-size: 14.5px; font-weight: 900; color: var(--royal); margin: 0; line-height: 1; }
+
+        .status-dot {
+            width: 7.5px;
+            height: 7.5px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 7px var(--success);
+        }
+
+        .hdr-line-2 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 4px 9px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .hdr-owner-name { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--royal); }
+        .hdr-owner-name i { color: #f59e0b; font-size: 10.5px; }
+
+        .hdr-owner-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: var(--royal);
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 1.5px 6px;
+            border-radius: 6px;
+        }
+
+        /* Top Action Buttons */
+        .header-actions-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 14px;
+            font-size: 12.5px;
+            font-weight: 800;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-primary:hover { background: var(--royal); }
+        .btn-secondary { background: #ffffff; color: var(--royal); border: 1.5px solid #bfdbfe; }
+        .btn-secondary:hover { background: #eff6ff; }
+
+        /* Bank Cards Grid */
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .bank-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: #ffffff;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.15);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 155px;
+        }
+
+        .bank-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .bank-name { font-size: 15px; font-weight: 800; color: #93c5fd; }
+        .bank-branch { font-size: 11.5px; color: #cbd5e1; }
+        .bank-acc-no { font-size: 14px; font-family: monospace; letter-spacing: 1px; color: #ffffff; margin: 8px 0; }
+        .bank-bal-label { font-size: 10px; text-transform: uppercase; color: #93c5fd; font-weight: 700; }
+        .bank-balance { font-size: 20px; font-weight: 900; color: #ffffff; }
+
+        .bank-card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-card-act {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-card-act:hover { background: rgba(255,255,255,0.28); }
+
+        /* Transactions Section */
+        .section-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .section-header {
+            padding: 12px 16px;
+            border-bottom: 1.5px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .section-header h2 { font-size: 14px; font-weight: 800; color: var(--royal); display: flex; align-items: center; gap: 6px; }
+
+        .tx-filters { display: flex; gap: 6px; }
+        .tx-filters select { padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 12px; font-weight: 700; outline: none; }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; white-space: nowrap; }
+        .data-table th { background: #f8fafc; padding: 10px 14px; text-align: left; font-weight: 800; color: #475569; border-bottom: 1.5px solid var(--border); font-size: 11px; text-transform: uppercase; }
+        .data-table td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; color: var(--text); vertical-align: middle; }
+        .data-table tr:hover td { background: #fafcff; }
+
+        .badge-tx { display: inline-block; font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; }
+        .tx-dep { background: #dcfce7; color: var(--success); }
+        .tx-with { background: #fee2e2; color: var(--danger); }
+        .tx-source { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+        .btn-tx-opt {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #475569;
+        }
+        .btn-tx-opt:hover { background: #e2e8f0; }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .modal.active { display: flex; }
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .modal-header h3 { font-size: 15px; font-weight: 800; color: var(--royal); }
+        .close-btn { background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; }
+        
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 4px; }
+        .form-control { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 13px; font-weight: 600; outline: none; }
+        .form-control:focus { border-color: var(--primary); }
+
+        .row-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        /* Access Denied Overlay */
+        #accessDeniedScreen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            color: #ffffff;
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .denied-card {
+            background: #1e293b;
+            border: 2px solid #ef4444;
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 440px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .denied-icon { font-size: 48px; color: #ef4444; margin-bottom: 14px; }
+        .denied-card h2 { font-size: 19px; font-weight: 900; margin-bottom: 6px; color: #ffffff; }
+        .denied-card p { font-size: 13px; color: #94a3b8; margin-bottom: 16px; line-height: 1.4; }
+        .btn-switch-account {
+            background: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="credit-app-body">
+
+    <!-- ACCESS DENIED SCREEN -->
+    <div id="accessDeniedScreen">
+        <div class="denied-card">
+            <i class="fa-solid fa-ban denied-icon"></i>
+            <h2>Access Denied</h2>
+            <p>You do not have permission to access the <strong>DARSHANA MADAWALA</strong> workspace with account: <br><span id="deniedEmail" style="color:#38bdf8; font-weight:bold;"></span></p>
+            <p style="font-size: 11.5px; color: #cbd5e1;">Please log in with an authorized account.</p>
+            <button class="btn-switch-account" onclick="handleDeniedLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Switch Account / Log Out
+            </button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+        <!-- 2-LINE UNIFIED TOP HEADER -->
+        <header class="unified-header-card">
+            <div class="hdr-line-1">
+                <div class="hdr-left">
+                    <button type="button" class="btn-hdr" onclick="toggleSidebarMenu()" aria-label="Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <a href="/clients/madawalateashop/modules/credit/dashboard.html?v=20260823_owner_v135" class="btn-hdr" title="Home Dashboard">
+                        <i class="fa-solid fa-house"></i>
+                    </a>
+                    <div class="app-title-wrap">
+                        <h1>BANKING & CASH</h1>
+                        <span class="status-dot" id="networkStatusDot" title="Online"></span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/clients/madawalateashop/modules/credit/profile.html" class="hdr-line-2" title="Business Profile">
+                <div class="hdr-owner-name">
+                    <i class="fa-solid fa-crown"></i>
+                    <span id="topOwnerName">DARSHANA MADAWALA</span>
+                </div>
+                <span class="hdr-owner-badge">BANKING</span>
+            </a>
+        </header>
+
+        <!-- Actions Bar -->
+        <div class="header-actions-bar">
+            <button class="btn btn-primary" onclick="openNewTxModal()">
+                <i class="fa-solid fa-plus"></i> + New Bank Transaction
+            </button>
+            <button class="btn btn-secondary" onclick="openAddBankModal()">
+                <i class="fa-solid fa-landmark"></i> + Add Bank Account
+            </button>
+        </div>
+
+        <!-- Bank Accounts Grid -->
+        <div class="bank-grid" id="bankAccountsGrid">
+            <!-- Dynamically populated -->
+        </div>
+
+        <!-- Bank Transactions Table -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> Bank Transactions History</h2>
+                <div class="tx-filters">
+                    <select id="filterBankAcc" onchange="filterBankTransactions()">
+                        <option value="">All Accounts</option>
+                    </select>
+                    <select id="filterTxType" onchange="filterBankTransactions()">
+                        <option value="">All Types</option>
+                        <option value="DEPOSIT">Deposits (+)</option>
+                        <option value="WITHDRAWAL">Withdrawals (-)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Bank Account</th>
+                            <th>Type / Mode</th>
+                            <th>Reference / Cheque</th>
+                            <th>Amount</th>
+                            <th>Notes</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bankTxTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">Loading transactions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL 1: ADD BANK ACCOUNT -->
+    <div class="modal" id="addBankModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-landmark text-primary"></i> Add Bank Account</h3>
+                <button class="close-btn" onclick="closeAddBankModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Bank Name *</label>
+                <input type="text" class="form-control" id="newBankName" placeholder="e.g. Commercial Bank / BOC / Sampath">
+            </div>
+            <div class="form-group">
+                <label>Account Number *</label>
+                <input type="text" class="form-control" id="newAccNo" placeholder="e.g. 8001234567">
+            </div>
+            <div class="form-group">
+                <label>Branch / Remarks</label>
+                <input type="text" class="form-control" id="newBankBranch" placeholder="e.g. Kandy Branch">
+            </div>
+            <div class="form-group">
+                <label>Initial Opening Balance (Rs.)</label>
+                <input type="number" class="form-control" id="newBankInitBal" placeholder="0.00" value="0">
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveNewBankAccount()">
+                Save Bank Account
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: EDIT BANK ACCOUNT -->
+    <div class="modal" id="editBankModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square text-primary"></i> Edit Bank Account</h3>
+                <button class="close-btn" onclick="closeEditBankModal()">&times;</button>
+            </div>
+            <input type="hidden" id="editBankId">
+            <div class="form-group">
+                <label>Bank Name *</label>
+                <input type="text" class="form-control" id="editBankName">
+            </div>
+            <div class="form-group">
+                <label>Account Number *</label>
+                <input type="text" class="form-control" id="editAccNo">
+            </div>
+            <div class="form-group">
+                <label>Branch / Location</label>
+                <input type="text" class="form-control" id="editBankBranch">
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="updateBankAccount()">
+                Update Account Details
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: RECONCILE / ADJUST BANK BALANCE -->
+    <div class="modal" id="reconcileBankModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-scale-balanced text-primary"></i> Manual Balance Adjustment</h3>
+                <button class="close-btn" onclick="closeReconcileModal()">&times;</button>
+            </div>
+            <input type="hidden" id="recBankId">
+            <div class="form-group">
+                <label>Bank Account</label>
+                <input type="text" class="form-control" id="recBankName" readonly style="background:#f1f5f9;">
+            </div>
+            <div class="form-group">
+                <label>Current System Balance (Rs.)</label>
+                <input type="text" class="form-control" id="recCurrentBal" readonly style="background:#f1f5f9; font-weight:800;">
+            </div>
+            <div class="form-group">
+                <label>Actual Bank Statement Balance (Rs.) *</label>
+                <input type="number" class="form-control" id="recNewBal" placeholder="0.00" step="any" style="font-size:16px; font-weight:900; color:var(--royal);">
+            </div>
+            <div class="form-group">
+                <label>Adjustment Reason / Note *</label>
+                <input type="text" class="form-control" id="recReason" placeholder="e.g. Bank charges / Manual reconciliation">
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="applyBankReconciliation()">
+                Set & Sync Balance
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 4: NEW BANK TRANSACTION (WITH MANUAL DETAILS) -->
+    <div class="modal" id="newTxModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-money-bill-transfer text-primary"></i> Record Bank Transaction</h3>
+                <button class="close-btn" onclick="closeNewTxModal()">&times;</button>
+            </div>
+            <div class="row-grid-2">
+                <div class="form-group">
+                    <label>Transaction Type *</label>
+                    <select class="form-control" id="modalTxType">
+                        <option value="DEPOSIT">📥 Deposit into Bank (+)</option>
+                        <option value="WITHDRAWAL">📤 Withdraw from Bank (-)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Mode *</label>
+                    <select class="form-control" id="modalTxMode">
+                        <option value="Cash Deposit">💵 Cash Deposit</option>
+                        <option value="Cheque">📑 Cheque</option>
+                        <option value="Bank Transfer">🏦 Online Bank Transfer</option>
+                        <option value="Slip Deposit">🧾 Bank Slip Deposit</option>
+                        <option value="ATM">🏧 ATM Deposit / Withdrawal</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Select Bank Account *</label>
+                <select class="form-control" id="modalTxBank"></select>
+            </div>
+
+            <div class="row-grid-2">
+                <div class="form-group">
+                    <label>Amount (Rs.) *</label>
+                    <input type="number" class="form-control" id="modalTxAmount" placeholder="0.00" min="1" step="any" style="font-weight:800; font-size:16px;">
+                </div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" class="form-control" id="modalTxDate">
+                </div>
+            </div>
+
+            <div class="row-grid-2">
+                <div class="form-group">
+                    <label>Cheque / Slip / Ref No</label>
+                    <input type="text" class="form-control" id="modalTxSlipNo" placeholder="e.g. CHQ-49201">
+                </div>
+                <div class="form-group">
+                    <label>Deposited / Withdrawn By</label>
+                    <input type="text" class="form-control" id="modalTxPerson" placeholder="e.g. Darshana / Staff">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Reference / Note</label>
+                <input type="text" class="form-control" id="modalTxRef" placeholder="e.g. Counter cash sales deposit">
+            </div>
+
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveBankTransaction()">
+                Record Transaction
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 5: EDIT BANK TRANSACTION DETAILS -->
+    <div class="modal" id="editTxModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square text-primary"></i> Edit Transaction Details</h3>
+                <button class="close-btn" onclick="closeEditTxModal()">&times;</button>
+            </div>
+            <input type="hidden" id="editTxId">
+            <div class="row-grid-2">
+                <div class="form-group">
+                    <label>Payment Mode</label>
+                    <select class="form-control" id="editTxMode">
+                        <option value="Cash Deposit">💵 Cash Deposit</option>
+                        <option value="Cheque">📑 Cheque</option>
+                        <option value="Bank Transfer">🏦 Online Bank Transfer</option>
+                        <option value="Slip Deposit">🧾 Bank Slip Deposit</option>
+                        <option value="ATM">🏧 ATM Deposit / Withdrawal</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" class="form-control" id="editTxDate">
+                </div>
+            </div>
+            <div class="row-grid-2">
+                <div class="form-group">
+                    <label>Cheque / Slip No</label>
+                    <input type="text" class="form-control" id="editTxSlipNo">
+                </div>
+                <div class="form-group">
+                    <label>Person Name</label>
+                    <input type="text" class="form-control" id="editTxPerson">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Reference / Note</label>
+                <input type="text" class="form-control" id="editTxRef">
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="updateBankTransactionDetails()">
+                Save Updated Details
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentBusinessId = null;
+        let allBankAccounts = [];
+        let allBankTransactions = [];
+
+        function formatRs(num) {
+            const val = Number(num) || 0;
+            return 'Rs. ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function toggleSidebarMenu() {
+            document.documentElement.classList.toggle('digibiz-sidebar-open');
+        }
+
+                // ACCESS CONTROL CHECK — Strictly Restricted to Owner & Super Admin
+        function verifyDarshanaAccess(user) {
+            if (!user) return false;
+            const email = (user.email || '').toLowerCase().trim();
+            const isImpersonating = localStorage.getItem('digibiz_impersonate_active') === 'true';
+            
+            const isAuthorized = email === 'madawalateashop80@gmail.com' ||
+                                 email.includes('madawalateashop') || 
+                                 email.includes('darshana') ||
+                                 email === 'biz.sirimal@gmail.com' ||
+                                 email === '2biz.sirimal@gmail.com' ||
+                                 email === 'scrap@chinthaka.com' ||
+                                 email.includes('superadmin') ||
+                                 email.startsWith('chinthaka') ||
+                                 (isImpersonating && (email.includes('admin') || email.includes('super') || email.includes('chinthaka')));
+            
+            if (!isAuthorized) {
+                const deniedScreen = document.getElementById('accessDeniedScreen');
+                if (deniedScreen) {
+                    const deniedEmail = document.getElementById('deniedEmail');
+                    if (deniedEmail) deniedEmail.textContent = user.email || 'Unknown User';
+                    deniedScreen.style.display = 'flex';
+                } else {
+                    alert('Access Denied: You do not have permission to access Darshana Madawala Credit App.');
+                    window.location.href = '/auth/login.html';
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function handleDeniedLogout() {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = '/auth/login.html';
+                });
+            } else {
+                window.location.href = '/auth/login.html';
+            }
+        }
+
+        // INSTANT LOCAL CACHE HYDRATION (0ms Load from Phone)
+        function loadFromLocalCache() {
+            try {
+                const cachedBiz = localStorage.getItem('dm_cache_biz_profile');
+                if (cachedBiz) {
+                    const el = document.getElementById('topOwnerName');
+                    if (el) el.textContent = cachedBiz;
+                }
+
+                const cachedBank = localStorage.getItem('dm_cache_bank_accounts');
+                if (cachedBank) {
+                    allBankAccounts = JSON.parse(cachedBank) || [];
+                    renderBankAccountsCards(allBankAccounts);
+                }
+
+                const cachedTx = localStorage.getItem('dm_cache_bank_transactions');
+                if (cachedTx) {
+                    allBankTransactions = JSON.parse(cachedTx) || [];
+                    filterBankTransactions();
+                }
+            } catch(e) {}
+        }
+
+        function renderBankAccountsCards(accounts) {
+            const grid = document.getElementById('bankAccountsGrid');
+            const select = document.getElementById('modalTxBank');
+            const filterSelect = document.getElementById('filterBankAcc');
+            if (!grid || !select || !filterSelect) return;
+
+            grid.innerHTML = '';
+            select.innerHTML = '<option value="">-- Select Bank Account --</option>';
+            filterSelect.innerHTML = '<option value="">All Accounts</option>';
+
+            if (accounts.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; padding: 24px; text-align: center; color: #64748b; background: #fff; border: 1.5px dashed #cbd5e1; border-radius: 14px;">No bank accounts added yet. Click "+ Add Bank Account" above.</div>';
+                return;
+            }
+
+            accounts.forEach(d => {
+                const card = document.createElement('div');
+                card.className = 'bank-card';
+                card.innerHTML = `
+                    <div class="bank-top">
+                        <div>
+                            <div class="bank-name">${escapeHtml(d.bankName)}</div>
+                            <div class="bank-branch">${escapeHtml(d.branch || 'General')}</div>
+                        </div>
+                        <i class="fa-solid fa-building-columns" style="font-size: 22px; opacity: 0.4;"></i>
+                    </div>
+                    <div class="bank-acc-no">${escapeHtml(d.accountNumber)}</div>
+                    <div>
+                        <div class="bank-bal-label">Current Balance</div>
+                        <div class="bank-balance">${formatRs(d.currentBalance)}</div>
+                    </div>
+                    <div class="bank-card-actions">
+                        <button type="button" class="btn-card-act" onclick="openEditBankModal('${d.id}')" title="Edit Bank Details">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </button>
+                        <button type="button" class="btn-card-act" onclick="openReconcileModal('${d.id}')" title="Adjust Balance">
+                            <i class="fa-solid fa-scale-balanced"></i> Reconcile
+                        </button>
+                        <button type="button" class="btn-card-act" style="color: #fca5a5;" onclick="deleteBankAccount('${d.id}')" title="Delete Account">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = `${d.bankName} - ${d.accountNumber} (${formatRs(d.currentBalance)})`;
+                select.appendChild(opt);
+
+                const optFilter = document.createElement('option');
+                optFilter.value = d.id;
+                optFilter.textContent = `${d.bankName} (${d.accountNumber})`;
+                filterSelect.appendChild(optFilter);
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('modalTxDate').value = todayStr;
+
+            // Load immediately from local phone memory
+            loadFromLocalCache();
+
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    if (!user) {
+                        localStorage.removeItem('dm_auth_verified_email');
+                        window.location.href = '/auth/login.html';
+                        return;
+                    }
+                    if (!verifyDarshanaAccess(user)) return;
+                    localStorage.setItem('dm_auth_verified_email', user.email);
+                    localStorage.setItem('currentUserRole', 'BUSINESS_OWNER');
+                    localStorage.setItem('currentBusinessNavRole', 'BUSINESS_OWNER');
+                    localStorage.setItem('currentBusinessType', 'credit_ledger');
+                    localStorage.setItem('currentBusinessName', 'DARSHANA MADAWALA');
+
+                    const DM_DEFAULT_BID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
+                    let storedBid = localStorage.getItem('currentBusinessId') || sessionStorage.getItem('currentBusinessId');
+                    if (!storedBid || storedBid === 'DarshanaMadawala' || storedBid.toLowerCase() === 'qxl4jrgfbztzofmoqyhocfr2pfp2') {
+                        storedBid = DM_DEFAULT_BID;
+                    }
+                    currentBusinessId = storedBid;
+                    localStorage.setItem('currentBusinessId', currentBusinessId);
+                    sessionStorage.setItem('currentBusinessId', currentBusinessId);
+                    listenToBusinessProfile();
+                    listenToBankAccounts();
+                    listenToBankTransactions();
+                });
+            }
+        });
+
+        function listenToBusinessProfile() {
+            if (!window.db || !currentBusinessId) return;
+            window.db.collection('businesses').doc(currentBusinessId).get().then(doc => {
+                if (doc.exists && (doc.data().businessName || doc.data().name)) {
+                    const name = doc.data().businessName || doc.data().name || 'DARSHANA MADAWALA';
+                    document.getElementById('topOwnerName').textContent = name;
+                    try { localStorage.setItem('dm_cache_biz_profile', name); } catch(e) {}
+                }
+            }, err => {
+                console.warn('[Offline Mode] Using local business profile cache');
+            });
+        }
+
+        function listenToBankAccounts() {
+            if (!window.db || !currentBusinessId) return;
+            window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts')
+                .get().then(snapshot => {
+                    allBankAccounts = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        d.id = doc.id;
+                        allBankAccounts.push(d);
+                    });
+
+                    renderBankAccountsCards(allBankAccounts);
+                    try { localStorage.setItem('dm_cache_bank_accounts', JSON.stringify(allBankAccounts)); } catch(e) {}
+                }, err => {
+                    console.warn('[Offline Mode] Using local bank accounts cache:', err);
+                });
+        }
+
+        function listenToBankTransactions() {
+            if (!window.db || !currentBusinessId) return;
+            window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions')
+                .orderBy('createdAt', 'desc')
+                .get().then(snapshot => {
+                    allBankTransactions = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        d.id = doc.id;
+                        allBankTransactions.push(d);
+                    });
+
+                    try { localStorage.setItem('dm_cache_bank_transactions', JSON.stringify(allBankTransactions)); } catch(e) {}
+                    filterBankTransactions();
+                }, err => {
+                    console.warn('[Offline Mode] Using local bank transactions cache:', err);
+                });
+        }
+
+        function filterBankTransactions() {
+            const accId = document.getElementById('filterBankAcc').value;
+            const txType = document.getElementById('filterTxType').value;
+
+            const filtered = allBankTransactions.filter(tx => {
+                if (accId && tx.bankAccountId !== accId) return false;
+                if (txType && tx.type !== txType) return false;
+                return true;
+            });
+
+            renderBankTxTable(filtered);
+        }
+
+        function renderBankTxTable(list) {
+            const tbody = document.getElementById('bankTxTableBody');
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">No bank transactions recorded.</td></tr>';
+                return;
+            }
+
+            list.forEach(d => {
+                const tr = document.createElement('tr');
+                const isDep = (d.type === 'DEPOSIT');
+                let modeText = d.paymentMode || 'Cash';
+
+                let sourceBadge = '';
+                if (d.source === 'LOAN_SETTLEMENT') {
+                    sourceBadge = `<div class="tx-source" style="color:#16a34a; font-weight:800;"><i class="fa-solid fa-hand-holding-dollar"></i> Customer Repayment</div>`;
+                } else if (d.source === 'LOAN_DISBURSAL') {
+                    sourceBadge = `<div class="tx-source" style="color:#dc2626; font-weight:800;"><i class="fa-solid fa-money-bill-wave"></i> Loan Disbursal</div>`;
+                } else {
+                    sourceBadge = `<div class="tx-source">Direct Bank Entry</div>`;
+                }
+
+                let refDetail = escapeHtml(d.reference || d.chequeNo || d.slipNo || '-');
+                if (d.personName) refDetail += ` • ${escapeHtml(d.personName)}`;
+
+                tr.innerHTML = `
+                    <td style="font-weight: 700;">${d.date || '-'}</td>
+                    <td style="font-weight: 800; color: var(--royal);">${escapeHtml(d.bankName || 'Bank')} <br><span style="font-size:11px; color:#64748b; font-weight:normal;">${escapeHtml(d.accountNumber || '')}</span></td>
+                    <td>
+                        <span class="badge-tx ${isDep ? 'tx-dep' : 'tx-with'}">${isDep ? '📥 Deposit' : '📤 Withdrawal'}</span>
+                        <div style="font-size:11px; color:#475569; font-weight:700; margin-top:2px;">${escapeHtml(modeText)}</div>
+                        ${sourceBadge}
+                    </td>
+                    <td style="color: #475569; font-size:12px;">${refDetail}</td>
+                    <td style="font-weight: 900; font-size: 13.5px; color: ${isDep ? '#16a34a' : '#dc2626'};">${formatRs(d.amount)}</td>
+                    <td style="color: #64748b; font-size:11.5px;">${escapeHtml(d.notes || '-')}</td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 4px; justify-content: center;">
+                            <button type="button" class="btn-tx-opt" onclick="openEditTxModal('${d.id}')" title="Edit Details">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn-tx-opt" style="color: #dc2626;" onclick="deleteBankTransaction('${d.id}')" title="Delete & Reverse">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* MODAL CONTROLS */
+        function openAddBankModal() { document.getElementById('addBankModal').classList.add('active'); }
+        function closeAddBankModal() { document.getElementById('addBankModal').classList.remove('active'); }
+        function openNewTxModal() { document.getElementById('newTxModal').classList.add('active'); }
+        function closeNewTxModal() { document.getElementById('newTxModal').classList.remove('active'); }
+
+        /* ADD BANK ACCOUNT */
+        async function saveNewBankAccount() {
+            const name = document.getElementById('newBankName').value.trim();
+            const accNo = document.getElementById('newAccNo').value.trim();
+            const branch = document.getElementById('newBankBranch').value.trim();
+            const initBal = parseFloat(document.getElementById('newBankInitBal').value) || 0;
+
+            if (!name || !accNo) {
+                alert('Please enter Bank Name and Account Number.');
+                return;
+            }
+
+            const docId = accNo.replace(/[^a-zA-Z0-9]/g, '_');
+            await window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(docId).set({
+                bankName: name,
+                accountNumber: accNo,
+                branch: branch,
+                currentBalance: initBal,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            closeAddBankModal();
+            alert('Bank Account added successfully!');
+        }
+
+        /* EDIT BANK ACCOUNT */
+        function openEditBankModal(bankId) {
+            const b = allBankAccounts.find(x => x.id === bankId);
+            if (!b) return;
+
+            document.getElementById('editBankId').value = b.id;
+            document.getElementById('editBankName').value = b.bankName || '';
+            document.getElementById('editAccNo').value = b.accountNumber || '';
+            document.getElementById('editBankBranch').value = b.branch || '';
+
+            document.getElementById('editBankModal').classList.add('active');
+        }
+        function closeEditBankModal() { document.getElementById('editBankModal').classList.remove('active'); }
+
+        async function updateBankAccount() {
+            const bankId = document.getElementById('editBankId').value;
+            const name = document.getElementById('editBankName').value.trim();
+            const accNo = document.getElementById('editAccNo').value.trim();
+            const branch = document.getElementById('editBankBranch').value.trim();
+
+            if (!name || !accNo) {
+                alert('Bank Name and Account Number are required.');
+                return;
+            }
+
+            await window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bankId).update({
+                bankName: name,
+                accountNumber: accNo,
+                branch: branch,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            closeEditBankModal();
+            alert('Bank Account details updated successfully!');
+        }
+
+        /* DELETE BANK ACCOUNT */
+        async function deleteBankAccount(bankId) {
+            const b = allBankAccounts.find(x => x.id === bankId);
+            if (!b) return;
+
+            if (confirm(`Are you sure you want to delete bank account "${b.bankName} - ${b.accountNumber}"?`)) {
+                await window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bankId).delete();
+                alert('Bank Account deleted successfully.');
+            }
+        }
+
+        /* RECONCILE / ADJUST BALANCE */
+        function openReconcileModal(bankId) {
+            const b = allBankAccounts.find(x => x.id === bankId);
+            if (!b) return;
+
+            document.getElementById('recBankId').value = b.id;
+            document.getElementById('recBankName').value = `${b.bankName} - ${b.accountNumber}`;
+            document.getElementById('recCurrentBal').value = formatRs(b.currentBalance || 0);
+            document.getElementById('recNewBal').value = Number(b.currentBalance || 0);
+            document.getElementById('recReason').value = '';
+
+            document.getElementById('reconcileBankModal').classList.add('active');
+        }
+        function closeReconcileModal() { document.getElementById('reconcileBankModal').classList.remove('active'); }
+
+        async function applyBankReconciliation() {
+            const bankId = document.getElementById('recBankId').value;
+            const newBal = parseFloat(document.getElementById('recNewBal').value);
+            const reason = document.getElementById('recReason').value.trim();
+
+            if (isNaN(newBal)) {
+                alert('Please enter a valid balance number.');
+                return;
+            }
+            if (!reason) {
+                alert('Please enter a reason or note for this manual balance adjustment.');
+                return;
+            }
+
+            const bankRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bankId);
+            const bDoc = await bankRef.get();
+            if (!bDoc.exists) return;
+
+            const oldBal = Number(bDoc.data().currentBalance || 0);
+            const diff = newBal - oldBal;
+
+            await bankRef.update({
+                currentBalance: newBal,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Log adjustment record in bank_transactions
+            const txRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc();
+            await txRef.set({
+                bankAccountId: bankId,
+                bankName: bDoc.data().bankName,
+                accountNumber: bDoc.data().accountNumber,
+                type: diff >= 0 ? 'DEPOSIT' : 'WITHDRAWAL',
+                amount: Math.abs(diff),
+                paymentMode: 'Reconciliation',
+                date: new Date().toISOString().split('T')[0],
+                reference: `Manual Adjustment: ${reason}`,
+                notes: `Previous: ${formatRs(oldBal)} -> Adjusted: ${formatRs(newBal)}`,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            closeReconcileModal();
+            alert('Bank balance reconciled successfully!');
+        }
+
+        /* RECORD BANK TRANSACTION */
+        async function saveBankTransaction() {
+            const type = document.getElementById('modalTxType').value;
+            const mode = document.getElementById('modalTxMode').value;
+            const bankId = document.getElementById('modalTxBank').value;
+            const amount = parseFloat(document.getElementById('modalTxAmount').value) || 0;
+            const slipNo = document.getElementById('modalTxSlipNo').value.trim();
+            const person = document.getElementById('modalTxPerson').value.trim();
+            const ref = document.getElementById('modalTxRef').value.trim();
+            const date = document.getElementById('modalTxDate').value;
+
+            if (!bankId || amount <= 0) {
+                alert('Please select a bank account and enter a valid amount.');
+                return;
+            }
+
+            const bankRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bankId);
+
+            await window.db.runTransaction(async (t) => {
+                const doc = await t.get(bankRef);
+                if (!doc.exists) throw new Error('Bank account not found');
+                const curr = Number(doc.data().currentBalance || 0);
+                const newBal = (type === 'DEPOSIT') ? (curr + amount) : (curr - amount);
+
+                t.update(bankRef, {
+                    currentBalance: newBal,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                const txRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc();
+                t.set(txRef, {
+                    bankAccountId: bankId,
+                    bankName: doc.data().bankName,
+                    accountNumber: doc.data().accountNumber,
+                    type: type,
+                    paymentMode: mode,
+                    amount: amount,
+                    chequeNo: slipNo,
+                    slipNo: slipNo,
+                    personName: person,
+                    reference: ref || (mode + ' Entry'),
+                    notes: ref,
+                    date: date,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+
+            closeNewTxModal();
+            alert('Bank transaction recorded successfully!');
+        }
+
+        /* EDIT BANK TRANSACTION DETAILS */
+        function openEditTxModal(txId) {
+            const tx = allBankTransactions.find(x => x.id === txId);
+            if (!tx) return;
+
+            document.getElementById('editTxId').value = tx.id;
+            document.getElementById('editTxMode').value = tx.paymentMode || 'Cash Deposit';
+            document.getElementById('editTxDate').value = tx.date || '';
+            document.getElementById('editTxSlipNo').value = tx.chequeNo || tx.slipNo || '';
+            document.getElementById('editTxPerson').value = tx.personName || '';
+            document.getElementById('editTxRef').value = tx.reference || tx.notes || '';
+
+            document.getElementById('editTxModal').classList.add('active');
+        }
+        function closeEditTxModal() { document.getElementById('editTxModal').classList.remove('active'); }
+
+        async function updateBankTransactionDetails() {
+            const txId = document.getElementById('editTxId').value;
+            const mode = document.getElementById('editTxMode').value;
+            const date = document.getElementById('editTxDate').value;
+            const slipNo = document.getElementById('editTxSlipNo').value.trim();
+            const person = document.getElementById('editTxPerson').value.trim();
+            const ref = document.getElementById('editTxRef').value.trim();
+
+            await window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc(txId).update({
+                paymentMode: mode,
+                date: date,
+                chequeNo: slipNo,
+                slipNo: slipNo,
+                personName: person,
+                reference: ref,
+                notes: ref,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            closeEditTxModal();
+            alert('Transaction details updated successfully!');
+        }
+
+        /* DELETE BANK TRANSACTION & REVERSE BALANCE */
+        async function deleteBankTransaction(txId) {
+            const tx = allBankTransactions.find(x => x.id === txId);
+            if (!tx) return;
+
+            if (!confirm(`Are you sure you want to delete this ${tx.type} transaction of ${formatRs(tx.amount)}? The bank balance will be reversed automatically.`)) {
+                return;
+            }
+
+            const bankRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(tx.bankAccountId);
+
+            await window.db.runTransaction(async (t) => {
+                const bankDoc = await t.get(bankRef);
+                if (bankDoc.exists) {
+                    const curr = Number(bankDoc.data().currentBalance || 0);
+                    // Reverse: if was DEPOSIT, subtract amount; if was WITHDRAWAL, add amount
+                    const reversedBal = (tx.type === 'DEPOSIT') ? (curr - tx.amount) : (curr + tx.amount);
+                    t.update(bankRef, {
+                        currentBalance: reversedBal,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                const txRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc(txId);
+                t.delete(txRef);
+            });
+
+            alert('Bank transaction deleted and account balance reversed successfully.');
+        }
+
+        function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    </script>
+    <script src="/clients/madawalateashop/modules/credit/ptr-helper.js?v=20260821_2030">
+        window.toggleSidebarMenu = function() {
+            document.documentElement.classList.toggle('digibiz-sidebar-open');
+        };
+        </script>
+    <script src="/clients/madawalateashop/modules/credit/migration-bridge.js?v=20260827"></script>
+</body>
+</html>

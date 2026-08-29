@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="en" class="digibiz-credit-app">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DIGIBIZ CREDIT — DARSHANA MADAWALA</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="/clients/madawalateashop/manifest.json">
+    <meta name="theme-color" content="#064e3b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="/clients/madawalateashop/assets/icon-192.png">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Firebase Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Core App Scripts -->
+    <script src="/clients/madawalateashop/core/firebase-init.js"></script>
+    <script src="/clients/madawalateashop/core/sidebar.js?v=20260823_owner_v135"></script>
+
+    <style>
+        :root {
+            /* Main Palette */
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            
+            /* Flow 1: Credit / Debt Given (STRONGER RICH RED) */
+            --red-main: #dc2626;
+            --red-dark: #b91c1c;
+            --red-bg: #fee2e2;
+            --red-border: #f87171;
+            --red-text: #991b1b;
+
+            /* Flow 2: Debt Collected / Repayment (STRONGER RICH GREEN) */
+            --green-main: #16a34a;
+            --green-dark: #15803d;
+            --green-bg: #dcfce7;
+            --green-border: #4ade80;
+            --green-text: #14532d;
+
+            /* Flow 3: Banking & Cash Movement (STRONGER RICH BLUE) */
+            --blue-main: #2563eb;
+            --blue-dark: #1d4ed8;
+            --blue-bg: #dbeafe;
+            --blue-border: #60a5fa;
+            --blue-text: #1e3a8a;
+
+            /* Auto-fit Height Variable */
+            --app-height: 100dvh;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            height: var(--app-height, 100dvh);
+            max-height: var(--app-height, 100dvh);
+            background-color: var(--bg);
+            color: var(--text);
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+            overflow: hidden;
+        }
+
+        #digibizMobileTopbar, #digibizMobileMenuToggle {
+            display: none !important;
+        }
+
+        /* PULL TO REFRESH INDICATOR */
+        .ptr-indicator {
+            position: fixed;
+            top: -65px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .ptr-content {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            padding: 7px 18px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            font-weight: 800;
+            color: var(--blue-main);
+        }
+
+        .ptr-icon {
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .ptr-icon.spin {
+            animation: ptrSpin 0.7s linear infinite;
+        }
+
+        @keyframes ptrSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* AUTO-FIT APP CONTAINER */
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            height: var(--app-height, 100dvh);
+            max-height: var(--app-height, 100dvh);
+            display: flex;
+            flex-direction: column;
+            padding: clamp(6px, 1.2vh, 10px) 12px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            justify-content: space-between;
+        }
+
+        /* 2-LINE COMPACT HEADER */
+        .unified-header-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: clamp(6px, 1vh, 8px) 12px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+            margin-bottom: clamp(4px, 0.8vh, 6px);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hdr-line-1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hdr-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-hamburger {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-hamburger:active {
+            background: #e2e8f0;
+            transform: scale(0.95);
+        }
+
+        .app-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .app-title-wrap h1 {
+            font-size: clamp(13.5px, 2vh, 15px);
+            font-weight: 900;
+            color: #1e3a8a;
+            letter-spacing: -0.2px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .status-dot {
+            width: 7.5px;
+            height: 7.5px;
+            border-radius: 50%;
+            background-color: var(--green-main);
+            box-shadow: 0 0 7px var(--green-main);
+            transition: all 0.3s;
+        }
+
+        .status-dot.offline {
+            background-color: var(--red-main);
+            box-shadow: 0 0 7px var(--red-main);
+        }
+
+        .btn-install-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border: 1px solid #f59e0b;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(6, 95, 70, 0.25);
+            transition: all 0.15s;
+        }
+        .btn-install-header:active { transform: scale(0.96); }
+
+        /* BREADCRUMBS WITH FORWARD ARROWS (➔) */
+        .steps-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .crumb-chip {
+            border-radius: 20px;
+            padding: 3px 9px;
+            font-size: 10.5px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .crumb-chip.chip-red { background: var(--red-bg); border: 1.5px solid var(--red-border); color: var(--red-text); }
+        .crumb-chip.chip-green { background: var(--green-bg); border: 1.5px solid var(--green-border); color: var(--green-text); }
+        .crumb-chip.chip-blue { background: var(--blue-bg); border: 1.5px solid var(--blue-border); color: var(--blue-text); }
+
+        .crumb-arrow {
+            font-size: 10px;
+            color: #94a3b8;
+            margin: 0 1px;
+        }
+
+        /* Workspace Card with Enhanced Rich Color Tinting */
+        .stage-card {
+            background: #ffffff;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: clamp(8px, 1.4vh, 12px) clamp(10px, 1.8vw, 14px);
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            animation: fadeInStage 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: border-color 0.25s, background-color 0.25s, box-shadow 0.25s;
+            overflow-y: auto;
+        }
+
+        .stage-card.flow-red {
+            border-color: var(--red-border);
+            background-color: #fff5f5;
+            box-shadow: 0 4px 18px rgba(220, 38, 38, 0.08);
+        }
+        .stage-card.flow-green {
+            border-color: var(--green-border);
+            background-color: #f0fdf4;
+            box-shadow: 0 4px 18px rgba(22, 163, 74, 0.08);
+        }
+        .stage-card.flow-blue {
+            border-color: var(--blue-border);
+            background-color: #eff6ff;
+            box-shadow: 0 4px 18px rgba(37, 99, 235, 0.08);
+        }
+
+        @keyframes fadeInStage {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stage-title {
+            text-align: center;
+            margin-bottom: clamp(6px, 1vh, 10px);
+            flex-shrink: 0;
+        }
+
+        .stage-title h2 {
+            font-size: clamp(13.5px, 1.9vh, 15px);
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .stage-title p {
+            font-size: clamp(10px, 1.4vh, 11px);
+            color: var(--text-muted);
+        }
+
+        /* STEP 1: AUTO-FIT 3 VIBRANT BLOCKS */
+        #step1_MainAction {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+            min-height: 0;
+        }
+
+        .blocks-stack {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            gap: clamp(6px, 1.2vh, 10px);
+            flex: 1;
+            min-height: 0;
+        }
+
+        .action-block {
+            border-radius: 14px;
+            padding: clamp(6px, 1.4vh, 11px) clamp(10px, 2.5vw, 14px);
+            display: flex;
+            align-items: center;
+            gap: clamp(10px, 2vw, 14px);
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            min-height: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            pointer-events: auto !important;
+            touch-action: manipulation;
+        }
+
+        /* BLOCK 1: STRONGER RED (Give Credit) */
+        .action-block.block-red {
+            border: 2px solid var(--red-border);
+            background: linear-gradient(135deg, #ffffff 0%, #fee2e2 100%);
+        }
+        .action-block.block-red:hover, .action-block.block-red:active {
+            border-color: var(--red-main);
+            background: #fecaca;
+            box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2);
+        }
+        .action-block.block-red .block-icon { background: #fecaca; color: var(--red-main); }
+        .action-block.block-red:hover .arrow-icon { color: var(--red-main); }
+
+        /* BLOCK 2: STRONGER GREEN (Collect Debt) */
+        .action-block.block-green {
+            border: 2px solid var(--green-border);
+            background: linear-gradient(135deg, #ffffff 0%, #dcfce7 100%);
+        }
+        .action-block.block-green:hover, .action-block.block-green:active {
+            border-color: var(--green-main);
+            background: #bbf7d0;
+            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.2);
+        }
+        .action-block.block-green .block-icon { background: #bbf7d0; color: var(--green-main); }
+        .action-block.block-green:hover .arrow-icon { color: var(--green-main); }
+
+        /* BLOCK 3: STRONGER BLUE (Banking & Cash) */
+        .action-block.block-blue {
+            border: 2px solid var(--blue-border);
+            background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+        }
+        .action-block.block-blue:hover, .action-block.block-blue:active {
+            border-color: var(--blue-main);
+            background: #bfdbfe;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+        }
+        .action-block.block-blue .block-icon { background: #bfdbfe; color: var(--blue-main); }
+        .action-block.block-blue:hover .arrow-icon { color: var(--blue-main); }
+
+        .action-block .block-icon {
+            width: clamp(36px, 5vh, 42px);
+            height: clamp(36px, 5vh, 42px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(16px, 2.2vh, 19px);
+            flex-shrink: 0;
+        }
+
+        .action-block .block-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .action-block h3 {
+            font-size: clamp(13px, 1.8vh, 14.5px);
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .action-block p {
+            font-size: clamp(10.5px, 1.4vh, 11.5px);
+            color: var(--text-muted);
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .action-block .arrow-icon {
+            color: #94a3b8;
+            font-size: clamp(12px, 1.6vh, 14px);
+            transition: transform 0.15s;
+            flex-shrink: 0;
+        }
+
+        .action-block:hover .arrow-icon {
+            transform: translateX(3px);
+        }
+
+        /* Step 2 (RED Flow): Category Tiles */
+        .category-tiles-grid {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            gap: clamp(6px, 1.2vh, 8px);
+            flex: 1;
+            min-height: 0;
+        }
+
+        .cat-tile {
+            border: 2px solid var(--red-border);
+            background: #ffffff;
+            border-radius: 13px;
+            padding: clamp(6px, 1.4vh, 10px) clamp(10px, 2vw, 14px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-height: 0;
+        }
+
+        .cat-tile:hover, .cat-tile:active {
+            border-color: var(--red-main);
+            background: #fee2e2;
+        }
+
+        .cat-tile .tile-icon {
+            width: clamp(34px, 4.8vh, 40px);
+            height: clamp(34px, 4.8vh, 40px);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(15px, 2vh, 17px);
+            background: #fecaca;
+            color: var(--red-main);
+            flex-shrink: 0;
+        }
+
+        .cat-tile:hover .tile-icon {
+            background: var(--red-main);
+            color: #ffffff;
+        }
+
+        .cat-tile h3 { font-size: clamp(12.5px, 1.7vh, 13.5px); font-weight: 800; color: var(--text); }
+        .cat-tile p { font-size: clamp(10px, 1.3vh, 11px); color: var(--text-muted); }
+
+        /* Step 3: Customer Selector */
+        .customer-stage-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .search-select-btn {
+            width: 100%;
+            padding: 11px 12px;
+            border: 2px solid var(--border);
+            border-radius: 11px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .btn-add-cust-toggle {
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 9px;
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .spacious-add-form {
+            display: none;
+            background: #ffffff;
+            border: 2px solid var(--border);
+            border-radius: 13px;
+            padding: 12px;
+        }
+
+        .dropdown-menu {
+            position: relative;
+            background: #ffffff;
+            border: 2px solid var(--border);
+            border-radius: 11px;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 20;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            display: none;
+        }
+
+        .dropdown-search-box {
+            padding: 7px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+        }
+
+        .dropdown-search-box input {
+            width: 100%;
+            padding: 7px 9px;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .customer-option-item {
+            padding: 9px 11px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .customer-option-item:hover { background: #f8fafc; }
+        .co-name { font-size: 13px; font-weight: 800; color: var(--text); }
+        .co-phone { font-size: 11px; color: var(--text-muted); }
+        .co-due { font-size: 11px; font-weight: 800; color: var(--red-main); background: #fee2e2; padding: 2px 6px; border-radius: 6px; }
+
+        .selected-cust-card {
+            display: none;
+            border: 2px solid var(--border);
+            border-radius: 13px;
+            padding: 10px;
+        }
+
+        .selected-cust-card.card-red { background: var(--red-bg); border-color: var(--red-border); }
+        .selected-cust-card.card-green { background: var(--green-bg); border-color: var(--green-border); }
+
+        .sc-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .sc-left { display: flex; align-items: center; gap: 9px; }
+        .sc-avatar { width: 34px; height: 34px; color: #ffffff; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; }
+        .sc-avatar.avatar-red { background: var(--red-main); }
+        .sc-avatar.avatar-green { background: var(--green-main); }
+
+        .sc-info h4 { font-size: 13.5px; font-weight: 800; color: var(--text); }
+        .sc-info p { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+        .sc-due-pill { background: var(--red-main); color: #ffffff; font-size: 11.5px; font-weight: 800; padding: 2.5px 7px; border-radius: 8px; }
+
+        /* Form Inputs */
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.3px; margin-bottom: 3px; }
+        .text-field { width: 100%; padding: 9px 11px; border: 2px solid var(--border); border-radius: 9px; font-size: 13.5px; font-weight: 700; color: var(--text); outline: none; }
+        .text-field:focus { border-color: var(--blue-main); }
+        .amount-field { font-size: 20px; font-weight: 900; }
+
+        /* Action Buttons */
+        .btn-continue {
+            width: 100%;
+            padding: 11.5px;
+            color: #ffffff;
+            border: none;
+            border-radius: 11px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+
+        .btn-continue.btn-red { background: linear-gradient(135deg, var(--red-main) 0%, var(--red-dark) 100%); box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25); }
+        .btn-continue.btn-green { background: linear-gradient(135deg, var(--green-main) 0%, var(--green-dark) 100%); box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25); }
+        .btn-continue.btn-blue { background: linear-gradient(135deg, var(--blue-main) 0%, var(--blue-dark) 100%); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
+
+        .btn-continue:hover { opacity: 0.95; }
+        .btn-continue:disabled { opacity: 0.5; }
+
+        /* Success Card & Auto-Return Timer */
+        .success-box { text-align: center; padding: 8px 4px; }
+        .success-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 8px auto; }
+        .success-icon.icon-red { background: #fee2e2; color: var(--red-main); }
+        .success-icon.icon-green { background: #dcfce7; color: var(--green-main); }
+        .success-icon.icon-blue { background: #dbeafe; color: var(--blue-main); }
+
+        .success-box h2 { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+        .success-box p { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+        .tx-summary-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 11px; padding: 11px; text-align: left; margin-bottom: 10px; }
+        .tx-row { display: flex; justify-content: space-between; padding: 2.5px 0; font-size: 12px; }
+        .tx-row.total { border-top: 1px dashed #cbd5e1; margin-top: 4px; padding-top: 5px; font-weight: 800; font-size: 13.5px; }
+
+        .countdown-chip {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            border-radius: 20px;
+            padding: 3px 11px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 14px;
+            right: 14px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 9px 14px;
+            border-radius: 9px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            font-size: 11.5px;
+            font-weight: 700;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+        .toast.show { display: flex; animation: slideUp 0.2s; }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Access Denied Overlay */
+        #accessDeniedScreen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            color: #ffffff;
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .denied-card {
+            background: #1e293b;
+            border: 2px solid #ef4444;
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 440px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .denied-icon { font-size: 48px; color: #ef4444; margin-bottom: 14px; }
+        .denied-card h2 { font-size: 19px; font-weight: 900; margin-bottom: 6px; color: #ffffff; }
+        .denied-card p { font-size: 13px; color: #94a3b8; margin-bottom: 16px; line-height: 1.4; }
+        .btn-switch-account {
+            background: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+    
+        /* Auto-hide install button when app is installed in standalone mode */
+        @media (display-mode: standalone) {
+            #pwaInstallBtn, .btn-install-header {
+                display: none !important;
+            }
+        }
+        body.is-standalone-pwa #pwaInstallBtn,
+        body.is-standalone-pwa .btn-install-header {
+            display: none !important;
+        }
+
+</style>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260824_v3_seamless_nav', { scope: '/clients/madawalateashop/' })
+                    .then(reg => {
+                        console.log('[PWA] Service Worker registered under scope:', reg.scope);
+                        if (reg.update) reg.update();
+                    })
+                    .catch(err => console.warn('[PWA] SW register error:', err));
+            });
+            // Auto reload when new service worker takes over to seamlessly upgrade cache
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('[PWA] New Service Worker activated. Refreshing...');
+                    window.location.reload();
+                }
+            });
+        }
+    </script>
+
+</head>
+<body class="credit-app-body">
+
+    <!-- ACCESS DENIED SCREEN -->
+    <div id="accessDeniedScreen">
+        <div class="denied-card">
+            <i class="fa-solid fa-ban denied-icon"></i>
+            <h2>Access Denied</h2>
+            <p>You do not have permission to access the <strong>DARSHANA MADAWALA</strong> workspace with account: <br><span id="deniedEmail" style="color:#38bdf8; font-weight:bold;"></span></p>
+            <p style="font-size: 11.5px; color: #cbd5e1;">Please log in with an authorized account.</p>
+            <button class="btn-switch-account" onclick="handleDeniedLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Switch Account / Log Out
+            </button>
+        </div>
+    </div>
+
+    <!-- PULL TO REFRESH SPINNER INDICATOR -->
+    <div id="pullToRefreshIndicator" class="ptr-indicator">
+        <div class="ptr-content">
+            <i class="fa-solid fa-arrows-rotate ptr-icon" id="ptrIcon"></i>
+            <span id="ptrText">Pull down to reload...</span>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+                                <!-- MODERN SLEEK TOP HEADER -->
+        <header class="unified-header-card" style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:18px; padding:10px 14px; box-shadow:0 4px 14px rgba(15,23,42,0.04); margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button type="button" class="btn-hdr" onclick="toggleSidebarMenu()" aria-label="Open Sidebar Menu" style="width:38px; height:38px; border-radius:10px; border:1.5px solid #cbd5e1; background:#f8fafc; color:#064e3b; display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer; transition:all 0.15s; flex-shrink:0;">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <img src="/clients/madawalateashop/assets/icon-192.svg" style="width:32px; height:32px; border-radius:8px; border:1.5px solid #f59e0b; flex-shrink:0;" alt="Madawala Tea">
+                    <div>
+                        <h1 style="font-size:14.5px; font-weight:900; color:#064e3b; margin:0; line-height:1.1; letter-spacing:0.4px;">MADAWALA TEA SHOP</h1>
+                        <div style="font-size:11px; font-weight:700; color:#059669; margin-top:2px;">Darshana Madawala • Kurunegala</div>
+                    </div>
+                    <span class="status-dot" id="networkStatusDot" title="Online" style="width:8px; height:8px; border-radius:50%; background-color:#16a34a; box-shadow:0 0 8px #16a34a; margin-left:2px;"></span>
+                </div>
+            </div>
+            <div>
+                <button class="btn-install-header" id="pwaInstallBtn" onclick="triggerPWAInstall()" style="display:inline-flex; align-items:center; gap:5px; padding:6px 12px; background:linear-gradient(135deg, #065f46 0%, #047857 100%); border:1.5px solid #f59e0b; color:#ffffff; font-size:11.5px; font-weight:800; border-radius:10px; cursor:pointer; box-shadow:0 2px 6px rgba(6,95,70,0.25);">
+                    <i class="fa-solid fa-download"></i> Install
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Breadcrumb Navigation With Forward Arrows -->
+        <div class="steps-breadcrumb" id="stepsBreadcrumb"></div>
+
+        <!-- PROGRESSIVE WORKSPACE CARD (Auto-Fit Proportional Height) -->
+        <div class="stage-card" id="stageCard">
+
+            <!-- STEP 1: AUTO-FIT 3 VIBRANT COLOR BLOCKS -->
+            <div id="step1_MainAction">
+                <div class="stage-title">
+                    <h2>What transaction would you like to perform?</h2>
+                    <p>Select one of the 3 options below to begin</p>
+                </div>
+
+                <div class="blocks-stack">
+                    <!-- BLOCK 1: RED (Give Credit / New Loan) -->
+                    <div class="action-block block-red" onclick="selectMainAction('GIVE_CREDIT')">
+                        <div class="block-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                        <div class="block-info">
+                            <h3 style="color: var(--red-text);">1. Give Credit / New Loan</h3>
+                            <p>Give grocery goods, phone reload or cash loan on credit</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    </div>
+
+                    <!-- BLOCK 2: GREEN (Collect Debt / Repayments) -->
+                    <div class="action-block block-green" onclick="selectMainAction('COLLECT_DEBT')">
+                        <div class="block-icon"><i class="fa-solid fa-circle-dollar-to-slot"></i></div>
+                        <div class="block-info">
+                            <h3 style="color: var(--green-text);">2. Collect Debt / Repayments</h3>
+                            <p>Receive payment from customer and settle balance</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    </div>
+
+                    <!-- BLOCK 3: BLUE (Banking & Cash Movement) -->
+                    <div class="action-block block-blue" onclick="selectMainAction('BANKING')">
+                        <div class="block-icon"><i class="fa-solid fa-building-columns"></i></div>
+                        <div class="block-info">
+                            <h3 style="color: var(--blue-text);">3. Banking & Cash Movement</h3>
+                            <p>Record cash deposit into bank account or withdrawal</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2 (GIVE CREDIT - RED FLOW): Category Selection -->
+            <div id="step2_CreditCategory" style="display: none; height: 100%; flex-direction: column;">
+                <div class="stage-title">
+                    <h2 style="color: var(--red-text);">Select Credit Type</h2>
+                    <p>What type of credit are you giving?</p>
+                </div>
+
+                <div class="category-tiles-grid">
+                    <div class="cat-tile" onclick="selectCreditCategory('GROCERY', 'Product Sale (Retail Goods)')">
+                        <div class="tile-icon"><i class="fa-solid fa-basket-shopping"></i></div>
+                        <div>
+                            <h3>Product Sale (Retail Goods)</h3>
+                            <p>Retail groceries and goods on credit</p>
+                        </div>
+                    </div>
+
+                    <div class="cat-tile" onclick="selectCreditCategory('RELOAD', 'Mobile Reload')">
+                        <div class="tile-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+                        <div>
+                            <h3>Mobile Reload</h3>
+                            <p>Phone reload credit balance</p>
+                        </div>
+                    </div>
+
+                    <div class="cat-tile" onclick="selectCreditCategory('CASH_LOAN', 'Cash Loan')">
+                        <div class="tile-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                        <div>
+                            <h3>Cash / Hand Loan</h3>
+                            <p>Direct cash lending to customer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Customer Selection (Colored Flow Aware) -->
+            <div id="step3_Customer" style="display: none;">
+                <div class="stage-title">
+                    <h2 id="custStageTitle">Select Customer</h2>
+                    <p id="custStageSubtitle">Choose the customer for this transaction</p>
+                </div>
+
+                <div class="customer-stage-wrap">
+                    <button type="button" class="search-select-btn" id="btnOpenCustomerDropdown" onclick="toggleCustomerDropdown()">
+                        <span id="selectedCustLabel"><i class="fa-solid fa-user" style="color: #94a3b8; margin-right: 8px;"></i> Select from Customer List...</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 11px; color: #94a3b8;"></i>
+                    </button>
+
+                    <div class="dropdown-menu" id="custDropdownMenu">
+                        <div class="dropdown-search-box">
+                            <input type="text" id="custSearchInput" placeholder="Search name or phone..." oninput="filterDropdownCustomers(this.value)" autocomplete="off">
+                        </div>
+                        <div id="custOptionsList"></div>
+                    </div>
+
+                    <button type="button" class="btn-add-cust-toggle" id="btnAddCustToggle" onclick="toggleSpaciousAddCustomer()">
+                        <i class="fa-solid fa-user-plus" id="addCustIcon"></i> <span>+ Add New Customer</span>
+                    </button>
+
+                    <div class="spacious-add-form" id="spaciousAddForm">
+                        <h4><i class="fa-solid fa-user-plus"></i> Register New Customer</h4>
+                        
+                        <div class="input-group">
+                            <label>Customer Full Name *</label>
+                            <input type="text" class="text-field" id="newCustName" placeholder="e.g. Kasun Perera" autocomplete="off">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Mobile Phone Number (07X...)</label>
+                            <input type="tel" class="text-field" id="newCustPhone" placeholder="e.g. 077 123 4567" autocomplete="off">
+                        </div>
+
+                        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px;">
+                            <button type="button" onclick="toggleSpaciousAddCustomer()" style="background:#e2e8f0; border:none; padding:7px 12px; border-radius:7px; font-weight:700; cursor:pointer;">Cancel</button>
+                            <button type="button" id="btnSaveNewCust" onclick="saveNewCustomerSpacious()" style="background:var(--blue-main); color:#fff; border:none; padding:7px 15px; border-radius:7px; font-weight:800; cursor:pointer;">Save & Select</button>
+                        </div>
+                    </div>
+
+                    <div class="selected-cust-card" id="selectedCustCard">
+                        <div class="sc-row">
+                            <div class="sc-left">
+                                <div class="sc-avatar" id="scAvatar">C</div>
+                                <div class="sc-info">
+                                    <h4 id="scName">Customer Name</h4>
+                                    <p><i class="fa-solid fa-phone"></i> <span id="scPhone">077 123 4567</span></p>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="sc-due-pill" id="scDue">Due: Rs. 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-continue" id="btnCustomerNext" onclick="proceedToAmountStage()" style="display: none;">
+                        <span>Continue to Amount</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Amount & Details (Colored Flow Aware) -->
+            <div id="step4_AmountDetails" style="display: none;">
+                <div class="stage-title">
+                    <h2 id="amountStageTitle">Enter Amount</h2>
+                    <p id="amountStageSubtitle">Specify transaction amount and notes</p>
+                </div>
+
+                <div class="input-group">
+                    <label id="amountInputLabel">Amount (Rs.) *</label>
+                    <input type="number" class="text-field amount-field" id="txAmount" placeholder="0.00" min="1" step="any">
+                </div>
+
+                <div class="input-group" id="settleMethodGroup" style="display: none;">
+                    <label>Payment Method *</label>
+                    <select class="text-field" id="txPayMethod" onchange="onPaymentMethodChanged(this.value)">
+                        <option value="CASH">💵 Cash in Hand</option>
+                        <option value="BANK_TRANSFER">🏦 Bank Transfer</option>
+                        <option value="CHEQUE">📑 Cheque</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="bankDepositGroup" style="display: none;">
+                    <label>Deposit To Bank Account *</label>
+                    <select class="text-field" id="txDepositBank">
+                        <option value="">-- Select Bank Account --</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="creditSourceGroup" style="display: none;">
+                    <label>Disbursed Via *</label>
+                    <select class="text-field" id="txCreditSource" onchange="onCreditSourceChanged(this.value)">
+                        <option value="CASH">💵 Cash in Hand</option>
+                        <option value="BANK_TRANSFER">🏦 Bank Account Transfer</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="bankDisburseGroup" style="display: none;">
+                    <label>Withdraw From Bank Account *</label>
+                    <select class="text-field" id="txDisburseBank">
+                        <option value="">-- Select Bank Account --</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Description / Note</label>
+                    <input type="text" class="text-field" id="txNotes" placeholder="e.g. Goods / Reload">
+                </div>
+
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" class="text-field" id="txDate">
+                </div>
+
+                <button type="button" class="btn-continue" id="btnSubmitTx" onclick="submitTransaction()">
+                    <i class="fa-solid fa-check"></i> <span id="submitBtnLabel">Record Transaction</span>
+                </button>
+            </div>
+
+            <!-- BANKING WORKSPACE (BLUE FLOW) -->
+            <div id="step_Banking" style="display: none;">
+                <div class="stage-title">
+                    <h2 style="color: var(--blue-text);">Banking & Cash Movement</h2>
+                    <p>Record bank deposits or withdrawals</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Transaction Type *</label>
+                    <select class="text-field" id="bankTxType">
+                        <option value="DEPOSIT">Deposit Cash into Bank (+)</option>
+                        <option value="WITHDRAWAL">Withdraw Cash from Bank (-)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Bank Account *</label>
+                    <select class="text-field" id="bankTxAccount">
+                        <option value="">-- Select Bank Account --</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Amount (Rs.) *</label>
+                    <input type="number" class="text-field amount-field" id="bankTxAmount" placeholder="0.00" min="1" step="any">
+                </div>
+
+                <div class="input-group">
+                    <label>Reference / Remarks</label>
+                    <input type="text" class="text-field" id="bankTxRef" placeholder="e.g. Cash sales deposit">
+                </div>
+
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" class="text-field" id="bankTxDate">
+                </div>
+
+                <button type="button" class="btn-continue btn-blue" id="btnSubmitBank" onclick="submitBankTransaction()">
+                    <i class="fa-solid fa-building-columns"></i> Record Bank Transaction
+                </button>
+            </div>
+
+            <!-- STEP 5: Success Completion Screen (With 10-Second Countdown to Home) -->
+            <div id="step_Success" style="display: none;">
+                <div class="success-box">
+                    <div class="success-icon" id="successIcon"><i class="fa-solid fa-check"></i></div>
+                    <h2 id="successTitle">Transaction Recorded!</h2>
+                    <p>The transaction has been safely saved to your ledger.</p>
+
+                    <div class="countdown-chip" id="successCountdownText">
+                        Auto returning to Home in 10s...
+                    </div>
+
+                    <div class="tx-summary-card" id="successSummaryCard"></div>
+
+                    <button type="button" class="btn-continue btn-blue" onclick="resetStepper()">
+                        <i class="fa-solid fa-plus"></i> Perform Another Transaction Now
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="appToast">
+        <i class="fa-solid fa-circle-check" style="color: #34d399;"></i>
+        <span id="toastMsg">Action completed</span>
+    </div>
+
+    <script>
+        let currentBusinessId = null;
+        let mainAction = null;
+        let selectedCategory = null;
+        let selectedCategoryLabel = '';
+        let selectedCustomer = null;
+        let allCustomers = [];
+        let allBankAccounts = [];
+
+        // 10-Second Countdown Timers
+        let successAutoHomeTimer = null;
+        let successCountdownInterval = null;
+
+        // DYNAMIC VIEWPORT HEIGHT CALIBRATION ENGINE
+        function updateAppViewportHeight() {
+            const vh = window.innerHeight;
+            document.documentElement.style.setProperty('--app-height', `${vh}px`);
+        }
+
+        window.addEventListener('resize', updateAppViewportHeight);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateAppViewportHeight, 150);
+        });
+
+        function toggleSidebarMenu(e) {
+            if (window.toggleSidebarMenu) window.toggleSidebarMenu(e);
+            else document.documentElement.classList.toggle('digibiz-sidebar-open');
+        }
+
+        function formatRs(num) {
+            const val = Number(num) || 0;
+            return 'Rs. ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('appToast');
+            document.getElementById('toastMsg').textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3500);
+        }
+
+        function updateNetworkStatus() {
+            const dot = document.getElementById('networkStatusDot');
+            if (dot) {
+                if (navigator.onLine) {
+                    dot.className = 'status-dot';
+                    dot.title = 'Online (Synchronized)';
+                } else {
+                    dot.className = 'status-dot offline';
+                    dot.title = 'Offline (Working locally)';
+                }
+            }
+        }
+
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
+                // ACCESS CONTROL CHECK — Strictly Restricted to Owner & Super Admin
+        function verifyDarshanaAccess(user) {
+            if (!user) return false;
+            const email = (user.email || '').toLowerCase().trim();
+            const isImpersonating = localStorage.getItem('digibiz_impersonate_active') === 'true';
+            
+            const isAuthorized = email === 'madawalateashop80@gmail.com' ||
+                                 email.includes('madawalateashop') || 
+                                 email.includes('darshana') ||
+                                 email === 'biz.sirimal@gmail.com' ||
+                                 email === '2biz.sirimal@gmail.com' ||
+                                 email === 'scrap@chinthaka.com' ||
+                                 email.includes('superadmin') ||
+                                 email.startsWith('chinthaka') ||
+                                 (isImpersonating && (email.includes('admin') || email.includes('super') || email.includes('chinthaka')));
+            
+            if (!isAuthorized) {
+                const deniedScreen = document.getElementById('accessDeniedScreen');
+                if (deniedScreen) {
+                    const deniedEmail = document.getElementById('deniedEmail');
+                    if (deniedEmail) deniedEmail.textContent = user.email || 'Unknown User';
+                    deniedScreen.style.display = 'flex';
+                } else {
+                    alert('Access Denied: You do not have permission to access Darshana Madawala Credit App.');
+                    window.location.href = '/auth/login.html';
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function handleDeniedLogout() {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = '/auth/login.html';
+                });
+            } else {
+                window.location.href = '/auth/login.html';
+            }
+        }
+
+        // INSTANT LOCAL CACHE HYDRATION (0ms Load from Phone)
+        function loadFromLocalCache() {
+            try {
+                const cachedBiz = localStorage.getItem('dm_cache_biz_profile');
+                if (cachedBiz) {
+                    const el = document.getElementById('topOwnerName');
+                    if (el) el.textContent = cachedBiz;
+                }
+
+                const cachedCust = localStorage.getItem('dm_cache_customers');
+                if (cachedCust) {
+                    allCustomers = JSON.parse(cachedCust) || [];
+                }
+
+                const cachedBank = localStorage.getItem('dm_cache_bank_accounts');
+                if (cachedBank) {
+                    allBankAccounts = JSON.parse(cachedBank) || [];
+                    populateBankDropdowns(allBankAccounts);
+                }
+            } catch(e) {}
+        }
+
+        function populateBankDropdowns(accounts) {
+            const depositSelect = document.getElementById('txDepositBank');
+            const disburseSelect = document.getElementById('txDisburseBank');
+            const bankTxSelect = document.getElementById('bankTxAccount');
+            if (!depositSelect || !bankTxSelect) return;
+
+            depositSelect.innerHTML = '<option value="">-- Select Bank Account --</option>';
+            if (disburseSelect) disburseSelect.innerHTML = '<option value="">-- Select Bank Account --</option>';
+            bankTxSelect.innerHTML = '<option value="">-- Select Bank Account --</option>';
+
+            accounts.forEach(d => {
+                const opt1 = document.createElement('option');
+                opt1.value = d.id;
+                opt1.textContent = `${d.bankName} - ${d.accountNumber} (${formatRs(d.currentBalance)})`;
+                depositSelect.appendChild(opt1);
+
+                if (disburseSelect) {
+                    const optDisburse = document.createElement('option');
+                    optDisburse.value = d.id;
+                    optDisburse.textContent = `${d.bankName} - ${d.accountNumber} (${formatRs(d.currentBalance)})`;
+                    disburseSelect.appendChild(optDisburse);
+                }
+
+                const opt2 = document.createElement('option');
+                opt2.value = d.id;
+                opt2.textContent = `${d.bankName} - ${d.accountNumber} (${formatRs(d.currentBalance)})`;
+                bankTxSelect.appendChild(opt2);
+            });
+        }
+
+        // ALWAYS RESET TO HOME ON PAGE LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAppViewportHeight();
+            updateNetworkStatus();
+            resetStepper();
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('txDate').value = todayStr;
+            document.getElementById('bankTxDate').value = todayStr;
+
+            initPullToRefresh();
+
+            // Instant load from phone storage
+            loadFromLocalCache();
+
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    if (!user) {
+                        localStorage.removeItem('dm_auth_verified_email');
+                        window.location.href = '/auth/login.html';
+                        return;
+                    }
+                    if (!verifyDarshanaAccess(user)) return;
+                    localStorage.setItem('dm_auth_verified_email', user.email);
+                    localStorage.setItem('currentUserRole', 'BUSINESS_OWNER');
+                    localStorage.setItem('currentBusinessNavRole', 'BUSINESS_OWNER');
+                    localStorage.setItem('currentBusinessType', 'credit_ledger');
+                    localStorage.setItem('currentBusinessName', 'DARSHANA MADAWALA');
+
+                    const DM_DEFAULT_BID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
+                    let storedBid = localStorage.getItem('currentBusinessId') || sessionStorage.getItem('currentBusinessId');
+                    if (!storedBid || storedBid === 'DarshanaMadawala' || storedBid.toLowerCase() === 'qxl4jrgfbztzofmoqyhocfr2pfp2') {
+                        storedBid = DM_DEFAULT_BID;
+                    }
+                    currentBusinessId = storedBid;
+                    localStorage.setItem('currentBusinessId', currentBusinessId);
+                    sessionStorage.setItem('currentBusinessId', currentBusinessId);
+                    listenToBusinessProfile();
+                    listenToCustomers();
+                    listenToBankAccounts();
+                });
+            }
+        });
+
+        // CUSTOM HIGH-PERFORMANCE TOUCH PULL-TO-REFRESH
+        function initPullToRefresh() {
+            let touchStartY = 0;
+            let touchCurrentY = 0;
+            let isPulling = false;
+            const PTR_THRESHOLD = 65;
+
+            window.addEventListener('touchstart', (e) => {
+                const stage = document.getElementById('stageCard');
+                const isAtTop = window.scrollY <= 0 && (!stage || stage.scrollTop <= 0);
+                if (isAtTop && e.touches.length === 1) {
+                    touchStartY = e.touches[0].clientY;
+                    isPulling = true;
+                } else {
+                    isPulling = false;
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isPulling || e.touches.length !== 1) return;
+                touchCurrentY = e.touches[0].clientY;
+                const pullDistance = touchCurrentY - touchStartY;
+
+                if (pullDistance > 8) {
+                    const indicator = document.getElementById('pullToRefreshIndicator');
+                    const icon = document.getElementById('ptrIcon');
+                    const text = document.getElementById('ptrText');
+                    const cappedDistance = Math.min(pullDistance * 0.45, 75);
+
+                    indicator.style.transform = `translateY(${cappedDistance + 65}px)`;
+                    indicator.style.opacity = Math.min(pullDistance / PTR_THRESHOLD, 1);
+
+                    if (pullDistance >= PTR_THRESHOLD) {
+                        text.textContent = 'Release to reload...';
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        text.textContent = 'Pull down to reload...';
+                        icon.style.transform = `rotate(${pullDistance * 2.5}deg)`;
+                    }
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchend', (e) => {
+                if (!isPulling) return;
+                const pullDistance = touchCurrentY - touchStartY;
+                isPulling = false;
+
+                const indicator = document.getElementById('pullToRefreshIndicator');
+                const icon = document.getElementById('ptrIcon');
+                const text = document.getElementById('ptrText');
+
+                if (pullDistance >= PTR_THRESHOLD) {
+                    text.textContent = 'Reloading...';
+                    icon.className = 'fa-solid fa-arrows-rotate ptr-icon spin';
+                    indicator.style.transform = 'translateY(75px)';
+                    indicator.style.opacity = '1';
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 250);
+                } else {
+                    indicator.style.transform = 'translateY(0)';
+                    indicator.style.opacity = '0';
+                }
+                touchStartY = 0;
+                touchCurrentY = 0;
+            }, { passive: true });
+        }
+
+        function hideAllSteps() {
+            clearSuccessTimers();
+
+            document.getElementById('step1_MainAction').style.display = 'none';
+            document.getElementById('step2_CreditCategory').style.display = 'none';
+            document.getElementById('step3_Customer').style.display = 'none';
+            document.getElementById('step4_AmountDetails').style.display = 'none';
+            document.getElementById('step_Banking').style.display = 'none';
+            document.getElementById('step_Success').style.display = 'none';
+
+            const stage = document.getElementById('stageCard');
+            stage.className = 'stage-card';
+        }
+
+        // BREADCRUMB WITH ARROWS (➔)
+        function renderBreadcrumb() {
+            const bc = document.getElementById('stepsBreadcrumb');
+            bc.innerHTML = '';
+
+            if (mainAction) {
+                const c1 = document.createElement('div');
+                let chipClass = 'crumb-chip chip-blue';
+                let label = 'Banking & Cash';
+                if (mainAction === 'GIVE_CREDIT') {
+                    chipClass = 'crumb-chip chip-red';
+                    label = 'Give Credit';
+                } else if (mainAction === 'COLLECT_DEBT') {
+                    chipClass = 'crumb-chip chip-green';
+                    label = 'Collect Debt';
+                }
+                c1.className = chipClass;
+                c1.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${label}`;
+                c1.onclick = () => goToStep(1);
+                bc.appendChild(c1);
+            }
+
+            if (selectedCategory && mainAction === 'GIVE_CREDIT') {
+                const arr1 = document.createElement('i');
+                arr1.className = 'fa-solid fa-chevron-right crumb-arrow';
+                bc.appendChild(arr1);
+
+                const c2 = document.createElement('div');
+                c2.className = 'crumb-chip chip-red';
+                c2.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${selectedCategoryLabel}`;
+                c2.onclick = () => goToStep(2);
+                bc.appendChild(c2);
+            }
+
+            if (selectedCustomer) {
+                const arr2 = document.createElement('i');
+                arr2.className = 'fa-solid fa-chevron-right crumb-arrow';
+                bc.appendChild(arr2);
+
+                const c3 = document.createElement('div');
+                let chipClass = (mainAction === 'GIVE_CREDIT') ? 'crumb-chip chip-red' : 'crumb-chip chip-green';
+                c3.className = chipClass;
+                c3.innerHTML = `<i class="fa-solid fa-user-check"></i> ${selectedCustomer.name}`;
+                c3.onclick = () => goToStep(3);
+                bc.appendChild(c3);
+            }
+        }
+
+        function goToStep(stepNumber) {
+            hideAllSteps();
+            if (stepNumber === 1) {
+                resetStepper();
+            } else if (stepNumber === 2) {
+                selectedCategory = null;
+                selectedCustomer = null;
+                if (mainAction === 'GIVE_CREDIT') {
+                    document.getElementById('stageCard').classList.add('flow-red');
+                    document.getElementById('step2_CreditCategory').style.display = 'flex';
+                }
+            } else if (stepNumber === 3) {
+                selectedCustomer = null;
+                applyFlowColorToCustomerStage();
+                document.getElementById('step3_Customer').style.display = 'block';
+            }
+            renderBreadcrumb();
+        }
+
+        // STEP 1: Main Action Selection & Flow Color Trigger
+        function selectMainAction(action) {
+            mainAction = action;
+            hideAllSteps();
+            const stage = document.getElementById('stageCard');
+
+            if (action === 'GIVE_CREDIT') {
+                stage.classList.add('flow-red');
+                document.getElementById('step2_CreditCategory').style.display = 'flex';
+            } else if (action === 'COLLECT_DEBT') {
+                selectedCategory = 'SETTLE';
+                selectedCategoryLabel = 'Collect Debt / Settle';
+                stage.classList.add('flow-green');
+                applyFlowColorToCustomerStage();
+                document.getElementById('custStageTitle').textContent = 'Collect Payment From Customer';
+                document.getElementById('custStageTitle').style.color = 'var(--green-text)';
+                document.getElementById('custStageSubtitle').textContent = 'Select customer settling debt';
+                document.getElementById('step3_Customer').style.display = 'block';
+            } else if (action === 'BANKING') {
+                stage.classList.add('flow-blue');
+                document.getElementById('step_Banking').style.display = 'block';
+            }
+            renderBreadcrumb();
+        }
+
+        // STEP 2: Credit Category Selection
+        function selectCreditCategory(catCode, label) {
+            selectedCategory = catCode;
+            selectedCategoryLabel = label;
+            hideAllSteps();
+            document.getElementById('stageCard').classList.add('flow-red');
+            applyFlowColorToCustomerStage();
+            document.getElementById('custStageTitle').textContent = 'Select Customer';
+            document.getElementById('custStageTitle').style.color = 'var(--red-text)';
+            document.getElementById('custStageSubtitle').textContent = `Giving ${label} to customer`;
+            document.getElementById('step3_Customer').style.display = 'block';
+            renderBreadcrumb();
+        }
+
+        function applyFlowColorToCustomerStage() {
+            const isRed = (mainAction === 'GIVE_CREDIT');
+            const custCard = document.getElementById('selectedCustCard');
+            const avatar = document.getElementById('scAvatar');
+            const nextBtn = document.getElementById('btnCustomerNext');
+            const saveBtn = document.getElementById('btnSaveNewCust');
+            const addIcon = document.getElementById('addCustIcon');
+
+            custCard.className = isRed ? 'selected-cust-card card-red' : 'selected-cust-card card-green';
+            avatar.className = isRed ? 'sc-avatar avatar-red' : 'sc-avatar avatar-green';
+            nextBtn.className = isRed ? 'btn-continue btn-red' : 'btn-continue btn-green';
+            saveBtn.style.background = isRed ? 'var(--red-main)' : 'var(--green-main)';
+            addIcon.style.color = isRed ? 'var(--red-main)' : 'var(--green-main)';
+        }
+
+        function toggleCustomerDropdown() {
+            const menu = document.getElementById('custDropdownMenu');
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+            if (menu.style.display === 'block') {
+                document.getElementById('custSearchInput').value = '';
+                filterDropdownCustomers('');
+                document.getElementById('custSearchInput').focus();
+            }
+        }
+
+        function filterDropdownCustomers(query) {
+            const q = query.toLowerCase().trim();
+            const listEl = document.getElementById('custOptionsList');
+            listEl.innerHTML = '';
+
+            const filtered = allCustomers.filter(c => String(c.name || '').toLowerCase().includes(q) || String(c.phone || '').includes(q));
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div style="padding: 14px; text-align: center; color: #64748b; font-size: 13px;">No matching customer. Click <strong>+ Add New Customer</strong> below.</div>';
+                return;
+            }
+
+            filtered.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'customer-option-item';
+                const bal = Number(c.currentBalance || 0);
+
+                item.innerHTML = `
+                    <div>
+                        <div class="co-name">${escapeHtml(c.name)}</div>
+                        <div class="co-phone"><i class="fa-solid fa-phone" style="font-size: 10px;"></i> ${escapeHtml(c.phone || 'No phone')}</div>
+                    </div>
+                    ${bal > 0 ? `<div class="co-due">Due: ${formatRs(bal)}</div>` : ''}
+                `;
+                item.onclick = () => selectCustomerOption(c);
+                listEl.appendChild(item);
+            });
+        }
+
+        function selectCustomerOption(c) {
+            selectedCustomer = c;
+            document.getElementById('custDropdownMenu').style.display = 'none';
+
+            document.getElementById('selectedCustCard').style.display = 'block';
+            document.getElementById('scAvatar').textContent = (c.name || 'C').charAt(0).toUpperCase();
+            document.getElementById('scName').textContent = c.name;
+            document.getElementById('scPhone').textContent = c.phone || 'No phone';
+            document.getElementById('scDue').textContent = 'Due: ' + formatRs(c.currentBalance || 0);
+
+            const iconColor = (mainAction === 'GIVE_CREDIT') ? 'var(--red-main)' : 'var(--green-main)';
+            document.getElementById('selectedCustLabel').innerHTML = `<i class="fa-solid fa-circle-check" style="color: ${iconColor}; margin-right: 8px;"></i> ${escapeHtml(c.name)}`;
+
+            document.getElementById('btnCustomerNext').style.display = 'flex';
+            document.getElementById('spaciousAddForm').style.display = 'none';
+        }
+
+        function toggleSpaciousAddCustomer() {
+            const form = document.getElementById('spaciousAddForm');
+            form.style.display = (form.style.display === 'block') ? 'none' : 'block';
+            if (form.style.display === 'block') {
+                document.getElementById('custDropdownMenu').style.display = 'none';
+                document.getElementById('newCustName').focus();
+            }
+        }
+
+        async function saveNewCustomerSpacious() {
+            const name = document.getElementById('newCustName').value.trim();
+            const phone = document.getElementById('newCustPhone').value.trim();
+
+            if (!name) {
+                alert('Please enter customer full name.');
+                return;
+            }
+
+            const custId = phone ? phone.replace(/[^0-9]/g, '') : name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const newCustObj = {
+                id: custId,
+                name: name,
+                phone: phone,
+                currentBalance: 0,
+                totalCredit: 0,
+                totalPaid: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                await window.db.collection('businesses').doc(currentBusinessId).collection('customers').doc(custId).set(newCustObj, { merge: true });
+                selectCustomerOption(newCustObj);
+                showToast(`Customer "${name}" saved!`);
+            } catch (err) {
+                alert('Error saving customer: ' + err.message);
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.customer-stage-wrap')) {
+                document.getElementById('custDropdownMenu').style.display = 'none';
+            }
+        });
+
+        // STEP 4: Proceed to Amount & Details
+        function proceedToAmountStage() {
+            if (!selectedCustomer) {
+                alert('Please select a customer.');
+                return;
+            }
+
+            hideAllSteps();
+            document.getElementById('step4_AmountDetails').style.display = 'block';
+            renderBreadcrumb();
+
+            const isRed = (mainAction === 'GIVE_CREDIT');
+            const stage = document.getElementById('stageCard');
+            const title = document.getElementById('amountStageTitle');
+            const subtitle = document.getElementById('amountStageSubtitle');
+            const settleGroup = document.getElementById('settleMethodGroup');
+            const creditSourceGroup = document.getElementById('creditSourceGroup');
+            const submitBtn = document.getElementById('btnSubmitTx');
+            const submitLabel = document.getElementById('submitBtnLabel');
+
+            if (isRed) {
+                stage.classList.add('flow-red');
+                title.textContent = `${selectedCategoryLabel}`;
+                title.style.color = 'var(--red-text)';
+                subtitle.textContent = `Giving credit to ${selectedCustomer.name}`;
+                settleGroup.style.display = 'none';
+                document.getElementById('bankDepositGroup').style.display = 'none';
+                
+                // Show lending source only for CASH_LOAN
+                if (selectedCategory === 'CASH_LOAN') {
+                    creditSourceGroup.style.display = 'block';
+                    onCreditSourceChanged(document.getElementById('txCreditSource').value);
+                } else {
+                    creditSourceGroup.style.display = 'none';
+                    document.getElementById('bankDisburseGroup').style.display = 'none';
+                }
+
+                submitBtn.className = 'btn-continue btn-red';
+                submitLabel.textContent = `Record Credit (${formatRs(0)})`;
+            } else {
+                stage.classList.add('flow-green');
+                title.textContent = 'Collect Payment: ' + selectedCustomer.name;
+                title.style.color = 'var(--green-text)';
+                subtitle.textContent = `Current outstanding debt: ${formatRs(selectedCustomer.currentBalance || 0)}`;
+                settleGroup.style.display = 'block';
+                creditSourceGroup.style.display = 'none';
+                document.getElementById('bankDisburseGroup').style.display = 'none';
+                submitBtn.className = 'btn-continue btn-green';
+                submitLabel.textContent = 'Receive Payment & Settle Debt';
+                onPaymentMethodChanged(document.getElementById('txPayMethod').value);
+            }
+
+            document.getElementById('txAmount').value = '';
+            document.getElementById('txNotes').value = '';
+            document.getElementById('txAmount').focus();
+
+            document.getElementById('txAmount').oninput = function() {
+                const amt = parseFloat(this.value) || 0;
+                if (isRed) {
+                    submitLabel.textContent = `Record ${selectedCategoryLabel} (${formatRs(amt)})`;
+                } else {
+                    submitLabel.textContent = `Receive ${formatRs(amt)} & Settle Debt`;
+                }
+            };
+        }
+
+        function onPaymentMethodChanged(val) {
+            const bankGroup = document.getElementById('bankDepositGroup');
+            if (val === 'BANK_TRANSFER' || val === 'CHEQUE') {
+                bankGroup.style.display = 'block';
+            } else {
+                bankGroup.style.display = 'none';
+            }
+        }
+
+        function onCreditSourceChanged(val) {
+            const disburseGroup = document.getElementById('bankDisburseGroup');
+            if (val === 'BANK_TRANSFER') {
+                disburseGroup.style.display = 'block';
+            } else {
+                disburseGroup.style.display = 'none';
+            }
+        }
+
+        async function submitTransaction() {
+            const btn = document.getElementById('btnSubmitTx');
+            const amount = parseFloat(document.getElementById('txAmount').value) || 0;
+            const notes = document.getElementById('txNotes').value.trim();
+            const date = document.getElementById('txDate').value;
+
+            if (amount <= 0) {
+                alert('Please enter a valid amount greater than 0.');
+                return;
+            }
+
+            btn.disabled = true;
+
+            try {
+                const custRef = window.db.collection('businesses').doc(currentBusinessId).collection('customers').doc(selectedCustomer.id);
+
+                if (selectedCategory === 'SETTLE' || mainAction === 'COLLECT_DEBT') {
+                    const payMethod = document.getElementById('txPayMethod').value;
+                    const bankAccountId = document.getElementById('txDepositBank').value;
+                    const isBankDeposit = (payMethod === 'BANK_TRANSFER' || payMethod === 'CHEQUE') && bankAccountId;
+
+                    await window.db.runTransaction(async (transaction) => {
+                        // 1. All Reads First
+                        const custDoc = await transaction.get(custRef);
+                        let bankDoc = null;
+                        let bankRef = null;
+                        if (isBankDeposit) {
+                            bankRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bankAccountId);
+                            bankDoc = await transaction.get(bankRef);
+                        }
+
+                        // 2. Calculations
+                        let prevBal = 0;
+                        let prevPaid = 0;
+                        if (custDoc.exists) {
+                            prevBal = Number(custDoc.data().currentBalance || 0);
+                            prevPaid = Number(custDoc.data().totalPaid || 0);
+                        }
+
+                        const newBal = Math.max(0, prevBal - amount);
+                        const newPaid = prevPaid + amount;
+
+                        let bankName = '';
+                        let bankAccNo = '';
+
+                        // 3. All Writes After Reads
+                        transaction.set(custRef, {
+                            name: selectedCustomer.name,
+                            phone: selectedCustomer.phone || '',
+                            currentBalance: newBal,
+                            totalPaid: newPaid,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+
+                        if (bankDoc && bankDoc.exists && bankRef) {
+                            bankName = bankDoc.data().bankName || '';
+                            bankAccNo = bankDoc.data().accountNumber || '';
+                            const currBankBal = Number(bankDoc.data().currentBalance || 0);
+                            transaction.update(bankRef, {
+                                currentBalance: currBankBal + amount,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+
+                            // AUTOMATICALLY LOG TO BANK TRANSACTIONS HISTORY
+                            const bankTxRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc();
+                            transaction.set(bankTxRef, {
+                                bankAccountId: bankAccountId,
+                                bankName: bankName,
+                                accountNumber: bankAccNo,
+                                type: 'DEPOSIT',
+                                paymentMode: payMethod === 'CHEQUE' ? 'Cheque' : 'Bank Transfer',
+                                amount: amount,
+                                date: date,
+                                customerId: selectedCustomer.id,
+                                customerName: selectedCustomer.name,
+                                source: 'LOAN_SETTLEMENT',
+                                reference: `Loan Repayment: ${selectedCustomer.name}`,
+                                notes: notes || `Debt Settlement (${selectedCustomer.name})`,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+
+                        const settleRef = window.db.collection('businesses').doc(currentBusinessId).collection('settlements').doc();
+                        transaction.set(settleRef, {
+                            customerId: selectedCustomer.id,
+                            customerName: selectedCustomer.name,
+                            customerPhone: selectedCustomer.phone || '',
+                            amount: amount,
+                            paymentMethod: payMethod,
+                            bankAccountId: bankAccountId || null,
+                            bankName: bankName,
+                            accountNumber: bankAccNo,
+                            date: date,
+                            notes: notes || 'Debt Settlement',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+
+                    showSuccessSummary({
+                        flow: 'green',
+                        type: 'Debt Settlement / Repayment',
+                        customer: selectedCustomer.name,
+                        amount: amount,
+                        method: payMethod,
+                        date: date
+                    });
+                } else {
+                    const creditSource = (selectedCategory === 'CASH_LOAN') ? (document.getElementById('txCreditSource').value) : 'CASH';
+                    const disburseBankId = (creditSource === 'BANK_TRANSFER') ? (document.getElementById('txDisburseBank').value) : '';
+                    const isBankDisburse = (selectedCategory === 'CASH_LOAN' && creditSource === 'BANK_TRANSFER' && disburseBankId);
+
+                    await window.db.runTransaction(async (transaction) => {
+                        // 1. All Reads First
+                        const custDoc = await transaction.get(custRef);
+                        let bankDoc = null;
+                        let bankRef = null;
+                        if (isBankDisburse) {
+                            bankRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(disburseBankId);
+                            bankDoc = await transaction.get(bankRef);
+                        }
+
+                        // 2. Calculations
+                        let prevBal = 0;
+                        let prevCredit = 0;
+                        if (custDoc.exists) {
+                            prevBal = Number(custDoc.data().currentBalance || 0);
+                            prevCredit = Number(custDoc.data().totalCredit || 0);
+                        }
+
+                        const newBal = prevBal + amount;
+                        const newCredit = prevCredit + amount;
+
+                        let bankName = '';
+                        let bankAccNo = '';
+
+                        // 3. All Writes After Reads
+                        transaction.set(custRef, {
+                            name: selectedCustomer.name,
+                            phone: selectedCustomer.phone || '',
+                            currentBalance: newBal,
+                            totalCredit: newCredit,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+
+                        // Deduct from bank if cash loan disbursed via bank
+                        if (bankDoc && bankDoc.exists && bankRef) {
+                            bankName = bankDoc.data().bankName || '';
+                            bankAccNo = bankDoc.data().accountNumber || '';
+                            const currBankBal = Number(bankDoc.data().currentBalance || 0);
+                            transaction.update(bankRef, {
+                                currentBalance: currBankBal - amount,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+
+                            // LOG WITHDRAWAL TO BANK TRANSACTIONS
+                            const bankTxRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc();
+                            transaction.set(bankTxRef, {
+                                bankAccountId: disburseBankId,
+                                bankName: bankName,
+                                accountNumber: bankAccNo,
+                                type: 'WITHDRAWAL',
+                                paymentMode: 'Bank Transfer',
+                                amount: amount,
+                                date: date,
+                                customerId: selectedCustomer.id,
+                                customerName: selectedCustomer.name,
+                                source: 'LOAN_DISBURSAL',
+                                reference: `Cash Loan Disbursed to ${selectedCustomer.name}`,
+                                notes: notes || `Cash Loan lending`,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+
+                        const credRef = window.db.collection('businesses').doc(currentBusinessId).collection('credits').doc();
+                        transaction.set(credRef, {
+                            customerId: selectedCustomer.id,
+                            customerName: selectedCustomer.name,
+                            customerPhone: selectedCustomer.phone || '',
+                            category: selectedCategory,
+                            disburseSource: creditSource,
+                            disburseBankId: disburseBankId || null,
+                            amount: amount,
+                            paidAmount: 0,
+                            balance: amount,
+                            status: 'UNPAID',
+                            date: date,
+                            notes: notes,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+
+                    showSuccessSummary({
+                        flow: 'red',
+                        type: selectedCategoryLabel,
+                        customer: selectedCustomer.name,
+                        amount: amount,
+                        date: date
+                    });
+                }
+            } catch (err) {
+                console.error('Error submitting:', err);
+                alert('Submission error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function submitBankTransaction() {
+            const btn = document.getElementById('btnSubmitBank');
+            const txType = document.getElementById('bankTxType').value;
+            const bankAccountId = document.getElementById('bankTxAccount').value;
+            const amount = parseFloat(document.getElementById('bankTxAmount').value) || 0;
+            const ref = document.getElementById('bankTxRef').value.trim();
+            const date = document.getElementById('bankTxDate').value;
+
+            if (!bankAccountId || amount <= 0) {
+                alert('Please select a bank account and enter a valid amount.');
+                return;
+            }
+
+            btn.disabled = true;
+
+            try {
+                const bankRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bankAccountId);
+                let accName = '';
+
+                await window.db.runTransaction(async (transaction) => {
+                    const bankDoc = await transaction.get(bankRef);
+                    if (!bankDoc.exists) throw new Error('Bank account not found');
+                    accName = bankDoc.data().bankName + ' - ' + bankDoc.data().accountNumber;
+
+                    const currBal = Number(bankDoc.data().currentBalance || 0);
+                    let newBal = currBal;
+                    if (txType === 'DEPOSIT') newBal += amount;
+                    else if (txType === 'WITHDRAWAL') newBal -= amount;
+
+                    transaction.update(bankRef, {
+                        currentBalance: newBal,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    const txRef = window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc();
+                    transaction.set(txRef, {
+                        bankAccountId: bankAccountId,
+                        bankName: bankDoc.data().bankName,
+                        accountNumber: bankDoc.data().accountNumber,
+                        type: txType,
+                        amount: amount,
+                        date: date,
+                        reference: ref,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+
+                showSuccessSummary({
+                    flow: 'blue',
+                    type: txType === 'DEPOSIT' ? 'Bank Cash Deposit' : 'Bank Cash Withdrawal',
+                    customer: accName,
+                    amount: amount,
+                    date: date
+                });
+            } catch (err) {
+                console.error('Banking error:', err);
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function showSuccessSummary(data) {
+            hideAllSteps();
+            document.getElementById('step_Success').style.display = 'block';
+
+            const icon = document.getElementById('successIcon');
+            icon.className = `success-icon icon-${data.flow}`;
+
+            let colorHex = (data.flow === 'red') ? 'var(--red-main)' : ((data.flow === 'green') ? 'var(--green-main)' : 'var(--blue-main)');
+
+            const card = document.getElementById('successSummaryCard');
+            card.innerHTML = `
+                <div class="tx-row"><span style="color: #64748b;">Transaction:</span><strong>${data.type}</strong></div>
+                <div class="tx-row"><span style="color: #64748b;">Party / Account:</span><strong>${data.customer}</strong></div>
+                <div class="tx-row"><span style="color: #64748b;">Date:</span><span>${data.date}</span></div>
+                ${data.method ? `<div class="tx-row"><span style="color: #64748b;">Method:</span><span>${data.method}</span></div>` : ''}
+                <div class="tx-row total"><span>Total Amount:</span><span style="color: ${colorHex};">${formatRs(data.amount)}</span></div>
+            `;
+            showToast('Transaction saved successfully!');
+
+            // 10-Second Auto Return to Home
+            startSuccessAutoHomeCountdown();
+        }
+
+        function startSuccessAutoHomeCountdown() {
+            clearSuccessTimers();
+
+            let remainingSeconds = 10;
+            const timerLabel = document.getElementById('successCountdownText');
+            if (timerLabel) {
+                timerLabel.textContent = `Auto returning to Home in ${remainingSeconds}s...`;
+            }
+
+            successCountdownInterval = setInterval(() => {
+                remainingSeconds--;
+                if (remainingSeconds > 0) {
+                    if (timerLabel) timerLabel.textContent = `Auto returning to Home in ${remainingSeconds}s...`;
+                } else {
+                    clearInterval(successCountdownInterval);
+                }
+            }, 1000);
+
+            successAutoHomeTimer = setTimeout(() => {
+                resetStepper();
+            }, 10000);
+        }
+
+        function clearSuccessTimers() {
+            if (successAutoHomeTimer) {
+                clearTimeout(successAutoHomeTimer);
+                successAutoHomeTimer = null;
+            }
+            if (successCountdownInterval) {
+                clearInterval(successCountdownInterval);
+                successCountdownInterval = null;
+            }
+        }
+
+        function resetStepper() {
+            clearSuccessTimers();
+            mainAction = null;
+            selectedCategory = null;
+            selectedCustomer = null;
+            hideAllSteps();
+            document.getElementById('step1_MainAction').style.display = 'flex';
+            document.getElementById('selectedCustCard').style.display = 'none';
+            document.getElementById('btnCustomerNext').style.display = 'none';
+            document.getElementById('selectedCustLabel').innerHTML = '<i class="fa-solid fa-user" style="color: #94a3b8; margin-right: 8px;"></i> Select from Customer List...';
+            document.getElementById('spaciousAddForm').style.display = 'none';
+            renderBreadcrumb();
+        }
+
+        function listenToBusinessProfile() {
+            if (!window.db || !currentBusinessId) return;
+            window.db.collection('businesses').doc(currentBusinessId).get().then(doc => {
+                if (doc.exists && (doc.data().businessName || doc.data().name)) {
+                    const name = doc.data().businessName || doc.data().name || 'DARSHANA MADAWALA';
+                    const el = document.getElementById('topOwnerName');
+                    if (el) el.textContent = name;
+                    try { localStorage.setItem('dm_cache_biz_profile', name); } catch(e) {}
+                }
+            }, err => {
+                console.warn('[Offline Mode] Using local business profile cache');
+            });
+        }
+
+        function listenToCustomers() {
+            if (!window.db || !currentBusinessId) return;
+            window.db.collection('businesses').doc(currentBusinessId).collection('customers')
+                .get().then(snapshot => {
+                    allCustomers = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        d.id = doc.id;
+                        allCustomers.push(d);
+                    });
+                    try { localStorage.setItem('dm_cache_customers', JSON.stringify(allCustomers)); } catch(e) {}
+                }, err => {
+                    console.warn('[Offline Mode] Using local customers cache');
+                });
+        }
+
+        function listenToBankAccounts() {
+            if (!window.db || !currentBusinessId) return;
+            window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts')
+                .get().then(snapshot => {
+                    allBankAccounts = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        d.id = doc.id;
+                        allBankAccounts.push(d);
+                    });
+                    populateBankDropdowns(allBankAccounts);
+                    try { localStorage.setItem('dm_cache_bank_accounts', JSON.stringify(allBankAccounts)); } catch(e) {}
+                }, err => {
+                    console.warn('[Offline Mode] Using local bank accounts cache');
+                });
+        }
+
+        // PWA Installation
+        function toggleSidebarMenu() {
+            if (window.toggleSidebarMenu && window.toggleSidebarMenu !== toggleSidebarMenu) {
+                window.toggleSidebarMenu();
+            } else {
+                document.documentElement.classList.toggle('digibiz-sidebar-open');
+                document.body.classList.toggle('digibiz-sidebar-open');
+                const sidebar = document.querySelector('.retail-navbar');
+                if (sidebar) {
+                    const isOpen = document.documentElement.classList.contains('digibiz-sidebar-open');
+                    sidebar.style.setProperty('transform', isOpen ? 'translateX(0)' : 'translateX(-100%)', 'important');
+                    sidebar.style.setProperty('display', isOpen ? 'flex' : 'none', 'important');
+                }
+            }
+        }
+
+        let deferredPrompt = null;
+
+        function checkPwaInstallState() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (isStandalone) {
+                document.body.classList.add('is-standalone-pwa');
+                if (btn) btn.style.setProperty('display', 'none', 'important');
+            }
+        }
+        checkPwaInstallState();
+        window.addEventListener('DOMContentLoaded', checkPwaInstallState);
+        window.addEventListener('appinstalled', () => {
+            document.body.classList.add('is-standalone-pwa');
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.style.setProperty('display', 'none', 'important');
+            deferredPrompt = null;
+        });
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.style.display = 'inline-flex';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Installed';
+        });
+
+        window.triggerPWAInstall = async function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                try {
+                    const choiceResult = await deferredPrompt.userChoice;
+                    if (choiceResult && choiceResult.outcome === 'accepted') {
+                        deferredPrompt = null;
+                    }
+                } catch(err) {
+                    console.warn('[PWA Install]', err);
+                }
+            } else {
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                if (isStandalone) {
+                    alert('✅ MADAWALA TEA SHOP App එක දැනටමත් මෙම දුරකථනයේ Install කර ඇත!');
+                } else {
+                    alert('📲 MADAWALA TEA SHOP Direct App Install:\n\n1. Chrome/Browser මෙනුව (⋮ හෝ Share 📤) ඔබන්න.\n2. "Add to Home screen" (හෝ "Install App") තෝරන්න.\n3. Home Screen එකෙන් App එක ලෙස විවෘත කරන්න!');
+                }
+            }
+        };
+
+        function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    </script>
+    <script src="/clients/madawalateashop/modules/credit/ptr-helper.js?v=20260821_2030">
+        </script>
+
+    
+    
+
+
+    <!-- INTERACTIVE DIRECT PWA INSTALL MODAL -->
+    <div id="pwaDirectInstallModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.75); backdrop-filter:blur(5px); z-index:999999; align-items:center; justify-content:center; padding:16px;">
+        <div style="background:#ffffff; border-radius:24px; max-width:400px; width:100%; padding:24px; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.3); border:2px solid #e2e8f0; animation:fadeInModal 0.2s ease-out;" onclick="event.stopPropagation()">
+            <div style="width:64px; height:64px; margin:0 auto 14px auto; border-radius:16px; background:#064e3b; display:flex; align-items:center; justify-content:center; border:2px solid #f59e0b; box-shadow:0 6px 16px rgba(6,78,59,0.25);">
+                <img src="/clients/madawalateashop/assets/icon-192.svg" style="width:48px; height:48px;" alt="Logo">
+            </div>
+            <h3 style="margin:0 0 6px 0; font-size:18px; font-weight:900; color:#064e3b;">MADAWALA TEA SHOP</h3>
+            <p style="margin:0 0 16px 0; font-size:12.5px; color:#64748b; line-height:1.4;">දුරකථනයට Direct App එකක් ලෙස Install කරගන්න (100% Offline Support)</p>
+
+            <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:12px; text-align:left; font-size:12px; color:#334155; margin-bottom:18px; line-height:1.6;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                    <span style="background:#064e3b; color:#fff; width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold;">1</span>
+                    <span>Chrome / Browser මෙනුව (<strong>⋮</strong> හෝ <strong>Share 📤</strong>) ඔබන්න</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                    <span style="background:#064e3b; color:#fff; width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold;">2</span>
+                    <span><strong>"Add to Home screen"</strong> (හෝ <strong>"Install App"</strong>) තෝරන්න</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="background:#064e3b; color:#fff; width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold;">3</span>
+                    <span>Home Screen එකෙන් App එක ලෙස 100% Offline විවෘත කරන්න!</span>
+                </div>
+            </div>
+
+            <button type="button" onclick="closePwaInstallModal()" style="width:100%; padding:12px; border-radius:12px; background:#064e3b; color:#fff; font-size:14px; font-weight:800; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(6,78,59,0.3);">
+                තේරුණා (Got It)
+            </button>
+        </div>
+    </div>
+
+    <script src="/clients/madawalateashop/modules/credit/migration-bridge.js?v=20260827"></script>
+</body>
+</html>

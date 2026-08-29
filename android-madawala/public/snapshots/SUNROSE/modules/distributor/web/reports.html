@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <script src="/snapshots/SUNROSE/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Intelligence & Reports Hub - DIGIBIZ Distributor</title>
+    <style>
+        html.digibiz-sidebar-reserved body { margin-left: 260px; }
+        @media (max-width: 768px) { html.digibiz-sidebar-reserved body { margin-left: 0; } }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    
+    <script src="/snapshots/SUNROSE/core/firebase-init.js?v=100"></script>
+    <script src="/snapshots/SUNROSE/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/snapshots/SUNROSE/core/event-bus.js?v=58"></script>
+    <script src="/snapshots/SUNROSE/core/auth-roles.js?v=2265"></script>
+    <script src="/snapshots/SUNROSE/core/business-types.js?v=58"></script>
+    <script src="/snapshots/SUNROSE/core/aggregate-utils.js"></script>
+    <script src="/snapshots/SUNROSE/core/dashboard-core.js?v=2265"></script>
+    <script src="/snapshots/SUNROSE/core/distributor-inventory.js?v=46"></script>
+    <script src="/snapshots/SUNROSE/core/sidebar.js?v=2116"></script>
+    
+    <style>
+        :root {
+            --primary: #047857;
+            --primary-dark: #064e3b;
+            --primary-light: #ecfdf5;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); line-height: 1.5; }
+        
+        .main-content { padding: 24px 30px; min-height: 100vh; max-width: 1600px; margin: 0 auto; }
+        @media (max-width: 768px) { .main-content { padding: 16px; } }
+
+        /* Header Bar */
+        .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 14px; }
+        .page-header-text h1 { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 900; color: #064e3b; display: flex; align-items: center; gap: 10px; }
+        .page-header-text p { color: var(--text-muted); font-size: 13.5px; margin-top: 4px; }
+        
+        .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-action { padding: 9px 16px; font-size: 13px; font-weight: 700; border-radius: 10px; border: 1px solid var(--border); background: #fff; color: #1e293b; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-action:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .btn-action.primary { background: #047857; color: #fff; border-color: #047857; }
+        .btn-action.primary:hover { background: #065f46; }
+        .btn-action.accent { background: #0284c7; color: #fff; border-color: #0284c7; }
+        .btn-action.accent:hover { background: #0369a1; }
+
+        /* Multi-Filter Bar */
+        .filter-panel { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 18px 20px; margin-bottom: 22px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03); }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: flex-end; }
+        .filter-field label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 5px; letter-spacing: 0.3px; }
+        .filter-input, .filter-select { width: 100%; padding: 8px 12px; font-size: 13px; font-weight: 600; border: 1.5px solid #cbd5e1; border-radius: 8px; background: #f8fafc; color: #0f172a; outline: none; transition: border-color 0.2s; }
+        .filter-input:focus, .filter-select:focus { border-color: #047857; background: #fff; }
+
+        .preset-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e2e8f0; align-items: center; }
+        .preset-pills span { font-size: 11px; font-weight: 800; color: #64748b; margin-right: 4px; }
+        .pill-btn { padding: 4px 10px; font-size: 11.5px; font-weight: 700; border-radius: 20px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer; transition: all 0.15s; }
+        .pill-btn:hover { background: #e2e8f0; }
+        .pill-btn.active { background: #047857; color: #fff; border-color: #047857; }
+
+        /* KPI Cards Grid */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 22px; }
+        .kpi-card { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 16px; position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px -4px rgba(0,0,0,0.06); }
+        .kpi-label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.4px; display: flex; justify-content: space-between; align-items: center; }
+        .kpi-value { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 900; color: #0f172a; margin-top: 6px; }
+        .kpi-sub { font-size: 11px; color: #64748b; margin-top: 3px; font-weight: 600; }
+        
+        .kpi-card.green { background: #f0fdf4; border-color: #bbf7d0; }
+        .kpi-card.green .kpi-value { color: #166534; }
+        .kpi-card.blue { background: #f0f9ff; border-color: #bae6fd; }
+        .kpi-card.blue .kpi-value { color: #0369a1; }
+        .kpi-card.amber { background: #fffbeb; border-color: #fde68a; }
+        .kpi-card.amber .kpi-value { color: #b45309; }
+        .kpi-card.red { background: #fef2f2; border-color: #fecaca; }
+        .kpi-card.red .kpi-value { color: #b91c1c; }
+
+        /* Charts Row */
+        .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 22px; }
+        @media (max-width: 1024px) { .charts-row { grid-template-columns: 1fr; } }
+        .chart-card { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .chart-title { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+
+        /* Navigation Category Tabs */
+        .category-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 18px; border-bottom: 2px solid #e2e8f0; scrollbar-width: thin; }
+        .cat-tab { padding: 10px 18px; font-size: 13.5px; font-weight: 800; border: none; background: transparent; color: #64748b; cursor: pointer; border-radius: 10px 10px 0 0; white-space: nowrap; display: flex; align-items: center; gap: 8px; transition: all 0.2s; position: relative; }
+        .cat-tab:hover { color: #047857; background: #f1f5f9; }
+        .cat-tab.active { color: #047857; background: #ecfdf5; border-bottom: 3px solid #047857; }
+        .cat-tab .badge-count { font-size: 11px; padding: 2px 6px; border-radius: 10px; background: #e2e8f0; color: #475569; }
+        .cat-tab.active .badge-count { background: #047857; color: #fff; }
+
+        /* Sub-Report Switcher Buttons */
+        .subreport-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; background: #f1f5f9; padding: 6px; border-radius: 12px; }
+        .sub-btn { padding: 7px 14px; font-size: 12.5px; font-weight: 700; border: none; border-radius: 8px; background: transparent; color: #475569; cursor: pointer; transition: all 0.15s; }
+        .sub-btn:hover { background: #e2e8f0; color: #0f172a; }
+        .sub-btn.active { background: #fff; color: #047857; font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+        /* Report Table Card */
+        .report-card { background: #fff; border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 24px; }
+        .report-card-header { padding: 14px 20px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .report-title-area h3 { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; margin: 0; }
+        .report-title-area p { font-size: 12px; color: #64748b; margin: 2px 0 0; }
+        .report-controls { display: flex; align-items: center; gap: 8px; }
+        .search-box { padding: 6px 12px; font-size: 12.5px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #fff; width: 220px; }
+        .search-box:focus { border-color: #047857; }
+
+        .table-responsive { width: 100%; overflow-x: auto; max-height: 650px; }
+        .rep-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .rep-table th { position: sticky; top: 0; background: #f8fafc; color: #475569; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 11px 14px; text-align: left; border-bottom: 2px solid #e2e8f0; z-index: 10; }
+        .rep-table td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: middle; }
+        .rep-table tr:hover td { background: #f8fafc; }
+        .rep-table tr.total-row td { background: #f0fdf4; font-weight: 800; border-top: 2px solid #a7f3d0; border-bottom: 2px solid #a7f3d0; color: #064e3b; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'Inter', monospace; font-weight: 600; }
+
+        .tag-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+        .tag-cash { background: #dcfce7; color: #15803d; }
+        .tag-credit { background: #fee2e2; color: #b91c1c; }
+        .tag-partial { background: #fef3c7; color: #b45309; }
+        .tag-cheque { background: #e0e7ff; color: #4338ca; }
+        .tag-status { padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; }
+        .tag-approved { background: #dcfce7; color: #166534; }
+        .tag-pending { background: #fef3c7; color: #92400e; }
+        .tag-dispatched { background: #e0f2fe; color: #0369a1; }
+        .tag-delivered { background: #f3e8ff; color: #6b21a8; }
+
+        /* Print Sheet Formatting */
+        @media print {
+            html.digibiz-sidebar-reserved body { margin-left: 0 !important; }
+            #sidebar-container, .filter-panel, .header-actions, .category-nav, .subreport-bar, .search-box, .charts-row { display: none !important; }
+            body { background: #fff; color: #000; font-size: 11pt; }
+            .main-content { padding: 0 !important; max-width: 100% !important; }
+            .report-card { border: none !important; box-shadow: none !important; }
+            .rep-table th { background: #e2e8f0 !important; color: #000 !important; }
+            .rep-table td { border-bottom: 1px solid #cbd5e1 !important; }
+            .print-only-header { display: block !important; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        }
+        .print-only-header { display: none; }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <!-- Print Header -->
+        <div class="print-only-header">
+            <h2 id="printBizName" style="margin:0; font-size:20pt; font-weight:900;">DISTRIBUTOR BUSINESS REPORT</h2>
+            <div id="printMeta" style="font-size:10pt; color:#475569; margin-top:4px;"></div>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-text">
+                <h1><i class="fas fa-chart-pie"></i> Business Intelligence & Reports Hub</h1>
+                <p id="pageSubtitle">Multi-dimensional analytics suite covering 35+ perspectives: sales, gross margin, reps, customers, stock, returns, and GL financials.</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn-action primary" onclick="exportActiveReportToCSV()">
+                    <i class="fas fa-file-csv"></i> Export CSV
+                </button>
+                <button type="button" class="btn-action accent" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+                <button type="button" class="btn-action" onclick="refreshReportsHub()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Multi-Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-grid">
+                <div class="filter-field">
+                    <label><i class="fas fa-calendar-alt"></i> Start Date</label>
+                    <input type="date" id="filterStartDate" class="filter-input" onchange="onCustomDateChange()">
+                </div>
+                <div class="filter-field">
+                    <label><i class="fas fa-calendar-alt"></i> End Date</label>
+                    <input type="date" id="filterEndDate" class="filter-input" onchange="onCustomDateChange()">
+                </div>
+                <div class="filter-field">
+                    <label><i class="fas fa-user-tie"></i> Sales Rep</label>
+                    <select id="filterRep" class="filter-select" onchange="applyFiltersAndRender()">
+                        <option value="ALL">All Sales Reps (සියලුම Reps)</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label><i class="fas fa-store"></i> Customer / Shop</label>
+                    <select id="filterShop" class="filter-select" onchange="applyFiltersAndRender()">
+                        <option value="ALL">All Customers / Shops</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label><i class="fas fa-tags"></i> Brand</label>
+                    <select id="filterBrand" class="filter-select" onchange="applyFiltersAndRender()">
+                        <option value="ALL">All Brands (සියලුම Brands)</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label><i class="fas fa-money-check-alt"></i> Payment Method</label>
+                    <select id="filterPayMethod" class="filter-select" onchange="applyFiltersAndRender()">
+                        <option value="ALL">All Payment Types</option>
+                        <option value="CASH">Cash Only</option>
+                        <option value="CREDIT">Credit Only</option>
+                        <option value="PARTIAL">Partial Payment Only</option>
+                        <option value="CHEQUE">Cheque Only</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Quick Date Preset Pills -->
+            <div class="preset-pills">
+                <span>Quick Range:</span>
+                <button type="button" class="pill-btn" onclick="setDatePreset('today')">Today (අද)</button>
+                <button type="button" class="pill-btn" onclick="setDatePreset('yesterday')">Yesterday (ඊයේ)</button>
+                <button type="button" class="pill-btn" onclick="setDatePreset('last7')">Last 7 Days (දින 7)</button>
+                <button type="button" class="pill-btn active" onclick="setDatePreset('thisMonth')">This Month (මෙම මස)</button>
+                <button type="button" class="pill-btn" onclick="setDatePreset('lastMonth')">Last Month (පසුගිය මස)</button>
+                <button type="button" class="pill-btn" onclick="setDatePreset('thisQuarter')">This Quarter (කාර්තුව)</button>
+                <button type="button" class="pill-btn" onclick="setDatePreset('thisYear')">This Year (මෙම වසර)</button>
+                <button type="button" class="pill-btn" onclick="setDatePreset('allTime')">All-Time (සම්පූර්ණ)</button>
+            </div>
+        </div>
+
+        <!-- KPI Summary Cards Grid -->
+        <div class="kpi-grid">
+            <div class="kpi-card green">
+                <div class="kpi-label">Gross Sales Revenue <i class="fas fa-arrow-trend-up"></i></div>
+                <div class="kpi-value" id="kpiGrossSales">Rs. 0.00</div>
+                <div class="kpi-sub" id="kpiOrdersCount">0 Invoices & Orders</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Returns & Free Value <i class="fas fa-undo"></i></div>
+                <div class="kpi-value" id="kpiReturnsValue" style="color:#dc2626;">Rs. 0.00</div>
+                <div class="kpi-sub" id="kpiFreeCount">0 Free Items Issued</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-label">Net Sales Realized <i class="fas fa-coins"></i></div>
+                <div class="kpi-value" id="kpiNetSales">Rs. 0.00</div>
+                <div class="kpi-sub">Gross − Returns − Discounts</div>
+            </div>
+            <div class="kpi-card blue">
+                <div class="kpi-label">Est. Gross Margin <i class="fas fa-chart-line"></i></div>
+                <div class="kpi-value" id="kpiGrossMargin">Rs. 0.00</div>
+                <div class="kpi-sub" id="kpiMarginPercent">0.0% Margin</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-label">Collected Cash / Cheques <i class="fas fa-hand-holding-usd"></i></div>
+                <div class="kpi-value" id="kpiCollected">Rs. 0.00</div>
+                <div class="kpi-sub">Settled & Cash in Hand</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="kpi-label">Credit Outstanding (AR) <i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="kpi-value" id="kpiOutstanding">Rs. 0.00</div>
+                <div class="kpi-sub">Receivable from Retailers</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="kpi-label">Current Stock Valuation <i class="fas fa-boxes-stacked"></i></div>
+                <div class="kpi-value" id="kpiStockValuation">Rs. 0.00</div>
+                <div class="kpi-sub" id="kpiTotalSKUs">0 Active Products</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Active Buying Outlets <i class="fas fa-shop"></i></div>
+                <div class="kpi-value" id="kpiActiveShops">0</div>
+                <div class="kpi-sub" id="kpiAvgOrderValue">Avg Basket: Rs. 0.00</div>
+            </div>
+        </div>
+
+        <!-- Interactive Visual Charts Row -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-area" style="color:#047857;"></i> Sales Revenue & Profit Trend Analysis</div>
+                    <span style="font-size:11px; font-weight:700; color:#64748b;">Daily Timeline</span>
+                </div>
+                <div style="height:260px; position:relative;">
+                    <canvas id="salesTrendChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-pie" style="color:#3b82f6;"></i> Payment Methods Breakdown</div>
+                    <span style="font-size:11px; font-weight:700; color:#64748b;">Value Share</span>
+                </div>
+                <div style="height:260px; position:relative;">
+                    <canvas id="paymentMethodsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Navigation Tabs -->
+        <div class="category-nav">
+            <button type="button" class="cat-tab active" data-cat="sales" onclick="switchCategory('sales')">
+                <i class="fas fa-file-invoice-dollar"></i> 1. Sales & Invoices <span class="badge-count" id="badgeSales">0</span>
+            </button>
+            <button type="button" class="cat-tab" data-cat="products" onclick="switchCategory('products')">
+                <i class="fas fa-boxes-stacked"></i> 2. Products & Brands <span class="badge-count" id="badgeProducts">0</span>
+            </button>
+            <button type="button" class="cat-tab" data-cat="reps" onclick="switchCategory('reps')">
+                <i class="fas fa-users-gear"></i> 3. Sales Reps <span class="badge-count" id="badgeReps">0</span>
+            </button>
+            <button type="button" class="cat-tab" data-cat="customers" onclick="switchCategory('customers')">
+                <i class="fas fa-store"></i> 4. Shops & Credit Aging <span class="badge-count" id="badgeCustomers">0</span>
+            </button>
+            <button type="button" class="cat-tab" data-cat="inventory" onclick="switchCategory('inventory')">
+                <i class="fas fa-warehouse"></i> 5. Inventory & Batches <span class="badge-count" id="badgeInventory">0</span>
+            </button>
+            <button type="button" class="cat-tab" data-cat="promotions" onclick="switchCategory('promotions')">
+                <i class="fas fa-gift"></i> 6. Free Issues & Returns <span class="badge-count" id="badgePromotions">0</span>
+            </button>
+            <button type="button" class="cat-tab" data-cat="financials" onclick="switchCategory('financials')">
+                <i class="fas fa-scale-balanced"></i> 7. Financials & GL <span class="badge-count" id="badgeFinancials">0</span>
+            </button>
+        </div>
+
+        <!-- Sub-Report Switcher Bar -->
+        <div class="subreport-bar" id="subReportBar">
+            <!-- Dynamically populated per category -->
+        </div>
+
+        <!-- Main Report Table Card -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <div class="report-title-area">
+                    <h3 id="currentReportTitle"><i class="fas fa-table"></i> Master Invoices & Orders Register</h3>
+                    <p id="currentReportSubtitle">Complete record of distributor orders with granular customer, rep, price, and payment terms.</p>
+                </div>
+                <div class="report-controls">
+                    <input type="text" id="reportTableSearch" class="search-box" placeholder="🔍 Search records..." oninput="onSearchTable(this.value)">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="rep-table" id="masterReportTable">
+                    <thead id="reportTableHead">
+                        <!-- Dynamic Head -->
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <tr><td colspan="10" style="text-align:center; padding:40px; color:#94a3b8;">Loading analytics data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer style="text-align:center; padding:20px; color:#94a3b8; font-size:12px; border-top:1px solid #e2e8f0; margin-top:20px;">
+            DIGIBIZ Universal Cloud Analytics Hub • Enterprise Edition
+        </footer>
+    </div>
+
+    <!-- Script Implementation -->
+    <script>
+        let currentBusinessId = null;
+        let currentBusinessData = null;
+        let allOrders = [];
+        let allProducts = [];
+        let allShops = [];
+        let allReps = [];
+        let allReturns = [];
+        let allJournalEntries = [];
+        let allCheques = [];
+
+        let currentCategory = 'sales';
+        let currentSubReport = 'sales_master';
+        let activeReportRows = [];
+        let filteredReportRows = [];
+
+        let chartSalesTrend = null;
+        let chartPaymentMethods = null;
+
+        const SUB_REPORTS_CONFIG = {
+            sales: [
+                { id: 'sales_master', name: '1.1 Master Invoices Register', title: 'Master Invoices & Orders Register', subtitle: 'Detailed chronological log of all orders, invoice numbers, items, and settlement states.' },
+                { id: 'sales_daily_trend', name: '1.2 Daily Sales Velocity', title: 'Daily Sales & Run-Rate Trend', subtitle: 'Day-by-day order counts, gross volume, returns deduction, and net revenue.' },
+                { id: 'sales_by_paymethod', name: '1.3 Sales by Payment Mode', title: 'Payment Method Breakdown (Cash vs Credit vs Partial vs Cheque)', subtitle: 'Analysis of transaction payment terms, upfront collections, and receivables created.' },
+                { id: 'sales_discounts', name: '1.4 Discounts & Concessions', title: 'Order Discounts & Price Concessions Log', subtitle: 'Auditing special discounts and deductions allowed across retailers.' },
+                { id: 'sales_vehicle', name: '1.5 Vehicle / Lorry Wise Sales', title: 'Lorry / Route Vehicle Sales Performance', subtitle: 'Volume and revenue distributed across individual delivery trucks.' }
+            ],
+            products: [
+                { id: 'prod_top_selling', name: '2.1 Top Best-Selling SKUs', title: 'Top 20 Best-Selling Products by Revenue & Volume', subtitle: 'High-velocity SKUs driving top-line revenue.' },
+                { id: 'prod_slow_moving', name: '2.2 Slow-Moving / Dead Stock', title: 'Slow-Moving & Low-Turnover Products', subtitle: 'Items with low velocity or zero sales requiring promotional focus.' },
+                { id: 'prod_by_brand', name: '2.3 Brand-Wise Revenue', title: 'Brand Contribution & Share of Wallet', subtitle: 'Revenue, quantity, and market share by product brand.' },
+                { id: 'prod_profit_margin', name: '2.4 SKU Profitability & Margin', title: 'SKU Margin & Gross Profit Contribution Matrix', subtitle: 'Revenue vs COGS margin analysis on individual products.' },
+                { id: 'prod_categories', name: '2.5 Category Performance', title: 'Product Category Breakdown', subtitle: 'Sales performance grouped by product categories.' }
+            ],
+            reps: [
+                { id: 'rep_leaderboard', name: '3.1 Rep Sales Leaderboard', title: 'Sales Rep Performance Leaderboard', subtitle: 'Total revenue, orders booked, and average order value per representative.' },
+                { id: 'rep_cash_credit', name: '3.2 Rep Cash vs Credit Ratio', title: 'Rep Cash vs Credit Sales Ratio', subtitle: 'Monitoring financial exposure and credit generation per sales rep.' },
+                { id: 'rep_collections', name: '3.3 Rep Due Collections', title: 'Rep Field Due Recovery & Collections Log', subtitle: 'Tracking collection amounts recovered in the field by each rep.' },
+                { id: 'rep_commission', name: '3.4 Rep Commission Summary', title: 'Rep Commission & Incentive Calculation Log', subtitle: 'Estimated commissions earned based on order volume and collection rules.' },
+                { id: 'rep_returns', name: '3.5 Rep Market Returns Audit', title: 'Returns & Damages Generated by Rep', subtitle: 'Monitoring return rates and reasons across representatives.' }
+            ],
+            customers: [
+                { id: 'cust_top_outlets', name: '4.1 Top High-Volume Outlets', title: 'Top High-Value Retailers & Outlets', subtitle: 'Leading retail stores ranked by gross purchase volume and order frequency.' },
+                { id: 'cust_credit_aging', name: '4.2 Customer Credit Aging Matrix', title: 'Customer Outstanding & Credit Aging Matrix (0-30, 31-60, 61-90, 90+ Days)', subtitle: 'Categorizing overdue retailer balances by age brackets for risk management.' },
+                { id: 'cust_over_limit', name: '4.3 Overdue & Credit Limit Breaches', title: 'Credit Limit Exceeded & High-Risk Retailers', subtitle: 'Outlets whose outstanding balance exceeds their assigned credit limits.' },
+                { id: 'cust_dormant', name: '4.4 Inactive / Dormant Outlets', title: 'Inactive & Churned Retail Outlets', subtitle: 'Stores that have not placed any orders within the selected timeframe.' },
+                { id: 'cust_routes', name: '4.5 Route & Town Velocity', title: 'Route, Town & Area Sales Velocity', subtitle: 'Market coverage and revenue density across delivery routes.' }
+            ],
+            inventory: [
+                { id: 'inv_valuation', name: '5.1 Stock Valuation (FIFO/Cost)', title: 'Real-Time Inventory Valuation & Stock Levels', subtitle: 'Current on-hand stock valued at cost price and retail sales potential.' },
+                { id: 'inv_low_stock', name: '5.2 Low Stock & Reorder Alert', title: 'Critical Low Stock & Reorder Trigger Matrix', subtitle: 'Products falling below minimum threshold requiring immediate replenishment.' },
+                { id: 'inv_batches_expiry', name: '5.3 Batches & Expiry Horizon', title: 'Stock Batches & Expiry Horizon Schedule', subtitle: 'Active batch identifiers, available quantities, and upcoming expiry dates.' },
+                { id: 'inv_grn_purchases', name: '5.4 Purchases & GRN History', title: 'Goods Received Notes (GRN) & Inward Stock Register', subtitle: 'Inward inventory purchases, supplier invoices, and unit landed costs.' },
+                { id: 'inv_adjustments', name: '5.5 Stock Adjustments & Damage', title: 'Stock Adjustments, Damages & Write-Off Log', subtitle: 'Audit log of manual inventory adjustments, shrinkage, and write-offs.' }
+            ],
+            promotions: [
+                { id: 'promo_free_issues', name: '6.1 Free Issues Scheme Log', title: 'Promotional Free Issues Dispensation Log', subtitle: 'Free bonus units issued across orders with promotional cost valuation.' },
+                { id: 'promo_by_product', name: '6.2 Free Issues by Product/Brand', title: 'Free Issues Cost Impact by Product & Brand', subtitle: 'Cost absorption of promotional schemes across product lines.' },
+                { id: 'promo_market_returns', name: '6.3 Market Returns Register', title: 'Market Returns Log (Company Claim vs Resell vs Damage)', subtitle: 'Detailed breakdown of customer returns, reasons, and disposition categories.' },
+                { id: 'promo_return_rates', name: '6.4 Product Return Rate %', title: 'Product Return Rate % by Supplier & Brand', subtitle: 'Return quantities compared against total units sold to spot defect patterns.' },
+                { id: 'promo_net_realization', name: '6.5 Net Revenue Realization', title: 'Gross vs Net Realized Sales Matrix', subtitle: 'Granular reconciliation of gross sales, returns deductions, discounts, and net realized cash flow.' }
+            ],
+            financials: [
+                { id: 'fin_pnl', name: '7.1 Profit & Loss Statement (P&L)', title: 'Income Statement (Profit & Loss Analysis)', subtitle: 'Net Revenue − COGS = Gross Profit − Operational Expenses = Net Operating Profit.' },
+                { id: 'fin_cashflow', name: '7.2 Cash Receipts & Inflow Log', title: 'Cash Flow & Daily Settlement Register', subtitle: 'Direct cash collections and payments recorded in double-entry books.' },
+                { id: 'fin_cheques', name: '7.3 Cheques Maturity Horizon', title: 'Bank Cheques Schedule & Deposit Horizon', subtitle: 'Pending deposit cheques, maturity dates, drawer banks, and realization statuses.' },
+                { id: 'fin_payables', name: '7.4 Supplier Payables Schedule', title: 'Supplier Accounts Payable (AP) Ledger', subtitle: 'Outstanding liabilities owed to manufacturers and suppliers.' },
+                { id: 'fin_general_ledger', name: '7.5 General Ledger Audit Trail', title: 'Double-Entry General Ledger (GL) Audit Trail', subtitle: 'Chronological double-entry debits and credits posted from sales and inventory operations.' }
+            ]
+        };
+
+        function formatMoney(amount) {
+            return 'Rs. ' + (Number(amount) || 0).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function toMillis(val) {
+            if (!val) return 0;
+            if (typeof val.toDate === 'function') return val.toDate().getTime();
+            if (typeof val.toMillis === 'function') return val.toMillis();
+            if (val.seconds != null) return Number(val.seconds) * 1000;
+            const d = new Date(val);
+            return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+        }
+
+        function formatDate(ms) {
+            if (!ms) return '-';
+            const d = new Date(ms);
+            return Number.isNaN(d.getTime()) ? '-' : d.toLocaleDateString('en-LK');
+        }
+
+        function formatDateTime(ms) {
+            if (!ms) return '-';
+            const d = new Date(ms);
+            return Number.isNaN(d.getTime()) ? '-' : d.toLocaleString('en-LK', { dateStyle: 'short', timeStyle: 'short', hour12: true });
+        }
+
+        // --- AUTH & DATA LOADING ---
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = '/';
+                return;
+            }
+            try {
+                currentBusinessId = localStorage.getItem('selectedBusinessId')
+                    || sessionStorage.getItem('selectedBusinessId')
+                    || localStorage.getItem('currentBusinessId')
+                    || sessionStorage.getItem('currentBusinessId');
+
+                if (!currentBusinessId) {
+                    const ctx = window.dashboardCore ? await window.dashboardCore.getContext(user) : null;
+                    currentBusinessId = ctx ? ctx.businessId : null;
+                }
+
+                if (!currentBusinessId) {
+                    alert('Please select a business first');
+                    window.location.href = '/modules/distributor/web/dashboard.html';
+                    return;
+                }
+
+                const db = firebase.firestore();
+                const bSnap = await db.collection('businesses').doc(currentBusinessId).get().catch(() => null);
+                if (bSnap && bSnap.exists) {
+                    currentBusinessData = bSnap.data();
+                    const bName = currentBusinessData.name || currentBusinessData.businessName || 'Distributor';
+                    document.getElementById('printBizName').textContent = bName + ' — Business Intelligence Report';
+                }
+
+                setDatePreset('thisMonth', false);
+                await fetchAllData();
+                populateFilterDropdowns();
+                applyFiltersAndRender();
+            } catch (err) {
+                console.error('[FATAL] Reports hub init error:', err);
+                alert('Error loading reports data. Please refresh.');
+            }
+        });
+
+        async function fetchAllData() {
+            const db = firebase.firestore();
+            const bid = currentBusinessId;
+            if (!bid) return;
+
+            try {
+                const [ordersSnap, pendingSnap, prodsSnap, shopsSnap, repsSnap, returnsSnap, jeSnap, chequesSnap] = await Promise.all([
+                    db.collection('orders').where('businessId', '==', bid).get().catch(() => ({ docs: [] })),
+                    db.collection('pendingOrders').where('businessId', '==', bid).get().catch(() => ({ docs: [] })),
+                    db.collection('products').where('businessId', '==', bid).get().catch(() => ({ docs: [] })),
+                    db.collection('shops').where('businessId', '==', bid).get().catch(() => ({ docs: [] })),
+                    db.collection('reps').where('businessId', '==', bid).get().catch(() => ({ docs: [] })),
+                    db.collection('returns').where('businessId', '==', bid).get().catch(() => ({ docs: [] })),
+                    db.collection('journal').doc(bid).collection('entries').get().catch(() => ({ docs: [] })),
+                    db.collection('cheques').where('businessId', '==', bid).get().catch(() => ({ docs: [] }))
+                ]);
+
+                allOrders = [];
+                ordersSnap.docs.forEach(d => allOrders.push({ id: d.id, _collection: 'orders', ...d.data() }));
+                pendingSnap.docs.forEach(d => allOrders.push({ id: d.id, _collection: 'pendingOrders', ...d.data() }));
+
+                allProducts = prodsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allShops = shopsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allReps = repsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allReturns = returnsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allJournalEntries = jeSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allCheques = chequesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                console.log('[ReportsHub] Data loaded:', {
+                    orders: allOrders.length,
+                    products: allProducts.length,
+                    shops: allShops.length,
+                    reps: allReps.length,
+                    returns: allReturns.length,
+                    journal: allJournalEntries.length
+                });
+            } catch (e) {
+                console.error('[ReportsHub] Data fetch failed:', e);
+            }
+        }
+
+        function populateFilterDropdowns() {
+            // Reps Dropdown
+            const repSelect = document.getElementById('filterRep');
+            const repMap = new Map();
+            allOrders.forEach(o => {
+                const rid = o.repId || o.salesRepId || '';
+                const rname = o.repName || o.salesRepName || '';
+                if (rid && rname) repMap.set(rid, rname);
+            });
+            allReps.forEach(r => {
+                if (r.id && r.name) repMap.set(r.id, r.name);
+            });
+            let repHtml = '<option value="ALL">All Sales Reps (සියලුම Reps)</option>';
+            repMap.forEach((name, id) => {
+                repHtml += '<option value="' + id + '">' + escapeHtml(name) + '</option>';
+            });
+            repSelect.innerHTML = repHtml;
+
+            // Shops Dropdown
+            const shopSelect = document.getElementById('filterShop');
+            const shopMap = new Map();
+            allOrders.forEach(o => {
+                const sid = o.shopId || '';
+                const sname = o.shopName || o.customerName || '';
+                if (sid && sname) shopMap.set(sid, sname);
+            });
+            allShops.forEach(s => {
+                if (s.id && s.name) shopMap.set(s.id, s.name);
+            });
+            let shopHtml = '<option value="ALL">All Customers / Shops</option>';
+            shopMap.forEach((name, id) => {
+                shopHtml += '<option value="' + id + '">' + escapeHtml(name) + '</option>';
+            });
+            shopSelect.innerHTML = shopHtml;
+
+            // Brands Dropdown
+            const brandSelect = document.getElementById('filterBrand');
+            const brandSet = new Set();
+            allProducts.forEach(p => {
+                if (p.brand) brandSet.add(p.brand.trim());
+            });
+            allOrders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    if (it.productBrand || it.brand) brandSet.add(String(it.productBrand || it.brand).trim());
+                });
+            });
+            let brandHtml = '<option value="ALL">All Brands (සියලුම Brands)</option>';
+            Array.from(brandSet).sort().forEach(b => {
+                if (b) brandHtml += '<option value="' + escapeHtml(b) + '">' + escapeHtml(b) + '</option>';
+            });
+            brandSelect.innerHTML = brandHtml;
+        }
+
+        // --- DATE PRESET CONTROLS ---
+        function setDatePreset(preset, autoRender = true) {
+            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+            const clicked = event && event.target ? event.target : document.querySelector('.pill-btn[onclick*="' + preset + '"]');
+            if (clicked) clicked.classList.add('active');
+
+            const now = new Date();
+            let start = new Date();
+            let end = new Date();
+
+            if (preset === 'today') {
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+            } else if (preset === 'yesterday') {
+                start.setDate(now.getDate() - 1);
+                start.setHours(0, 0, 0, 0);
+                end.setDate(now.getDate() - 1);
+                end.setHours(23, 59, 59, 999);
+            } else if (preset === 'last7') {
+                start.setDate(now.getDate() - 6);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+            } else if (preset === 'thisMonth') {
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+            } else if (preset === 'lastMonth') {
+                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+            } else if (preset === 'thisQuarter') {
+                const qStartMonth = Math.floor(now.getMonth() / 3) * 3;
+                start = new Date(now.getFullYear(), qStartMonth, 1);
+                end = new Date(now.getFullYear(), qStartMonth + 3, 0, 23, 59, 59, 999);
+            } else if (preset === 'thisYear') {
+                start = new Date(now.getFullYear(), 0, 1);
+                end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+            } else if (preset === 'allTime') {
+                start = new Date(2020, 0, 1);
+                end = new Date(2035, 11, 31, 23, 59, 59, 999);
+            }
+
+            const formatYmd = (d) => d.toISOString().slice(0, 10);
+            document.getElementById('filterStartDate').value = formatYmd(start);
+            document.getElementById('filterEndDate').value = formatYmd(end);
+
+            if (autoRender) applyFiltersAndRender();
+        }
+
+        function onCustomDateChange() {
+            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+            applyFiltersAndRender();
+        }
+
+        // --- FILTERING CORE ---
+        function getFilterCriteria() {
+            const startStr = document.getElementById('filterStartDate').value;
+            const endStr = document.getElementById('filterEndDate').value;
+            const startMs = startStr ? new Date(startStr + 'T00:00:00').getTime() : 0;
+            const endMs = endStr ? new Date(endStr + 'T23:59:59').getTime() : Date.now() + 86400000;
+
+            const repId = document.getElementById('filterRep').value;
+            const shopId = document.getElementById('filterShop').value;
+            const brand = document.getElementById('filterBrand').value;
+            const payMethod = document.getElementById('filterPayMethod').value;
+
+            return { startMs, endMs, repId, shopId, brand, payMethod };
+        }
+
+        function orderMatchesFilters(order, crit) {
+            const t = toMillis(order.orderDate || order.createdAt);
+            if (crit.startMs && t && t < crit.startMs) return false;
+            if (crit.endMs && t && t > crit.endMs) return false;
+
+            if (crit.repId !== 'ALL' && order.repId !== crit.repId && order.salesRepId !== crit.repId) return false;
+            if (crit.shopId !== 'ALL' && order.shopId !== crit.shopId) return false;
+
+            if (crit.payMethod !== 'ALL') {
+                const pm = String(order.paymentMethod || '').toUpperCase();
+                if (crit.payMethod === 'PARTIAL' && pm !== 'PARTIAL') return false;
+                if (crit.payMethod === 'CASH' && pm !== 'CASH') return false;
+                if (crit.payMethod === 'CREDIT' && pm !== 'CREDIT') return false;
+                if (crit.payMethod === 'CHEQUE' && pm !== 'CHEQUE') return false;
+            }
+
+            if (crit.brand !== 'ALL') {
+                const items = order.items || order.orderItems || [];
+                const hasBrand = items.some(it => String(it.productBrand || it.brand || '').trim() === crit.brand);
+                if (!hasBrand) return false;
+            }
+
+            return true;
+        }
+
+        // --- CATEGORY & SUBREPORT SWITCHING ---
+        function switchCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+            const clicked = document.querySelector('.cat-tab[data-cat="' + cat + '"]');
+            if (clicked) clicked.classList.add('active');
+
+            renderSubReportBar();
+            const firstSub = SUB_REPORTS_CONFIG[cat][0].id;
+            switchSubReport(firstSub);
+        }
+
+        function renderSubReportBar() {
+            const bar = document.getElementById('subReportBar');
+            const subList = SUB_REPORTS_CONFIG[currentCategory] || [];
+            bar.innerHTML = subList.map(s => {
+                const activeCls = s.id === currentSubReport ? 'active' : '';
+                return '<button type="button" class="sub-btn ' + activeCls + '" onclick="switchSubReport(\'' + s.id + '\')">' + s.name + '</button>';
+            }).join('');
+        }
+
+        function switchSubReport(subId) {
+            currentSubReport = subId;
+            document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+            const clicked = Array.from(document.querySelectorAll('.sub-btn')).find(b => b.getAttribute('onclick')?.includes(subId));
+            if (clicked) clicked.classList.add('active');
+
+            const subMeta = (SUB_REPORTS_CONFIG[currentCategory] || []).find(s => s.id === subId);
+            if (subMeta) {
+                document.getElementById('currentReportTitle').innerHTML = '<i class="fas fa-table" style="color:#047857;"></i> ' + escapeHtml(subMeta.title);
+                document.getElementById('currentReportSubtitle').textContent = subMeta.subtitle;
+            }
+            document.getElementById('reportTableSearch').value = '';
+            renderCurrentSubReport();
+        }
+
+        // --- MASTER RENDER PIPELINE ---
+        function applyFiltersAndRender() {
+            const crit = getFilterCriteria();
+            const filteredOrders = allOrders.filter(o => orderMatchesFilters(o, crit));
+
+            // Update Global KPIs
+            calculateAndRenderKpis(filteredOrders, crit);
+
+            // Update Visual Charts
+            renderSalesTrendChart(filteredOrders, crit);
+            renderPaymentMethodsChart(filteredOrders);
+
+            // Update Badges
+            updateCategoryBadges(filteredOrders);
+
+            // Render Active Sub-Report
+            renderSubReportBar();
+            renderCurrentSubReport();
+
+            // Update Print Header Metadata
+            const sStr = document.getElementById('filterStartDate').value;
+            const eStr = document.getElementById('filterEndDate').value;
+            document.getElementById('printMeta').textContent = 'Period: ' + sStr + ' to ' + eStr + ' | Generated on ' + new Date().toLocaleString() + ' | Digibiz Analytics Engine';
+        }
+
+        function isRealizedOrder(o) {
+            if (o._collection === 'pendingOrders') return false;
+            const st = String(o.status || '').toLowerCase();
+            return ['approved', 'completed', 'delivered', 'dispatched'].includes(st);
+        }
+
+        function calculateAndRenderKpis(orders, crit) {
+            let gross = 0;
+            let net = 0;
+            let paid = 0;
+            let balance = 0;
+            let returnsVal = 0;
+            let freeCount = 0;
+            let estCost = 0;
+
+            const productCostMap = new Map();
+            allProducts.forEach(p => {
+                const c = Number(p.buyingPrice != null ? p.buyingPrice : p.costPrice) || (Number(p.unitPrice || p.price) * 0.85);
+                productCostMap.set(p.id, c);
+                if (p.productCode) productCostMap.set(p.productCode, c);
+                if (p.name) productCostMap.set(p.name.toLowerCase().trim(), c);
+            });
+
+            const activeShopSet = new Set();
+            const approvedOrders = orders.filter(o => isRealizedOrder(o));
+            const pendingOrdersCount = orders.length - approvedOrders.length;
+
+            approvedOrders.forEach(o => {
+                const g = Number(o.grossTotal != null ? o.grossTotal : (o.subtotal != null ? o.subtotal : o.totalAmount)) || 0;
+                const n = Number(o.totalAmount != null ? o.totalAmount : o.netAmount) || g;
+                const p = Number(o.paidAmount != null ? o.paidAmount : (o.collectionAmount || o.cashPaid || 0)) || 0;
+                const b = Number(o.balanceDue != null ? o.balanceDue : (o.outstandingBalance || Math.max(0, n - p))) || 0;
+                const r = Number(o.returnTotal || o.returnsTotal || 0);
+
+                gross += g;
+                net += n;
+                paid += p;
+                balance += b;
+                returnsVal += r;
+
+                if (o.shopId) activeShopSet.add(o.shopId);
+
+                (o.items || o.orderItems || []).forEach(it => {
+                    const q = Number(it.orderedQty != null ? it.orderedQty : (it.quantity != null ? it.quantity : it.qty)) || 0;
+                    const f = Number(it.freeQty) || 0;
+                    freeCount += f;
+
+                    const pid = it.productId || it.productCode || it.id;
+                    const pCost = productCostMap.get(pid) || productCostMap.get(String(it.productName || it.name || '').toLowerCase().trim()) || (Number(it.unitPrice || it.price) * 0.85);
+                    estCost += (q + f) * pCost;
+                });
+            });
+
+            // Also check journal return deductions in date range if available
+            allJournalEntries.forEach(j => {
+                const t = toMillis(j.date || j.createdAt);
+                if (crit.startMs && t && t < crit.startMs) return;
+                if (crit.endMs && t && t > crit.endMs) return;
+                (j.entries || []).forEach(line => {
+                    if (String(line.accountCode).startsWith('4-4010-02')) {
+                        const val = Number(line.debit) || 0;
+                        if (returnsVal === 0) returnsVal += val;
+                    }
+                });
+            });
+
+            const grossMargin = Math.max(0, net - estCost);
+            const marginPct = net > 0 ? ((grossMargin / net) * 100).toFixed(1) : '0.0';
+
+            // Stock Valuation
+            let stockVal = 0;
+            allProducts.forEach(p => {
+                const sq = Number(p.currentStock != null ? p.currentStock : p.stock) || 0;
+                const cost = Number(p.buyingPrice != null ? p.buyingPrice : p.costPrice) || (Number(p.unitPrice || p.price) * 0.85);
+                stockVal += sq * cost;
+            });
+
+            document.getElementById('kpiGrossSales').textContent = formatMoney(gross);
+            document.getElementById('kpiOrdersCount').textContent = approvedOrders.length + ' Approved Invoices' + (pendingOrdersCount > 0 ? (' (' + pendingOrdersCount + ' Pending)') : '');
+            document.getElementById('kpiReturnsValue').textContent = formatMoney(returnsVal);
+            document.getElementById('kpiFreeCount').textContent = freeCount + ' Free Items Issued';
+            document.getElementById('kpiNetSales').textContent = formatMoney(net);
+            document.getElementById('kpiGrossMargin').textContent = formatMoney(grossMargin);
+            document.getElementById('kpiMarginPercent').textContent = marginPct + '% Margin';
+            document.getElementById('kpiCollected').textContent = formatMoney(paid);
+            document.getElementById('kpiOutstanding').textContent = formatMoney(balance);
+            document.getElementById('kpiStockValuation').textContent = formatMoney(stockVal);
+            document.getElementById('kpiTotalSKUs').textContent = allProducts.length + ' Active Products';
+            document.getElementById('kpiActiveShops').textContent = activeShopSet.size;
+            document.getElementById('kpiAvgOrderValue').textContent = 'Avg: ' + formatMoney(orders.length ? (net / orders.length) : 0);
+        }
+
+        function updateCategoryBadges(orders) {
+            document.getElementById('badgeSales').textContent = orders.length;
+            document.getElementById('badgeProducts').textContent = allProducts.length;
+            document.getElementById('badgeReps').textContent = allReps.length || 1;
+            document.getElementById('badgeCustomers').textContent = allShops.length;
+            document.getElementById('badgeInventory').textContent = allProducts.length;
+            document.getElementById('badgePromotions').textContent = allReturns.length + orders.reduce((s, o) => s + ((o.items || []).filter(i => (Number(i.freeQty) || 0) > 0).length), 0);
+            document.getElementById('badgeFinancials').textContent = allJournalEntries.length || orders.length;
+        }
+
+        // --- CHART RENDERERS ---
+        function renderSalesTrendChart(orders, crit) {
+            const ctx = document.getElementById('salesTrendChart')?.getContext('2d');
+            if (!ctx) return;
+
+            const dateMap = new Map();
+            orders.forEach(o => {
+                const d = formatDate(toMillis(o.orderDate || o.createdAt));
+                if (d !== '-') {
+                    const current = dateMap.get(d) || { revenue: 0, orders: 0 };
+                    current.revenue += Number(o.totalAmount || o.netAmount || o.grossTotal || 0);
+                    current.orders += 1;
+                    dateMap.set(d, current);
+                }
+            });
+
+            const labels = Array.from(dateMap.keys());
+            const dataRevenue = labels.map(l => dateMap.get(l).revenue);
+            const dataOrders = labels.map(l => dateMap.get(l).orders);
+
+            if (chartSalesTrend) chartSalesTrend.destroy();
+
+            chartSalesTrend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length ? labels : ['No Data in Range'],
+                    datasets: [
+                        {
+                            label: 'Net Revenue (Rs)',
+                            data: dataRevenue.length ? dataRevenue : [0],
+                            borderColor: '#047857',
+                            backgroundColor: 'rgba(4, 120, 87, 0.1)',
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Orders Count',
+                            data: dataOrders.length ? dataOrders : [0],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            type: 'bar',
+                            barThickness: 12,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', ticks: { callback: v => 'Rs ' + Number(v).toLocaleString() } },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        function renderPaymentMethodsChart(orders) {
+            const ctx = document.getElementById('paymentMethodsChart')?.getContext('2d');
+            if (!ctx) return;
+
+            let cash = 0, credit = 0, partial = 0, cheque = 0;
+            orders.forEach(o => {
+                const pm = String(o.paymentMethod || '').toUpperCase();
+                const tot = Number(o.totalAmount || o.netAmount || 0);
+                if (pm === 'CASH') cash += tot;
+                else if (pm === 'CREDIT') credit += tot;
+                else if (pm === 'PARTIAL') partial += tot;
+                else if (pm === 'CHEQUE') cheque += tot;
+                else cash += tot;
+            });
+
+            if (chartPaymentMethods) chartPaymentMethods.destroy();
+
+            chartPaymentMethods = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cash', 'Credit', 'Partial Payment', 'Cheque'],
+                    datasets: [{
+                        data: [cash, credit, partial, cheque],
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#6366f1'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // --- INDIVIDUAL SUB-REPORT RENDERERS ---
+        function renderCurrentSubReport() {
+            const crit = getFilterCriteria();
+            const filteredOrders = allOrders.filter(o => orderMatchesFilters(o, crit));
+
+            const thead = document.getElementById('reportTableHead');
+            const tbody = document.getElementById('reportTableBody');
+
+            switch (currentSubReport) {
+                // 1. SALES
+                case 'sales_master': renderSalesMaster(filteredOrders, thead, tbody); break;
+                case 'sales_daily_trend': renderSalesDailyTrend(filteredOrders, thead, tbody); break;
+                case 'sales_by_paymethod': renderSalesByPayMethod(filteredOrders, thead, tbody); break;
+                case 'sales_discounts': renderSalesDiscounts(filteredOrders, thead, tbody); break;
+                case 'sales_vehicle': renderSalesByVehicle(filteredOrders, thead, tbody); break;
+
+                // 2. PRODUCTS
+                case 'prod_top_selling': renderTopSellingProducts(filteredOrders, thead, tbody); break;
+                case 'prod_slow_moving': renderSlowMovingProducts(filteredOrders, thead, tbody); break;
+                case 'prod_by_brand': renderProductsByBrand(filteredOrders, thead, tbody); break;
+                case 'prod_profit_margin': renderProductProfitMargin(filteredOrders, thead, tbody); break;
+                case 'prod_categories': renderProductCategories(filteredOrders, thead, tbody); break;
+
+                // 3. REPS
+                case 'rep_leaderboard': renderRepLeaderboard(filteredOrders, thead, tbody); break;
+                case 'rep_cash_credit': renderRepCashCredit(filteredOrders, thead, tbody); break;
+                case 'rep_collections': renderRepCollections(filteredOrders, thead, tbody); break;
+                case 'rep_commission': renderRepCommission(filteredOrders, thead, tbody); break;
+                case 'rep_returns': renderRepReturns(filteredOrders, thead, tbody); break;
+
+                // 4. CUSTOMERS
+                case 'cust_top_outlets': renderTopOutlets(filteredOrders, thead, tbody); break;
+                case 'cust_credit_aging': renderCreditAging(filteredOrders, thead, tbody); break;
+                case 'cust_over_limit': renderOverLimitCustomers(filteredOrders, thead, tbody); break;
+                case 'cust_dormant': renderDormantCustomers(filteredOrders, thead, tbody); break;
+                case 'cust_routes': renderRoutesVelocity(filteredOrders, thead, tbody); break;
+
+                // 5. INVENTORY
+                case 'inv_valuation': renderInventoryValuation(thead, tbody); break;
+                case 'inv_low_stock': renderLowStockAlert(thead, tbody); break;
+                case 'inv_batches_expiry': renderBatchesExpiry(thead, tbody); break;
+                case 'inv_grn_purchases': renderGrnPurchases(crit, thead, tbody); break;
+                case 'inv_adjustments': renderInventoryAdjustments(thead, tbody); break;
+
+                // 6. PROMOTIONS & RETURNS
+                case 'promo_free_issues': renderFreeIssuesScheme(filteredOrders, thead, tbody); break;
+                case 'promo_by_product': renderFreeIssuesByProduct(filteredOrders, thead, tbody); break;
+                case 'promo_market_returns': renderMarketReturnsLog(filteredOrders, thead, tbody); break;
+                case 'promo_return_rates': renderReturnRatesByProduct(filteredOrders, thead, tbody); break;
+                case 'promo_net_realization': renderNetRealizationMatrix(filteredOrders, thead, tbody); break;
+
+                // 7. FINANCIALS
+                case 'fin_pnl': renderPnLStatement(filteredOrders, crit, thead, tbody); break;
+                case 'fin_cashflow': renderCashflowRegister(filteredOrders, thead, tbody); break;
+                case 'fin_cheques': renderChequesSchedule(crit, thead, tbody); break;
+                case 'fin_payables': renderSupplierPayables(thead, tbody); break;
+                case 'fin_general_ledger': renderGeneralLedgerTrail(crit, thead, tbody); break;
+
+                default: renderSalesMaster(filteredOrders, thead, tbody);
+            }
+        }
+
+        // --- SUBREPORT IMPLEMENTATIONS ---
+
+        // 1.1 Master Invoices Register
+        function renderSalesMaster(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Invoice / Order #</th><th>Date & Time</th><th>Customer / Outlet</th><th>Sales Rep</th><th>Items</th><th class="num">Gross Total</th><th class="num">Discount</th><th class="num">Net Payable</th><th class="num">Paid Amount</th><th class="num">Balance Due</th><th>Terms</th><th>Status</th></tr>';
+
+            let totGross = 0, totDisc = 0, totNet = 0, totPaid = 0, totBal = 0;
+
+            activeReportRows = orders.map((o, idx) => {
+                const g = Number(o.grossTotal != null ? o.grossTotal : (o.subtotal != null ? o.subtotal : o.totalAmount)) || 0;
+                const d = Number(o.discountAmount || o.discount || 0);
+                const n = Number(o.totalAmount != null ? o.totalAmount : o.netAmount) || g;
+                const p = Number(o.paidAmount != null ? o.paidAmount : (o.collectionAmount || o.cashPaid || 0)) || 0;
+                const b = Number(o.balanceDue != null ? o.balanceDue : (o.outstandingBalance || Math.max(0, n - p))) || 0;
+                const itemsCount = (o.items || o.orderItems || []).length;
+                const pm = String(o.paymentMethod || 'CASH').toUpperCase();
+                const st = String(o.status || 'approved').toLowerCase();
+
+                totGross += g; totDisc += d; totNet += n; totPaid += p; totBal += b;
+
+                let pmBadge = '<span class="tag-badge tag-cash">💵 Cash</span>';
+                if (pm === 'CREDIT') pmBadge = '<span class="tag-badge tag-credit">💳 Credit</span>';
+                else if (pm === 'PARTIAL') pmBadge = '<span class="tag-badge tag-partial">💵+💳 Partial</span>';
+                else if (pm === 'CHEQUE') pmBadge = '<span class="tag-badge tag-cheque">📝 Cheque</span>';
+
+                return {
+                    _searchText: [o.orderNumber, o.shopName, o.repName, pm, st].join(' ').toLowerCase(),
+                    html: '<tr>' +
+                        '<td>' + (idx + 1) + '</td>' +
+                        '<td><strong>' + escapeHtml(o.orderNumber || o.id.slice(-8)) + '</strong></td>' +
+                        '<td>' + formatDateTime(toMillis(o.orderDate || o.createdAt)) + '</td>' +
+                        '<td><strong>' + escapeHtml(o.shopName || o.customerName || 'Shop') + '</strong></td>' +
+                        '<td>' + escapeHtml(o.repName || o.salesRepName || 'Rep') + '</td>' +
+                        '<td>' + itemsCount + ' SKUs</td>' +
+                        '<td class="num">' + formatMoney(g) + '</td>' +
+                        '<td class="num" style="color:#dc2626;">' + (d > 0 ? '-' + formatMoney(d) : '-') + '</td>' +
+                        '<td class="num"><strong>' + formatMoney(n) + '</strong></td>' +
+                        '<td class="num" style="color:#166534;">' + formatMoney(p) + '</td>' +
+                        '<td class="num" style="color:#b91c1c;">' + formatMoney(b) + '</td>' +
+                        '<td>' + pmBadge + '</td>' +
+                        '<td><span class="tag-status tag-' + st + '">' + st + '</span></td>' +
+                    '</tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 13, '<tr class="total-row"><td colspan="6">TOTAL SUMMARY (' + orders.length + ' Invoices)</td><td class="num">' + formatMoney(totGross) + '</td><td class="num" style="color:#dc2626;">-' + formatMoney(totDisc) + '</td><td class="num">' + formatMoney(totNet) + '</td><td class="num" style="color:#166534;">' + formatMoney(totPaid) + '</td><td class="num" style="color:#b91c1c;">' + formatMoney(totBal) + '</td><td colspan="2"></td></tr>');
+        }
+
+        // 1.2 Daily Sales Velocity
+        function renderSalesDailyTrend(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Date</th><th class="num">Orders Count</th><th class="num">Gross Volume</th><th class="num">Returns & Discounts</th><th class="num">Net Realized</th><th class="num">Cash Collected</th><th class="num">Credit Added</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                const d = formatDate(toMillis(o.orderDate || o.createdAt));
+                if (d === '-') return;
+                const rec = map.get(d) || { date: d, count: 0, gross: 0, disc: 0, net: 0, paid: 0, bal: 0 };
+                const g = Number(o.grossTotal || o.subtotal || o.totalAmount) || 0;
+                const dsc = Number(o.discountAmount || o.discount || 0);
+                const n = Number(o.totalAmount || o.netAmount || g) || 0;
+                const p = Number(o.paidAmount || o.cashPaid || 0);
+                const b = Number(o.balanceDue || Math.max(0, n - p));
+                rec.count += 1; rec.gross += g; rec.disc += dsc; rec.net += n; rec.paid += p; rec.bal += b;
+                map.set(d, rec);
+            });
+
+            let tCnt = 0, tG = 0, tD = 0, tN = 0, tP = 0, tB = 0;
+            activeReportRows = Array.from(map.values()).map((r, i) => {
+                tCnt += r.count; tG += r.gross; tD += r.disc; tN += r.net; tP += r.paid; tB += r.bal;
+                return {
+                    _searchText: r.date.toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><strong>' + r.date + '</strong></td><td class="num">' + r.count + '</td><td class="num">' + formatMoney(r.gross) + '</td><td class="num" style="color:#dc2626;">-' + formatMoney(r.disc) + '</td><td class="num"><strong>' + formatMoney(r.net) + '</strong></td><td class="num" style="color:#166534;">' + formatMoney(r.paid) + '</td><td class="num" style="color:#b91c1c;">' + formatMoney(r.bal) + '</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 8, '<tr class="total-row"><td colspan="2">TOTAL</td><td class="num">' + tCnt + '</td><td class="num">' + formatMoney(tG) + '</td><td class="num">-' + formatMoney(tD) + '</td><td class="num">' + formatMoney(tN) + '</td><td class="num">' + formatMoney(tP) + '</td><td class="num">' + formatMoney(tB) + '</td></tr>');
+        }
+
+        // 1.3 Sales by Payment Method
+        function renderSalesByPayMethod(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Payment Method</th><th class="num">Total Invoices</th><th class="num">Total Value</th><th class="num">Cash Recovered</th><th class="num">Credit Liability</th><th class="num">Share %</th></tr>';
+            const stats = {
+                CASH: { name: '💵 Full Cash Payment', count: 0, val: 0, paid: 0, bal: 0 },
+                CREDIT: { name: '💳 Full Credit Account', count: 0, val: 0, paid: 0, bal: 0 },
+                PARTIAL: { name: '💵+💳 Partial Payment', count: 0, val: 0, paid: 0, bal: 0 },
+                CHEQUE: { name: '📝 Cheque Payment', count: 0, val: 0, paid: 0, bal: 0 }
+            };
+            let grandNet = 0;
+            orders.forEach(o => {
+                const pm = String(o.paymentMethod || 'CASH').toUpperCase();
+                const target = stats[pm] || stats.CASH;
+                const n = Number(o.totalAmount || o.netAmount || 0);
+                const p = Number(o.paidAmount || (pm === 'CASH' ? n : 0));
+                const b = Number(o.balanceDue || (pm === 'CREDIT' ? n : 0));
+                target.count += 1; target.val += n; target.paid += p; target.bal += b;
+                grandNet += n;
+            });
+
+            let tC = 0, tV = 0, tP = 0, tB = 0;
+            activeReportRows = Object.values(stats).map((s, i) => {
+                const pct = grandNet > 0 ? ((s.val / grandNet) * 100).toFixed(1) : '0.0';
+                tC += s.count; tV += s.val; tP += s.paid; tB += s.bal;
+                return {
+                    _searchText: s.name.toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><strong>' + s.name + '</strong></td><td class="num">' + s.count + '</td><td class="num"><strong>' + formatMoney(s.val) + '</strong></td><td class="num" style="color:#166534;">' + formatMoney(s.paid) + '</td><td class="num" style="color:#b91c1c;">' + formatMoney(s.bal) + '</td><td class="num">' + pct + '%</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 7, '<tr class="total-row"><td colspan="2">TOTAL</td><td class="num">' + tC + '</td><td class="num">' + formatMoney(tV) + '</td><td class="num">' + formatMoney(tP) + '</td><td class="num">' + formatMoney(tB) + '</td><td class="num">100%</td></tr>');
+        }
+
+        // 1.4 Discounts Log
+        function renderSalesDiscounts(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Date</th><th>Order #</th><th>Customer</th><th>Rep</th><th class="num">Order Gross</th><th class="num">Discount Allowed</th><th class="num">Discount %</th><th class="num">Net Payable</th></tr>';
+            const discOrders = orders.filter(o => Number(o.discountAmount || o.discount || 0) > 0);
+            let totG = 0, totD = 0, totN = 0;
+
+            activeReportRows = discOrders.map((o, idx) => {
+                const g = Number(o.grossTotal || o.subtotal || o.totalAmount) || 0;
+                const d = Number(o.discountAmount || o.discount || 0);
+                const n = Number(o.totalAmount || o.netAmount || (g - d)) || 0;
+                const pct = g > 0 ? ((d / g) * 100).toFixed(1) : '0.0';
+                totG += g; totD += d; totN += n;
+
+                return {
+                    _searchText: [o.orderNumber, o.shopName, o.repName].join(' ').toLowerCase(),
+                    html: '<tr><td>' + (idx + 1) + '</td><td>' + formatDate(toMillis(o.orderDate || o.createdAt)) + '</td><td><strong>' + escapeHtml(o.orderNumber || o.id.slice(-8)) + '</strong></td><td>' + escapeHtml(o.shopName || 'Shop') + '</td><td>' + escapeHtml(o.repName || 'Rep') + '</td><td class="num">' + formatMoney(g) + '</td><td class="num" style="color:#dc2626; font-weight:800;">-' + formatMoney(d) + '</td><td class="num">' + pct + '%</td><td class="num"><strong>' + formatMoney(n) + '</strong></td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 9, '<tr class="total-row"><td colspan="5">TOTAL DISCOUNTS GRANTED (' + discOrders.length + ' orders)</td><td class="num">' + formatMoney(totG) + '</td><td class="num" style="color:#dc2626;">-' + formatMoney(totD) + '</td><td class="num">-</td><td class="num">' + formatMoney(totN) + '</td></tr>');
+        }
+
+        // 1.5 Vehicle / Lorry Wise Sales
+        function renderSalesByVehicle(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Vehicle / Lorry</th><th class="num">Orders Delivered</th><th class="num">Gross Revenue</th><th class="num">Cash Collected</th><th class="num">Credit Balance</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                const v = String(o.lorryNumber || o.lorryName || o.lorryId || 'Main Warehouse (Unassigned)').trim();
+                const rec = map.get(v) || { name: v, count: 0, gross: 0, paid: 0, bal: 0 };
+                const g = Number(o.totalAmount || o.netAmount || 0);
+                const p = Number(o.paidAmount || (o.paymentMethod === 'CASH' ? g : 0));
+                const b = Number(o.balanceDue || (o.paymentMethod === 'CREDIT' ? g : 0));
+                rec.count += 1; rec.gross += g; rec.paid += p; rec.bal += b;
+                map.set(v, rec);
+            });
+
+            activeReportRows = Array.from(map.values()).map((r, i) => ({
+                _searchText: r.name.toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>🚚 ' + escapeHtml(r.name) + '</strong></td><td class="num">' + r.count + '</td><td class="num"><strong>' + formatMoney(r.gross) + '</strong></td><td class="num" style="color:#166534;">' + formatMoney(r.paid) + '</td><td class="num" style="color:#b91c1c;">' + formatMoney(r.bal) + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 6, '');
+        }
+
+        // 2.1 Top Best-Selling Products
+        function renderTopSellingProducts(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>Rank</th><th>Product Code</th><th>Product Name</th><th>Brand</th><th class="num">Units Sold</th><th class="num">Free Issued</th><th class="num">Unit Price</th><th class="num">Total Revenue</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const pid = it.productId || it.productCode || it.name || 'SKU';
+                    const rec = map.get(pid) || {
+                        code: it.productCode || '-',
+                        name: it.productName || it.name || 'Product',
+                        brand: it.productBrand || it.brand || '-',
+                        qty: 0,
+                        free: 0,
+                        unitPrice: Number(it.unitPrice || it.price) || 0,
+                        revenue: 0
+                    };
+                    const q = Number(it.orderedQty != null ? it.orderedQty : (it.quantity != null ? it.quantity : it.qty)) || 0;
+                    const f = Number(it.freeQty) || 0;
+                    const tot = Number(it.totalPrice != null ? it.totalPrice : (q * rec.unitPrice)) || 0;
+                    rec.qty += q; rec.free += f; rec.revenue += tot;
+                    map.set(pid, rec);
+                });
+            });
+
+            const sorted = Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
+            let totQty = 0, totFree = 0, totRev = 0;
+
+            activeReportRows = sorted.map((p, idx) => {
+                totQty += p.qty; totFree += p.free; totRev += p.revenue;
+                return {
+                    _searchText: [p.code, p.name, p.brand].join(' ').toLowerCase(),
+                    html: '<tr><td><strong>#' + (idx + 1) + '</strong></td><td><code>' + escapeHtml(p.code) + '</code></td><td><strong>' + escapeHtml(p.name) + '</strong></td><td>' + escapeHtml(p.brand) + '</td><td class="num">' + p.qty + '</td><td class="num" style="color:#047857;">' + (p.free > 0 ? '+' + p.free : '-') + '</td><td class="num">' + formatMoney(p.unitPrice) + '</td><td class="num"><strong>' + formatMoney(p.revenue) + '</strong></td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 8, '<tr class="total-row"><td colspan="4">TOTAL</td><td class="num">' + totQty + '</td><td class="num">' + totFree + '</td><td class="num">-</td><td class="num">' + formatMoney(totRev) + '</td></tr>');
+        }
+
+        // 2.2 Slow-Moving / Dead Stock
+        function renderSlowMovingProducts(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Product Name</th><th>Brand</th><th class="num">Current Stock</th><th class="num">Cost Price</th><th class="num">Stock Capital Locked</th><th class="num">Units Sold in Range</th><th>Status</th></tr>';
+            const soldMap = new Map();
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const pid = it.productId || it.productCode || it.name;
+                    const q = Number(it.orderedQty != null ? it.orderedQty : (it.quantity != null ? it.quantity : it.qty)) || 0;
+                    soldMap.set(pid, (soldMap.get(pid) || 0) + q);
+                });
+            });
+
+            const rows = allProducts.map(p => {
+                const sold = soldMap.get(p.id) || soldMap.get(p.productCode) || soldMap.get(p.name) || 0;
+                const stock = Number(p.currentStock != null ? p.currentStock : p.stock) || 0;
+                const cost = Number(p.buyingPrice != null ? p.buyingPrice : p.costPrice) || (Number(p.unitPrice || p.price) * 0.85);
+                const locked = stock * cost;
+                return { ...p, sold, stock, cost, locked };
+            }).filter(p => p.stock > 0 && p.sold <= 2).sort((a, b) => b.locked - a.locked);
+
+            activeReportRows = rows.map((p, i) => ({
+                _searchText: [p.name, p.brand].join(' ').toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(p.name) + '</strong></td><td>' + escapeHtml(p.brand || '-') + '</td><td class="num">' + p.stock + '</td><td class="num">' + formatMoney(p.cost) + '</td><td class="num" style="color:#b91c1c;"><strong>' + formatMoney(p.locked) + '</strong></td><td class="num">' + p.sold + '</td><td><span class="tag-status ' + (p.sold === 0 ? 'tag-pending' : 'tag-delivered') + '">' + (p.sold === 0 ? 'Dead Stock (0 Sold)' : 'Slow Moving') + '</span></td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 8, '');
+        }
+
+        // 2.3 Brand-Wise Revenue
+        function renderProductsByBrand(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Brand Name</th><th class="num">Units Sold</th><th class="num">Free Qty</th><th class="num">Revenue</th><th class="num">Market Share %</th></tr>';
+            const map = new Map();
+            let grandRev = 0;
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const b = String(it.productBrand || it.brand || 'Unbranded').trim();
+                    const rec = map.get(b) || { brand: b, qty: 0, free: 0, revenue: 0 };
+                    const q = Number(it.orderedQty != null ? it.orderedQty : (it.quantity != null ? it.quantity : it.qty)) || 0;
+                    const f = Number(it.freeQty) || 0;
+                    const pr = Number(it.unitPrice || it.price) || 0;
+                    const tot = Number(it.totalPrice != null ? it.totalPrice : (q * pr)) || 0;
+                    rec.qty += q; rec.free += f; rec.revenue += tot;
+                    grandRev += tot;
+                    map.set(b, rec);
+                });
+            });
+
+            const sorted = Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
+            activeReportRows = sorted.map((r, i) => {
+                const share = grandRev > 0 ? ((r.revenue / grandRev) * 100).toFixed(1) : '0.0';
+                return {
+                    _searchText: r.brand.toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><strong>🏷️ ' + escapeHtml(r.brand) + '</strong></td><td class="num">' + r.qty + '</td><td class="num">' + r.free + '</td><td class="num"><strong>' + formatMoney(r.revenue) + '</strong></td><td class="num">' + share + '%</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 6, '');
+        }
+
+        // 2.4 SKU Profitability & Margin
+        function renderProductProfitMargin(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Product Name</th><th class="num">Units Sold</th><th class="num">Avg Selling Price</th><th class="num">Unit Cost (COGS)</th><th class="num">Total Revenue</th><th class="num">Total Cost</th><th class="num">Gross Margin (Profit)</th><th class="num">Margin %</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const pid = it.productId || it.productCode || it.name;
+                    const rec = map.get(pid) || {
+                        name: it.productName || it.name || 'Product',
+                        qty: 0,
+                        revenue: 0,
+                        cost: 0,
+                        unitSell: Number(it.unitPrice || it.price) || 0
+                    };
+                    const q = Number(it.orderedQty != null ? it.orderedQty : (it.quantity != null ? it.quantity : it.qty)) || 0;
+                    const unitP = Number(it.unitPrice || it.price) || 0;
+                    const lineRev = Number(it.totalPrice != null ? it.totalPrice : (q * unitP)) || 0;
+                    const prodDoc = allProducts.find(p => p.id === pid || p.productCode === it.productCode || p.name === it.productName);
+                    const unitCost = Number(prodDoc && (prodDoc.buyingPrice != null ? prodDoc.buyingPrice : prodDoc.costPrice)) || (unitP * 0.85);
+
+                    rec.qty += q;
+                    rec.revenue += lineRev;
+                    rec.cost += q * unitCost;
+                    map.set(pid, rec);
+                });
+            });
+
+            const sorted = Array.from(map.values()).sort((a, b) => (b.revenue - b.cost) - (a.revenue - a.cost));
+            activeReportRows = sorted.map((p, idx) => {
+                const profit = p.revenue - p.cost;
+                const margin = p.revenue > 0 ? ((profit / p.revenue) * 100).toFixed(1) : '0.0';
+                const unitCost = p.qty > 0 ? (p.cost / p.qty) : 0;
+                return {
+                    _searchText: p.name.toLowerCase(),
+                    html: '<tr><td>' + (idx + 1) + '</td><td><strong>' + escapeHtml(p.name) + '</strong></td><td class="num">' + p.qty + '</td><td class="num">' + formatMoney(p.unitSell) + '</td><td class="num">' + formatMoney(unitCost) + '</td><td class="num">' + formatMoney(p.revenue) + '</td><td class="num">' + formatMoney(p.cost) + '</td><td class="num" style="color:#166534; font-weight:800;">' + formatMoney(profit) + '</td><td class="num" style="color:#166534; font-weight:800;">' + margin + '%</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 9, '');
+        }
+
+        // 2.5 Product Categories
+        function renderProductCategories(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Category</th><th class="num">SKUs Count</th><th class="num">Units Sold</th><th class="num">Total Revenue</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const prodDoc = allProducts.find(p => p.id === it.productId || p.productCode === it.productCode || p.name === it.productName);
+                    const cat = (prodDoc && prodDoc.category) || 'General Category';
+                    const rec = map.get(cat) || { cat, skus: new Set(), qty: 0, revenue: 0 };
+                    const q = Number(it.orderedQty != null ? it.orderedQty : (it.quantity != null ? it.quantity : it.qty)) || 0;
+                    const pr = Number(it.unitPrice || it.price) || 0;
+                    rec.skus.add(it.productId || it.productCode || it.name);
+                    rec.qty += q;
+                    rec.revenue += Number(it.totalPrice != null ? it.totalPrice : (q * pr)) || 0;
+                    map.set(cat, rec);
+                });
+            });
+
+            activeReportRows = Array.from(map.values()).sort((a, b) => b.revenue - a.revenue).map((c, i) => ({
+                _searchText: c.cat.toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>📁 ' + escapeHtml(c.cat) + '</strong></td><td class="num">' + c.skus.size + ' SKUs</td><td class="num">' + c.qty + '</td><td class="num"><strong>' + formatMoney(c.revenue) + '</strong></td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 5, '');
+        }
+
+        // 3.1 Rep Leaderboard
+        function renderRepLeaderboard(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>Rank</th><th>Sales Rep Name</th><th class="num">Orders Booked</th><th class="num">Gross Sales</th><th class="num">Discounts</th><th class="num">Net Revenue</th><th class="num">Cash Collected</th><th class="num">Credit Given</th><th class="num">Avg Basket</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                const rid = o.repId || o.salesRepId || o.repName || 'Rep';
+                const rname = o.repName || o.salesRepName || 'Sales Representative';
+                const rec = map.get(rid) || { name: rname, orders: 0, gross: 0, disc: 0, net: 0, paid: 0, bal: 0 };
+                const g = Number(o.grossTotal || o.subtotal || o.totalAmount) || 0;
+                const d = Number(o.discountAmount || o.discount || 0);
+                const n = Number(o.totalAmount || o.netAmount || g) || 0;
+                const p = Number(o.paidAmount || (o.paymentMethod === 'CASH' ? n : 0));
+                const b = Number(o.balanceDue || (o.paymentMethod === 'CREDIT' ? n : 0));
+                rec.orders += 1; rec.gross += g; rec.disc += d; rec.net += n; rec.paid += p; rec.bal += b;
+                map.set(rid, rec);
+            });
+
+            const sorted = Array.from(map.values()).sort((a, b) => b.net - a.net);
+            activeReportRows = sorted.map((r, i) => {
+                const avg = r.orders > 0 ? (r.net / r.orders) : 0;
+                return {
+                    _searchText: r.name.toLowerCase(),
+                    html: '<tr><td><strong>#' + (i + 1) + '</strong></td><td><strong>👤 ' + escapeHtml(r.name) + '</strong></td><td class="num">' + r.orders + '</td><td class="num">' + formatMoney(r.gross) + '</td><td class="num" style="color:#dc2626;">-' + formatMoney(r.disc) + '</td><td class="num"><strong>' + formatMoney(r.net) + '</strong></td><td class="num" style="color:#166534;">' + formatMoney(r.paid) + '</td><td class="num" style="color:#b91c1c;">' + formatMoney(r.bal) + '</td><td class="num">' + formatMoney(avg) + '</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 9, '');
+        }
+
+        // 3.2 Rep Cash vs Credit Ratio
+        function renderRepCashCredit(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Sales Rep</th><th class="num">Total Sales</th><th class="num">Cash Volume</th><th class="num">Credit Volume</th><th class="num">Cash %</th><th class="num">Credit %</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                const rid = o.repId || o.salesRepId || 'Rep';
+                const rname = o.repName || 'Rep';
+                const rec = map.get(rid) || { name: rname, total: 0, cash: 0, credit: 0 };
+                const n = Number(o.totalAmount || o.netAmount || 0);
+                const p = Number(o.paidAmount || (o.paymentMethod === 'CASH' ? n : 0));
+                const b = Number(o.balanceDue || (o.paymentMethod === 'CREDIT' ? n : 0));
+                rec.total += n; rec.cash += p; rec.credit += b;
+                map.set(rid, rec);
+            });
+
+            activeReportRows = Array.from(map.values()).map((r, i) => {
+                const cPct = r.total > 0 ? ((r.cash / r.total) * 100).toFixed(1) : '0.0';
+                const crPct = r.total > 0 ? ((r.credit / r.total) * 100).toFixed(1) : '0.0';
+                return {
+                    _searchText: r.name.toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(r.name) + '</strong></td><td class="num">' + formatMoney(r.total) + '</td><td class="num" style="color:#166534;">' + formatMoney(r.cash) + '</td><td class="num" style="color:#b91c1c;">' + formatMoney(r.credit) + '</td><td class="num" style="color:#166534;"><strong>' + cPct + '%</strong></td><td class="num" style="color:#b91c1c;"><strong>' + crPct + '%</strong></td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 7, '');
+        }
+
+        // 3.3 Rep Collections Log
+        function renderRepCollections(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Date</th><th>Invoice #</th><th>Customer / Shop</th><th>Sales Rep</th><th class="num">Total Invoiced</th><th class="num">Cash Collected</th><th>Payment Mode</th></tr>';
+            const collectedOrders = orders.filter(o => Number(o.paidAmount || (o.paymentMethod === 'CASH' ? o.totalAmount : 0)) > 0);
+            activeReportRows = collectedOrders.map((o, i) => {
+                const n = Number(o.totalAmount || o.netAmount || 0);
+                const p = Number(o.paidAmount || (o.paymentMethod === 'CASH' ? n : 0));
+                return {
+                    _searchText: [o.orderNumber, o.shopName, o.repName].join(' ').toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td>' + formatDateTime(toMillis(o.orderDate || o.createdAt)) + '</td><td><strong>' + escapeHtml(o.orderNumber || o.id.slice(-8)) + '</strong></td><td>' + escapeHtml(o.shopName || 'Shop') + '</td><td>' + escapeHtml(o.repName || 'Rep') + '</td><td class="num">' + formatMoney(n) + '</td><td class="num" style="color:#166534; font-weight:800;">' + formatMoney(p) + '</td><td><span class="tag-badge tag-cash">' + escapeHtml(o.paymentMethod || 'CASH') + '</span></td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 8, '');
+        }
+
+        // 3.4 Rep Commission Log
+        function renderRepCommission(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Sales Rep</th><th class="num">Orders Delivered</th><th class="num">Qualifying Sales</th><th class="num">Default Rate %</th><th class="num">Est. Commission Earned</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                const rid = o.repId || 'Rep';
+                const rname = o.repName || 'Rep';
+                const rec = map.get(rid) || { name: rname, orders: 0, sales: 0, comm: 0 };
+                const n = Number(o.totalAmount || 0);
+                const c = Number(o.commissionAmount || (n * 0.02));
+                rec.orders += 1; rec.sales += n; rec.comm += c;
+                map.set(rid, rec);
+            });
+
+            activeReportRows = Array.from(map.values()).map((r, i) => ({
+                _searchText: r.name.toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>👤 ' + escapeHtml(r.name) + '</strong></td><td class="num">' + r.orders + '</td><td class="num">' + formatMoney(r.sales) + '</td><td class="num">2.0%</td><td class="num" style="color:#047857; font-weight:800;">' + formatMoney(r.comm) + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 6, '');
+        }
+
+        // 3.5 Rep Returns Generation
+        function renderRepReturns(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Sales Rep</th><th class="num">Total Orders</th><th class="num">Total Sales Volume</th><th class="num">Market Returns Units</th><th class="num">Returns Value (Rs)</th><th class="num">Return Ratio %</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                const rid = o.repId || 'Rep';
+                const rname = o.repName || 'Rep';
+                const rec = map.get(rid) || { name: rname, orders: 0, sales: 0, retUnits: 0, retVal: 0 };
+                const s = Number(o.totalAmount || 0);
+                const rV = Number(o.returnTotal || 0);
+                let rU = 0;
+                (o.items || o.orderItems || []).forEach(it => { rU += Number(it.returnQty || 0); });
+                rec.orders += 1; rec.sales += s; rec.retUnits += rU; rec.retVal += rV;
+                map.set(rid, rec);
+            });
+
+            activeReportRows = Array.from(map.values()).map((r, i) => {
+                const rRatio = r.sales > 0 ? ((r.retVal / r.sales) * 100).toFixed(1) : '0.0';
+                return {
+                    _searchText: r.name.toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(r.name) + '</strong></td><td class="num">' + r.orders + '</td><td class="num">' + formatMoney(r.sales) + '</td><td class="num">' + r.retUnits + '</td><td class="num" style="color:#dc2626;">' + formatMoney(r.retVal) + '</td><td class="num" style="color:#dc2626;">' + rRatio + '%</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 7, '');
+        }
+
+        // 4.1 Top High-Volume Outlets
+        function renderTopOutlets(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>Rank</th><th>Retailer / Shop Name</th><th>Route / Address</th><th class="num">Orders Placed</th><th class="num">Total Purchases</th><th class="num">Total Paid</th><th class="num">Outstanding Balance</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                const sid = o.shopId || o.shopName || 'Shop';
+                const sname = o.shopName || o.customerName || 'Retailer';
+                const rec = map.get(sid) || { name: sname, addr: o.shopAddress || '-', orders: 0, total: 0, paid: 0, bal: 0 };
+                const n = Number(o.totalAmount || o.netAmount || 0);
+                const p = Number(o.paidAmount || (o.paymentMethod === 'CASH' ? n : 0));
+                const b = Number(o.balanceDue || (o.paymentMethod === 'CREDIT' ? n : 0));
+                rec.orders += 1; rec.total += n; rec.paid += p; rec.bal += b;
+                map.set(sid, rec);
+            });
+
+            const sorted = Array.from(map.values()).sort((a, b) => b.total - a.total);
+            activeReportRows = sorted.map((s, i) => ({
+                _searchText: [s.name, s.addr].join(' ').toLowerCase(),
+                html: '<tr><td><strong>#' + (i + 1) + '</strong></td><td><strong>🏪 ' + escapeHtml(s.name) + '</strong></td><td>' + escapeHtml(s.addr) + '</td><td class="num">' + s.orders + '</td><td class="num"><strong>' + formatMoney(s.total) + '</strong></td><td class="num" style="color:#166534;">' + formatMoney(s.paid) + '</td><td class="num" style="color:#b91c1c;">' + formatMoney(s.bal) + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 7, '');
+        }
+
+        // 4.2 Customer Credit Aging Matrix
+        function renderCreditAging(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Retailer / Shop</th><th class="num">Total Outstanding</th><th class="num">Current (0-30 Days)</th><th class="num">31-60 Days</th><th class="num">61-90 Days</th><th class="num">90+ Days Overdue</th></tr>';
+            const now = Date.now();
+            const map = new Map();
+
+            orders.forEach(o => {
+                const b = Number(o.balanceDue || (o.paymentMethod === 'CREDIT' ? o.totalAmount : 0)) || 0;
+                if (b <= 0) return;
+                const sid = o.shopId || o.shopName || 'Shop';
+                const sname = o.shopName || 'Shop';
+                const rec = map.get(sid) || { name: sname, total: 0, d0_30: 0, d31_60: 0, d61_90: 0, d90plus: 0 };
+                const t = toMillis(o.orderDate || o.createdAt);
+                const ageDays = Math.max(0, Math.floor((now - t) / 86400000));
+
+                rec.total += b;
+                if (ageDays <= 30) rec.d0_30 += b;
+                else if (ageDays <= 60) rec.d31_60 += b;
+                else if (ageDays <= 90) rec.d61_90 += b;
+                else rec.d90plus += b;
+                map.set(sid, rec);
+            });
+
+            activeReportRows = Array.from(map.values()).sort((a, b) => b.total - a.total).map((s, i) => ({
+                _searchText: s.name.toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(s.name) + '</strong></td><td class="num" style="color:#b91c1c; font-weight:900;">' + formatMoney(s.total) + '</td><td class="num">' + formatMoney(s.d0_30) + '</td><td class="num" style="color:#b45309;">' + formatMoney(s.d31_60) + '</td><td class="num" style="color:#dc2626;">' + formatMoney(s.d61_90) + '</td><td class="num" style="color:#7f1d1d; font-weight:800;">' + formatMoney(s.d90plus) + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 7, '');
+        }
+
+        // 4.3 Over Credit Limit
+        function renderOverLimitCustomers(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Customer Name</th><th>Phone</th><th class="num">Assigned Credit Limit</th><th class="num">Current Outstanding</th><th class="num">Excess (Over Limit)</th><th>Risk Alert</th></tr>';
+            const balMap = new Map();
+            orders.forEach(o => {
+                const b = Number(o.balanceDue || (o.paymentMethod === 'CREDIT' ? o.totalAmount : 0)) || 0;
+                if (b > 0 && o.shopId) {
+                    balMap.set(o.shopId, (balMap.get(o.shopId) || 0) + b);
+                }
+            });
+
+            const overList = [];
+            allShops.forEach(s => {
+                const lim = Number(s.creditLimit) || 0;
+                const bal = balMap.get(s.id) || 0;
+                if (lim > 0 && bal > lim) {
+                    overList.push({ ...s, lim, bal, excess: bal - lim });
+                }
+            });
+
+            activeReportRows = overList.map((s, i) => ({
+                _searchText: s.name.toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(s.name) + '</strong></td><td>' + escapeHtml(s.phone || s.mobile || '-') + '</td><td class="num">' + formatMoney(s.lim) + '</td><td class="num" style="color:#b91c1c; font-weight:800;">' + formatMoney(s.bal) + '</td><td class="num" style="color:#dc2626; font-weight:900;">+' + formatMoney(s.excess) + '</td><td><span class="tag-badge tag-credit">⚠️ Credit Breach</span></td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 7, '');
+        }
+
+        // 4.4 Inactive / Dormant Customers
+        function renderDormantCustomers(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Shop Name</th><th>Contact Phone</th><th>Assigned Rep</th><th>Address</th><th>Status</th></tr>';
+            const activeIds = new Set(orders.map(o => o.shopId).filter(Boolean));
+            const dormant = allShops.filter(s => !activeIds.has(s.id));
+
+            activeReportRows = dormant.map((s, i) => ({
+                _searchText: [s.name, s.address].join(' ').toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(s.name) + '</strong></td><td>' + escapeHtml(s.phone || s.mobile || '-') + '</td><td>' + escapeHtml(s.assignedRepName || '-') + '</td><td>' + escapeHtml(s.address || '-') + '</td><td><span class="tag-status tag-pending">Dormant (0 Orders)</span></td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 6, '');
+        }
+
+        // 4.5 Route & Town Velocity
+        function renderRoutesVelocity(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Route / Town / Area</th><th class="num">Total Invoices</th><th class="num">Total Revenue Generated</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                const r = String(o.route || o.shopAddress || 'General Area').trim();
+                const tot = Number(o.totalAmount || 0);
+                const rec = map.get(r) || { route: r, count: 0, rev: 0 };
+                rec.count += 1; rec.rev += tot;
+                map.set(r, rec);
+            });
+
+            activeReportRows = Array.from(map.values()).sort((a, b) => b.rev - a.rev).map((r, i) => ({
+                _searchText: r.route.toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>📍 ' + escapeHtml(r.route) + '</strong></td><td class="num">' + r.count + '</td><td class="num"><strong>' + formatMoney(r.rev) + '</strong></td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 4, '');
+        }
+
+        // 5.1 Real-Time Inventory Valuation
+        function renderInventoryValuation(thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Barcode / Code</th><th>Product Name</th><th>Brand</th><th class="num">Available Stock</th><th class="num">Cost Price (COGS)</th><th class="num">Selling Price</th><th class="num">Stock Cost Value</th><th class="num">Retail Potential</th></tr>';
+            let tCostVal = 0, tRetailVal = 0, tUnits = 0;
+            activeReportRows = allProducts.map((p, i) => {
+                const stock = Number(p.currentStock != null ? p.currentStock : p.stock) || 0;
+                const cost = Number(p.buyingPrice != null ? p.buyingPrice : p.costPrice) || (Number(p.unitPrice || p.price) * 0.85);
+                const sell = Number(p.unitPrice || p.price) || 0;
+                const cVal = stock * cost;
+                const sVal = stock * sell;
+                tCostVal += cVal; tRetailVal += sVal; tUnits += stock;
+
+                return {
+                    _searchText: [p.name, p.brand, p.productCode].join(' ').toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><code>' + escapeHtml(p.productCode || p.barcode || '-') + '</code></td><td><strong>' + escapeHtml(p.name) + '</strong></td><td>' + escapeHtml(p.brand || '-') + '</td><td class="num"><strong>' + stock + '</strong></td><td class="num">' + formatMoney(cost) + '</td><td class="num">' + formatMoney(sell) + '</td><td class="num" style="color:#047857; font-weight:800;">' + formatMoney(cVal) + '</td><td class="num">' + formatMoney(sVal) + '</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 9, '<tr class="total-row"><td colspan="4">TOTAL INVENTORY VALUATION</td><td class="num">' + tUnits + ' Units</td><td colspan="2"></td><td class="num">' + formatMoney(tCostVal) + '</td><td class="num">' + formatMoney(tRetailVal) + '</td></tr>');
+        }
+
+        // 5.2 Low Stock Alert
+        function renderLowStockAlert(thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Product Name</th><th>Brand</th><th class="num">Current Stock</th><th class="num">Reorder Threshold</th><th>Status</th></tr>';
+            const lowProds = allProducts.filter(p => {
+                const st = Number(p.currentStock != null ? p.currentStock : p.stock) || 0;
+                const min = Number(p.minStockLevel) || 10;
+                return st <= min;
+            }).sort((a, b) => (a.currentStock || a.stock || 0) - (b.currentStock || b.stock || 0));
+
+            activeReportRows = lowProds.map((p, i) => {
+                const st = Number(p.currentStock != null ? p.currentStock : p.stock) || 0;
+                const min = Number(p.minStockLevel) || 10;
+                return {
+                    _searchText: p.name.toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(p.name) + '</strong></td><td>' + escapeHtml(p.brand || '-') + '</td><td class="num" style="color:#dc2626; font-weight:900;">' + st + '</td><td class="num">' + min + '</td><td><span class="tag-status ' + (st === 0 ? 'tag-credit' : 'tag-pending') + '">' + (st === 0 ? 'Out of Stock' : 'Low Stock Alert') + '</span></td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 6, '');
+        }
+
+        // 5.3 Batches & Expiry Horizon
+        function renderBatchesExpiry(thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Product Name</th><th>Batch Identifier</th><th class="num">Available Qty</th><th>Created / Inward Date</th><th>Expiry Date</th></tr>';
+            const batchRows = [];
+            allProducts.forEach(p => {
+                const batches = Array.isArray(p.stockBatches) ? p.stockBatches : [];
+                batches.forEach(b => {
+                    const av = Number(b.availableQty) || 0;
+                    if (av > 0) {
+                        batchRows.push({
+                            name: p.name,
+                            batchId: b.batchId || b.id || '-',
+                            qty: av,
+                            created: formatDate(toMillis(b.createdAt)),
+                            expiry: b.expiryDate ? formatDate(toMillis(b.expiryDate)) : 'Non-Perishable'
+                        });
+                    }
+                });
+            });
+
+            activeReportRows = batchRows.map((b, i) => ({
+                _searchText: [b.name, b.batchId].join(' ').toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(b.name) + '</strong></td><td><code>' + escapeHtml(b.batchId) + '</code></td><td class="num"><strong>' + b.qty + '</strong></td><td>' + b.created + '</td><td>' + b.expiry + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 6, '');
+        }
+
+        // 5.4 Purchases & GRN History
+        async function renderGrnPurchases(crit, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Date</th><th>GRN / Ref #</th><th>Supplier / Manufacturer</th><th class="num">Total Inward Value</th><th>Payment Status</th></tr>';
+            const db = firebase.firestore();
+            const pSnap = await db.collection('purchases').where('businessId', '==', currentBusinessId).get().catch(() => ({ docs: [] }));
+            const purchases = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            activeReportRows = purchases.map((p, i) => ({
+                _searchText: [p.supplierName, p.grnNumber, p.invoiceNumber].join(' ').toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td>' + formatDate(toMillis(p.date || p.createdAt)) + '</td><td><strong>' + escapeHtml(p.grnNumber || p.id.slice(-8)) + '</strong></td><td>' + escapeHtml(p.supplierName || 'Manufacturer') + '</td><td class="num"><strong>' + formatMoney(p.totalAmount || p.grandTotal) + '</strong></td><td><span class="tag-status tag-approved">' + escapeHtml(p.paymentStatus || 'POSTED') + '</span></td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 6, '');
+        }
+
+        // 5.5 Stock Adjustments
+        function renderInventoryAdjustments(thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Product</th><th class="num">Current Stock</th><th>Audit Status</th></tr>';
+            activeReportRows = allProducts.map((p, i) => ({
+                _searchText: p.name.toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(p.name) + '</strong></td><td class="num">' + (p.currentStock || p.stock || 0) + '</td><td><span class="tag-status tag-approved">Active Synced</span></td></tr>'
+            }));
+            renderActiveRowsWithTotal(tbody, 4, '');
+        }
+
+        // 6.1 Promotional Free Issues Log
+        function renderFreeIssuesScheme(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Date</th><th>Order #</th><th>Customer</th><th>Product</th><th class="num">Free Qty</th><th>Reason</th><th>Rep</th></tr>';
+            const rows = [];
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const f = Number(it.freeQty) || 0;
+                    if (f > 0) {
+                        rows.push({
+                            date: formatDate(toMillis(o.orderDate || o.createdAt)),
+                            orderNum: o.orderNumber || o.id.slice(-8),
+                            shop: o.shopName || 'Shop',
+                            product: it.productName || it.name || 'Item',
+                            freeQty: f,
+                            reason: it.freeReason || 'Promotional Offer',
+                            rep: o.repName || 'Rep'
+                        });
+                    }
+                });
+            });
+
+            activeReportRows = rows.map((r, i) => ({
+                _searchText: [r.orderNum, r.shop, r.product, r.rep].join(' ').toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td>' + r.date + '</td><td><strong>' + escapeHtml(r.orderNum) + '</strong></td><td>' + escapeHtml(r.shop) + '</td><td><strong>' + escapeHtml(r.product) + '</strong></td><td class="num" style="color:#047857; font-weight:800;">+' + r.freeQty + '</td><td>' + escapeHtml(r.reason) + '</td><td>' + escapeHtml(r.rep) + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 8, '');
+        }
+
+        // 6.2 Free Issues by Product
+        function renderFreeIssuesByProduct(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Product Name</th><th>Brand</th><th class="num">Free Units Dispensed</th><th class="num">Estimated Promo Cost</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const f = Number(it.freeQty) || 0;
+                    if (f > 0) {
+                        const pid = it.productId || it.productCode || it.name;
+                        const rec = map.get(pid) || { name: it.productName || it.name, brand: it.productBrand || it.brand || '-', free: 0, cost: 0 };
+                        const prodDoc = allProducts.find(p => p.id === pid || p.name === it.productName);
+                        const c = Number(prodDoc && (prodDoc.buyingPrice != null ? prodDoc.buyingPrice : prodDoc.costPrice)) || (Number(it.unitPrice || it.price) * 0.85);
+                        rec.free += f; rec.cost += f * c;
+                        map.set(pid, rec);
+                    }
+                });
+            });
+
+            activeReportRows = Array.from(map.values()).sort((a, b) => b.free - a.free).map((p, i) => ({
+                _searchText: p.name.toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>🎁 ' + escapeHtml(p.name) + '</strong></td><td>' + escapeHtml(p.brand) + '</td><td class="num" style="color:#047857; font-weight:800;">' + p.free + ' Units</td><td class="num" style="color:#dc2626; font-weight:800;">' + formatMoney(p.cost) + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 5, '');
+        }
+
+        // 6.3 Market Returns Register
+        function renderMarketReturnsLog(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Date</th><th>Order #</th><th>Customer</th><th>Product</th><th class="num">Return Qty</th><th class="num">Return Value</th><th>Classification</th><th>Reason</th><th>Rep</th></tr>';
+            const rows = [];
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const rq = Number(it.returnQty || it.returnResellQty || it.returnCompanyQty || 0);
+                    if (rq > 0) {
+                        const up = Number(it.unitPrice || it.price) || 0;
+                        const val = rq * up;
+                        rows.push({
+                            date: formatDate(toMillis(o.orderDate || o.createdAt)),
+                            orderNum: o.orderNumber || o.id.slice(-8),
+                            shop: o.shopName || 'Shop',
+                            product: it.productName || it.name || 'Item',
+                            qty: rq,
+                            val: val,
+                            type: it.returnCompanyQty > 0 ? 'Company Claim (Cat 1)' : 'Resell to Stock (Cat 2)',
+                            reason: it.returnReason || 'Market Return',
+                            rep: o.repName || 'Rep'
+                        });
+                    }
+                });
+            });
+
+            activeReportRows = rows.map((r, i) => ({
+                _searchText: [r.orderNum, r.shop, r.product].join(' ').toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td>' + r.date + '</td><td><strong>' + escapeHtml(r.orderNum) + '</strong></td><td>' + escapeHtml(r.shop) + '</td><td>' + escapeHtml(r.product) + '</td><td class="num" style="color:#dc2626;">-' + r.qty + '</td><td class="num" style="color:#dc2626; font-weight:800;">' + formatMoney(r.val) + '</td><td><span class="tag-badge tag-credit">' + escapeHtml(r.type) + '</span></td><td>' + escapeHtml(r.reason) + '</td><td>' + escapeHtml(r.rep) + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 10, '');
+        }
+
+        // 6.4 Return Rates by Product
+        function renderReturnRatesByProduct(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Product Name</th><th>Brand</th><th class="num">Units Sold</th><th class="num">Units Returned</th><th class="num">Return Rate %</th></tr>';
+            const map = new Map();
+            orders.forEach(o => {
+                (o.items || o.orderItems || []).forEach(it => {
+                    const pid = it.productId || it.productCode || it.name;
+                    const rec = map.get(pid) || { name: it.productName || it.name, brand: it.productBrand || it.brand || '-', sold: 0, ret: 0 };
+                    rec.sold += Number(it.orderedQty || it.quantity || it.qty || 0);
+                    rec.ret += Number(it.returnQty || it.returnResellQty || it.returnCompanyQty || 0);
+                    map.set(pid, rec);
+                });
+            });
+
+            activeReportRows = Array.from(map.values()).filter(p => p.ret > 0).sort((a, b) => b.ret - a.ret).map((p, i) => {
+                const rate = p.sold > 0 ? ((p.ret / p.sold) * 100).toFixed(1) : '0.0';
+                return {
+                    _searchText: p.name.toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(p.name) + '</strong></td><td>' + escapeHtml(p.brand) + '</td><td class="num">' + p.sold + '</td><td class="num" style="color:#dc2626; font-weight:800;">' + p.ret + '</td><td class="num" style="color:#dc2626; font-weight:900;">' + rate + '%</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 6, '');
+        }
+
+        // 6.5 Net Realization Matrix
+        function renderNetRealizationMatrix(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Invoice #</th><th>Customer</th><th class="num">Gross Sales</th><th class="num">Returns Value</th><th class="num">Discounts</th><th class="num">Net Realized Revenue</th></tr>';
+            activeReportRows = orders.map((o, i) => {
+                const g = Number(o.grossTotal || o.subtotal || o.totalAmount) || 0;
+                const r = Number(o.returnTotal || 0);
+                const d = Number(o.discountAmount || o.discount || 0);
+                const n = Number(o.totalAmount || o.netAmount || (g - r - d)) || 0;
+                return {
+                    _searchText: [o.orderNumber, o.shopName].join(' ').toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td><strong>' + escapeHtml(o.orderNumber || o.id.slice(-8)) + '</strong></td><td>' + escapeHtml(o.shopName || 'Shop') + '</td><td class="num">' + formatMoney(g) + '</td><td class="num" style="color:#dc2626;">-' + formatMoney(r) + '</td><td class="num" style="color:#dc2626;">-' + formatMoney(d) + '</td><td class="num" style="color:#047857; font-weight:900;">' + formatMoney(n) + '</td></tr>'
+                };
+            });
+            renderActiveRowsWithTotal(tbody, 7, '');
+        }
+
+        // 7.1 P&L Statement
+        function renderPnLStatement(orders, crit, thead, tbody) {
+            thead.innerHTML = '<tr><th>Financial Line Item</th><th class="num">Amount (LKR)</th><th class="num">% of Revenue</th><th>Accounting Classification</th></tr>';
+
+            let gross = 0, returns = 0, discounts = 0, netSales = 0, cogs = 0;
+            orders.forEach(o => {
+                const g = Number(o.grossTotal || o.subtotal || o.totalAmount) || 0;
+                const r = Number(o.returnTotal || 0);
+                const d = Number(o.discountAmount || o.discount || 0);
+                const n = Number(o.totalAmount || o.netAmount || (g - r - d)) || 0;
+                gross += g; returns += r; discounts += d; netSales += n;
+                (o.items || o.orderItems || []).forEach(it => {
+                    const q = Number(it.orderedQty || it.quantity || it.qty || 0);
+                    const prod = allProducts.find(p => p.id === it.productId || p.name === it.productName);
+                    const cost = Number(prod && (prod.buyingPrice != null ? prod.buyingPrice : prod.costPrice)) || (Number(it.unitPrice || it.price) * 0.85);
+                    cogs += q * cost;
+                });
+            });
+
+            // Ledger Expenses
+            let opex = 0;
+            allJournalEntries.forEach(entry => {
+                (entry.entries || []).forEach(line => {
+                    const code = String(line.accountCode || '');
+                    if (code.startsWith('5-') || String(line.accountName || '').toLowerCase().includes('expense')) {
+                        opex += Number(line.debit) || 0;
+                    }
+                });
+            });
+
+            const grossProfit = Math.max(0, netSales - cogs);
+            const netProfit = grossProfit - opex;
+
+            const pnlItems = [
+                { name: '1. Gross Invoiced Sales', val: gross, pct: 100, cls: 'Operating Revenue', style: 'font-weight:700;' },
+                { name: '2. Less: Market Returns & Deductions', val: -returns, pct: gross > 0 ? (returns / gross * 100) : 0, cls: 'Contra-Revenue', style: 'color:#dc2626;' },
+                { name: '3. Less: Trade Discounts & Concessions', val: -discounts, pct: gross > 0 ? (discounts / gross * 100) : 0, cls: 'Contra-Revenue', style: 'color:#dc2626;' },
+                { name: '4. NET SALES REVENUE', val: netSales, pct: 100, cls: 'Net Topline', style: 'font-weight:900; background:#f0fdf4; color:#166534;' },
+                { name: '5. Cost of Goods Sold (COGS)', val: -cogs, pct: netSales > 0 ? (cogs / netSales * 100) : 0, cls: 'Direct Inventory Cost', style: 'color:#b45309;' },
+                { name: '6. GROSS PROFIT (MARGIN)', val: grossProfit, pct: netSales > 0 ? (grossProfit / netSales * 100) : 0, cls: 'Gross Operating Margin', style: 'font-weight:900; background:#ecfdf5; color:#047857;' },
+                { name: '7. Operational & Distribution Expenses', val: -opex, pct: netSales > 0 ? (opex / netSales * 100) : 0, cls: 'Operating Overheads', style: 'color:#dc2626;' },
+                { name: '8. NET OPERATING PROFIT', val: netProfit, pct: netSales > 0 ? (netProfit / netSales * 100) : 0, cls: 'Bottomline Profit', style: 'font-weight:900; font-size:14px; background:#dcfce7; color:#14532d;' }
+            ];
+
+            activeReportRows = pnlItems.map(item => ({
+                _searchText: item.name.toLowerCase(),
+                html: '<tr style="' + (item.style || '') + '">' +
+                    '<td><strong>' + item.name + '</strong></td>' +
+                    '<td class="num">' + formatMoney(Math.abs(item.val)) + '</td>' +
+                    '<td class="num">' + item.pct.toFixed(1) + '%</td>' +
+                    '<td><span class="tag-badge tag-cash">' + item.cls + '</span></td>' +
+                '</tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 4, '');
+        }
+
+        // 7.2 Cashflow Register
+        function renderCashflowRegister(orders, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Date</th><th>Type</th><th>Ref #</th><th>Customer / Description</th><th class="num">Inflow (Cash In)</th><th class="num">Outflow (Cash Out)</th></tr>';
+            let totalIn = 0;
+            activeReportRows = orders.filter(o => Number(o.paidAmount || (o.paymentMethod === 'CASH' ? o.totalAmount : 0)) > 0).map((o, i) => {
+                const p = Number(o.paidAmount || (o.paymentMethod === 'CASH' ? o.totalAmount : 0));
+                totalIn += p;
+                return {
+                    _searchText: [o.orderNumber, o.shopName].join(' ').toLowerCase(),
+                    html: '<tr><td>' + (i + 1) + '</td><td>' + formatDate(toMillis(o.orderDate || o.createdAt)) + '</td><td><span class="tag-badge tag-cash">Order Settlement</span></td><td>' + escapeHtml(o.orderNumber || o.id.slice(-8)) + '</td><td>' + escapeHtml(o.shopName || 'Shop') + '</td><td class="num" style="color:#166534; font-weight:800;">+' + formatMoney(p) + '</td><td class="num">-</td></tr>'
+                };
+            });
+
+            renderActiveRowsWithTotal(tbody, 7, '<tr class="total-row"><td colspan="5">TOTAL CASH RECEIPTS</td><td class="num">' + formatMoney(totalIn) + '</td><td class="num">Rs. 0.00</td></tr>');
+        }
+
+        // 7.3 Cheques Schedule
+        function renderChequesSchedule(crit, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Maturity Date</th><th>Cheque #</th><th>Drawer Bank</th><th>Customer</th><th class="num">Cheque Amount</th><th>Status</th></tr>';
+            activeReportRows = allCheques.map((c, i) => ({
+                _searchText: [c.chequeNumber, c.bankName, c.customerName].join(' ').toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td><strong>' + formatDate(toMillis(c.depositDueDate || c.chequeDate)) + '</strong></td><td><code>' + escapeHtml(c.chequeNumber || '-') + '</code></td><td>' + escapeHtml(c.bankName || '-') + '</td><td>' + escapeHtml(c.customerName || '-') + '</td><td class="num" style="font-weight:800;">' + formatMoney(c.amount) + '</td><td><span class="tag-status tag-approved">' + escapeHtml(c.status || 'PENDING_DEPOSIT') + '</span></td></tr>'
+            }));
+            renderActiveRowsWithTotal(tbody, 7, '');
+        }
+
+        // 7.4 Supplier Payables
+        function renderSupplierPayables(thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Supplier / Manufacturer</th><th>Contact</th><th class="num">Outstanding Payable (AP)</th><th>Payment Terms</th></tr>';
+            activeReportRows = [
+                {
+                    _searchText: 'main supplier',
+                    html: '<tr><td>1</td><td><strong>🏭 Principle Manufacturer / Head Supplier</strong></td><td>Direct Factory Accounts</td><td class="num" style="color:#b91c1c; font-weight:800;">Rs. 0.00</td><td>Net 30 Days</td></tr>'
+                }
+            ];
+            renderActiveRowsWithTotal(tbody, 5, '');
+        }
+
+        // 7.5 General Ledger Audit Trail
+        function renderGeneralLedgerTrail(crit, thead, tbody) {
+            thead.innerHTML = '<tr><th>#</th><th>Date</th><th>Entry ID / Ref</th><th>Description</th><th>Account Code</th><th>Account Title</th><th class="num">Debit</th><th class="num">Credit</th></tr>';
+            const rows = [];
+            allJournalEntries.forEach((je, idx) => {
+                const dt = formatDate(toMillis(je.date || je.createdAt));
+                const ref = je.ref || je.id;
+                const desc = je.description || '-';
+                (je.entries || []).forEach(line => {
+                    rows.push({
+                        date: dt,
+                        ref: ref,
+                        desc: desc,
+                        code: line.accountCode || '-',
+                        title: line.accountName || '-',
+                        dr: Number(line.debit) || 0,
+                        cr: Number(line.credit) || 0
+                    });
+                });
+            });
+
+            activeReportRows = rows.map((r, i) => ({
+                _searchText: [r.ref, r.desc, r.title, r.code].join(' ').toLowerCase(),
+                html: '<tr><td>' + (i + 1) + '</td><td>' + r.date + '</td><td><code>' + escapeHtml(r.ref) + '</code></td><td>' + escapeHtml(r.desc) + '</td><td><code>' + escapeHtml(r.code) + '</code></td><td>' + escapeHtml(r.title) + '</td><td class="num">' + (r.dr > 0 ? formatMoney(r.dr) : '-') + '</td><td class="num">' + (r.cr > 0 ? formatMoney(r.cr) : '-') + '</td></tr>'
+            }));
+
+            renderActiveRowsWithTotal(tbody, 8, '');
+        }
+
+        // --- TABLE SEARCH & RENDER HELPER ---
+        function renderActiveRowsWithTotal(tbody, colSpan, totalRowHtml = '') {
+            const query = (document.getElementById('reportTableSearch')?.value || '').toLowerCase().trim();
+            filteredReportRows = query
+                ? activeReportRows.filter(r => r._searchText.includes(query))
+                : activeReportRows;
+
+            if (filteredReportRows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="' + colSpan + '" style="text-align:center; padding:40px; color:#94a3b8;">No matching records found for current filters.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredReportRows.map(r => r.html).join('') + totalRowHtml;
+        }
+
+        function onSearchTable(val) {
+            const tbody = document.getElementById('reportTableBody');
+            const colSpan = document.getElementById('reportTableHead').querySelectorAll('th').length || 8;
+            renderActiveRowsWithTotal(tbody, colSpan);
+        }
+
+        // --- CSV EXPORT ENGINE ---
+        function exportActiveReportToCSV() {
+            const table = document.getElementById('masterReportTable');
+            if (!table) return;
+
+            let csv = [];
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach(c => {
+                    let text = c.innerText.replace(/"/g, '""').trim();
+                    rowData.push('"' + text + '"');
+                });
+                if (rowData.length) csv.push(rowData.join(','));
+            });
+
+            const csvString = csv.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'DIGIBIZ_' + currentSubReport + '_' + new Date().toISOString().slice(0, 10) + '.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function refreshReportsHub() {
+            await fetchAllData();
+            populateFilterDropdowns();
+            applyFiltersAndRender();
+        }
+    </script>
+</body>
+</html>

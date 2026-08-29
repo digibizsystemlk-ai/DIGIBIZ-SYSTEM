@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="si">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="/snapshots/ROYAL_ARABIAN/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIGIBIZ - සජීවී පරිශීලක ක්‍රියාකාරකම් නිරීක්ෂණ කේන්ද්‍රය (Live User Activity)</title>
+    
+    <style>
+        html.digibiz-sidebar-reserved body {
+            margin-left: 260px;
+        }
+
+        @media (max-width: 768px) {
+            html.digibiz-sidebar-reserved body {
+                margin-left: 0;
+            }
+        }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-database-compat.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/firebase-init.js?v=100"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/auth-roles.js?v=2135"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/sidebar.js?v=2116"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/live-presence.js?v=2116"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Noto Sans Sinhala', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #090e17;
+            color: #f1f5f9;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .dashboard-container {
+            padding: 24px 28px;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* Top Header Banner */
+        .live-header {
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+            border: 1.5px solid #059669;
+            border-radius: 18px;
+            padding: 22px 28px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(5, 150, 105, 0.2);
+        }
+
+        .header-title-group h1 {
+            margin: 0 0 4px 0;
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title-group p {
+            margin: 0;
+            font-size: 13px;
+            color: #a7f3d0;
+            opacity: 0.9;
+        }
+
+        .live-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1.5px solid #10b981;
+            color: #6ee7b7;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .radar-pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px #10b981;
+            animation: radarPulse 1.4s infinite;
+        }
+
+        @keyframes radarPulse {
+            0% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Top Summary KPI Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #111a28;
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #334155;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            opacity: 0.9;
+        }
+
+        /* Search & Filter Toolbar */
+        .toolbar-panel {
+            background: #111a28;
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 260px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: #090e17;
+            border: 1.5px solid #334155;
+            color: #f8fafc;
+            padding: 10px 14px 10px 38px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: #10b981;
+        }
+
+        .search-box span.search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-chip {
+            background: #090e17;
+            border: 1px solid #334155;
+            color: #cbd5e1;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-chip:hover {
+            border-color: #059669;
+            color: #34d399;
+        }
+
+        .filter-chip.active {
+            background: #064e3b;
+            border-color: #10b981;
+            color: #34d399;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Main Timeline Feed */
+        .timeline-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding: 0 4px;
+        }
+
+        .timeline-section-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        /* Activity Item Row */
+        .activity-card {
+            background: #111a28;
+            border: 1.5px solid #1e293b;
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-card.is-active-user {
+            border-left: 5px solid #10b981;
+        }
+
+        .activity-card.is-idle-user {
+            border-left: 5px solid #f59e0b;
+            opacity: 0.85;
+        }
+
+        .activity-card:hover {
+            border-color: #059669;
+            background: #142032;
+            transform: translateX(4px);
+        }
+
+        .activity-card.highlight-new {
+            animation: highlightFlash 1s ease-out;
+        }
+
+        @keyframes highlightFlash {
+            0% { background: #064e3b; border-color: #34d399; }
+            100% { background: #111a28; }
+        }
+
+        .activity-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .user-meta-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .user-avatar .avatar-status-badge {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #111a28;
+        }
+
+        .avatar-status-badge.active-dot {
+            background: #10b981;
+            box-shadow: 0 0 6px #10b981;
+        }
+
+        .avatar-status-badge.idle-dot {
+            background: #f59e0b;
+            box-shadow: 0 0 6px #f59e0b;
+        }
+
+        .user-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .business-pill {
+            background: #1e293b;
+            color: #38bdf8;
+            border: 1px solid #0284c7;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .role-pill {
+            background: #334155;
+            color: #cbd5e1;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .role-pill.role-admin {
+            background: #831843;
+            color: #f472b6;
+            border: 1px solid #db2777;
+        }
+
+        .role-pill.role-owner {
+            background: #3b0764;
+            color: #c084fc;
+            border: 1px solid #9333ea;
+        }
+
+        .user-email-text {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .time-badge {
+            font-size: 12px;
+            font-weight: 700;
+            color: #34d399;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .time-badge.is-idle-time {
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        /* Big Sinhala Action Box */
+        .action-highlight-box {
+            background: #0b131f;
+            border: 1.5px solid #1e293b;
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f8fafc;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .action-highlight-box.action-active-glow {
+            border-color: #059669;
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.3) 0%, rgba(2, 44, 34, 0.4) 100%);
+        }
+
+        .action-highlight-box .action-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .action-text-sinhala {
+            flex: 1;
+            color: #e2e8f0;
+            line-height: 1.4;
+        }
+
+        .action-text-sinhala strong {
+            color: #34d399;
+        }
+
+        /* Bottom Meta & Quick Buttons */
+        .activity-bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 12px;
+            color: #94a3b8;
+            border-top: 1px dashed #1e293b;
+            padding-top: 8px;
+            margin-top: 2px;
+        }
+
+        .device-info-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #cbd5e1;
+        }
+
+        .quick-action-buttons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .q-btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .q-btn:hover {
+            background: #334155;
+            color: #fff;
+            border-color: #64748b;
+        }
+
+        .q-btn.btn-whatsapp {
+            background: #064e3b;
+            border-color: #059669;
+            color: #34d399;
+        }
+
+        .q-btn.btn-whatsapp:hover {
+            background: #059669;
+            color: #fff;
+        }
+
+        /* Empty State */
+        .empty-state {
+            background: #111a28;
+            border: 2px dashed #1e293b;
+            border-radius: 16px;
+            padding: 48px 24px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 6px 0;
+            font-size: 18px;
+            color: #cbd5e1;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar Mount Point -->
+    <div id="sidebar-container"></div>
+
+    <div class="dashboard-container">
+        <!-- Live Header -->
+        <div class="live-header">
+            <div class="header-title-group">
+                <h1>
+                    <span>⚡</span>
+                    <span>සජීවී පරිශීලක ක්‍රියාකාරකම් නිරීක්ෂණ කේන්ද්‍රය</span>
+                </h1>
+                <p>පද්ධතිය තුළ පරිශීලකයින් මේ මොහොතේ සිදුකරන ක්‍රියාකාරකම් සජීවීව නිරීක්ෂණය කරන්න (Real-Time Live Telemetry).</p>
+            </div>
+            <div class="live-status-pill">
+                <span class="radar-pulse-dot"></span>
+                <span id="connectionStatusText">සජීවීව සම්බන්ධයි (Live WebSocket)</span>
+            </div>
+        </div>
+
+        <!-- Top Summary KPI Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">සක්‍රීය පරිශීලකයින් (Active Now)</div>
+                    <div class="stat-value" id="kpiActiveNow" style="color:#10b981;">0</div>
+                </div>
+                <div class="stat-icon">🟢</div>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">මඳ වේලාවකින් ක්‍රියා විරහිත (Idle)</div>
+                    <div class="stat-value" id="kpiIdleNow" style="color:#f59e0b;">0</div>
+                </div>
+                <div class="stat-icon">🟡</div>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">සක්‍රීය ව්‍යාපාර (Active Stores)</div>
+                    <div class="stat-value" id="kpiActiveBiz">0</div>
+                </div>
+                <div class="stat-icon">🏢</div>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">උපාංග බෙදීම (Mobile / PC)</div>
+                    <div class="stat-value" id="kpiDeviceSplit" style="font-size: 20px; color:#38bdf8;">0% / 0%</div>
+                </div>
+                <div class="stat-icon">📱</div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Toolbar -->
+        <div class="toolbar-panel">
+            <div class="search-row">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input id="liveSearchInput" type="text" placeholder="නම, ව්‍යාපාරය, Email හෝ ක්‍රියාව අනුව සොයන්න..." oninput="handleSearchFilter()">
+                </div>
+            </div>
+            <div class="filter-chips">
+                <span style="font-size: 11.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">පෙරහන් (Filters):</span>
+                <div class="filter-chip active" data-filter="all" onclick="setFilter('all', this)">
+                    <span>🌐</span>
+                    <span>සියල්ල (All)</span>
+                </div>
+                <div class="filter-chip" data-filter="active" onclick="setFilter('active', this)">
+                    <span>🟢</span>
+                    <span>සක්‍රීය අය (Active Now)</span>
+                </div>
+                <div class="filter-chip" data-filter="scrap" onclick="setFilter('scrap', this)">
+                    <span>🧾</span>
+                    <span>පරණ යකඩ බිල්පත් (Scrap Buying)</span>
+                </div>
+                <div class="filter-chip" data-filter="purchases" onclick="setFilter('purchases', this)">
+                    <span>📦</span>
+                    <span>තොග මිලදී ගැනීම් (GRN)</span>
+                </div>
+                <div class="filter-chip" data-filter="billing" onclick="setFilter('billing', this)">
+                    <span>💳</span>
+                    <span>විකුණුම් බිල්පත් (POS/Billing)</span>
+                </div>
+                <div class="filter-chip" data-filter="viewing" onclick="setFilter('viewing', this)">
+                    <span>👀</span>
+                    <span>පිටු නරඹන අය (Browsing)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Section -->
+        <div class="timeline-section-header">
+            <div class="timeline-section-title">
+                <span>📡</span>
+                <span>සජීවී ක්‍රියාකාරකම් පෙළගැස්ම (අලුත්ම එක උඩින් - Newest on Top)</span>
+            </div>
+            <div id="liveItemCountBadge" style="font-size: 12px; font-weight: 700; color: #94a3b8;">
+                පරිශීලකයින් 0 ක් හමු විය
+            </div>
+        </div>
+
+        <!-- Activity Timeline Container -->
+        <div class="timeline-container" id="timelineContainer">
+            <div class="empty-state">
+                <div class="empty-state-icon">📡</div>
+                <h3>සජීවී පරිශීලකයින් සම්බන්ධ වන තුරු රැඳී සිටින්න...</h3>
+                <p>පරිශීලකයින් පද්ධතියට ලොග් වී යමක් කරන විට මෙම පිටුවේ ස්වයංක්‍රීයව සජීවීව පෙන්වනු ඇත.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Telemetry & Formatting Script -->
+    <script>
+        let _allSessions = [];
+        let _activeFilter = 'all';
+        let _searchTerm = '';
+        let _prevActionMap = {}; // Track action changes for flash animation
+
+        // Convert technical telemetry into clear, warm, simple Sinhala
+        function formatSinhalaAction(actionText, sess) {
+            if (window.DigiBizPresence && typeof window.DigiBizPresence.formatSinhalaAction === 'function') {
+                return window.DigiBizPresence.formatSinhalaAction(actionText, sess);
+            }
+            if (!actionText) return 'පද්ධතියේ සැරිසරමින් සිටී (Browsing Platform)';
+            return String(actionText);
+        }
+
+        // Format relative time in simple Sinhala
+        function formatRelativeSinhalaTime(timestamp) {
+            if (!timestamp) return 'මීට සුළු මොහොතකට පෙර';
+            const now = Date.now();
+            const diffSec = Math.max(0, Math.floor((now - timestamp) / 1000));
+
+            if (diffSec < 5) return 'දැන් (Just now)';
+            if (diffSec < 60) return `තත්පර ${diffSec}කට පෙර`;
+            const diffMin = Math.floor(diffSec / 60);
+            if (diffMin < 60) return `මිනිත්තු ${diffMin}කට පෙර`;
+            const diffHours = Math.floor(diffMin / 60);
+            if (diffHours < 24) return `පැය ${diffHours}කට පෙර`;
+            return `දින ${Math.floor(diffHours / 24)}කට පෙර`;
+        }
+
+        // Render the entire list (Sorted: Newest action on TOP)
+        function renderLiveTimeline() {
+            const container = document.getElementById('timelineContainer');
+            if (!container) return;
+
+            let filtered = [..._allSessions];
+
+            // 1. Apply Search Filter
+            if (_searchTerm) {
+                const q = _searchTerm.toLowerCase();
+                filtered = filtered.filter((s) => {
+                    return (s.name && s.name.toLowerCase().includes(q)) ||
+                           (s.businessName && s.businessName.toLowerCase().includes(q)) ||
+                           (s.businessType && s.businessType.toLowerCase().includes(q)) ||
+                           (s.email && s.email.toLowerCase().includes(q)) ||
+                           (s.currentAction && s.currentAction.toLowerCase().includes(q)) ||
+                           (s.pageTitle && s.pageTitle.toLowerCase().includes(q));
+                });
+            }
+
+            // 2. Apply Category Filter
+            if (_activeFilter !== 'all') {
+                filtered = filtered.filter((s) => {
+                    const act = String(s.currentAction || '').toLowerCase();
+                    const page = String(s.pageTitle || '').toLowerCase();
+                    if (_activeFilter === 'active') return s.computedStatus === 'active';
+                    if (_activeFilter === 'scrap') return act.includes('scrap') || page.includes('scrap');
+                    if (_activeFilter === 'purchases') return act.includes('grn') || act.includes('purchases') || page.includes('purchase');
+                    if (_activeFilter === 'billing') return act.includes('bill') || act.includes('pos') || page.includes('billing');
+                    if (_activeFilter === 'viewing') return act.includes('loaded') || act.includes('viewing') || act.includes('browsing');
+                    return true;
+                });
+            }
+
+            // 3. Sort: NEWEST ACTION / PING ON TOP!
+            filtered.sort((a, b) => {
+                const timeA = a.lastActionAt || a.lastPing || 0;
+                const timeB = b.lastActionAt || b.lastPing || 0;
+                return timeB - timeA;
+            });
+
+            // Update Header Counts
+            const countBadge = document.getElementById('liveItemCountBadge');
+            if (countBadge) {
+                countBadge.textContent = `පරිශීලකයින් ${filtered.length} ක් සක්‍රීයව ලැයිස්තුගතයි`;
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📡</div>
+                        <h3>සක්‍රීය පරිශීලකයින් කිසිවෙකු හමු නොවීය</h3>
+                        <p>පරිශීලකයින් පද්ධතියට ලොග් වී යමක් කරන විට මෙම පිටුවේ ස්වයංක්‍රීයව සජීවීව පෙන්වනු ඇත.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((sess) => {
+                const isActive = sess.computedStatus === 'active';
+                const timeVal = sess.lastActionAt || sess.lastPing || Date.now();
+                const sinhalaAction = formatSinhalaAction(sess.currentAction, sess);
+                const initial = (sess.name || 'U').charAt(0).toUpperCase();
+                const relTime = formatRelativeSinhalaTime(timeVal);
+
+                const roleLower = String(sess.role || '').toLowerCase();
+                let roleClass = 'role-staff';
+                if (roleLower.includes('admin')) roleClass = 'role-admin';
+                else if (roleLower.includes('owner')) roleClass = 'role-owner';
+
+                const deviceIcon = sess.deviceType === 'Mobile' ? '📱' : (sess.deviceType === 'Tablet' ? '📟' : '💻');
+                const isNewAction = _prevActionMap[sess.sessionId] && _prevActionMap[sess.sessionId] !== sess.currentAction;
+                _prevActionMap[sess.sessionId] = sess.currentAction;
+
+                const phoneClean = String(sess.phone || '').replace(/[^0-9]/g, '');
+                const bizTypeSinhala = window.DigiBizPresence ? window.DigiBizPresence.getSinhalaBusinessType(sess.businessType) : (sess.businessType || 'General');
+
+                html += `
+                    <div class="activity-card ${isActive ? 'is-active-user' : 'is-idle-user'} ${isNewAction ? 'highlight-new' : ''}" id="card_${sess.sessionId}">
+                        <div class="activity-top-row">
+                            <div class="user-meta-group">
+                                <div class="user-avatar">
+                                    <span>${initial}</span>
+                                    <span class="avatar-status-badge ${isActive ? 'active-dot' : 'idle-dot'}"></span>
+                                </div>
+                                <div class="user-titles">
+                                    <div class="user-name">
+                                        <span>${sess.name || 'පරිශීලකයා'}</span>
+                                        <span class="business-pill">🏢 ${sess.businessName || 'Main Store'}</span>
+                                        <span class="role-pill" style="background:#0c4a6e; color:#7dd3fc; border:1px solid #0284c7;">🏷️ ${bizTypeSinhala}</span>
+                                        <span class="role-pill ${roleClass}">${sess.role || 'STAFF'}</span>
+                                        ${sess.isDemo ? '<span class="role-pill" style="background:#ea580c; color:#fff;">DEMO</span>' : ''}
+                                    </div>
+                                    <div class="user-email-text">${sess.email || 'Email සටහන්ව නැත'} ${sess.phone ? `• 📞 ${sess.phone}` : ''}</div>
+                                </div>
+                            </div>
+                            <div class="time-badge ${isActive ? '' : 'is-idle-time'}" data-time="${timeVal}">
+                                <span>${isActive ? '🟢' : '🟡'}</span>
+                                <span class="rel-time-text">${relTime}</span>
+                            </div>
+                        </div>
+
+                        <div class="action-highlight-box ${isActive ? 'action-active-glow' : ''}">
+                            <span class="action-icon">⚡</span>
+                            <div class="action-text-sinhala">${sinhalaAction}</div>
+                        </div>
+
+                        <div class="activity-bottom-row">
+                            <div class="device-info-tag">
+                                <span>📄 <strong>පිටුව:</strong> ${sess.pageTitle || 'Home'}</span>
+                                <span>•</span>
+                                <span>${deviceIcon} <strong>උපාංගය:</strong> ${sess.os || 'OS'} (${sess.browser || 'Browser'}${sess.isPwa ? ' • PWA' : ''})</span>
+                            </div>
+                            <div class="quick-action-buttons">
+                                ${phoneClean ? `<a class="q-btn btn-whatsapp" href="https://wa.me/${phoneClean.startsWith('0') ? '94' + phoneClean.slice(1) : phoneClean}" target="_blank">💬 WhatsApp</a>` : ''}
+                                ${phoneClean ? `<a class="q-btn" href="tel:${phoneClean}">📞 Call</a>` : ''}
+                                ${sess.email ? `<a class="q-btn" href="mailto:${sess.email}">✉️ Email</a>` : ''}
+                                ${sess.uid ? `<button class="q-btn" onclick="startAdminImpersonate('${sess.uid}', '${sess.name || ''}')">👁️ View</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Live Real-Time Data Processor
+        function processLivePresenceData(rawSessions) {
+            const now = Date.now();
+            let activeCount = 0;
+            let idleCount = 0;
+            const activeBizSet = new Set();
+            let mobileCount = 0;
+            let desktopCount = 0;
+
+            const processed = [];
+
+            (rawSessions || []).forEach((sess) => {
+                if (!sess) return;
+                const email = String(sess.email || '').toLowerCase().trim();
+                if (email === 'biz.sirimal@gmail.com') return; // Exclude Chinthaka
+                if (sess.isSuperAdminObserver || sess.isImpersonating) return;
+
+                let lastPingMillis = 0;
+                if (sess.lastPing) {
+                    if (typeof sess.lastPing === 'number') lastPingMillis = sess.lastPing;
+                    else if (typeof sess.lastPing.toMillis === 'function') lastPingMillis = sess.lastPing.toMillis();
+                    else if (typeof sess.lastPing.toDate === 'function') lastPingMillis = sess.lastPing.toDate().getTime();
+                    else if (sess.lastPing.seconds) lastPingMillis = sess.lastPing.seconds * 1000;
+                }
+                if (!lastPingMillis && sess.lastActionAt) {
+                    if (typeof sess.lastActionAt === 'number') lastPingMillis = sess.lastActionAt;
+                    else if (typeof sess.lastActionAt.toMillis === 'function') lastPingMillis = sess.lastActionAt.toMillis();
+                    else if (typeof sess.lastActionAt.toDate === 'function') lastPingMillis = sess.lastActionAt.toDate().getTime();
+                    else if (sess.lastActionAt.seconds) lastPingMillis = sess.lastActionAt.seconds * 1000;
+                }
+
+                // Reject if no valid timestamp exists (prevents phantom counts)
+                if (!lastPingMillis || isNaN(lastPingMillis)) return;
+
+                const diff = now - lastPingMillis;
+                if (diff >= 300000 || diff < -15000) return; // Stale
+
+                let computedStatus = 'offline';
+                if (diff < 120000) {
+                    computedStatus = 'active';
+                    activeCount++;
+                    if (sess.businessId) activeBizSet.add(sess.businessId);
+                } else {
+                    computedStatus = 'idle';
+                    idleCount++;
+                    if (sess.businessId) activeBizSet.add(sess.businessId);
+                }
+
+                if (computedStatus !== 'offline') {
+                    if (sess.deviceType === 'Mobile') mobileCount++;
+                    else desktopCount++;
+
+                    processed.push({
+                        ...sess,
+                        lastPing: lastPingMillis,
+                        lastActionAt: sess.lastActionAt || lastPingMillis,
+                        computedStatus: computedStatus
+                    });
+                }
+            });
+
+            _allSessions = processed;
+
+            // Update KPI Displays
+            const totalDevices = mobileCount + desktopCount;
+            const mobPct = totalDevices > 0 ? Math.round((mobileCount / totalDevices) * 100) : 0;
+            const deskPct = totalDevices > 0 ? (100 - mobPct) : 0;
+
+            const kpiAct = document.getElementById('kpiActiveNow');
+            const kpiIdl = document.getElementById('kpiIdleNow');
+            const kpiBiz = document.getElementById('kpiActiveBiz');
+            const kpiDev = document.getElementById('kpiDeviceSplit');
+
+            if (kpiAct) kpiAct.textContent = activeCount;
+            if (kpiIdl) kpiIdl.textContent = idleCount;
+            if (kpiBiz) kpiBiz.textContent = activeBizSet.size;
+            if (kpiDev) kpiDev.textContent = `${mobPct}% / ${deskPct}%`;
+
+            renderLiveTimeline();
+        }
+
+        // Start Realtime WebSocket Listeners (Continuous Zero-Refresh Streaming)
+        function initRealtimeStream() {
+            let streamStarted = false;
+
+            // 1. Firebase Realtime Database Listener
+            if (typeof firebase !== 'undefined' && firebase.database) {
+                try {
+                    const rtdb = firebase.database();
+                    rtdb.ref('system_presence').on('value', (snap) => {
+                        const val = snap.val() || {};
+                        const list = Object.keys(val).map(k => val[k]);
+                        streamStarted = true;
+                        processLivePresenceData(list);
+                    });
+                } catch (e) {
+                    console.warn('RTDB listener fallback to Firestore:', e);
+                }
+            }
+
+            // 2. Dual-channel Firestore Fallback Listener
+            if (window.db) {
+                try {
+                    window.db.collection('system_live_sessions')
+                        .where('status', 'in', ['active', 'idle'])
+                        .onSnapshot((snap) => {
+                            if (!streamStarted) {
+                                const list = [];
+                                snap.forEach(doc => list.push(doc.data()));
+                                processLivePresenceData(list);
+                            }
+                        });
+                } catch (e) {
+                    console.warn('Firestore presence snapshot warning:', e);
+                }
+            }
+        }
+
+        // Search & Filter Triggers
+        function handleSearchFilter() {
+            const input = document.getElementById('liveSearchInput');
+            _searchTerm = (input ? input.value : '').trim();
+            renderLiveTimeline();
+        }
+
+        function setFilter(filterType, element) {
+            _activeFilter = filterType;
+            document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+            if (element) element.classList.add('active');
+            renderLiveTimeline();
+        }
+
+        // Admin Impersonate Action
+        function startAdminImpersonate(uid, name) {
+            if (!uid) return;
+            if (confirm(`ඔබට "${name}" ගිණුම සජීවීව නිරීක්ෂණය කිරීමට (Impersonate) අවශ්‍යද?`)) {
+                if (typeof window.impersonateUser === 'function') {
+                    window.impersonateUser(uid);
+                } else {
+                    window.location.href = `/modules/admin/scrap-buying.html?impersonate=${uid}`;
+                }
+            }
+        }
+
+        // Auto-update Relative Timestamps Every Second without Reloading Data
+        setInterval(() => {
+            document.querySelectorAll('.time-badge[data-time]').forEach((badge) => {
+                const ts = Number(badge.getAttribute('data-time'));
+                const txtEl = badge.querySelector('.rel-time-text');
+                if (ts && txtEl) {
+                    txtEl.textContent = formatRelativeSinhalaTime(ts);
+                }
+            });
+        }, 1000);
+
+        // Bootstrap on Page Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initRealtimeStream();
+        });
+    </script>
+</body>
+
+</html>

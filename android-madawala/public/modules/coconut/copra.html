@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copra Management & Dedicated P&L (කොප්පරා කළමනාකරණය)</title>
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/core/event-validation.js?v=4"></script>
+    <script src="/core/event-bus.js?v=4"></script>
+    <script src="/core/accounts-core.js?v=4"></script>
+    <script src="/core/auth-roles.js?v=2265"></script>
+    <script src="/core/business-types.js?v=84"></script>
+    <script src="/core/aggregate-utils.js"></script>
+    <script src="/core/dashboard-core.js?v=2265"></script>
+    <script src="/core/subscription-manager.js?v=4"></script>
+    <script src="/core/sidebar.js?v=2116"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="coconut.css">
+    <script src="coconut-common.js?v=85"></script>
+</head>
+<body>
+
+    <main class="c-container">
+        <div class="c-header">
+            <div class="c-header-left">
+                <h1>🥥 Copra Management & P&L (කොප්පරා කළමනාකරණය සහ ලාභ/පාඩු)</h1>
+                <p>Transfer whole coconuts to Copra raw stock, track drying conversion yield, record copra sales, and calculate dedicated Copra profits & margins.</p>
+            </div>
+            <div class="c-header-actions">
+                <button type="button" class="c-btn" style="background:#92400e; color:#ffffff;" id="btnOpenTransferModal">
+                    + 🔄 Transfer Nuts to Copra
+                </button>
+                <button type="button" class="c-btn c-btn-primary" id="btnOpenConvertModal">
+                    + 🏭 Process / Dry Copra
+                </button>
+                <button type="button" class="c-btn c-btn-accent" id="btnOpenSaleModal">
+                    + 🛒 Sell Copra
+                </button>
+            </div>
+        </div>
+
+        <!-- Copra Dedicated KPI Banner -->
+        <div class="c-hero-banner" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div>
+                <div class="c-hero-stat-label">Copra Raw Nuts in Stock</div>
+                <div class="c-hero-stat-val" id="kpiCopraNutsCount" style="color:#fde68a;">0 nuts</div>
+                <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Asset Val: <strong id="kpiCopraNutsVal" style="color:#facc15;">Rs. 0.00</strong></div>
+            </div>
+            <div>
+                <div class="c-hero-stat-label">Ready Dried Copra Stock</div>
+                <div class="c-hero-stat-val" id="kpiCopraKgCount" style="color:#6ee7b7;">0.00 Kg</div>
+                <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Asset Val: <strong id="kpiCopraKgVal" style="color:#34d399;">Rs. 0.00</strong></div>
+            </div>
+            <div>
+                <div class="c-hero-stat-label">Total Copra Revenue</div>
+                <div class="c-hero-stat-val" id="kpiCopraRevenue" style="color:#38bdf8;">Rs. 0.00</div>
+                <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Total Invoiced Sales</div>
+            </div>
+            <div>
+                <div class="c-hero-stat-label">Total Copra Cost (COGS)</div>
+                <div class="c-hero-stat-val" id="kpiCopraCogs" style="color:#fda4af;">Rs. 0.00</div>
+                <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Raw Nuts + Drying Cost</div>
+            </div>
+            <div>
+                <div class="c-hero-stat-label">Copra Net Profit / Margin</div>
+                <div class="c-hero-stat-val" id="kpiCopraProfit" style="color:#a7f3d0;">Rs. 0.00</div>
+                <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">Net Margin: <strong id="kpiCopraMarginPct" style="color:#34d399;">0.0%</strong></div>
+            </div>
+        </div>
+
+        <!-- Main Content Card with Navigation Tabs -->
+        <div class="c-card" style="margin-top:20px;">
+            <div class="c-card-header" style="border-bottom:1px solid var(--c-border); padding-bottom:12px; flex-wrap:wrap; gap:12px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;" id="copraTabButtons">
+                    <button type="button" class="c-btn c-btn-primary c-btn-sm copra-tab-btn active" data-tab="tabSales">
+                        📈 Copra Sales & Profit / Loss Log
+                    </button>
+                    <button type="button" class="c-btn c-btn-secondary c-btn-sm copra-tab-btn" data-tab="tabTransfers">
+                        🔄 Raw Nut Transfers from Coconut Stock
+                    </button>
+                    <button type="button" class="c-btn c-btn-secondary c-btn-sm copra-tab-btn" data-tab="tabProcessing">
+                        🏭 Drying & Production Batches
+                    </button>
+                </div>
+                <input type="text" id="searchCopraLogs" class="c-input" placeholder="🔍 Search records..." style="max-width:240px; height:34px; font-size:12px;">
+            </div>
+
+            <!-- Tab 1: Copra Sales & Dedicated Profit/Loss Log -->
+            <div id="tabSales" class="copra-tab-content">
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Invoice #</th>
+                                <th>Customer</th>
+                                <th class="text-right">Sold Qty (Kg)</th>
+                                <th class="text-right">Selling Rate / Kg</th>
+                                <th class="text-right">Revenue (LKR)</th>
+                                <th class="text-right">Cost (COGS)</th>
+                                <th class="text-right">Net Profit</th>
+                                <th class="text-center">Margin %</th>
+                                <th class="text-center">Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="copraSalesTableBody">
+                            <tr><td colspan="10" class="text-center" style="padding:24px; color:var(--c-text-muted);">Loading Copra sales and profit logs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Raw Nut Transfers to Copra Log -->
+            <div id="tabTransfers" class="copra-tab-content" style="display:none;">
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Source Grade</th>
+                                <th class="text-right">Nut Count</th>
+                                <th class="text-right">Inherited Cost / Nut</th>
+                                <th class="text-right">Transferred Asset Value (LKR)</th>
+                                <th>Reason / Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="copraTransfersTableBody">
+                            <tr><td colspan="6" class="text-center" style="padding:24px; color:var(--c-text-muted);">Loading nut transfer logs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: Drying & Production Batches Log -->
+            <div id="tabProcessing" class="copra-tab-content" style="display:none;">
+                <div class="c-table-wrapper">
+                    <table class="c-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Batch Name</th>
+                                <th class="text-right">Copra Nuts Consumed</th>
+                                <th class="text-right">Nut Cost</th>
+                                <th class="text-right">Drying Cost</th>
+                                <th class="text-right">Total Batch Cost</th>
+                                <th class="text-right">Ready Copra (Kg)</th>
+                                <th class="text-right">Unit Cost / Kg</th>
+                            </tr>
+                        </thead>
+                        <tbody id="copraProcessingTableBody">
+                            <tr><td colspan="8" class="text-center" style="padding:24px; color:var(--c-text-muted);">Loading production batches...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal 1: Transfer Nuts from Stock to Copra -->
+    <div class="c-modal-overlay" id="transferModal">
+        <div class="c-modal">
+            <div class="c-modal-header" style="background:#fffbeb; border-bottom:1px solid #fde68a;">
+                <h3 style="color:#92400e; margin:0;">🔄 Transfer Nuts from Stock to Copra (පොල් තොගයෙන් මාරු කිරීම)</h3>
+                <button type="button" class="c-modal-close" id="btnCloseTransferModal">×</button>
+            </div>
+            <form id="transferForm">
+                <div style="padding:16px 20px;">
+                    <div class="c-form-group" style="margin-bottom:12px;">
+                        <label>Source Coconut Category (මාරු කරන තොගය) *</label>
+                        <select id="trSourceCat" class="c-select" required>
+                            <option value="GOOD">Good / Large (A Grade)</option>
+                            <option value="MEDIUM">Medium (B Grade)</option>
+                            <option value="LOW">Low / Small (C Grade)</option>
+                            <option value="UNGRADED">Ungraded Whole Batch</option>
+                        </select>
+                        <div style="font-size:11.5px; color:var(--c-text-muted); margin-top:2px;">
+                            Available: <span id="trAvailDisplay" style="font-weight:700; color:var(--c-primary);">0 nuts</span> (Cost: <span id="trCostDisplay" style="font-weight:700;">Rs. 0.00</span> / nut)
+                        </div>
+                    </div>
+
+                    <div class="c-form-row" style="margin-bottom:12px;">
+                        <div class="c-form-group">
+                            <label>Nut Count to Transfer (ගෙඩි ගණන) *</label>
+                            <input type="number" id="trQty" class="c-input" min="1" step="1" placeholder="e.g. 500" required>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Transfer Date *</label>
+                            <input type="date" id="trDate" class="c-input" required>
+                        </div>
+                    </div>
+
+                    <!-- Transferred Valuation Preview -->
+                    <div class="c-cart-total-box" style="margin-bottom:14px; background:#f0f9ff; border-color:#bae6fd;">
+                        <div class="c-cart-row">
+                            <span>Transferred Asset Value:</span>
+                            <strong id="trAssetValDisplay" style="color:#0369a1;">Rs. 0.00</strong>
+                        </div>
+                    </div>
+
+                    <div class="c-form-group" style="margin-bottom:14px;">
+                        <label>Reason / Notes</label>
+                        <input type="text" id="trNotes" class="c-input" placeholder="e.g. Overmature nuts / Pre-sale lot inspection">
+                    </div>
+
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px; font-size:11.5px; color:#166534;">
+                        ✅ තෝරාගත් Grade එකෙන් මෙම ගෙඩි ගණන අඩු වී, මිලදී ගත් ඒකක පිරිවැය සහිතව <strong>COPRA_NUTS</strong> තොගයට එක් වේ.
+                    </div>
+                </div>
+
+                <div class="c-modal-footer">
+                    <button type="button" class="c-btn c-btn-secondary" id="btnCancelTransfer">Cancel</button>
+                    <button type="submit" class="c-btn" style="background:#92400e; color:#ffffff;" id="btnSaveTransfer">🔄 Execute Nut Transfer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Process / Convert Copra Nuts to Dried Copra -->
+    <div class="c-modal-overlay" id="convertModal">
+        <div class="c-modal">
+            <div class="c-modal-header">
+                <h3>🏭 Process & Dry Copra (කොප්පරා වේලීම / සැකසීම)</h3>
+                <button type="button" class="c-modal-close" id="btnCloseConvertModal">×</button>
+            </div>
+            <form id="convertForm">
+                <div style="padding:16px 20px;">
+                    <div class="c-form-row" style="margin-bottom:12px;">
+                        <div class="c-form-group">
+                            <label>Copra Raw Nuts Consumed (භාවිත කළ පොල් ගෙඩි) *</label>
+                            <input type="number" id="cvNutsQty" class="c-input" min="1" step="1" placeholder="e.g. 1000" required>
+                            <div style="font-size:11.5px; color:var(--c-text-muted); margin-top:2px;">
+                                Available in Copra Nuts: <span id="cvAvailNutsDisplay" style="font-weight:700; color:#92400e;">0 nuts</span>
+                            </div>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Processing / Drying Labor & Power Cost (Rs) *</label>
+                            <input type="number" id="cvProcCost" class="c-input" min="0" step="0.01" value="0.00" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="c-form-row" style="margin-bottom:12px;">
+                        <div class="c-form-group">
+                            <label>Ready Copra Produced (ලැබුණු කොප්පරා බර - Kg) *</label>
+                            <input type="number" id="cvCopraKg" class="c-input" min="0.1" step="0.01" placeholder="e.g. 200.00" required>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Production Date *</label>
+                            <input type="date" id="cvDate" class="c-input" required>
+                        </div>
+                    </div>
+
+                    <!-- Cost Summary Box -->
+                    <div class="c-cart-total-box" style="margin-bottom:14px;">
+                        <div class="c-cart-row">
+                            <span>Raw Nuts Cost:</span>
+                            <strong id="cvNutCostDisplay">Rs. 0.00</strong>
+                        </div>
+                        <div class="c-cart-row">
+                            <span>Processing & Drying Cost:</span>
+                            <strong id="cvProcCostDisplay">Rs. 0.00</strong>
+                        </div>
+                        <div class="c-cart-row grand-total">
+                            <span>Total Batch Cost:</span>
+                            <span id="cvTotalCostDisplay">Rs. 0.00</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--c-text-muted); margin-top:6px; border-top:1px dashed #cbd5e1; padding-top:6px;">
+                            Calculated Landed Cost per Kg: <strong id="cvUnitCostDisplay" style="color:var(--c-primary); font-size:13px;">Rs. 0.00 / Kg</strong>
+                        </div>
+                    </div>
+
+                    <div class="c-form-group" style="margin-bottom:14px;">
+                        <label>Notes / Batch Code</label>
+                        <input type="text" id="cvNotes" class="c-input" placeholder="e.g. Batch #1 Kiln Drying / Chamber A">
+                    </div>
+                </div>
+
+                <div class="c-modal-footer">
+                    <button type="button" class="c-btn c-btn-secondary" id="btnCancelConvert">Cancel</button>
+                    <button type="submit" class="c-btn c-btn-primary" id="btnSaveConvert">🏭 Save Batch & Add to Ready Copra</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Sell Copra & Profit Invoicing -->
+    <div class="c-modal-overlay" id="saleModal">
+        <div class="c-modal">
+            <div class="c-modal-header" style="background:#f0fdf4; border-bottom:1px solid #bbf7d0;">
+                <h3 style="color:#166534; margin:0;">🛒 Sell Ready Copra (කොප්පරා අලෙවිය සහ ලාභ ගණනය)</h3>
+                <button type="button" class="c-modal-close" id="btnCloseSaleModal">×</button>
+            </div>
+            <form id="saleForm">
+                <div style="padding:16px 20px;">
+                    <div class="c-form-row" style="margin-bottom:12px;">
+                        <div class="c-form-group">
+                            <label>Customer (ගැනුම්කරු) *</label>
+                            <select id="slCustomer" class="c-select" required>
+                                <option value="">Select Customer...</option>
+                            </select>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Sale Date *</label>
+                            <input type="date" id="slDate" class="c-input" required>
+                        </div>
+                    </div>
+
+                    <div class="c-form-row" style="margin-bottom:12px;">
+                        <div class="c-form-group">
+                            <label>Quantity to Sell (Kg) *</label>
+                            <input type="number" id="slQtyKg" class="c-input" min="0.1" step="0.01" placeholder="e.g. 200.00" required>
+                            <div style="font-size:11.5px; color:var(--c-text-muted); margin-top:2px;">
+                                Ready in Stock: <span id="slAvailKgDisplay" style="font-weight:700; color:#16a34a;">0.00 Kg</span>
+                            </div>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Selling Price per Kg (Rs) *</label>
+                            <input type="number" id="slPricePerKg" class="c-input" min="1" step="0.5" placeholder="e.g. 550.00" required>
+                        </div>
+                    </div>
+
+                    <!-- Live Profit & Loss Preview Box -->
+                    <div class="c-cart-total-box" style="margin-bottom:14px; background:#fafaf9; border-color:#e7e5e4;">
+                        <div class="c-cart-row">
+                            <span>Sales Revenue (ආදායම):</span>
+                            <strong id="slRevenueDisplay" style="color:#0284c7;">Rs. 0.00</strong>
+                        </div>
+                        <div class="c-cart-row">
+                            <span>Copra Cost (COGS @ Rs.<span id="slCostRateDisplay">0.00</span>/kg):</span>
+                            <strong id="slCogsDisplay" style="color:var(--c-text-muted);">Rs. 0.00</strong>
+                        </div>
+                        <div class="c-cart-row grand-total" style="background:#f0fdf4; border-color:#bbf7d0;">
+                            <span>Estimated Net Profit (ශුද්ධ ලාභය):</span>
+                            <span id="slProfitDisplay" style="color:#166534;">Rs. 0.00 (0.0%)</span>
+                        </div>
+                    </div>
+
+                    <div class="c-form-row" style="margin-bottom:14px;">
+                        <div class="c-form-group">
+                            <label>Payment Mode *</label>
+                            <select id="slPaymentMode" class="c-select" required>
+                                <option value="CASH">Cash (අත්පිට මුදල්)</option>
+                                <option value="BANK">Bank Transfer (බැංකු)</option>
+                                <option value="CREDIT">Credit (ණයට)</option>
+                                <option value="CHEQUE">Cheque (චෙක්පත්)</option>
+                            </select>
+                        </div>
+                        <div class="c-form-group">
+                            <label>Notes / Vehicle / Buyer Ref</label>
+                            <input type="text" id="slNotes" class="c-input" placeholder="e.g. Wholesale Oil Mill Order">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="c-modal-footer">
+                    <button type="button" class="c-btn c-btn-secondary" id="btnCancelSale">Cancel</button>
+                    <button type="submit" class="c-btn c-btn-accent" id="btnSaveSale">🛒 Complete Copra Sale & Post Profit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="copra.js?v=88"></script>
+</body>
+</html>

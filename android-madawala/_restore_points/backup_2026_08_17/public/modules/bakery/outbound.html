@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bakery Production & Recipe Batching - DIGIBIZ</title>
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/core/event-validation.js?v=2"></script>
+    <script src="/core/event-bus.js?v=2"></script>
+    <script src="/core/accounts-core.js?v=2"></script>
+    <script src="/core/aggregate-utils.js"></script>
+    <script src="/core/dashboard-core.js?v=2105"></script>
+    <script src="/core/sidebar.js?v=2105"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-database-compat.js"></script>
+    <script src="/core/sms-wallet-core.js?v=4"></script>
+    <script src="/core/ui-helpers.js?v=1"></script>
+    <script src="/modules/bakery/bakery-common.js?v=18"></script>
+    
+    <style>
+        :root {
+            --primary: #d97706;
+            --primary-dark: #b45309;
+            --primary-light: #fef3c7;
+            --indigo: #4f46e5;
+            --indigo-dark: #3730a3;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --bg-page: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .mfg-wrap {
+            padding: 24px;
+            max-width: 1440px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        @media (max-width: 768px) { .mfg-wrap { padding: 12px; } }
+
+        .mfg-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .mfg-head h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0 0 4px 0;
+            letter-spacing: -0.5px;
+        }
+        .mfg-head p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Top Summary Bar */
+        .summary-bar {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #ffffff;
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+        }
+        .summary-metric-label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+        .summary-metric-val {
+            font-size: 20px;
+            font-weight: 800;
+            margin-top: 2px;
+        }
+
+        /* 2-Column Main Layout Grid */
+        .main-workflow-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 20px;
+            align-items: start;
+        }
+        @media (max-width: 1100px) {
+            .main-workflow-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .mfg-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+            box-sizing: border-box;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recipe-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 11px;
+        }
+        .recipe-badge-amber { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .recipe-badge-blue { background: #e0e7fe; color: #3730a3; border: 1px solid #c7d2fe; }
+
+        .mfg-card label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mfg-card input, .mfg-card select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-main);
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .mfg-card input:focus, .mfg-card select:focus {
+            background-color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+        }
+
+        /* Preset Chips */
+        .chip-btn {
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 11.5px;
+            font-weight: 700;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .chip-btn:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        /* Ingredients Table */
+        .ingredients-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .ingredients-table th {
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 9px 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+        }
+        .ingredients-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+            vertical-align: middle;
+        }
+        .ingredients-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .stock-tag-ok {
+            background: #ecfdf5;
+            color: #047857;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid #a7f3d0;
+            display: inline-block;
+        }
+        .stock-tag-warn {
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid #fecaca;
+            display: inline-block;
+        }
+
+        /* Step 2 Hero Card */
+        .yield-card {
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            color: #ffffff;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 20px rgba(49, 46, 129, 0.2);
+        }
+        .yield-stat-box {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 12px 14px;
+            border-radius: 10px;
+        }
+        .yield-val {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin: 2px 0;
+        }
+
+        .mfg-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 600px) { .mfg-row { grid-template-columns: 1fr; } }
+
+        .btn-complete-batch {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+            background: linear-gradient(135deg, #d97706, #b45309);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+            transition: all 0.2s ease;
+        }
+        .btn-complete-batch:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(217, 119, 6, 0.45);
+        }
+
+        .mfg-msg {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+        }
+        .mfg-msg:not(:empty) { display: block; }
+        .mfg-msg.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .mfg-msg.ok { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 10050;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+    </style>
+
+    <!-- CORE LOGIC PRE-INITIALIZATION SCRIPT (Loaded before UI for instant handler binding) -->
+    <script>
+        const DEFAULT_BAKERY_RECIPES = [
+    {
+        "code": "LS",
+        "name": "Lemon Sweet / Large Sweet (LS)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            }
+        ],
+        "expectedUnitsYield": 444.4,
+        "expectedPacketsYield": 8.889,
+        "unitsPerPacket": 50
+    },
+    {
+        "code": "SS",
+        "name": "Short Sweet Biscuit / Sweet Pastry (SS)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            }
+        ],
+        "expectedUnitsYield": 1111,
+        "expectedPacketsYield": 111.1,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "S200",
+        "name": "Sweet 200 Biscuit / Bun (S200)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            }
+        ],
+        "expectedUnitsYield": 1053,
+        "expectedPacketsYield": 58.48,
+        "unitsPerPacket": 18
+    },
+    {
+        "code": "Ro",
+        "name": "Chocolate Rolls (Ro)",
+        "category": "BUN",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            },
+            {
+                "name": "Chocolate Powder",
+                "qty": 0.5,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 410,
+        "expectedPacketsYield": 41,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "RC",
+        "name": "Ribbon Cake (RC)",
+        "category": "CAKE",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 5.33,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 53.3,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 166,
+        "expectedPacketsYield": 16.6,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "WI",
+        "name": "White Bread / White Loaf (WI)",
+        "category": "BREAD",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 0.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Cita",
+                "qty": 0.1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.15,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.15,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 680,
+        "expectedPacketsYield": 68,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "BW",
+        "name": "Brown Bread / Burger Buns (BW)",
+        "category": "BREAD",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 0.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Cita",
+                "qty": 0.1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.15,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.15,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 1000,
+        "expectedPacketsYield": 100,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "FB",
+        "name": "Fish Bun / Savory Pastry (FB)",
+        "category": "BUN",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 3.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.02,
+                "unit": "L"
+            },
+            {
+                "name": "Coconut",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 10,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 650,
+        "expectedPacketsYield": 108.33,
+        "unitsPerPacket": 6
+    },
+    {
+        "code": "3in1",
+        "name": "3 in 1 Pastry Bun (3in1)",
+        "category": "BUN",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 3.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.02,
+                "unit": "L"
+            },
+            {
+                "name": "Coconut",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 10,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 888.9,
+        "expectedPacketsYield": 148.15,
+        "unitsPerPacket": 6
+    },
+    {
+        "code": "CB",
+        "name": "Cream Bun / Sweet Cream Bun (CB)",
+        "category": "BUN",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 3.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.02,
+                "unit": "L"
+            },
+            {
+                "name": "Coconut",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 10,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 888.9,
+        "expectedPacketsYield": 148.15,
+        "unitsPerPacket": 6
+    },
+    {
+        "code": "WC",
+        "name": "Wedding Cake / White Cake (WC)",
+        "category": "CAKE",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 5.33,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 53.3,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 427,
+        "expectedPacketsYield": 42.7,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "Wa",
+        "name": "Crispy Wafers (Wa)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 0.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            },
+            {
+                "name": "Corn Flour",
+                "qty": 0.1,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 186.6,
+        "expectedPacketsYield": 18.66,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "SC",
+        "name": "Sponge Cake (SC)",
+        "category": "CAKE",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 6.666,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 106.6,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 790,
+        "expectedPacketsYield": 79,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "RB",
+        "name": "Rusk / Twice-Baked Bread (RB)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 40,
+                "unit": "Kg"
+            },
+            {
+                "name": "Biscuit Crumb",
+                "qty": 80,
+                "unit": "Kg"
+            },
+            {
+                "name": "Egg",
+                "qty": 4,
+                "unit": "Units"
+            }
+        ],
+        "expectedUnitsYield": 7600,
+        "expectedPacketsYield": 760,
+        "unitsPerPacket": 10
+    }
+];
+
+        const DEFAULT_RAW_MATERIALS = [
+    {
+        "name": "Flour",
+        "unit": "Kg",
+        "stockQty": 500,
+        "minStockLevel": 50,
+        "lastUnitCost": 180,
+        "category": "Flour & Grains"
+    },
+    {
+        "name": "Sugar",
+        "unit": "Kg",
+        "stockQty": 250,
+        "minStockLevel": 25,
+        "lastUnitCost": 240,
+        "category": "Sweeteners"
+    },
+    {
+        "name": "Margarine",
+        "unit": "Kg",
+        "stockQty": 100,
+        "minStockLevel": 15,
+        "lastUnitCost": 650,
+        "category": "Fats & Oils"
+    },
+    {
+        "name": "Cita",
+        "unit": "Kg",
+        "stockQty": 40,
+        "minStockLevel": 10,
+        "lastUnitCost": 450,
+        "category": "Fats & Oils"
+    },
+    {
+        "name": "Baking Powder",
+        "unit": "Kg",
+        "stockQty": 25,
+        "minStockLevel": 5,
+        "lastUnitCost": 500,
+        "category": "Leavening Agents"
+    },
+    {
+        "name": "Yeast",
+        "unit": "Kg",
+        "stockQty": 30,
+        "minStockLevel": 5,
+        "lastUnitCost": 1200,
+        "category": "Leavening Agents"
+    },
+    {
+        "name": "Salt",
+        "unit": "Kg",
+        "stockQty": 50,
+        "minStockLevel": 10,
+        "lastUnitCost": 80,
+        "category": "Seasoning"
+    },
+    {
+        "name": "Oil",
+        "unit": "L",
+        "stockQty": 100,
+        "minStockLevel": 20,
+        "lastUnitCost": 550,
+        "category": "Fats & Oils"
+    },
+    {
+        "name": "Biscuit Crumb",
+        "unit": "Kg",
+        "stockQty": 150,
+        "minStockLevel": 20,
+        "lastUnitCost": 300,
+        "category": "Additives"
+    },
+    {
+        "name": "Coconut",
+        "unit": "Kg",
+        "stockQty": 80,
+        "minStockLevel": 15,
+        "lastUnitCost": 200,
+        "category": "Nuts & Desiccated"
+    },
+    {
+        "name": "Whey Powder",
+        "unit": "Kg",
+        "stockQty": 100,
+        "minStockLevel": 15,
+        "lastUnitCost": 850,
+        "category": "Dairy & Powders"
+    },
+    {
+        "name": "Egg",
+        "unit": "Units",
+        "stockQty": 600,
+        "minStockLevel": 100,
+        "lastUnitCost": 38,
+        "category": "Dairy & Eggs"
+    },
+    {
+        "name": "Rulan",
+        "unit": "Kg",
+        "stockQty": 50,
+        "minStockLevel": 10,
+        "lastUnitCost": 220,
+        "category": "Flour & Grains"
+    },
+    {
+        "name": "Chocolate Powder",
+        "unit": "Kg",
+        "stockQty": 30,
+        "minStockLevel": 5,
+        "lastUnitCost": 1400,
+        "category": "Flavorings"
+    },
+    {
+        "name": "Corn Flour",
+        "unit": "Kg",
+        "stockQty": 35,
+        "minStockLevel": 5,
+        "lastUnitCost": 320,
+        "category": "Flour & Grains"
+    }
+];
+        // Firestore DB instance resolved via window.db
+        var currentRecipes = [...DEFAULT_BAKERY_RECIPES];
+        var rawMaterialsCache = [];
+        var currentActiveRecipe = DEFAULT_BAKERY_RECIPES[0];
+        var currentScaledIngredients = [];
+
+        function calculateLocalBatch(recipe, flourKg) {
+            if (!recipe) return { scaleFactor: 1, scaledIngredients: [], expectedUnitsYield: 0, expectedPacketsYield: 0 };
+
+            let ings = recipe.ingredients;
+            if (!Array.isArray(ings) || ings.length === 0) {
+                const def = DEFAULT_BAKERY_RECIPES.find(r => r.code === recipe.code) || DEFAULT_BAKERY_RECIPES[0];
+                if (def && Array.isArray(def.ingredients) && def.ingredients.length > 0) {
+                    ings = def.ingredients;
+                } else {
+                    ings = [];
+                }
+            }
+
+            const baseFlour = Number(recipe.baseFlourQty || 10) || 10;
+            const flour = Number(flourKg || 0);
+            const scaleFactor = (flour > 0 && baseFlour > 0) ? (flour / baseFlour) : 1;
+
+            const scaledIngredients = ings.map(ing => {
+                const baseQty = Number(ing.qty || 0);
+                const scaledQty = Number((baseQty * scaleFactor).toFixed(3));
+                return {
+                    name: ing.name,
+                    unit: ing.unit || 'Kg',
+                    baseQty: baseQty,
+                    requiredQty: scaledQty
+                };
+            });
+
+            const expectedUnitsYield = Number(((Number(recipe.expectedUnitsYield || 0)) * scaleFactor).toFixed(1));
+            const expectedPacketsYield = Number(((Number(recipe.expectedPacketsYield || 0)) * scaleFactor).toFixed(2));
+
+            return {
+                scaleFactor,
+                scaledIngredients,
+                expectedUnitsYield,
+                expectedPacketsYield
+            };
+        }
+
+        function onRecipeSelectionChanged() {
+            const sel = document.getElementById('selectedRecipeCode');
+            const code = sel ? sel.value : '';
+            const banner = document.getElementById('recipeDescriptionBanner');
+
+            if (!code) {
+                currentActiveRecipe = null;
+                if (banner) banner.style.display = 'none';
+                const tbody = document.getElementById('ingredientsTableBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:28px;">👆 Select a Bakery Product/Recipe above to auto-generate ingredients.</td></tr>';
+                }
+                const tfoot = document.getElementById('ingredientsTableFoot');
+                if (tfoot) tfoot.style.display = 'none';
+                resetYieldDisplays();
+                return;
+            }
+
+            currentActiveRecipe = currentRecipes.find(r => r.code === code) || DEFAULT_BAKERY_RECIPES.find(r => r.code === code) || null;
+            if (!currentActiveRecipe) return;
+
+            // Ensure ingredients array exists on currentActiveRecipe
+            if (!Array.isArray(currentActiveRecipe.ingredients) || currentActiveRecipe.ingredients.length === 0) {
+                const def = DEFAULT_BAKERY_RECIPES.find(r => r.code === currentActiveRecipe.code);
+                if (def && Array.isArray(def.ingredients)) {
+                    currentActiveRecipe.ingredients = [...def.ingredients];
+                    currentActiveRecipe.expectedUnitsYield = currentActiveRecipe.expectedUnitsYield || def.expectedUnitsYield;
+                    currentActiveRecipe.expectedPacketsYield = currentActiveRecipe.expectedPacketsYield || def.expectedPacketsYield;
+                }
+            }
+
+            if (banner) {
+                banner.style.display = 'block';
+                banner.innerHTML = '<strong>Base Recipe:</strong> ' + currentActiveRecipe.name + ' (Base Flour: ' + (currentActiveRecipe.baseFlourQty || 10) + ' Kg | Expected: ' + (currentActiveRecipe.expectedUnitsYield || 0) + ' Units / ' + (currentActiveRecipe.expectedPacketsYield || 0) + ' Pkts)';
+            }
+
+            recalculateScaledIngredients();
+        }
+        window.onRecipeSelectionChanged = onRecipeSelectionChanged;
+
+        function setFlourPreset(kg) {
+            const inp = document.getElementById('baseFlourInput');
+            if (inp) inp.value = kg;
+            recalculateScaledIngredients();
+        }
+        window.setFlourPreset = setFlourPreset;
+
+        function recalculateScaledIngredients() {
+            const sel = document.getElementById('selectedRecipeCode');
+            const code = sel ? sel.value : '';
+            if (code) {
+                currentActiveRecipe = currentRecipes.find(r => r.code === code) || DEFAULT_BAKERY_RECIPES.find(r => r.code === code) || null;
+            }
+            if (!currentActiveRecipe) return;
+
+            const flourInp = document.getElementById('baseFlourInput');
+            const flourKg = Number(flourInp ? flourInp.value : 10) || 10;
+            const batchCalc = calculateLocalBatch(currentActiveRecipe, flourKg);
+
+            currentScaledIngredients = batchCalc.scaledIngredients.map(ing => {
+                const rmMatch = rawMaterialsCache.find(r => r.name && r.name.toLowerCase().trim() === ing.name.toLowerCase().trim())
+                    || rawMaterialsCache.find(r => r.name && r.name.toLowerCase().includes(ing.name.toLowerCase()))
+                    || null;
+
+                const inStock = rmMatch ? Number(rmMatch.stockQty || 0) : 0;
+                const unitCost = rmMatch ? Number(rmMatch.lastUnitCost || rmMatch.unitCost || 0) : 0;
+                const lineCost = unitCost * ing.requiredQty;
+
+                return {
+                    ...ing,
+                    inStock: inStock,
+                    unitCost: unitCost,
+                    lineCost: lineCost,
+                    isShortage: inStock < ing.requiredQty
+                };
+            });
+
+            renderScaledIngredientsTable();
+
+            // Update Step 2 Yield Estimation
+            const estUnitsEl = document.getElementById('estUnitsDisplay');
+            if (estUnitsEl) estUnitsEl.textContent = Number(batchCalc.expectedUnitsYield || 0).toLocaleString() + ' Units';
+            
+            const estPktsEl = document.getElementById('estPacketsDisplay');
+            if (estPktsEl) estPktsEl.textContent = Number(batchCalc.expectedPacketsYield || 0).toLocaleString() + ' Pkts';
+            
+            const estPerKgEl = document.getElementById('estUnitsPerKgLabel');
+            if (estPerKgEl) estPerKgEl.textContent = ((batchCalc.expectedUnitsYield / (flourKg || 1)) || 0).toFixed(1) + ' units/kg flour';
+
+            const actUnitsInp = document.getElementById('actualProducedUnits');
+            if (actUnitsInp) actUnitsInp.value = Math.round(batchCalc.expectedUnitsYield);
+            
+            const actPktsInp = document.getElementById('actualProducedPkts');
+            if (actPktsInp) actPktsInp.value = batchCalc.expectedPacketsYield;
+
+            recalcBatchCosts();
+        }
+        window.recalculateScaledIngredients = recalculateScaledIngredients;
+
+        function renderScaledIngredientsTable() {
+            const tbody = document.getElementById('ingredientsTableBody');
+            const tfoot = document.getElementById('ingredientsTableFoot');
+            if (!tbody) return;
+
+            let totalRmCost = 0;
+
+            tbody.innerHTML = currentScaledIngredients.map((ing, idx) => {
+                totalRmCost += (ing.lineCost || 0);
+                const stockStatusHtml = ing.inStock > 0 
+                    ? (ing.isShortage 
+                        ? '<span class="stock-tag-warn">⚠️ Short: ' + ing.inStock + ' ' + ing.unit + '</span>' 
+                        : '<span class="stock-tag-ok">🟢 ' + ing.inStock + ' ' + ing.unit + '</span>')
+                    : '<span class="stock-tag-warn">⛔ 0 ' + ing.unit + ' (No Stock)</span>';
+
+                const costDisplay = ing.unitCost > 0 
+                    ? 'Rs. ' + (ing.lineCost || 0).toFixed(2) + ' <span style="font-size:10.5px; color:#64748b; font-weight:normal;">(@ Rs. ' + ing.unitCost.toFixed(2) + ')</span>'
+                    : '<span style="color:#94a3b8; font-size:11px; font-weight:600;">Rs. 0.00 (No Inbound Price)</span>';
+
+                return '<tr>' +
+                    '<td style="font-weight:700; color:#1e293b;">' + ing.name + '</td>' +
+                    '<td style="text-align:center;">' +
+                        '<input type="number" value="' + ing.requiredQty + '" min="0.001" step="0.001" style="width:85px; padding:4px 8px; font-weight:800; font-size:13px; text-align:center; color:#0284c7; background:#fff; border:1px solid #cbd5e1; border-radius:6px;" onchange="onManualIngredientQtyChange(' + idx + ', this.value)">' +
+                    '</td>' +
+                    '<td style="color:#64748b; font-weight:600;">' + ing.unit + '</td>' +
+                    '<td style="text-align:right;">' + stockStatusHtml + '</td>' +
+                    '<td style="text-align:right; font-weight:700; color:#0f172a;">' + costDisplay + '</td>' +
+                '</tr>';
+            }).join('');
+
+            if (tfoot) {
+                tfoot.style.display = 'table-footer-group';
+                const totalEl = document.getElementById('totalRmCostDisplay');
+                if (totalEl) totalEl.textContent = 'Rs. ' + totalRmCost.toFixed(2);
+            }
+        }
+        window.renderScaledIngredientsTable = renderScaledIngredientsTable;
+
+        function onManualIngredientQtyChange(idx, newVal) {
+            if (!currentScaledIngredients[idx]) return;
+            const qty = Math.max(0, Number(newVal) || 0);
+            currentScaledIngredients[idx].requiredQty = qty;
+            currentScaledIngredients[idx].lineCost = qty * (currentScaledIngredients[idx].unitCost || 0);
+            currentScaledIngredients[idx].isShortage = (currentScaledIngredients[idx].inStock || 0) < qty;
+            renderScaledIngredientsTable();
+            recalcBatchCosts();
+        }
+        window.onManualIngredientQtyChange = onManualIngredientQtyChange;
+
+        function recalcBatchCosts() {
+            const totalRmCost = currentScaledIngredients.reduce((sum, i) => sum + (Number(i.lineCost) || 0), 0);
+            const laborEl = document.getElementById('laborCost');
+            const labor = laborEl ? Number(laborEl.value || 0) : 0;
+            
+            const overheadEl = document.getElementById('overheadCost');
+            const overhead = overheadEl ? Number(overheadEl.value || 0) : 0;
+            
+            const actUnitsEl = document.getElementById('actualProducedUnits');
+            const actualUnits = actUnitsEl ? Number(actUnitsEl.value || 0) : 0;
+            
+            const actPktsEl = document.getElementById('actualProducedPkts');
+            const actualPkts = actPktsEl ? Number(actPktsEl.value || 0) : 0;
+
+            const totalBatchCost = totalRmCost + labor + overhead;
+            const unitCost = actualUnits > 0 ? (totalBatchCost / actualUnits) : 0;
+            const pktCost = actualPkts > 0 ? (totalBatchCost / actualPkts) : 0;
+
+            const totalBatchEl = document.getElementById('finalTotalBatchCost');
+            if (totalBatchEl) totalBatchEl.textContent = 'Rs. ' + totalBatchCost.toFixed(2);
+
+            const unitCostEl = document.getElementById('finalUnitCostDisplay');
+            if (unitCostEl) unitCostEl.textContent = 'Rs. ' + unitCost.toFixed(2) + ' / unit';
+
+            const estCostUnitEl = document.getElementById('estCostPerUnitDisplay');
+            if (estCostUnitEl) estCostUnitEl.textContent = 'Rs. ' + unitCost.toFixed(2) + ' / unit';
+
+            const estCostPktEl = document.getElementById('estCostPerPktDisplay');
+            if (estCostPktEl) estCostPktEl.textContent = 'Rs. ' + pktCost.toFixed(2) + ' / pkt';
+        }
+        window.recalcBatchCosts = recalcBatchCosts;
+
+        function resetYieldDisplays() {
+            const el1 = document.getElementById('estUnitsDisplay'); if (el1) el1.textContent = '0 Units';
+            const el2 = document.getElementById('estPacketsDisplay'); if (el2) el2.textContent = '0 Pkts';
+            const el3 = document.getElementById('estUnitsPerKgLabel'); if (el3) el3.textContent = '0 units/kg flour';
+            const el4 = document.getElementById('estCostPerUnitDisplay'); if (el4) el4.textContent = 'Rs. 0.00 / piece';
+            const el5 = document.getElementById('estCostPerPktDisplay'); if (el5) el5.textContent = 'Rs. 0.00 / pkt';
+            const el6 = document.getElementById('finalTotalBatchCost'); if (el6) el6.textContent = 'Rs. 0.00';
+            const el7 = document.getElementById('finalUnitCostDisplay'); if (el7) el7.textContent = 'Rs. 0.00';
+        }
+        window.resetYieldDisplays = resetYieldDisplays;
+    </script>
+</head>
+<body>
+<div class="mfg-wrap">
+    
+    <!-- Top Header -->
+    <div class="mfg-head">
+        <div>
+            <h2>🥖 Bakery Production & Recipe Batching (බේකරි නිෂ්පාදන ක්‍රියාවලිය)</h2>
+            <p id="mfgBusinessCtx"></p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" onclick="seedStandardBakeryRawMaterials()" style="padding:9px 16px; background:#0284c7; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; box-shadow:0 3px 10px rgba(2,132,199,0.3);">
+                🔄 Seed Demo Raw Materials (අමුද්‍රව්‍ය 15ම දමන්න)
+            </button>
+            <a href="/modules/bakery/recipes.html" style="padding:9px 16px; background:#d97706; color:#fff; text-decoration:none; border-radius:8px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(217,119,6,0.3);">
+                📖 Manage Recipes Studio (වට්ටෝරු කළමනාකරණය)
+            </a>
+            <a href="/modules/bakery/inbound.html" style="padding:9px 16px; background:#475569; color:#fff; text-decoration:none; border-radius:8px; font-weight:700; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+                📥 Ingredients Purchases
+            </a>
+            <a href="/modules/bakery/stock.html?tab=fg" style="padding:9px 16px; background:#7c3aed; color:#fff; text-decoration:none; border-radius:8px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+                📦 Finished Goods Stock ➡️
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Asset & Recipe Summary Banner -->
+    <div class="summary-bar">
+        <div>
+            <div class="summary-metric-label">📦 Raw Ingredients Stock (අමුද්‍රව්‍ය වත්කම)</div>
+            <div class="summary-metric-val" id="prodRmAssetVal" style="color:#38bdf8;">Rs. 0.00</div>
+        </div>
+        <div>
+            <div class="summary-metric-label">🥖 Finished Goods Asset (නිමි භාණ්ඩ වත්කම)</div>
+            <div class="summary-metric-val" id="prodFgAssetVal" style="color:#34d399;">Rs. 0.00</div>
+        </div>
+        <div>
+            <div class="summary-metric-label">📖 Active Bakery Recipes</div>
+            <div class="summary-metric-val" id="prodRecipeCount" style="color:#f59e0b;">14 Recipes</div>
+        </div>
+        <div>
+            <div class="summary-metric-label">⚙️ Total Batches Baked</div>
+            <div class="summary-metric-val" id="prodBatchCount" style="color:#facc15;">0 Batches</div>
+        </div>
+    </div>
+
+    <!-- 2-COLUMN MAIN WORKFLOW GRID -->
+    <div class="main-workflow-grid">
+        
+        <!-- STEP 1: RECIPE SELECTION & AUTO-SCALED INGREDIENTS -->
+        <div class="mfg-card" style="border-top: 4px solid var(--primary);">
+            <div class="card-header">
+                <h3 style="color: var(--primary-dark);">
+                    <span>1️⃣</span> Recipe & Ingredient Batching (අමුද්‍රව්‍ය වට්ටෝරුව)
+                </h3>
+                <span class="recipe-badge recipe-badge-amber">Step 1 of 2</span>
+            </div>
+
+            <!-- Product / Recipe Selector -->
+            <div style="margin-bottom:14px;">
+                <label>Select Bakery Product / Recipe (නිෂ්පාදනය හෝ රෙසිපිය තෝරන්න) *</label>
+                <select id="selectedRecipeCode" style="font-weight:700; font-size:14px;" onchange="window.onRecipeSelectionChanged()">
+                    <option value="">-- Choose a Bakery Product / Recipe --</option>
+                    <option value="LS" selected>LS - Lemon Sweet / Large Sweet (LS)</option>
+                    <option value="SS">SS - Short Sweet Biscuit / Sweet Pastry (SS)</option>
+                    <option value="S200">S200 - Sweet 200 Biscuit / Bun (S200)</option>
+                    <option value="Ro">Ro - Chocolate Rolls (Ro)</option>
+                    <option value="RC">RC - Ribbon Cake (RC)</option>
+                    <option value="WI">WI - White Bread / White Loaf (WI)</option>
+                    <option value="BW">BW - Brown Bread / Burger Buns (BW)</option>
+                    <option value="FB">FB - Fish Bun / Savory Pastry (FB)</option>
+                    <option value="3in1">3in1 - 3 in 1 Pastry Bun (3in1)</option>
+                    <option value="CB">CB - Cream Bun / Sweet Cream Bun (CB)</option>
+                    <option value="WC">WC - Wedding Cake / White Cake (WC)</option>
+                    <option value="Wa">Wa - Crispy Wafers (Wa)</option>
+                    <option value="SC">SC - Sponge Cake (SC)</option>
+                    <option value="RB">RB - Rusk / Twice-Baked Bread (RB)</option>
+                </select>
+                <div id="recipeDescriptionBanner" style="display:block; margin-top:8px; font-size:12px; color:#64748b; background:#fef3c7; border:1px solid #fde68a; padding:8px 12px; border-radius:8px;">
+                    <strong>Base Recipe:</strong> Lemon Sweet / Large Sweet (LS) (Base Flour: 10 Kg | Expected: 444.4 Units / 8.889 Pkts)
+                </div>
+            </div>
+
+            <!-- Base Flour Quantity Input with Quick Preset Chips -->
+            <div style="margin-bottom:16px; background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                    <label style="margin:0;">Flour Quantity to Bake (පිටි ප්‍රමාණය Kg) *</label>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="chip-btn" onclick="window.setFlourPreset(10)">10 Kg</button>
+                        <button type="button" class="chip-btn" onclick="window.setFlourPreset(25)">25 Kg</button>
+                        <button type="button" class="chip-btn" onclick="window.setFlourPreset(50)">50 Kg</button>
+                        <button type="button" class="chip-btn" onclick="window.setFlourPreset(100)">100 Kg</button>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="number" id="baseFlourInput" value="10" min="0.1" step="0.1" style="font-size:18px; font-weight:900; color:var(--primary); flex:1;" oninput="window.recalculateScaledIngredients()" onchange="window.recalculateScaledIngredients()">
+                    <span style="font-weight:800; font-size:15px; color:#475569;">Kg (කිලෝ)</span>
+                </div>
+            </div>
+
+            <!-- Scaled Ingredients Table (Pre-rendered for initial recipe) -->
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <label style="margin:0; font-size:11.5px; color:#334155;">🧪 Auto-Calculated Ingredients (ස්වයංක්‍රීය අමුද්‍රව්‍ය ලැයිස්තුව)</label>
+                    <button type="button" onclick="showAddExtraIngredientRow()" style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; font-size:11px; font-weight:700; padding:4px 8px; cursor:pointer; color:#1d4ed8;">
+                        ➕ Add Extra Item
+                    </button>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="ingredients-table" id="ingredientsTable">
+                        <thead>
+                            <tr>
+                                <th>Ingredient</th>
+                                <th style="text-align:center;">Required</th>
+                                <th>Unit</th>
+                                <th style="text-align:right;">In-Stock</th>
+                                <th style="text-align:right;">Line Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ingredientsTableBody">
+                            <tr>
+                                <td style="font-weight:700; color:#1e293b;">Flour</td>
+                                <td style="text-align:center;"><input type="number" value="10" min="0.001" step="0.001" style="width:85px; padding:4px 8px; font-weight:800; font-size:13px; text-align:center; color:#0284c7; background:#fff; border:1px solid #cbd5e1; border-radius:6px;" onchange="window.onManualIngredientQtyChange(0, this.value)"></td>
+                                <td style="color:#64748b; font-weight:600;">Kg</td>
+                                <td style="text-align:right;"><span class="stock-tag-ok">🟢 In Stock</span></td>
+                                <td style="text-align:right; font-weight:700; color:#0f172a;">Rs. 0.00</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight:700; color:#1e293b;">Sugar</td>
+                                <td style="text-align:center;"><input type="number" value="7.5" min="0.001" step="0.001" style="width:85px; padding:4px 8px; font-weight:800; font-size:13px; text-align:center; color:#0284c7; background:#fff; border:1px solid #cbd5e1; border-radius:6px;" onchange="window.onManualIngredientQtyChange(1, this.value)"></td>
+                                <td style="color:#64748b; font-weight:600;">Kg</td>
+                                <td style="text-align:right;"><span class="stock-tag-ok">🟢 In Stock</span></td>
+                                <td style="text-align:right; font-weight:700; color:#0f172a;">Rs. 0.00</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight:700; color:#1e293b;">Margarine</td>
+                                <td style="text-align:center;"><input type="number" value="1" min="0.001" step="0.001" style="width:85px; padding:4px 8px; font-weight:800; font-size:13px; text-align:center; color:#0284c7; background:#fff; border:1px solid #cbd5e1; border-radius:6px;" onchange="window.onManualIngredientQtyChange(2, this.value)"></td>
+                                <td style="color:#64748b; font-weight:600;">Kg</td>
+                                <td style="text-align:right;"><span class="stock-tag-ok">🟢 In Stock</span></td>
+                                <td style="text-align:right; font-weight:700; color:#0f172a;">Rs. 0.00</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight:700; color:#1e293b;">Baking Powder</td>
+                                <td style="text-align:center;"><input type="number" value="0.2" min="0.001" step="0.001" style="width:85px; padding:4px 8px; font-weight:800; font-size:13px; text-align:center; color:#0284c7; background:#fff; border:1px solid #cbd5e1; border-radius:6px;" onchange="window.onManualIngredientQtyChange(3, this.value)"></td>
+                                <td style="color:#64748b; font-weight:600;">Kg</td>
+                                <td style="text-align:right;"><span class="stock-tag-ok">🟢 In Stock</span></td>
+                                <td style="text-align:right; font-weight:700; color:#0f172a;">Rs. 0.00</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight:700; color:#1e293b;">Oil</td>
+                                <td style="text-align:center;"><input type="number" value="0.2" min="0.001" step="0.001" style="width:85px; padding:4px 8px; font-weight:800; font-size:13px; text-align:center; color:#0284c7; background:#fff; border:1px solid #cbd5e1; border-radius:6px;" onchange="window.onManualIngredientQtyChange(4, this.value)"></td>
+                                <td style="color:#64748b; font-weight:600;">L</td>
+                                <td style="text-align:right;"><span class="stock-tag-ok">🟢 In Stock</span></td>
+                                <td style="text-align:right; font-weight:700; color:#0f172a;">Rs. 0.00</td>
+                            </tr>
+                        </tbody>
+                        <tfoot id="ingredientsTableFoot" style="display:table-footer-group;">
+                            <tr style="background:#f8fafc; font-weight:800; border-top:2px solid var(--border);">
+                                <td colspan="4" style="padding:10px 12px; text-align:right;">Total Raw Ingredients Cost:</td>
+                                <td style="padding:10px 12px; text-align:right; color:#0284c7; font-size:15px;" id="totalRmCostDisplay">Rs. 0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Extra Ingredient Input Box -->
+            <div id="extraIngredientRow" style="display:none; margin-top:12px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px;">
+                <div style="font-size:11px; font-weight:800; color:#1e40af; margin-bottom:6px;">Add Custom Ingredient / Extra Item:</div>
+                <div style="display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:8px; align-items:center;">
+                    <select id="extraIngredientSelect" style="font-size:12px; font-weight:600;"></select>
+                    <input type="number" id="extraIngredientQty" placeholder="Qty" min="0.001" step="0.001" style="font-size:12px; font-weight:700;">
+                    <select id="extraIngredientUnit" style="font-size:12px; font-weight:600;">
+                        <option value="Kg">Kg</option>
+                        <option value="g">g</option>
+                        <option value="L">L</option>
+                        <option value="Units">Units</option>
+                    </select>
+                    <button type="button" onclick="confirmAddExtraIngredient()" style="padding:8px 12px; background:#2563eb; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+                        Add
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: PRODUCTION YIELD ESTIMATION & FINALIZATION -->
+        <div class="mfg-card" style="border-top: 4px solid var(--indigo);">
+            <div class="card-header">
+                <h3 style="color: var(--indigo-dark);">
+                    <span>2️⃣</span> Production Estimation & Yield (නිෂ්පාදන ඇස්තමේන්තුව)
+                </h3>
+                <span class="recipe-badge recipe-badge-blue">Step 2 of 2</span>
+            </div>
+
+            <!-- Yield Estimation Forecast Hero Box -->
+            <div class="yield-card">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#c7d2fe; font-weight:800; margin-bottom:10px;">
+                    🎯 Projected Output Yield (කල්තියා ඇස්තමේන්තුගත නිෂ්පාදනය)
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="yield-stat-box">
+                        <div style="font-size:10.5px; color:#e0e7ff; font-weight:700;">ESTIMATED UNITS</div>
+                        <div class="yield-val" id="estUnitsDisplay" style="color:#38bdf8;">444.4 Units</div>
+                        <div style="font-size:10px; color:#cbd5e1;" id="estUnitsPerKgLabel">44.4 units/kg flour</div>
+                    </div>
+                    <div class="yield-stat-box">
+                        <div style="font-size:10.5px; color:#e0e7ff; font-weight:700;">ESTIMATED PACKETS</div>
+                        <div class="yield-val" id="estPacketsDisplay" style="color:#4ade80;">8.89 Pkts</div>
+                        <div style="font-size:10px; color:#cbd5e1;" id="estPktsRatioLabel">Based on recipe pack size</div>
+                    </div>
+                </div>
+
+                <!-- Unit Cost Forecast -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.15); padding-top:10px;">
+                    <div>
+                        <div style="font-size:10px; color:#e0e7ff;">EST. COST PER PIECE:</div>
+                        <div style="font-size:15px; font-weight:800; color:#fde047;" id="estCostPerUnitDisplay">Rs. 0.00 / unit</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px; color:#e0e7ff;">EST. COST PER PACKET:</div>
+                        <div style="font-size:15px; font-weight:800; color:#fde047;" id="estCostPerPktDisplay">Rs. 0.00 / pkt</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actual Production Output Confirmation -->
+            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:800; color:#1e293b; margin-bottom:8px;">
+                    🏭 Actual Baked Output (සත්‍ය ලෙස නිපදවූ ප්‍රමාණය තහවුරු කරන්න):
+                </div>
+
+                <div class="mfg-row" style="margin-bottom:10px;">
+                    <div>
+                        <label>Actual Finished Units (ඒකක/කෑලි) *</label>
+                        <input type="number" id="actualProducedUnits" value="444" min="1" step="1" placeholder="e.g. 444" style="font-weight:800; font-size:15px; color:#0f172a;" oninput="window.recalcBatchCosts()">
+                    </div>
+                    <div>
+                        <label>Actual Finished Packets (පැකට් ගණන)</label>
+                        <input type="number" id="actualProducedPkts" value="8.89" min="0" step="0.01" placeholder="e.g. 8.89" style="font-weight:700; font-size:14px;" oninput="window.recalcBatchCosts()">
+                    </div>
+                </div>
+
+                <!-- Labor & Overheads -->
+                <div class="mfg-row" style="margin-bottom:10px;">
+                    <div>
+                        <label>Baking Labor Cost (ශ්‍රම පිරිවැය Rs.)</label>
+                        <input type="number" id="laborCost" value="0" min="0" step="1" style="font-weight:700;" oninput="window.recalcBatchCosts()">
+                    </div>
+                    <div>
+                        <label>Oven / Gas / Fuel Cost (Rs.)</label>
+                        <input type="number" id="overheadCost" value="0" min="0" step="1" style="font-weight:700;" oninput="window.recalcBatchCosts()">
+                    </div>
+                </div>
+
+                <!-- Final Absorbed Unit Cost Summary -->
+                <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <span style="font-size:10.5px; font-weight:700; color:#64748b;">TOTAL BATCH COST:</span>
+                        <div style="font-size:16px; font-weight:900; color:#0f172a;" id="finalTotalBatchCost">Rs. 0.00</div>
+                    </div>
+                    <div>
+                        <span style="font-size:10.5px; font-weight:700; color:#64748b;">FINAL UNIT COST:</span>
+                        <div style="font-size:16px; font-weight:900; color:#059669;" id="finalUnitCostDisplay">Rs. 0.00 / unit</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete Batch Button -->
+            <button type="button" id="saveProductionBtn" class="btn-complete-batch" onclick="window.saveBakeryProductionBatch()">
+                🥖 Complete Baking Batch & Update Stock (නිෂ්පාදනය අවසන් කර තොග යාවත්කාලීන කරන්න)
+            </button>
+
+            <div id="mfgProdMsg" class="mfg-msg"></div>
+        </div>
+
+    </div>
+
+    <!-- Production Batches History Table -->
+    <div class="mfg-card" style="margin-top:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+            <h3 style="margin:0; font-size:16px; font-weight:800;">📜 Bakery Production Runs & Batch History (දෛනික බේකිං ඉතිහාසය)</h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="date" id="prodFilterFromDate" style="width:auto; padding:6px 10px; font-size:12px;">
+                <span>to</span>
+                <input type="date" id="prodFilterToDate" style="width:auto; padding:6px 10px; font-size:12px;">
+                <button type="button" onclick="renderProductionHistoryTable()" style="padding:6px 12px; background:#0f172a; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+                    Filter
+                </button>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="ingredients-table" style="margin-top:0;">
+                <thead>
+                    <tr>
+                        <th>Batch ID & Date</th>
+                        <th>Product & Recipe</th>
+                        <th style="text-align:center;">Flour (Kg)</th>
+                        <th style="text-align:center;">Estimated Yield</th>
+                        <th style="text-align:center;">Actual Produced</th>
+                        <th style="text-align:center;">Efficiency</th>
+                        <th style="text-align:right;">Unit Cost</th>
+                        <th style="text-align:right;">Total Cost</th>
+                        <th style="text-align:center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="productionHistoryBody">
+                    <tr><td colspan="9" style="text-align:center; padding:24px; color:#94a3b8;">Loading bakery production records...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Bottom Script for Async / Firebase Operations and Event Listeners
+    function showAddExtraIngredientRow() {
+        const row = document.getElementById('extraIngredientRow');
+        if (row) row.style.display = row.style.display === 'none' ? 'block' : 'none';
+    }
+    window.showAddExtraIngredientRow = showAddExtraIngredientRow;
+
+    function confirmAddExtraIngredient() {
+        const sel = document.getElementById('extraIngredientSelect');
+        const name = sel ? sel.value : '';
+        const qty = Number(document.getElementById('extraIngredientQty').value || 0);
+        const unit = document.getElementById('extraIngredientUnit').value;
+
+        if (!name || qty <= 0) {
+            alert('Please select an ingredient and specify quantity > 0');
+            return;
+        }
+
+        const rmMatch = rawMaterialsCache.find(r => r.name === name);
+        const inStock = rmMatch ? Number(rmMatch.stockQty || 0) : 0;
+        const unitCost = rmMatch ? Number(rmMatch.lastUnitCost || rmMatch.unitCost || 0) : 0;
+
+        currentScaledIngredients.push({
+            name: name,
+            requiredQty: qty,
+            unit: unit,
+            baseQty: qty,
+            inStock: inStock,
+            unitCost: unitCost,
+            lineCost: qty * unitCost,
+            isShortage: inStock < qty
+        });
+
+        document.getElementById('extraIngredientQty').value = '';
+        document.getElementById('extraIngredientRow').style.display = 'none';
+
+        renderScaledIngredientsTable();
+        recalcBatchCosts();
+    }
+    window.confirmAddExtraIngredient = confirmAddExtraIngredient;
+
+    async function saveBakeryProductionBatch() {
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        const msgEl = document.getElementById('mfgProdMsg');
+        const btn = document.getElementById('saveProductionBtn');
+
+        if (!bid) return alert('No business context connected.');
+        if (!currentActiveRecipe) return alert('Please select a Bakery Product/Recipe first.');
+
+        const actualUnits = Number(document.getElementById('actualProducedUnits').value || 0);
+        if (actualUnits <= 0) return alert('Please specify actual produced units > 0');
+
+        const flourKg = Number(document.getElementById('baseFlourInput').value || 10);
+        const actualPkts = Number(document.getElementById('actualProducedPkts').value || 0);
+        const labor = Number(document.getElementById('laborCost').value || 0);
+        const overhead = Number(document.getElementById('overheadCost').value || 0);
+
+        btn.disabled = true;
+        btn.textContent = '⏳ Baking & Deducting Ingredients...';
+        msgEl.className = 'mfg-msg';
+        msgEl.textContent = '';
+
+        try {
+            const batchId = 'BAKE-' + Date.now();
+            const now = new Date();
+
+            let totalRmCost = 0;
+            currentScaledIngredients.forEach(i => { totalRmCost += (Number(i.lineCost) || 0); });
+            const totalBatchCost = Math.max(0.01, totalRmCost + labor + overhead);
+            const unitCost = totalBatchCost / actualUnits;
+
+            const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+
+            if (firestoreDb) {
+                // 1. Deduct consumed ingredients from bakery_raw_materials
+                const batch = firestoreDb.batch();
+                for (const ing of currentScaledIngredients) {
+                    const rmMatch = rawMaterialsCache.find(r => r.name && r.name.toLowerCase().trim() === ing.name.toLowerCase().trim())
+                        || rawMaterialsCache.find(r => r.name && r.name.toLowerCase().includes(ing.name.toLowerCase()));
+
+                    if (rmMatch && rmMatch.id) {
+                        const rmRef = firestoreDb.collection('bakery_raw_materials').doc(rmMatch.id);
+                        batch.set(rmRef, {
+                            stockQty: firebase.firestore.FieldValue.increment(-Number(ing.requiredQty)),
+                            updatedAt: now
+                        }, { merge: true });
+                    }
+                }
+
+                // 2. Add finished goods to bakery_finished_products & products
+                const fgKey = bid + '_' + currentActiveRecipe.code;
+                const fgRef = firestoreDb.collection('bakery_finished_products').doc(fgKey);
+                batch.set(fgRef, {
+                    businessId: bid,
+                    productId: fgKey,
+                    code: currentActiveRecipe.code,
+                    name: currentActiveRecipe.name,
+                    stockQty: firebase.firestore.FieldValue.increment(actualUnits),
+                    unitCost: unitCost,
+                    unitPrice: unitCost * 1.4,
+                    isActive: true,
+                    updatedAt: now
+                }, { merge: true });
+
+                const prodRef = firestoreDb.collection('products').doc(fgKey);
+                batch.set(prodRef, {
+                    businessId: bid,
+                    name: currentActiveRecipe.name,
+                    currentStock: firebase.firestore.FieldValue.increment(actualUnits),
+                    costPrice: unitCost,
+                    unitPrice: unitCost * 1.4,
+                    price: unitCost * 1.4,
+                    isActive: true,
+                    updatedAt: now.toISOString()
+                }, { merge: true });
+
+                // 3. Record in bakery_production_batches & runs
+                const batchDocRef = firestoreDb.collection('bakery_production_batches').doc(batchId);
+                const batchPayload = {
+                    batchId: batchId,
+                    businessId: bid,
+                    recipeCode: currentActiveRecipe.code,
+                    productName: currentActiveRecipe.name,
+                    flourUsedKg: flourKg,
+                    ingredients: currentScaledIngredients,
+                    estimatedUnits: Number(document.getElementById('estUnitsDisplay').textContent.replace(/[^0-9.]/g, '') || 0),
+                    estimatedPackets: Number(document.getElementById('estPacketsDisplay').textContent.replace(/[^0-9.]/g, '') || 0),
+                    actualProducedUnits: actualUnits,
+                    actualProducedPkts: actualPkts,
+                    totalRmCost: totalRmCost,
+                    laborCost: labor,
+                    overheadCost: overhead,
+                    totalBatchCost: totalBatchCost,
+                    unitFgCost: unitCost,
+                    createdAt: now
+                };
+                batch.set(batchDocRef, batchPayload);
+
+                await batch.commit();
+
+                // 4. Record Overhead Expense if labor or overhead > 0
+                if ((labor + overhead) > 0) {
+                    const expId = 'PEXP-' + Date.now();
+                    await firestoreDb.collection('bakery_expenses').doc(expId).set({
+                        expenseId: expId,
+                        businessId: bid,
+                        title: 'Baking Labor & Oven Overhead - ' + currentActiveRecipe.name + ' (Batch ' + batchId + ')',
+                        category: 'BAKERY_OVERHEAD_LABOR',
+                        amount: labor + overhead,
+                        notes: 'Labor: Rs. ' + labor.toFixed(2) + ', Oven/Fuel: Rs. ' + overhead.toFixed(2),
+                        paymentMode: 'CASH',
+                        createdAt: now
+                    });
+                }
+
+                if (window.BakeryModule) {
+                    BakeryModule.publishEvent('MANUFACTURING_PRODUCTION_RECORDED', {
+                        businessId: bid,
+                        runId: batchId,
+                        rawMaterial: currentScaledIngredients.map(i => i.name + ' (' + i.requiredQty + ' ' + i.unit + ')').join(', '),
+                        finishedProduct: currentActiveRecipe.name,
+                        rawQty: flourKg,
+                        finishedQty: actualUnits,
+                        totalCost: totalBatchCost,
+                        rawCost: totalRmCost,
+                        laborCost: labor,
+                        overheadCost: overhead
+                    });
+
+                    if (typeof BakeryModule.syncFlatAccountingProductionRecorded === 'function') {
+                        await BakeryModule.syncFlatAccountingProductionRecorded(batchPayload);
+                    }
+                }
+            }
+
+            msgEl.className = 'mfg-msg ok';
+            msgEl.textContent = '✅ Baking Batch Saved! ' + actualUnits + ' units of "' + currentActiveRecipe.name + '" produced and ingredients deducted from Stock!';
+
+            // Reload inventory, history, asset summary
+            await loadRawMaterialsInventory(bid);
+            recalculateScaledIngredients();
+            await refreshProductionHistory();
+            await updateProductionAssetSummary();
+        } catch (err) {
+            console.error('[Bakery Production Error]', err);
+            msgEl.className = 'mfg-msg err';
+            msgEl.textContent = 'Error recording batch: ' + err.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🥖 Complete Baking Batch & Update Stock (නිෂ්පාදනය අවසන් කර තොග යාවත්කාලීන කරන්න)';
+        }
+    }
+    window.saveBakeryProductionBatch = saveBakeryProductionBatch;
+
+    async function loadRawMaterialsInventory(bid) {
+        const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+        if (!bid || !firestoreDb) return;
+        try {
+            const snap = await firestoreDb.collection('bakery_raw_materials')
+                .where('businessId', '==', bid)
+                .get()
+                .catch(() => ({ docs: [] }));
+
+            rawMaterialsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            const extraSel = document.getElementById('extraIngredientSelect');
+            if (extraSel) {
+                extraSel.innerHTML = '<option value="">Select Ingredient...</option>' +
+                    rawMaterialsCache.map(r => '<option value="' + r.name + '" data-unit="' + (r.unit || 'Kg') + '" data-cost="' + (r.lastUnitCost || r.unitCost || 0) + '">' + r.name + ' (Stock: ' + (r.stockQty || 0) + ' ' + (r.unit || 'Kg') + ')</option>').join('');
+            }
+
+            recalculateScaledIngredients();
+        } catch (e) {
+            console.warn('[Bakery] Raw materials load error:', e);
+        }
+    }
+
+    async function loadAndPopulateRecipes(bid) {
+        if (!bid || !window.BakeryModule) return;
+        try {
+            const fetched = await BakeryModule.getRecipes(bid);
+            if (Array.isArray(fetched) && fetched.length > 0) {
+                currentRecipes = fetched.map(f => {
+                    const def = DEFAULT_BAKERY_RECIPES.find(r => r.code === f.code);
+                    return {
+                        ...def,
+                        ...f,
+                        ingredients: (Array.isArray(f.ingredients) && f.ingredients.length > 0) ? f.ingredients : (def ? def.ingredients : [])
+                    };
+                });
+            }
+        } catch (err) {
+            console.warn('[Bakery] Error fetching recipes:', err);
+        }
+
+        const sel = document.getElementById('selectedRecipeCode');
+        if (!sel) return;
+
+        const currentVal = sel.value || 'LS';
+        sel.innerHTML = '<option value="">-- Choose a Bakery Product / Recipe --</option>' +
+            currentRecipes.map(r => '<option value="' + r.code + '"' + (r.code === currentVal ? ' selected' : '') + '>' + r.code + ' - ' + r.name + '</option>').join('');
+
+        const countEl = document.getElementById('prodRecipeCount');
+        if (countEl) countEl.textContent = currentRecipes.length + ' Recipes';
+
+        if (sel.value) {
+            onRecipeSelectionChanged();
+        }
+    }
+
+    async function refreshProductionHistory() {
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+        if (!bid || !firestoreDb) return;
+        try {
+            const snap = await firestoreDb.collection('bakery_production_batches')
+                .where('businessId', '==', bid)
+                .limit(100)
+                .get()
+                .catch(() => ({ docs: [] }));
+
+            const tbody = document.getElementById('productionHistoryBody');
+            if (!tbody) return;
+
+            if (snap.docs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:24px; color:#94a3b8;">No bakery batches recorded yet.</td></tr>';
+                return;
+            }
+
+            const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => {
+                    const ta = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+                    const tb = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+                    return tb - ta;
+                });
+
+            const countEl = document.getElementById('prodBatchCount');
+            if (countEl) countEl.textContent = docs.length + ' Batches';
+
+            tbody.innerHTML = docs.map(b => {
+                const dStr = b.createdAt ? (window.BakeryModule ? BakeryModule.formatDate(b.createdAt) : new Date(b.createdAt).toLocaleDateString()) : '-';
+                const estUnits = Number(b.estimatedUnits || 0);
+                const actualUnits = Number(b.actualProducedUnits || b.producedQty || 0);
+                const efficiency = estUnits > 0 ? Math.round((actualUnits / estUnits) * 100) : 100;
+                const effColor = efficiency >= 95 ? '#059669' : (efficiency >= 80 ? '#d97706' : '#dc2626');
+
+                return '<tr>' +
+                    '<td>' +
+                        '<div style="font-weight:800; color:#0f172a;">' + (b.batchId || b.id) + '</div>' +
+                        '<div style="font-size:11px; color:#64748b;">' + dStr + '</div>' +
+                    '</td>' +
+                    '<td>' +
+                        '<span class="recipe-badge recipe-badge-amber">' + (b.recipeCode || 'BAKE') + '</span>' +
+                        '<span style="font-weight:700; color:#1e293b; margin-left:4px;">' + b.productName + '</span>' +
+                    '</td>' +
+                    '<td style="text-align:center; font-weight:700;">' + (b.flourUsedKg || '-') + ' Kg</td>' +
+                    '<td style="text-align:center; color:#64748b;">' + estUnits.toLocaleString() + ' units</td>' +
+                    '<td style="text-align:center; font-weight:900; color:#0f172a;">' + actualUnits.toLocaleString() + ' units</td>' +
+                    '<td style="text-align:center;">' +
+                        '<span style="font-weight:800; color:' + effColor + '; background:#f8fafc; padding:2px 8px; border-radius:6px; border:1px solid #e2e8f0;">' + efficiency + '%</span>' +
+                    '</td>' +
+                    '<td style="text-align:right; font-weight:700; color:#059669;">Rs. ' + (Number(b.unitFgCost) || 0).toFixed(2) + '</td>' +
+                    '<td style="text-align:right; font-weight:800; color:#0f172a;">Rs. ' + (Number(b.totalBatchCost) || 0).toFixed(2) + '</td>' +
+                    '<td style="text-align:center;">' +
+                        '<button type="button" onclick="alert(\'Batch: ' + (b.batchId || b.id) + '\\nProduct: ' + b.productName + '\\nFlour: ' + (b.flourUsedKg || 10) + 'kg\\nActual Produced: ' + actualUnits + ' units\\nUnit Cost: Rs.' + (Number(b.unitFgCost) || 0).toFixed(2) + '\')" style="padding:4px 8px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer;">Details</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        } catch (e) {
+            console.warn('[Bakery] History error:', e);
+        }
+    }
+
+    async function updateProductionAssetSummary() {
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+        if (!bid || !firestoreDb) return;
+        try {
+            const [rmSnap, fgSnap] = await Promise.all([
+                firestoreDb.collection('bakery_raw_materials').where('businessId', '==', bid).get().catch(() => ({ docs: [] })),
+                firestoreDb.collection('bakery_finished_products').where('businessId', '==', bid).get().catch(() => ({ docs: [] }))
+            ]);
+
+            let rmVal = 0;
+            rmSnap.docs.forEach(d => {
+                const x = d.data();
+                rmVal += (Number(x.stockQty) || 0) * (Number(x.lastUnitCost || x.unitCost) || 0);
+            });
+
+            let fgVal = 0;
+            fgSnap.docs.forEach(d => {
+                const x = d.data();
+                fgVal += (Number(x.stockQty) || 0) * (Number(x.unitCost) || 0);
+            });
+
+            const rmValEl = document.getElementById('prodRmAssetVal');
+            if (rmValEl) rmValEl.textContent = 'Rs. ' + rmVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            const fgValEl = document.getElementById('prodFgAssetVal');
+            if (fgValEl) fgValEl.textContent = 'Rs. ' + fgVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } catch (e) {
+            console.warn('[Bakery Asset Summary Error]', e);
+        }
+    }
+
+    async function seedStandardBakeryRawMaterials() {
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        if (!bid) return alert('No business connected.');
+        if (!confirm('Add / Reset the 15 standard bakery raw materials (Flour, Sugar, Margarine, Cita, Baking Powder, Yeast, Salt, Oil, etc.) with demo stock?')) return;
+        try {
+            if (window.BakeryModule && typeof BakeryModule.seedDefaultRawMaterials === 'function') {
+                await BakeryModule.seedDefaultRawMaterials(bid);
+                alert('✅ 15 Standard Bakery Raw Materials seeded successfully!');
+                await loadRawMaterialsInventory(bid);
+                recalculateScaledIngredients();
+                await updateProductionAssetSummary();
+            }
+        } catch (e) {
+            alert('Error seeding materials: ' + e.message);
+        }
+    }
+    window.seedStandardBakeryRawMaterials = seedStandardBakeryRawMaterials;
+
+    async function initOutboundPage() {
+        // Attach direct DOM listeners for bulletproof event capture
+        const sel = document.getElementById('selectedRecipeCode');
+        if (sel) {
+            sel.addEventListener('change', window.onRecipeSelectionChanged);
+        }
+
+        const flourInput = document.getElementById('baseFlourInput');
+        if (flourInput) {
+            flourInput.addEventListener('input', window.recalculateScaledIngredients);
+            flourInput.addEventListener('change', window.recalculateScaledIngredients);
+            flourInput.addEventListener('keyup', window.recalculateScaledIngredients);
+        }
+
+        // Check if recipe is in URL parameter or already selected
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoCode = urlParams.get('recipe');
+            if (autoCode && sel && currentRecipes.some(r => r.code === autoCode)) {
+                sel.value = autoCode;
+            }
+            if (sel && sel.value) {
+                window.onRecipeSelectionChanged();
+            }
+        } catch (e) {}
+
+        try {
+            const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+            if (window.BakeryModule && typeof window.BakeryModule.init === 'function') {
+                await BakeryModule.init('outbound');
+                const bid = BakeryModule.businessId || localStorage.getItem('currentBusinessId');
+                if (bid) {
+                    await loadRawMaterialsInventory(bid);
+                    await loadAndPopulateRecipes(bid);
+                    await refreshProductionHistory();
+                    await updateProductionAssetSummary();
+                }
+            }
+        } catch (err) {
+            console.warn('[Bakery Outbound] Async init warning:', err);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOutboundPage);
+    } else {
+        initOutboundPage();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,3390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DIGIBIZ — Seller Central</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* ================================================================ */
+        /* 🛍️ DIGIBIZ SELLER CENTRAL — AMAZON STYLE THEME                 */
+        /* ================================================================ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== TOP NAVIGATION (Amazon Style) ===== */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: #131921;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            border-bottom: 1px solid #232f3e;
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-nav-logo {
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-nav-logo i {
+            color: #ff9900;
+        }
+
+        .top-nav-logo span {
+            font-size: 11px;
+            font-weight: 400;
+            color: #ff9900;
+            margin-left: 2px;
+        }
+
+        .top-nav-search {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 6px;
+            overflow: hidden;
+            width: 320px;
+        }
+
+        .top-nav-search input {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .top-nav-search button {
+            padding: 6px 14px;
+            background: #ff9900;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-nav-item {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .top-nav-item:hover {
+            color: #fff;
+        }
+
+        .top-nav-item .badge {
+            background: #ff9900;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 10px;
+            position: absolute;
+            top: -6px;
+            right: -12px;
+        }
+
+        .top-nav-item .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #ff9900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 11px;
+            color: #fff;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* ===== SIDEBAR (Amazon Style) ===== */
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            bottom: 0;
+            width: 220px;
+            background: #fff;
+            border-right: 1px solid #e7e7e7;
+            overflow-y: auto;
+            padding: 12px 0;
+            z-index: 999;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+
+        .sidebar-section-title {
+            font-size: 9px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 8px 16px 4px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            color: #444;
+            font-size: 12.5px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: #f0f2f5;
+            color: #131921;
+        }
+
+        .sidebar-item.active {
+            background: #f0f2f5;
+            border-left-color: #ff9900;
+            color: #131921;
+            font-weight: 700;
+        }
+
+        .sidebar-item i {
+            width: 16px;
+            color: #999;
+            font-size: 13px;
+        }
+
+        .sidebar-item.active i {
+            color: #ff9900;
+        }
+
+        .sidebar-item .count {
+            margin-left: auto;
+            background: #e7e7e7;
+            color: #555;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 10px;
+        }
+
+        .sidebar-item.active .count {
+            background: #ff9900;
+            color: #fff;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 998;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: 220px;
+            margin-top: 56px;
+            flex: 1;
+            padding: 20px 24px;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* ===== PAGE ===== */
+        .page {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #131921;
+        }
+
+        .page-header .sub {
+            font-size: 12px;
+            color: #999;
+            font-weight: 400;
+        }
+
+        .page-header .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 7px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: #ff9900;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #e68a00;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #444;
+            border: 1px solid #ddd;
+        }
+        .btn-secondary:hover {
+            background: #f0f2f5;
+        }
+
+        .btn-success {
+            background: #067d62;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #055a46;
+        }
+
+        .btn-danger {
+            background: #c40000;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #a00000;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px 18px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e7e7e7;
+            margin-bottom: 16px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #131921;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header h3 i {
+            color: #ff9900;
+        }
+
+        .card-header a {
+            font-size: 12px;
+            color: #ff9900;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .card-header a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== DASHBOARD GRID ===== */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 1024px) {
+            .dash-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .dash-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dash-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid #e7e7e7;
+            transition: all 0.2s;
+        }
+
+        .dash-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .dash-card .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .dash-card .label i {
+            color: #ff9900;
+        }
+
+        .dash-card .value {
+            font-size: 26px;
+            font-weight: 900;
+            color: #131921;
+            margin-top: 2px;
+        }
+
+        .dash-card .change {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .dash-card .change.up {
+            color: #067d62;
+        }
+        .dash-card .change.down {
+            color: #c40000;
+        }
+
+        /* ===== TWO COLUMN ===== */
+        .two-col {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== TABLES ===== */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+
+        table th {
+            text-align: left;
+            padding: 8px 10px;
+            color: #999;
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e7e7e7;
+        }
+
+        table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f2f5;
+            color: #444;
+        }
+
+        table tr:hover td {
+            background: #f8f9fa;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+
+        /* ===== STATUS BADGES ===== */
+        .badge {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-ready {
+            background: #e6f7ed;
+            color: #067d62;
+        }
+        .badge-queue {
+            background: #fff3e0;
+            color: #e68a00;
+        }
+        .badge-progress {
+            background: #e3f0ff;
+            color: #0066c0;
+        }
+        .badge-delivered {
+            background: #f0f0f0;
+            color: #666;
+        }
+        .badge-low {
+            background: #fce4e4;
+            color: #c40000;
+        }
+        .badge-good {
+            background: #e6f7ed;
+            color: #067d62;
+        }
+        .badge-blue {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        /* ===== CHARTS ===== */
+        .chart-container {
+            height: 200px;
+            position: relative;
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ===== ORDER / STOCK ITEMS ===== */
+        .order-item,
+        .stock-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .order-item:last-child,
+        .stock-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item .info .name {
+            font-weight: 600;
+            color: #131921;
+            font-size: 13px;
+        }
+        .order-item .info .detail {
+            font-size: 11px;
+            color: #999;
+        }
+        .order-item .amount {
+            font-weight: 700;
+            color: #131921;
+            font-size: 13px;
+        }
+
+        .stock-item .name {
+            font-size: 12.5px;
+            color: #444;
+        }
+        .stock-item .stock {
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+        .stock-item .stock.low {
+            color: #c40000;
+        }
+        .stock-item .action {
+            font-size: 11px;
+            color: #ff9900;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .stock-item .action:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 520px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalIn 0.25s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid #e7e7e7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #131921;
+            color: #fff;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-header h3 i {
+            color: #ff9900;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 12px;
+        }
+
+        .modal-body .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        .modal-body .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .modal-body .form-control:focus {
+            border-color: #ff9900;
+        }
+
+        .modal-body .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 500px) {
+            .modal-body .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #e7e7e7;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            background: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* ===== THERMAL RECEIPT ===== */
+        .receipt-content {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            padding: 12px;
+            background: #fff;
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .receipt-content .center {
+            text-align: center;
+        }
+        .receipt-content .line {
+            border-top: 1px dashed #999;
+            margin: 6px 0;
+        }
+        .receipt-content .row {
+            display: flex;
+            justify-content: space-between;
+        }
+        .receipt-content .total {
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        /* ===== POS LAYOUT ===== */
+        .pos-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .pos-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .top-nav-search {
+                width: 160px;
+            }
+            .top-nav-search input {
+                width: 80px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                width: 260px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 12px;
+            }
+
+            .mobile-toggle {
+                display: inline-flex !important;
+            }
+
+            .top-nav-item .hide-mobile {
+                display: none;
+            }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0f2f5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- 🛍️ TOP NAVIGATION — DIGIBIZ SELLER CENTRAL                   -->
+    <!-- ============================================================ -->
+
+    <nav class="top-nav">
+        <div class="top-nav-left">
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="top-nav-logo">
+                <i class="fas fa-bolt"></i>
+                DIGIBIZ<span>SC</span>
+                <span>Seller Central</span>
+            </div>
+
+            <div class="top-nav-search">
+                <input type="text" placeholder="Search..." id="globalSearch" oninput="handleSearch(this.value)" />
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="top-nav-right">
+            <div class="top-nav-item" onclick="navigateTo('dashboard')">
+                <i class="fas fa-home"></i>
+                <span class="hide-mobile">Home</span>
+            </div>
+            <div class="top-nav-item" onclick="navigateTo('orders')">
+                <i class="fas fa-box"></i>
+                <span class="hide-mobile">Orders</span>
+                <span class="badge" id="orderBadge">0</span>
+            </div>
+            <div class="top-nav-item" onclick="navigateTo('pos')">
+                <i class="fas fa-cash-register"></i>
+                <span class="hide-mobile">POS</span>
+            </div>
+            <div class="top-nav-item">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="top-nav-item">
+                <div class="avatar">DB</div>
+                <span class="hide-mobile">Admin</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- 📋 SIDEBAR — DIGIBIZ SELLER CENTRAL                          -->
+    <!-- ============================================================ -->
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-section-title">📊 Main</div>
+        <a class="sidebar-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+            <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+        <a class="sidebar-item" data-page="orders" onclick="navigateTo('orders')">
+            <i class="fas fa-box"></i> Orders
+            <span class="count" id="sideOrderCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="pos" onclick="navigateTo('pos')">
+            <i class="fas fa-cash-register"></i> POS Counter
+            <span class="count" id="sidePosCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="repairs" onclick="navigateTo('repairs')">
+            <i class="fas fa-screwdriver-wrench"></i> Repair Desk
+            <span class="count" id="sideRepairCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="printing" onclick="navigateTo('printing')">
+            <i class="fas fa-print"></i> Print Studio
+            <span class="count" id="sidePrintCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="inventory" onclick="navigateTo('inventory')">
+            <i class="fas fa-warehouse"></i> Inventory
+            <span class="count" id="sideInvCount">0</span>
+        </a>
+
+        <div class="sidebar-section-title">💰 Financials</div>
+        <a class="sidebar-item" data-page="payments" onclick="navigateTo('payments')">
+            <i class="fas fa-money-bill-wave"></i> Payments
+        </a>
+        <a class="sidebar-item" data-page="credit" onclick="navigateTo('credit')">
+            <i class="fas fa-user-clock"></i> Credit Management
+            <span class="count" id="sideCreditCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="accounting" onclick="navigateTo('accounting')">
+            <i class="fas fa-book"></i> Accounting
+        </a>
+
+        <div class="sidebar-section-title">📈 Analytics</div>
+        <a class="sidebar-item" data-page="performance" onclick="navigateTo('performance')">
+            <i class="fas fa-chart-line"></i> Performance
+        </a>
+        <a class="sidebar-item" data-page="reports" onclick="navigateTo('reports')">
+            <i class="fas fa-file-alt"></i> Reports
+        </a>
+
+        <div class="sidebar-section-title">⚙️ Management</div>
+        <a class="sidebar-item" data-page="customers" onclick="navigateTo('customers')">
+            <i class="fas fa-users"></i> Customers
+            <span class="count" id="sideCustCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="settings" onclick="navigateTo('settings')">
+            <i class="fas fa-sliders-h"></i> Settings
+        </a>
+
+        <div style="padding:12px 16px; border-top:1px solid #e7e7e7; margin-top:8px; font-size:11px; color:#999;">
+            <i class="fas fa-circle" style="color:#067d62; font-size:7px;"></i> Online · v3.0
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- 📄 MAIN CONTENT                                              -->
+    <!-- ============================================================ -->
+
+    <div class="main-content">
+
+        <!-- ============================================================ -->
+        <!-- 🏠 PAGE: DASHBOARD                                           -->
+        <!-- ============================================================ -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <h1>Dashboard <span class="sub">| Real-time Business Summary</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="refreshAll()"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-primary" onclick="navigateTo('pos')"><i class="fas fa-plus"></i> New Sale</button>
+                </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="dash-grid">
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-shopping-cart"></i> Today's Orders</div>
+                    <div class="value" id="todayOrders">0</div>
+                    <div class="change up">↑ 12% vs yesterday</div>
+                </div>
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-dollar-sign"></i> Today's Revenue</div>
+                    <div class="value" id="todayRevenue">LKR 0</div>
+                    <div class="change up">↑ 8% vs yesterday</div>
+                </div>
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-users"></i> Active Repairs</div>
+                    <div class="value" id="activeRepairs">0</div>
+                    <div class="change down">↓ 2% vs yesterday</div>
+                </div>
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-star"></i> Customer Satisfaction</div>
+                    <div class="value" id="customerRating">4.8 ⭐</div>
+                    <div class="change up">↑ 0.2 vs yesterday</div>
+                </div>
+            </div>
+
+            <!-- Two Column: Chart + Recent Orders -->
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> Weekly Revenue Trend</h3>
+                        <a onclick="navigateTo('performance')">Details ➔</a>
+                    </div>
+                    <div class="chart-container"><canvas id="dashChart"></canvas></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-clock"></i> Recent Orders</h3>
+                        <a onclick="navigateTo('orders')">View All ➔</a>
+                    </div>
+                    <div id="recentOrdersList">
+                        <div style="color:#999; font-size:13px; padding:6px 0;">No orders yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Column: Low Stock + Quick Stats -->
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-exclamation-triangle" style="color:#c40000;"></i> Low Stock Alerts</h3>
+                        <a onclick="navigateTo('inventory')">Manage Inventory ➔</a>
+                    </div>
+                    <div id="lowStockList">
+                        <div style="color:#067d62; font-size:13px; padding:6px 0;">✅ All stock levels are healthy</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bolt" style="color:#ff9900;"></i> Quick Stats</h3>
+                    </div>
+                    <div class="stat-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                        <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center;">
+                            <div style="font-size:10px; color:#999;">Total Orders</div>
+                            <div style="font-size:18px; font-weight:900; color:#131921;" id="totalOrdersStat">0</div>
+                        </div>
+                        <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center;">
+                            <div style="font-size:10px; color:#999;">Total Customers</div>
+                            <div style="font-size:18px; font-weight:900; color:#131921;" id="totalCustStat">0</div>
+                        </div>
+                        <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center;">
+                            <div style="font-size:10px; color:#999;">Stock Items</div>
+                            <div style="font-size:18px; font-weight:900; color:#131921;" id="totalInvStat">0</div>
+                        </div>
+                        <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center; grid-column:span 3;">
+                            <div style="font-size:10px; color:#999;">Total Revenue</div>
+                            <div style="font-size:18px; font-weight:900; color:#067d62;" id="totalRevStat">LKR 0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 📦 PAGE: ORDERS                                              -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-orders">
+            <div class="page-header">
+                <div>
+                    <h1>Orders <span class="sub">| All Repair & Sales Orders</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+                    <button class="btn btn-success"><i class="fas fa-file-excel"></i> Export</button>
+                    <button class="btn btn-primary" onclick="openModal('repairModal')"><i class="fas fa-plus"></i> New Order</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Device</th>
+                                <th>Status</th>
+                                <th class="text-right">Amount</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr><td colspan="6" style="text-align:center; color:#999; padding:30px 0;">
+                                    <i class="fas fa-box" style="font-size:24px; display:block; margin-bottom:6px;"></i>No orders
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 🛒 PAGE: POS — With QTY Type + Change Calculator            -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-pos">
+            <div class="page-header">
+                <div>
+                    <h1>POS Counter <span class="sub">| Fast Checkout</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="clearCart()"><i class="fas fa-trash"></i> Clear Cart</button>
+                    <button class="btn btn-success" onclick="checkout()"><i class="fas fa-check"></i> Complete Sale</button>
+                </div>
+            </div>
+
+            <div class="pos-layout">
+                <!-- LEFT: Catalog -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-search"></i> Product Catalog</h3>
+                    </div>
+                    <input type="text" class="form-control" id="posSearch" placeholder="Search items..." oninput="renderPOS()" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; margin-bottom:8px;">
+                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;">
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="filterPOS('ALL')">All</button>
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="filterPOS('SERVICES')">Services</button>
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="filterPOS('Accessories')">Accessories</button>
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="filterPOS('Spares')">Spares</button>
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="filterPOS('Paper')">Paper</button>
+                    </div>
+                    <div class="table-wrap" style="max-height:280px; overflow-y:auto;">
+                        <table>
+                            <thead><tr><th>Item</th><th>Price</th><th>Stock</th><th></th></tr></thead>
+                            <tbody id="posCatalog"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Cart + Tender -->
+                <div>
+                    <!-- Cart -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-cart-shopping"></i> Cart <span id="cartCount" style="font-size:11px; color:#999; font-weight:400;">(0 items)</span></h3>
+                        </div>
+                        <div id="cartItems" style="max-height:200px; overflow-y:auto; margin-bottom:8px;"></div>
+                        <div style="border-top:1px solid #e7e7e7; padding-top:8px;">
+                            <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
+                                <span>Subtotal</span>
+                                <span id="cartSubtotal">LKR 0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:800; color:#131921; margin-top:2px;">
+                                <span>Total</span>
+                                <span id="cartTotal" style="color:#067d62;">LKR 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Add Buttons -->
+                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;">
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 6px;" onclick="quickAdd('A4 Photocopy B&W',10)">📄 Copy LKR10</button>
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 6px;" onclick="quickAdd('A4 Color Print',50)">🖨️ Print LKR50</button>
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 6px;" onclick="quickAdd('Tempered Glass 9D',450)">📱 Glass LKR450</button>
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 6px;" onclick="quickAdd('Type-C Cable 65W',650)">🔌 Cable LKR650</button>
+                        <button class="btn btn-secondary" style="font-size:9px; padding:3px 6px;" onclick="quickAdd('Fast Charger 33W',1450)">⚡ Charger LKR1450</button>
+                    </div>
+
+                    <!-- Customer -->
+                    <div class="card" style="margin-bottom:8px;">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user"></i> Customer</h3>
+                        </div>
+                        <input type="text" class="form-control" id="posCustomer" placeholder="Name or phone number..." oninput="searchCustomer(this.value)" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px;">
+                        <div id="customerResult" style="font-size:11px; color:#999; margin-top:4px;"></div>
+                    </div>
+
+                    <!-- TENDER + CHANGE CALCULATOR -->
+                    <div class="card" style="margin-bottom:0;">
+                        <div class="card-header">
+                            <h3><i class="fas fa-money-bill-wave" style="color:#ff9900;"></i> Payment & Change</h3>
+                        </div>
+
+                        <!-- Tender Selector -->
+                        <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px;">
+                            <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="setTender('CASH')">💵 Cash</button>
+                            <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="setTender('CARD')">💳 Card</button>
+                            <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="setTender('BANK')">🏦 Bank</button>
+                            <button class="btn btn-secondary" style="font-size:9px; padding:3px 8px;" onclick="setTender('CREDIT')">📋 Credit</button>
+                        </div>
+                        <div style="font-size:10px; color:#999; margin-bottom:6px;">Payment Method: <span id="posTenderDisplay" style="font-weight:700; color:#131921;">Cash</span></div>
+
+                        <!-- Tendered Cash + Change Display -->
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#f8f9fa; border-radius:6px; padding:10px; border:1px solid #e7e7e7;">
+                            <div>
+                                <label style="font-size:10px; font-weight:600; color:#555; display:block; margin-bottom:2px;">Amount Tendered (LKR)</label>
+                                <input type="number" id="tenderedCash" placeholder="0" oninput="calcChange()" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size:14px; font-weight:700; outline:none; background:#fff;">
+                                <div style="display:flex; gap:4px; margin-top:4px; flex-wrap:wrap;">
+                                    <button class="btn btn-secondary" style="font-size:8px; padding:2px 6px;" onclick="quickCash(500)">LKR500</button>
+                                    <button class="btn btn-secondary" style="font-size:8px; padding:2px 6px;" onclick="quickCash(1000)">LKR1,000</button>
+                                    <button class="btn btn-secondary" style="font-size:8px; padding:2px 6px;" onclick="quickCash(5000)">LKR5,000</button>
+                                    <button class="btn btn-secondary" style="font-size:8px; padding:2px 6px;" onclick="quickCash('EXACT')">Exact</button>
+                                </div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; background:#fff; border-radius:4px; border:1px solid #e7e7e7; padding:8px;">
+                                <div style="font-size:10px; font-weight:600; color:#999; text-transform:uppercase;">↩️ Change Return</div>
+                                <div id="changeDisplay" style="font-size:24px; font-weight:900; color:#067d62;">LKR 0.00</div>
+                                <div id="changeStatus" style="font-size:10px; color:#999;">💵 Enter amount</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="width:100%; margin-top:8px; padding:10px; font-size:14px;" onclick="checkout()">
+                            <i class="fas fa-check-circle"></i> Complete Sale
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 🔧 PAGE: REPAIRS                                             -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-repairs">
+            <div class="page-header">
+                <div>
+                    <h1>Repair Desk <span class="sub">| 4-Stage Workflow</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openModal('repairModal')"><i class="fas fa-plus"></i> New Repair</button>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;">
+                <div class="card" style="border-left:3px solid #0066c0; text-align:center; padding:12px;">
+                    <div style="font-size:10px; color:#999;">1. Queue</div>
+                    <div style="font-size:24px; font-weight:900; color:#131921;" id="repairQueue">0</div>
+                </div>
+                <div class="card" style="border-left:3px solid #e68a00; text-align:center; padding:12px;">
+                    <div style="font-size:10px; color:#999;">2. In Progress</div>
+                    <div style="font-size:24px; font-weight:900; color:#131921;" id="repairProgress">0</div>
+                </div>
+                <div class="card" style="border-left:3px solid #067d62; text-align:center; padding:12px;">
+                    <div style="font-size:10px; color:#999;">3. Ready</div>
+                    <div style="font-size:24px; font-weight:900; color:#131921;" id="repairReady">0</div>
+                </div>
+                <div class="card" style="border-left:3px solid #999; text-align:center; padding:12px;">
+                    <div style="font-size:10px; color:#999;">4. Delivered</div>
+                    <div style="font-size:24px; font-weight:900; color:#131921;" id="repairDelivered">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> All Repair Orders</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Order ID</th><th>Customer</th><th>Device</th><th>Fault</th><th>Status</th><th class="text-right">Action</th></tr></thead>
+                        <tbody id="repairTable">
+                            <tr><td colspan="6" style="text-align:center; color:#999; padding:20px 0;">No repair orders</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 🖨️ PAGE: PRINTING                                            -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-printing">
+            <div class="page-header">
+                <div>
+                    <h1>Print Studio <span class="sub">| Mugs · T-Shirts · Banners · Binding</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openModal('printModal')"><i class="fas fa-plus"></i> New Print Order</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Print Orders</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th class="text-right">Total</th><th class="text-right">Advance</th></tr></thead>
+                        <tbody id="printTable">
+                            <tr><td colspan="5" style="text-align:center; color:#999; padding:20px 0;">No print orders</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 📦 PAGE: INVENTORY                                           -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-inventory">
+            <div class="page-header">
+                <div>
+                    <h1>Inventory <span class="sub">| Stock Management</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openModal('inventoryModal')"><i class="fas fa-plus"></i> Add Item</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Item</th><th>Category</th><th class="text-right">Price</th><th class="text-right">Stock</th><th>Status</th><th class="text-right">Action</th></tr></thead>
+                        <tbody id="inventoryTable">
+                            <tr><td colspan="6" style="text-align:center; color:#999; padding:20px 0;">No inventory items</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 💰 PAGE: PAYMENTS                                            -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-payments">
+            <div class="page-header">
+                <div>
+                    <h1>Payments <span class="sub">| Bank & Cash Reconciliation</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary"><i class="fas fa-download"></i> Report</button>
+                    <button class="btn btn-primary" onclick="openModal('bankModal')"><i class="fas fa-plus"></i> Add Account</button>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:16px;">
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-wallet"></i> Total Balance</div>
+                    <div class="value" id="totalBalance">LKR 0</div>
+                </div>
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-building-columns"></i> Bank Balance</div>
+                    <div class="value" id="bankBalance">LKR 0</div>
+                </div>
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-money-bill-wave"></i> Drawer Cash</div>
+                    <div class="value" id="drawerBalance">LKR 0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Bank Transactions</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Date</th><th>Account</th><th>Type</th><th class="text-right">Amount</th></tr></thead>
+                        <tbody id="paymentTable">
+                            <tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No transactions</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 📋 PAGE: CREDIT                                              -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-credit">
+            <div class="page-header">
+                <div>
+                    <h1>Credit Management <span class="sub">| Overdue Collections</span></h1>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:16px;">
+                <div class="dash-card" style="border-left:3px solid #067d62;">
+                    <div class="label">Current</div>
+                    <div class="value" style="font-size:16px;" id="creditCurrent">LKR 0</div>
+                </div>
+                <div class="dash-card" style="border-left:3px solid #84cc16;">
+                    <div class="label">1-30 Days</div>
+                    <div class="value" style="font-size:16px;" id="credit30">LKR 0</div>
+                </div>
+                <div class="dash-card" style="border-left:3px solid #eab308;">
+                    <div class="label">31-60 Days</div>
+                    <div class="value" style="font-size:16px;" id="credit60">LKR 0</div>
+                </div>
+                <div class="dash-card" style="border-left:3px solid #f97316;">
+                    <div class="label">61-90 Days</div>
+                    <div class="value" style="font-size:16px;" id="credit90">LKR 0</div>
+                </div>
+                <div class="dash-card" style="border-left:3px solid #dc2626;">
+                    <div class="label">90+ Days</div>
+                    <div class="value" style="font-size:16px;" id="credit90plus">LKR 0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-users"></i> Debtors List</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Customer</th><th>Device</th><th class="text-right">Due Amount</th><th class="text-right">Action</th></tr></thead>
+                        <tbody id="creditTable">
+                            <tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No debtors</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 📊 PAGE: ACCOUNTING — Amazon Style                           -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-accounting">
+            <div class="page-header">
+                <div>
+                    <h1>Accounting <span class="sub">| Double-Entry · General Ledger · Trial Balance</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary"><i class="fas fa-print"></i> Print</button>
+                    <button class="btn btn-success"><i class="fas fa-file-excel"></i> Export</button>
+                </div>
+            </div>
+
+            <!-- Accounting Summary Cards -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; margin-bottom:16px;">
+                <div class="dash-card" style="border-left:3px solid #067d62;">
+                    <div class="label">Total Revenue</div>
+                    <div class="value" style="color:#067d62; font-size:20px;" id="accRevenue">LKR 0</div>
+                </div>
+                <div class="dash-card" style="border-left:3px solid #dc2626;">
+                    <div class="label">Total Expenses</div>
+                    <div class="value" style="color:#dc2626; font-size:20px;" id="accExpenses">LKR 0</div>
+                </div>
+                <div class="dash-card" style="border-left:3px solid #ff9900;">
+                    <div class="label">Net Profit</div>
+                    <div class="value" style="color:#ff9900; font-size:20px;" id="accProfit">LKR 0</div>
+                </div>
+                <div class="dash-card" style="border-left:3px solid #0066c0;">
+                    <div class="label">Trial Balance Status</div>
+                    <div class="value" style="font-size:16px; color:#0066c0;" id="trialStatus">✅ Balanced</div>
+                </div>
+            </div>
+
+            <!-- General Journal -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-book"></i> General Journal</h3>
+                    <button class="btn btn-secondary" style="font-size:10px; padding:2px 10px;" onclick="openModal('journalModal')"><i class="fas fa-plus"></i> Add Entry</button>
+                </div>
+                <div class="table-wrap" style="max-height:280px; overflow-y:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th class="text-right">Debit (Dr)</th>
+                                <th class="text-right">Credit (Cr)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="journalTable">
+                            <tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No journal entries</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Trial Balance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-balance-scale"></i> Trial Balance</h3>
+                    <span class="badge badge-good" id="trialBalanceBadge">✅ Balanced</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Account</th>
+                                <th>Type</th>
+                                <th class="text-right">Debit (LKR)</th>
+                                <th class="text-right">Credit (LKR)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trialBalanceTable">
+                            <tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No trial balance data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top:10px; padding:8px 12px; background:#f8f9fa; border-radius:6px; display:flex; justify-content:space-between; font-weight:700;">
+                    <span>Total Debits: <span id="totalDebits" style="color:#067d62;">LKR 0</span></span>
+                    <span>Total Credits: <span id="totalCredits" style="color:#dc2626;">LKR 0</span></span>
+                    <span id="trialDiff" style="color:#ff9900;">Difference: LKR 0</span>
+                </div>
+            </div>
+
+            <!-- Income Statement (P&L) -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-invoice-dollar"></i> Income Statement (P&L)</h3>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div>
+                        <h4 style="font-size:12px; color:#067d62; margin-bottom:8px;">📈 Revenue</h4>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>POS Sales</span>
+                            <span id="plPosSales">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Repair Services</span>
+                            <span id="plRepairs">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Print Studio</span>
+                            <span id="plPrinting">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:15px; font-weight:800; border-top:2px solid #e7e7e7;">
+                            <span>Total Revenue</span>
+                            <span style="color:#067d62;" id="plTotalRevenue">LKR 0</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size:12px; color:#dc2626; margin-bottom:8px;">📊 Expenses</h4>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Operating Expenses</span>
+                            <span id="plOpEx">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>COGS</span>
+                            <span id="plCogs">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:15px; font-weight:800; border-top:2px solid #e7e7e7;">
+                            <span>Total Expenses</span>
+                            <span style="color:#dc2626;" id="plTotalExpenses">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:16px; font-weight:900; border-top:2px solid #ff9900; margin-top:4px;">
+                            <span>Net Profit / (Loss)</span>
+                            <span style="color:#ff9900;" id="plNetProfit">LKR 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Balance Sheet -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-balance-scale"></i> Balance Sheet</h3>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div>
+                        <h4 style="font-size:12px; color:#067d62; margin-bottom:8px;">💎 Assets</h4>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Cash in Drawer</span>
+                            <span id="bsCash">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Bank Accounts</span>
+                            <span id="bsBank">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Inventory</span>
+                            <span id="bsInventory">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Accounts Receivable</span>
+                            <span id="bsReceivable">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:15px; font-weight:800; border-top:2px solid #e7e7e7;">
+                            <span>Total Assets</span>
+                            <span style="color:#067d62;" id="bsTotalAssets">LKR 0</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size:12px; color:#dc2626; margin-bottom:8px;">📋 Liabilities & Equity</h4>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Accounts Payable</span>
+                            <span id="bsPayable">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Customer Advances</span>
+                            <span id="bsAdvances">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Owner's Capital</span>
+                            <span id="bsCapital">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px; border-bottom:1px solid #f0f2f5;">
+                            <span>Retained Earnings</span>
+                            <span id="bsRetained">LKR 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:15px; font-weight:800; border-top:2px solid #e7e7e7;">
+                            <span>Total Liabilities & Equity</span>
+                            <span style="color:#dc2626;" id="bsTotalLiab">LKR 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 📈 PAGE: PERFORMANCE                                         -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-performance">
+            <div class="page-header">
+                <div>
+                    <h1>Performance <span class="sub">| Sales Analytics</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary"><i class="fas fa-calendar"></i> Today</button>
+                    <button class="btn btn-secondary">This Week</button>
+                    <button class="btn btn-primary"><i class="fas fa-download"></i> Export</button>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:2fr 1fr; gap:16px;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-bar" style="color:#ff9900;"></i> Monthly Revenue Analysis</h3>
+                    </div>
+                    <div class="chart-container" style="height:240px;"><canvas id="perfChart"></canvas></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-pie" style="color:#ff9900;"></i> Revenue Sources</h3>
+                    </div>
+                    <div class="chart-container" style="height:220px;"><canvas id="perfPieChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:16px;">
+                <div class="card-header">
+                    <h3><i class="fas fa-trophy" style="color:#ff9900;"></i> Top Services</h3>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;" id="topServices">
+                    <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center;"><div style="font-size:10px; color:#999;">1. Repairs</div><div style="font-size:18px; font-weight:900; color:#131921;">45%</div></div>
+                    <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center;"><div style="font-size:10px; color:#999;">2. Accessories</div><div style="font-size:18px; font-weight:900; color:#131921;">30%</div></div>
+                    <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center;"><div style="font-size:10px; color:#999;">3. Printing</div><div style="font-size:18px; font-weight:900; color:#131921;">15%</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 📋 PAGE: REPORTS                                             -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-reports">
+            <div class="page-header">
+                <div>
+                    <h1>Reports <span class="sub">| Complete Business Analysis</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary"><i class="fas fa-file-pdf"></i> Save as PDF</button>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:16px;">
+                <div class="dash-card"><div class="label">Total Orders</div><div class="value" id="reportOrders">0</div></div>
+                <div class="dash-card"><div class="label">Total Customers</div><div class="value" id="reportCustomers">0</div></div>
+                <div class="dash-card"><div class="label">Total Revenue</div><div class="value" id="reportRevenue">LKR 0</div></div>
+                <div class="dash-card"><div class="label">Avg Order Value</div><div class="value" id="reportAvgOrder">LKR 0</div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-file-alt"></i> Quick Report Summary</h3></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center;"><div style="font-size:10px; color:#999;">📊 Sales Report</div>
+                        <div>Total Orders: <span id="rOrders">0</span></div>
+                        <div style="color:#067d62;">Total Revenue: <span id="rRevenue">LKR 0</span></div>
+                    </div>
+                    <div style="background:#f8f9fa; border-radius:8px; padding:10px; text-align:center;"><div style="font-size:10px; color:#999;">🔧 Repair Report</div>
+                        <div>Active: <span id="rActive">0</span></div>
+                        <div style="color:#dc2626;">Debt Outstanding: <span id="rDebt">LKR 0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 👥 PAGE: CUSTOMERS                                           -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-customers">
+            <div class="page-header">
+                <div>
+                    <h1>Customers <span class="sub">| CRM</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openModal('customerModal')"><i class="fas fa-user-plus"></i> Add Customer</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <input type="text" class="form-control" id="custSearch" placeholder="Search customers..." oninput="renderCustomers()" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; margin-bottom:10px;">
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Name</th><th>Phone</th><th>Address</th><th class="text-right">Visits</th></tr></thead>
+                        <tbody id="customerTable">
+                            <tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No customers</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ⚙️ PAGE: SETTINGS                                            -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-settings">
+            <div class="page-header">
+                <div>
+                    <h1>Settings <span class="sub">| System Customization</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Save</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-building"></i> Business Profile</h3></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div><label style="font-size:11px; font-weight:600; color:#555; display:block; margin-bottom:3px;">Business Name</label>
+                        <input type="text" class="form-control" id="settingsName" value="DIGIBIZ" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px;"></div>
+                    <div><label style="font-size:11px; font-weight:600; color:#555; display:block; margin-bottom:3px;">Phone Number</label>
+                        <input type="text" class="form-control" id="settingsPhone" value="0771234567" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px;"></div>
+                    <div style="grid-column:span 2;"><label style="font-size:11px; font-weight:600; color:#555; display:block; margin-bottom:3px;">Address</label>
+                        <input type="text" class="form-control" id="settingsAddress" value="Main Street, Kurunegala" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-print"></i> Printer Settings</h3></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div><label style="font-size:11px; font-weight:600; color:#555; display:block; margin-bottom:3px;">Paper Size</label>
+                        <select class="form-control" id="settingsPrinter" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px;">
+                            <option value="58mm">58mm Thermal</option>
+                            <option value="80mm" selected>80mm Thermal</option>
+                            <option value="A4">A4 Paper</option>
+                        </select>
+                    </div>
+                    <div><label style="font-size:11px; font-weight:600; color:#555; display:block; margin-bottom:3px;">Language</label>
+                        <select class="form-control" id="settingsLanguage" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px;">
+                            <option value="en" selected>English</option>
+                            <option value="si">සිංහල</option>
+                            <option value="ta">தமிழ்</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 📦 MODALS                                                   -->
+    <!-- ============================================================ -->
+
+    <!-- Repair Modal -->
+    <div class="modal-overlay" id="repairModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-screwdriver-wrench"></i> New Repair Order</h3>
+                <button class="modal-close" onclick="closeModal('repairModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Customer Name *</label>
+                    <input type="text" class="form-control" id="repairCust" placeholder="e.g. Kamal Silva">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" class="form-control" id="repairPhone" placeholder="07xxxxxxxx">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Device Model *</label>
+                        <input type="text" class="form-control" id="repairDevice" placeholder="e.g. Samsung A12">
+                    </div>
+                    <div class="form-group">
+                        <label>Fault Description</label>
+                        <input type="text" class="form-control" id="repairFault" placeholder="e.g. Broken screen">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Estimated Cost (LKR)</label>
+                        <input type="number" class="form-control" id="repairCost" placeholder="3800">
+                    </div>
+                    <div class="form-group">
+                        <label>Advance Payment (LKR)</label>
+                        <input type="number" class="form-control" id="repairAdvance" placeholder="0" value="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('repairModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitRepair()">Create Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Modal -->
+    <div class="modal-overlay" id="printModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-print"></i> New Print Order</h3>
+                <button class="modal-close" onclick="closeModal('printModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Customer Name *</label>
+                    <input type="text" class="form-control" id="printCust" placeholder="e.g. Ruwan Silva">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" class="form-control" id="printPhone" placeholder="07xxxxxxxx">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product Type</label>
+                        <select class="form-control" id="printProduct">
+                            <option value="Magic Mug">Magic Mug</option>
+                            <option value="T-Shirt DTF">T-Shirt DTF</option>
+                            <option value="Visiting Cards">Visiting Cards</option>
+                            <option value="Flex Banner">Flex Banner</option>
+                            <option value="Rubber Stamp">Rubber Stamp</option>
+                            <option value="Laminating">Laminating</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Amount (LKR)</label>
+                        <input type="number" class="form-control" id="printTotal" placeholder="2500">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Advance Payment (LKR)</label>
+                    <input type="number" class="form-control" id="printAdvance" placeholder="0" value="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('printModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitPrint()">Save Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Modal -->
+    <div class="modal-overlay" id="inventoryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-box"></i> New Inventory Item</h3>
+                <button class="modal-close" onclick="closeModal('inventoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Item Name *</label>
+                    <input type="text" class="form-control" id="invName" placeholder="e.g. Type-C Cable">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select class="form-control" id="invCategory">
+                            <option value="Accessories">Mobile Accessories</option>
+                            <option value="Spares">Repair Spares</option>
+                            <option value="Glasses">Glasses & Cases</option>
+                            <option value="Gadgets">Gadgets & Audio</option>
+                            <option value="Printing">Printing Consumables</option>
+                            <option value="Paper">Stationery & Paper</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Quantity</label>
+                        <input type="number" class="form-control" id="invStock" placeholder="10" value="10">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cost Price (LKR)</label>
+                        <input type="number" class="form-control" id="invCost" placeholder="500">
+                    </div>
+                    <div class="form-group">
+                        <label>Selling Price (LKR)</label>
+                        <input type="number" class="form-control" id="invPrice" placeholder="1000">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('inventoryModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitInventory()">Add Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Modal -->
+    <div class="modal-overlay" id="customerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> New Customer</h3>
+                <button class="modal-close" onclick="closeModal('customerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" class="form-control" id="custName" placeholder="e.g. Priyantha">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="text" class="form-control" id="custPhone" placeholder="07xxxxxxxx">
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" class="form-control" id="custAddress" placeholder="City / Area">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('customerModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitCustomer()">Register</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank Modal -->
+    <div class="modal-overlay" id="bankModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-building-columns"></i> New Bank Account</h3>
+                <button class="modal-close" onclick="closeModal('bankModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Bank Name *</label>
+                    <input type="text" class="form-control" id="bankName" placeholder="e.g. Sampath Bank">
+                </div>
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" class="form-control" id="bankAcc" placeholder="e.g. 1099 5448 6969">
+                </div>
+                <div class="form-group">
+                    <label>Opening Balance (LKR)</label>
+                    <input type="number" class="form-control" id="bankBalanceInit" placeholder="0" value="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('bankModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitBank()">Add Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal Entry Modal -->
+    <div class="modal-overlay" id="journalModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-book"></i> Add Journal Entry</h3>
+                <button class="modal-close" onclick="closeModal('journalModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Description *</label>
+                    <input type="text" class="form-control" id="journalDesc" placeholder="e.g. Office supplies purchase">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Debit Account</label>
+                        <input type="text" class="form-control" id="journalDebit" placeholder="e.g. Cash (1001)">
+                    </div>
+                    <div class="form-group">
+                        <label>Debit Amount (LKR)</label>
+                        <input type="number" class="form-control" id="journalDebitAmt" placeholder="5000">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Credit Account</label>
+                        <input type="text" class="form-control" id="journalCredit" placeholder="e.g. Bank (1002)">
+                    </div>
+                    <div class="form-group">
+                        <label>Credit Amount (LKR)</label>
+                        <input type="number" class="form-control" id="journalCreditAmt" placeholder="5000">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('journalModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitJournal()">Post Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div class="modal-overlay" id="receiptModal">
+        <div class="modal" style="max-width:380px;">
+            <div class="modal-header" style="background:#fff; color:#131921; border-bottom:2px solid #ff9900;">
+                <h3 style="color:#131921;"><i class="fas fa-receipt" style="color:#ff9900;"></i> Receipt</h3>
+                <button class="modal-close" onclick="closeModal('receiptModal')" style="color:#999;">&times;</button>
+            </div>
+            <div class="modal-body" style="background:#f8f9fa;">
+                <div class="receipt-content" id="receiptContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('receiptModal')">Close</button>
+                <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- 📜 JAVASCRIPT — COMPLETE BUSINESS LOGIC                      -->
+    <!-- ============================================================ -->
+
+    <script>
+        // ================================================================
+        // 📦 DATA STORE
+        // ================================================================
+
+        let data = JSON.parse(localStorage.getItem('digibiz_data')) || {
+            inventory: [
+                { id: 'i1', name: 'Samsung A12 Display', category: 'Spares', cost: 3200, price: 5400, stock: 4 },
+                { id: 'i2', name: 'Type-C Cable 65W', category: 'Accessories', cost: 120, price: 350, stock: 25 },
+                { id: 'i3', name: 'Tempered Glass 9D', category: 'Glasses', cost: 85, price: 350, stock: 55 },
+                { id: 'i4', name: 'Bluetooth Neckband', category: 'Gadgets', cost: 1250, price: 2450, stock: 9 },
+                { id: 'i5', name: 'A4 Copier Paper 70gsm', category: 'Paper', cost: 1250, price: 1650, stock: 25 },
+                { id: 'i6', name: 'Vivo Y93 Display', category: 'Spares', cost: 2600, price: 4200, stock: 3 },
+                { id: 'i7', name: 'Power Bank 10000mAh', category: 'Accessories', cost: 2200, price: 3800, stock: 7 },
+                { id: 'i8', name: 'Sublimation Mug Blank', category: 'Printing', cost: 280, price: 650, stock: 32 },
+                { id: 'i9', name: 'A4 Photocopy B&W', category: 'Paper', cost: 3, price: 10, stock: 999 },
+                { id: 'i10', name: 'A4 Color Print', category: 'Paper', cost: 15, price: 50, stock: 999 },
+                { id: 'i11', name: 'Fast Charger 33W', category: 'Accessories', cost: 650, price: 1450, stock: 12 },
+                { id: 'i12', name: 'iPhone 11 Battery', category: 'Spares', cost: 2800, price: 5200, stock: 2 },
+            ],
+            customers: [
+                { id: 'c1', name: 'Kamal Silva', phone: '0771234567', address: 'Kurunegala', visits: 5 },
+                { id: 'c2', name: 'Nimal Perera', phone: '0719876543', address: 'Colombo', visits: 3 },
+                { id: 'c3', name: 'Priyantha Jayasuriya', phone: '0765432109', address: 'Narammala', visits: 7 },
+            ],
+            repairs: [
+                { id: 'R-101', customer: 'Kamal Silva', phone: '0771234567', device: 'Samsung A12', fault: 'Broken screen', cost: 5400, advance: 2000, status: 'READY', date: new Date().toISOString() },
+                { id: 'R-102', customer: 'Nimal Perera', phone: '0719876543', device: 'iPhone 11', fault: 'Charging port damaged', cost: 3800, advance: 1000, status: 'IN_PROGRESS', date: new Date().toISOString() },
+                { id: 'R-103', customer: 'Priyantha Jayasuriya', phone: '0765432109', device: 'Redmi 9', fault: 'Battery draining fast', cost: 2800, advance: 0, status: 'QUEUE', date: new Date().toISOString() },
+            ],
+            prints: [],
+            expenses: [],
+            transactions: [],
+            bankAccounts: [
+                { id: 'b1', name: 'Sampath Bank', balance: 85000 },
+                { id: 'b2', name: 'Commercial Bank', balance: 25000 },
+            ],
+            bankTx: [],
+            posBills: [],
+            journalEntries: [],
+            cart: [],
+            settings: {
+                name: 'DIGIBIZ',
+                phone: '0771234567',
+                address: 'Main Street, Kurunegala',
+                printer: '80mm',
+                language: 'en'
+            }
+        };
+
+        let posFilter = 'ALL';
+        let posTender = 'CASH';
+        let selectedCustomer = null;
+        let chartInstances = {};
+        let currentPage = 'dashboard';
+
+        // ================================================================
+        // 💾 SAVE & LOAD
+        // ================================================================
+
+        function saveData() {
+            localStorage.setItem('digibiz_data', JSON.stringify(data));
+        }
+
+        // ================================================================
+        // 📍 NAVIGATION
+        // ================================================================
+
+        function navigateTo(page) {
+            currentPage = page;
+            document.querySelectorAll('.page').forEach(function(p) { if (p && p.classList) p.classList.remove('active'); });
+            const target = document.getElementById('page-' + page);
+            if (target && target.classList) target.classList.add('active');
+
+            document.querySelectorAll('.sidebar-item').forEach(function(m) { if (m && m.classList) m.classList.remove('active'); });
+            const sideItem = document.querySelector('.sidebar-item[data-page="' + page + '"]');
+            if (sideItem && sideItem.classList) sideItem.classList.add('active');
+
+            closeSidebar();
+
+            const renderMap = {
+                'dashboard': renderDashboard,
+                'orders': renderOrders,
+                'pos': renderPOS,
+                'repairs': renderRepairs,
+                'printing': renderPrints,
+                'inventory': renderInventory,
+                'payments': renderPayments,
+                'credit': renderCredit,
+                'accounting': renderAccounting,
+                'performance': renderPerformance,
+                'reports': renderReports,
+                'customers': renderCustomers,
+            };
+
+            if (renderMap[page]) renderMap[page]();
+            updateBadges();
+        }
+
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const so = document.getElementById('sidebarOverlay');
+            if (sb && sb.classList) sb.classList.toggle('open');
+            if (so && so.classList) so.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sb = document.getElementById('sidebar');
+            const so = document.getElementById('sidebarOverlay');
+            if (sb && sb.classList) sb.classList.remove('open');
+            if (so && so.classList) so.classList.remove('active');
+        }
+
+        function refreshAll() {
+            saveData();
+            navigateTo(currentPage);
+        }
+
+        function handleSearch(val) {
+            if (val.length > 1) navigateTo('orders');
+        }
+
+        // ================================================================
+        // 🔔 MODALS
+        // ================================================================
+
+        function openModal(id) { 
+            const el = document.getElementById(id);
+            if (el && el.classList) el.classList.add('show'); 
+        }
+
+        function closeModal(id) { 
+            const el = document.getElementById(id);
+            if (el && el.classList) el.classList.remove('show'); 
+        }
+
+        // ================================================================
+        // 🔔 BADGES
+        // ================================================================
+
+        function updateBadges() {
+            const totalOrders = data.repairs.length + data.posBills.length;
+            const activeRepairs = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; }).length;
+            const debtors = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; }).length;
+
+            document.getElementById('orderBadge').textContent = totalOrders;
+            document.getElementById('sideOrderCount').textContent = totalOrders;
+            document.getElementById('sidePosCount').textContent = data.cart.length;
+            document.getElementById('sideRepairCount').textContent = activeRepairs;
+            document.getElementById('sidePrintCount').textContent = data.prints.length;
+            document.getElementById('sideInvCount').textContent = data.inventory.length;
+            document.getElementById('sideCreditCount').textContent = debtors;
+            document.getElementById('sideCustCount').textContent = data.customers.length;
+
+            document.getElementById('todayOrders').textContent = data.repairs.length + data.posBills.length;
+            const totalRev = data.repairs.reduce(function(s, r) { return s + r.cost; }, 0) +
+                data.posBills.reduce(function(s, b) { return s + b.total; }, 0);
+            document.getElementById('todayRevenue').textContent = 'LKR ' + totalRev.toLocaleString();
+            document.getElementById('activeRepairs').textContent = activeRepairs;
+
+            const totalStock = data.inventory.reduce(function(s, i) { return s + i.stock; }, 0);
+            document.getElementById('totalInvStat').textContent = totalStock;
+            document.getElementById('totalCustStat').textContent = data.customers.length;
+            document.getElementById('totalRevStat').textContent = 'LKR ' + totalRev.toLocaleString();
+            document.getElementById('totalOrdersStat').textContent = totalOrders;
+        }
+
+        // ================================================================
+        // 🏠 DASHBOARD
+        // ================================================================
+
+        function renderDashboard() {
+            updateBadges();
+
+            const ordersList = document.getElementById('recentOrdersList');
+            const recent = data.repairs.slice(0, 5);
+            if (recent.length === 0) {
+                ordersList.innerHTML = '<div style="color:#999; font-size:13px; padding:6px 0;">No orders yet</div>';
+            } else {
+                ordersList.innerHTML = recent.map(function(r) {
+                    return '<div class="order-item">' +
+                        '<div class="info">' +
+                          '<div class="name">#' + r.id + ' - ' + r.customer + '</div>' +
+                          '<div class="detail">' + r.device + ' · ' + (r.fault || 'No details') + '</div>' +
+                        '</div>' +
+                        '<div class="amount">LKR ' + r.cost.toLocaleString() + '</div>' +
+                    '</div>';
+                }).join('');
+            }
+
+            const stockList = document.getElementById('lowStockList');
+            const lowItems = data.inventory.filter(function(i) { return i.stock <= 3; });
+            if (lowItems.length === 0) {
+                stockList.innerHTML = '<div style="color:#067d62; font-size:13px; padding:6px 0;">✅ All stock levels are healthy</div>';
+            } else {
+                stockList.innerHTML = lowItems.map(function(i) {
+                    return '<div class="stock-item">' +
+                        '<span class="name">' + i.name + '</span>' +
+                        '<span class="stock low">' + i.stock + ' units</span>' +
+                        '<span class="action" onclick="restockItem(\'' + i.id + '\')">+ Reorder</span>' +
+                    '</div>';
+                }).join('');
+            }
+
+            renderDashChart();
+        }
+
+        function renderDashChart() {
+            const canvas = document.getElementById('dashChart');
+            if (!canvas) return;
+            if (chartInstances.dash) chartInstances.dash.destroy();
+
+            const totalRev = data.repairs.reduce(function(s, r) { return s + r.cost; }, 0) +
+                data.posBills.reduce(function(s, b) { return s + b.total; }, 0);
+
+            chartInstances.dash = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'],
+                    datasets: [{
+                        label: 'Revenue (LKR)',
+                        data: [12500, 14800, 11200, 16400, 19500, 22000, totalRev || 18400],
+                        borderColor: '#ff9900',
+                        backgroundColor: 'rgba(255,153,0,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#ff9900',
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f0f2f5' }, ticks: { font: { size: 10 }, color: '#999' } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#999' } }
+                    }
+                }
+            });
+        }
+
+        function restockItem(id) {
+            const item = data.inventory.find(function(i) { return i.id === id; });
+            if (item) { 
+                item.stock += 10;
+                saveData();
+                renderDashboard();
+                renderInventory();
+                updateBadges(); 
+            }
+        }
+
+        // ================================================================
+        // 📦 ORDERS
+        // ================================================================
+
+        function renderOrders() {
+            const tbody = document.getElementById('ordersTable');
+            const allOrders = [...data.repairs, ...data.posBills.map(function(b) {
+                return {
+                    id: b.id,
+                    customer: b.customer || 'Walk-in',
+                    device: 'Sale',
+                    status: 'DELIVERED',
+                    cost: b.total,
+                    date: b.date
+                };
+            })];
+
+            if (allOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999; padding:30px 0;"><i class="fas fa-box" style="font-size:24px; display:block; margin-bottom:6px;"></i>No orders</td></tr>';
+                return;
+            }
+
+            const statusMap = {
+                'QUEUE': { label: 'Queue', class: 'badge-queue' },
+                'IN_PROGRESS': { label: 'In Progress', class: 'badge-progress' },
+                'READY': { label: 'Ready', class: 'badge-ready' },
+                'DELIVERED': { label: 'Delivered', class: 'badge-delivered' }
+            };
+
+            tbody.innerHTML = allOrders.slice(0, 20).map(function(r) {
+                const st = statusMap[r.status] || statusMap['DELIVERED'];
+                return '<tr>' +
+                    '<td><strong>#' + r.id + '</strong></td>' +
+                    '<td>' + r.customer + '</td>' +
+                    '<td>' + r.device + '</td>' +
+                    '<td><span class="badge ' + st.class + '">' + st.label + '</span></td>' +
+                    '<td class="text-right"><strong>LKR ' + r.cost.toLocaleString() + '</strong></td>' +
+                    '<td class="text-right">' +
+                        (r.status && r.status !== 'DELIVERED' ? '<button class="btn btn-secondary" style="font-size:10px; padding:2px 10px;" onclick="advanceOrder(\'' + r.id + '\')">Advance</button>' : '✅') +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        function advanceOrder(id) {
+            const order = data.repairs.find(function(r) { return r.id === id; });
+            if (!order || order.status === 'DELIVERED') return;
+            const statuses = ['QUEUE', 'IN_PROGRESS', 'READY', 'DELIVERED'];
+            const idx = statuses.indexOf(order.status);
+            if (idx < statuses.length - 1) {
+                order.status = statuses[idx + 1];
+                saveData();
+                renderOrders();
+                renderDashboard();
+                updateBadges();
+            }
+        }
+
+        // ================================================================
+        // 🛒 POS — WITH QTY TYPE + CHANGE CALCULATOR
+        // ================================================================
+
+        function renderPOS() {
+            const search = (document.getElementById('posSearch')?.value || '').toLowerCase();
+            const filtered = data.inventory.filter(function(i) {
+                return (posFilter === 'ALL' || i.category === posFilter) && i.name.toLowerCase().includes(search);
+            });
+
+            const tbody = document.getElementById('posCatalog');
+            if (!tbody) return;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#999; padding:10px;">No items found</td></tr>';
+            } else {
+                tbody.innerHTML = filtered.map(function(i) {
+                    return '<tr>' +
+                        '<td>' + i.name + '</td>' +
+                        '<td>LKR ' + i.price + '</td>' +
+                        '<td><span class="badge ' + (i.stock <= 3 ? 'badge-low' : 'badge-good') + '">' + i.stock + '</span></td>' +
+                        '<td><button class="btn btn-primary" style="font-size:9px; padding:2px 10px;" onclick="addToCart(\'' + i.id + '\')">+ Add</button></td>' +
+                    '</tr>';
+                }).join('');
+            }
+
+            renderCart();
+        }
+
+        function filterPOS(cat) { 
+            posFilter = cat;
+            renderPOS(); 
+        }
+
+        function addToCart(id) {
+            const item = data.inventory.find(function(i) { return i.id === id; });
+            if (!item || item.stock <= 0) return alert('⚠️ Item out of stock!');
+
+            const existing = data.cart.find(function(c) { return c.id === id; });
+            if (existing) { 
+                existing.qty++; 
+            } else { 
+                data.cart.push({ id: item.id, name: item.name, price: item.price, qty: 1, isService: item.category === 'SERVICES' || item.category === 'Paper' }); 
+            }
+            item.stock--;
+            saveData();
+            renderPOS();
+            updateBadges();
+            calcChange();
+        }
+
+        function quickAdd(name, price) {
+            let item = data.inventory.find(function(i) { return i.name === name; });
+            if (!item) {
+                item = { id: 'q_' + Date.now(), name: name, category: 'SERVICES', price: price, stock: 999 };
+                data.inventory.push(item);
+                saveData();
+            }
+            addToCart(item.id);
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            const count = document.getElementById('cartCount');
+            const subtotal = document.getElementById('cartSubtotal');
+            const total = document.getElementById('cartTotal');
+
+            if (!container) return;
+
+            if (data.cart.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#999; padding:16px;">' +
+                    '<i class="fas fa-cart-shopping" style="font-size:24px; display:block; margin-bottom:4px;"></i>' +
+                    'Cart is empty' +
+                '</div>';
+                if (count) count.textContent = '(0 items)';
+                if (subtotal) subtotal.textContent = 'LKR 0';
+                if (total) total.textContent = 'LKR 0';
+                calcChange();
+                return;
+            }
+
+            const totalAmount = data.cart.reduce(function(s, c) { return s + c.price * c.qty; }, 0);
+            if (count) count.textContent = '(' + data.cart.reduce(function(s, c) { return s + c.qty; }, 0) + ' items)';
+            if (subtotal) subtotal.textContent = 'LKR ' + totalAmount.toLocaleString();
+            if (total) total.textContent = 'LKR ' + totalAmount.toLocaleString();
+
+            container.innerHTML = data.cart.map(function(c, idx) {
+                return '<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f0f2f5; gap:6px;">' +
+                    '<div style="flex:1; min-width:0;">' +
+                        '<div style="font-size:12.5px; font-weight:600; color:#131921;">' + c.name + '</div>' +
+                        '<div style="font-size:11px; color:#999;">LKR ' + c.price + ' each</div>' +
+                    '</div>' +
+                    '<div style="display:flex; align-items:center; gap:4px;">' +
+                        '<button class="btn btn-secondary" style="font-size:11px; padding:2px 8px; min-width:28px; height:28px;" onclick="updateCartQty(' + idx + ', -1)">−</button>' +
+                        '<input type="number" min="1" value="' + c.qty + '" onchange="setCartQty(' + idx + ', this.value)" style="width:48px; padding:4px 2px; text-align:center; border:1px solid #ddd; border-radius:4px; font-size:13px; font-weight:700; outline:none; background:#fff;">' +
+                        '<button class="btn btn-secondary" style="font-size:11px; padding:2px 8px; min-width:28px; height:28px;" onclick="updateCartQty(' + idx + ', 1)">+</button>' +
+                    '</div>' +
+                    '<div style="min-width:70px; text-align:right;">' +
+                        '<span style="font-weight:700; color:#067d62;">LKR ' + (c.price * c.qty).toLocaleString() + '</span>' +
+                    '</div>' +
+                    '<button class="btn btn-secondary" style="font-size:11px; padding:2px 6px; color:#dc2626;" onclick="removeFromCart(' + idx + ')">' +
+                        '<i class="fas fa-times"></i>' +
+                    '</button>' +
+                '</div>';
+            }).join('');
+
+            calcChange();
+        }
+
+        function updateCartQty(idx, delta) {
+            const item = data.cart[idx];
+            if (!item) return;
+            const newQty = item.qty + delta;
+            if (newQty <= 0) { removeFromCart(idx); return; }
+            if (!item.isService) {
+                const inv = data.inventory.find(function(i) { return i.id === item.id; });
+                if (inv && newQty > (inv.stock + item.qty)) {
+                    alert('⚠️ Only ' + (inv.stock + item.qty) + ' units available!');
+                    return;
+                }
+            }
+            item.qty = newQty;
+            saveData();
+            renderCart();
+            calcChange();
+        }
+
+        function setCartQty(idx, value) {
+            const item = data.cart[idx];
+            if (!item) return;
+            let newQty = parseInt(value) || 1;
+            if (newQty <= 0) { removeFromCart(idx); return; }
+            if (!item.isService) {
+                const inv = data.inventory.find(function(i) { return i.id === item.id; });
+                if (inv && newQty > (inv.stock + item.qty)) {
+                    alert('⚠️ Only ' + (inv.stock + item.qty) + ' units available!');
+                    newQty = inv.stock + item.qty;
+                    if (newQty <= 0) { removeFromCart(idx); return; }
+                }
+            }
+            item.qty = newQty;
+            saveData();
+            renderCart();
+            calcChange();
+        }
+
+        function removeFromCart(idx) {
+            const item = data.cart[idx];
+            const inv = data.inventory.find(function(i) { return i.id === item.id; });
+            if (inv && !inv.name.includes('SERVICES')) inv.stock += item.qty;
+            data.cart.splice(idx, 1);
+            saveData();
+            renderCart();
+            updateBadges();
+            calcChange();
+        }
+
+        function clearCart() {
+            data.cart.forEach(function(c) {
+                const inv = data.inventory.find(function(i) { return i.id === c.id; });
+                if (inv && !inv.name.includes('SERVICES')) inv.stock += c.qty;
+            });
+            data.cart = [];
+            saveData();
+            renderCart();
+            updateBadges();
+            calcChange();
+        }
+
+        function searchCustomer(val) {
+            const result = document.getElementById('customerResult');
+            if (!val) { result.textContent = ''; return; }
+            const found = data.customers.find(function(c) { return c.name.toLowerCase().includes(val.toLowerCase()) || c.phone.includes(val); });
+            if (found) {
+                selectedCustomer = found;
+                result.innerHTML = '✅ <span style="color:#067d62; font-weight:700;">' + found.name + '</span> (' + found.phone + ') — <span style="color:#999;">Visits: ' + found.visits + '</span>';
+            } else {
+                selectedCustomer = null;
+                result.textContent = '👤 New customer — will be registered on checkout';
+            }
+        }
+
+        function setTender(tender) {
+            posTender = tender;
+            document.getElementById('posTenderDisplay').textContent = tender;
+        }
+
+        function calcChange() {
+            const total = data.cart.reduce(function(s, c) { return s + c.price * c.qty; }, 0);
+            const input = document.getElementById('tenderedCash');
+            if (!input) return;
+            const tendered = parseFloat(input.value) || 0;
+            const change = Math.max(0, tendered - total);
+            const display = document.getElementById('changeDisplay');
+            const status = document.getElementById('changeStatus');
+
+            if (!display || !status) return;
+
+            display.textContent = 'LKR ' + change.toFixed(2);
+
+            if (tendered === 0) {
+                status.textContent = '💵 Enter amount';
+                status.style.color = '#999';
+                display.style.color = '#067d62';
+            } else if (tendered < total) {
+                status.textContent = '⚠️ LKR ' + (total - tendered).toFixed(2) + ' more needed';
+                status.style.color = '#dc2626';
+                display.style.color = '#dc2626';
+            } else if (change === 0) {
+                status.textContent = '✅ Exact payment';
+                status.style.color = '#067d62';
+                display.style.color = '#067d62';
+            } else {
+                status.textContent = '🔄 LKR ' + change.toFixed(2) + ' change due';
+                status.style.color = '#067d62';
+                display.style.color = '#067d62';
+            }
+        }
+
+        function quickCash(amount) {
+            const total = data.cart.reduce(function(s, c) { return s + c.price * c.qty; }, 0);
+            const input = document.getElementById('tenderedCash');
+            if (!input) return;
+            if (amount === 'EXACT') {
+                input.value = total;
+            } else {
+                input.value = amount;
+            }
+            calcChange();
+        }
+
+        function checkout() {
+            if (data.cart.length === 0) return alert('⚠️ Cart is empty!');
+
+            const total = data.cart.reduce(function(s, c) { return s + c.price * c.qty; }, 0);
+            const tendered = parseFloat(document.getElementById('tenderedCash')?.value) || total;
+
+            if (posTender === 'CASH' && tendered < total) {
+                return alert('⚠️ Insufficient amount! LKR ' + (total - tendered).toFixed(2) + ' more needed.');
+            }
+
+            const customerName = document.getElementById('posCustomer')?.value.trim() || 'Walk-in';
+
+            let cust = data.customers.find(function(c) { return c.name === customerName || c.phone === customerName; });
+            if (!cust && customerName !== 'Walk-in') {
+                cust = { id: 'c_' + Date.now(), name: customerName, phone: document.getElementById('posCustomer')?.value || '', address: '', visits: 0 };
+                data.customers.push(cust);
+            }
+            if (cust) cust.visits = (cust.visits || 0) + 1;
+
+            const bill = {
+                id: 'POS-' + String(data.posBills.length + 1001),
+                customer: customerName,
+                items: JSON.parse(JSON.stringify(data.cart)),
+                total: total,
+                tender: posTender,
+                tendered: tendered,
+                change: Math.max(0, tendered - total),
+                date: new Date().toISOString()
+            };
+
+            data.posBills.push(bill);
+            data.transactions.push({
+                date: new Date().toLocaleString(),
+                type: 'POS',
+                desc: customerName + ' - ' + data.cart.length + ' items',
+                amount: total
+            });
+
+            // Journal Entry
+            data.journalEntries.push({
+                id: 'J-' + String(data.journalEntries.length + 1),
+                date: new Date().toISOString().split('T')[0],
+                desc: 'POS Sale: ' + customerName + ' (' + bill.id + ')',
+                debit: posTender === 'CASH' ? 'Cash (1001)' :
+                    posTender === 'CARD' ? 'Card Payments (1003)' :
+                    posTender === 'BANK' ? 'Bank (1002)' : 'Accounts Receivable (1301)',
+                debitAmt: total,
+                credit: 'Sales Revenue (4001)',
+                creditAmt: total
+            });
+
+            showReceipt(bill);
+
+            data.cart = [];
+            if (document.getElementById('tenderedCash')) document.getElementById('tenderedCash').value = '';
+            saveData();
+            renderPOS();
+            renderDashboard();
+            updateBadges();
+            calcChange();
+        }
+
+        function showReceipt(bill) {
+            const content = document.getElementById('receiptContent');
+            const itemsHtml = bill.items.map(function(item) {
+                return '<div class="row"><span>' + item.qty + 'x ' + item.name + '</span><span>LKR ' + (item.price * item.qty).toLocaleString() + '</span></div>';
+            }).join('');
+
+            content.innerHTML = 
+            '<div class="center">' +
+              '<strong>DIGIBIZ</strong><br>' +
+              '<span style="font-size:10px; color:#666;">Repairs · Printing · Accessories</span><br>' +
+              '<span style="font-size:10px; color:#999;">Tel: ' + data.settings.phone + '</span>' +
+            '</div>' +
+            '<div class="line"></div>' +
+            '<div class="row"><span>Invoice</span><span>' + bill.id + '</span></div>' +
+            '<div class="row"><span>Date</span><span>' + new Date().toLocaleDateString() + '</span></div>' +
+            '<div class="row"><span>Customer</span><span>' + bill.customer + '</span></div>' +
+            '<div class="line"></div>' +
+            itemsHtml +
+            '<div class="line"></div>' +
+            '<div class="row"><span>Subtotal</span><span>LKR ' + bill.total.toLocaleString() + '</span></div>' +
+            '<div class="row total"><span>TOTAL</span><span>LKR ' + bill.total.toLocaleString() + '</span></div>' +
+            (bill.tender === 'CASH' ? '<div class="row"><span>Tendered</span><span>LKR ' + bill.tendered.toFixed(2) + '</span></div><div class="row"><span>Change</span><span>LKR ' + bill.change.toFixed(2) + '</span></div>' : '') +
+            '<div class="row"><span>Payment</span><span>' + bill.tender + '</span></div>' +
+            '<div class="line"></div>' +
+            '<div class="center" style="font-size:10px; color:#999;">' +
+              '*** Thank you! Visit again ***<br>' +
+              '🛠️ Fast Repairs · 🖨️ Quality Printing' +
+            '</div>';
+
+            openModal('receiptModal');
+        }
+
+        // ================================================================
+        // 🔧 REPAIRS
+        // ================================================================
+
+        function submitRepair() {
+            const customer = document.getElementById('repairCust').value.trim();
+            const phone = document.getElementById('repairPhone').value.trim();
+            const device = document.getElementById('repairDevice').value.trim();
+            const fault = document.getElementById('repairFault').value.trim();
+            const cost = parseFloat(document.getElementById('repairCost').value) || 0;
+            const advance = parseFloat(document.getElementById('repairAdvance').value) || 0;
+
+            if (!customer || !device) return alert('Please fill customer name and device');
+
+            const job = {
+                id: 'R-' + String(data.repairs.length + 101),
+                customer: customer,
+                phone: phone,
+                device: device,
+                fault: fault || '-',
+                cost: cost,
+                advance: advance,
+                status: 'QUEUE',
+                date: new Date().toISOString()
+            };
+
+            data.repairs.push(job);
+            data.transactions.push({
+                date: new Date().toLocaleString(),
+                type: 'REPAIR',
+                desc: customer + ' - ' + device,
+                amount: advance
+            });
+
+            if (advance > 0) {
+                data.journalEntries.push({
+                    id: 'J-' + String(data.journalEntries.length + 1),
+                    date: new Date().toISOString().split('T')[0],
+                    desc: 'Repair Advance: ' + job.id + ' (' + customer + ')',
+                    debit: 'Cash (1001)',
+                    debitAmt: advance,
+                    credit: 'Customer Advances (2101)',
+                    creditAmt: advance
+                });
+            }
+
+            closeModal('repairModal');
+            document.getElementById('repairCust').value = '';
+            document.getElementById('repairPhone').value = '';
+            document.getElementById('repairDevice').value = '';
+            document.getElementById('repairFault').value = '';
+            document.getElementById('repairCost').value = '';
+            document.getElementById('repairAdvance').value = '0';
+
+            saveData();
+            renderRepairs();
+            renderDashboard();
+            updateBadges();
+            alert('✅ Repair order #' + job.id + ' created!');
+        }
+
+        function renderRepairs() {
+            const tbody = document.getElementById('repairTable');
+            document.getElementById('repairQueue').textContent = data.repairs.filter(function(r) { return r.status === 'QUEUE'; }).length;
+            document.getElementById('repairProgress').textContent = data.repairs.filter(function(r) { return r.status === 'IN_PROGRESS'; }).length;
+            document.getElementById('repairReady').textContent = data.repairs.filter(function(r) { return r.status === 'READY'; }).length;
+            document.getElementById('repairDelivered').textContent = data.repairs.filter(function(r) { return r.status === 'DELIVERED'; }).length;
+
+            if (!tbody) return;
+
+            if (data.repairs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999; padding:20px 0;">No repair orders</td></tr>';
+                return;
+            }
+
+            const statusMap = {
+                'QUEUE': { label: 'Queue', class: 'badge-queue' },
+                'IN_PROGRESS': { label: 'In Progress', class: 'badge-progress' },
+                'READY': { label: 'Ready', class: 'badge-ready' },
+                'DELIVERED': { label: 'Delivered', class: 'badge-delivered' }
+            };
+
+            tbody.innerHTML = data.repairs.map(function(r) {
+                const st = statusMap[r.status] || statusMap['QUEUE'];
+                return '<tr>' +
+                    '<td><strong>#' + r.id + '</strong></td>' +
+                    '<td>' + r.customer + '</td>' +
+                    '<td>' + r.device + '</td>' +
+                    '<td>' + (r.fault || '-') + '</td>' +
+                    '<td><span class="badge ' + st.class + '">' + st.label + '</span></td>' +
+                    '<td class="text-right">' +
+                        (r.status !== 'DELIVERED' ? '<button class="btn btn-secondary" style="font-size:10px; padding:2px 10px;" onclick="advanceRepair(\'' + r.id + '\')">Advance</button>' : '✅') +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        function advanceRepair(id) {
+            const job = data.repairs.find(function(r) { return r.id === id; });
+            if (!job || job.status === 'DELIVERED') return;
+            const statuses = ['QUEUE', 'IN_PROGRESS', 'READY', 'DELIVERED'];
+            const idx = statuses.indexOf(job.status);
+            if (idx < statuses.length - 1) {
+                job.status = statuses[idx + 1];
+                if (job.status === 'DELIVERED') {
+                    const due = job.cost - job.advance;
+                    if (due > 0) {
+                        data.journalEntries.push({
+                            id: 'J-' + String(data.journalEntries.length + 1),
+                            date: new Date().toISOString().split('T')[0],
+                            desc: 'Repair Complete: ' + job.id + ' (' + job.customer + ')',
+                            debit: 'Cash (1001)',
+                            debitAmt: due,
+                            credit: 'Repair Revenue (4002)',
+                            creditAmt: due
+                        });
+                        data.transactions.push({
+                            date: new Date().toLocaleString(),
+                            type: 'REPAIR_DELIVERED',
+                            desc: job.customer + ' - ' + job.device,
+                            amount: due
+                        });
+                    }
+                }
+                saveData();
+                renderRepairs();
+                renderDashboard();
+                updateBadges();
+                renderAccounting();
+            }
+        }
+
+        // ================================================================
+        // 🖨️ PRINTING
+        // ================================================================
+
+        function submitPrint() {
+            const customer = document.getElementById('printCust').value.trim();
+            const phone = document.getElementById('printPhone').value.trim();
+            const product = document.getElementById('printProduct').value;
+            const total = parseFloat(document.getElementById('printTotal').value) || 0;
+            const advance = parseFloat(document.getElementById('printAdvance').value) || 0;
+
+            if (!customer || total <= 0) return alert('Please fill customer and total amount');
+
+            const order = {
+                id: 'P-' + String(data.prints.length + 201),
+                customer: customer,
+                phone: phone,
+                product: product,
+                total: total,
+                advance: advance,
+                date: new Date().toISOString()
+            };
+
+            data.prints.push(order);
+            data.transactions.push({
+                date: new Date().toLocaleString(),
+                type: 'PRINT',
+                desc: customer + ' - ' + product,
+                amount: advance
+            });
+
+            if (advance > 0) {
+                data.journalEntries.push({
+                    id: 'J-' + String(data.journalEntries.length + 1),
+                    date: new Date().toISOString().split('T')[0],
+                    desc: 'Print Advance: ' + order.id + ' (' + customer + ')',
+                    debit: 'Cash (1001)',
+                    debitAmt: advance,
+                    credit: 'Customer Advances (2101)',
+                    creditAmt: advance
+                });
+            }
+
+            closeModal('printModal');
+            document.getElementById('printCust').value = '';
+            document.getElementById('printPhone').value = '';
+            document.getElementById('printTotal').value = '';
+            document.getElementById('printAdvance').value = '0';
+
+            saveData();
+            renderPrints();
+            renderDashboard();
+            updateBadges();
+            alert('✅ Print order #' + order.id + ' saved!');
+        }
+
+        function renderPrints() {
+            const tbody = document.getElementById('printTable');
+            if (!tbody) return;
+            if (data.prints.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999; padding:20px 0;">No print orders</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.prints.map(function(p) {
+                return '<tr>' +
+                    '<td><strong>#' + p.id + '</strong></td>' +
+                    '<td>' + p.customer + '</td>' +
+                    '<td>' + p.product + '</td>' +
+                    '<td class="text-right">LKR ' + p.total.toLocaleString() + '</td>' +
+                    '<td class="text-right">LKR ' + p.advance.toLocaleString() + '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        // ================================================================
+        // 📦 INVENTORY
+        // ================================================================
+
+        function submitInventory() {
+            const name = document.getElementById('invName').value.trim();
+            const category = document.getElementById('invCategory').value;
+            const cost = parseFloat(document.getElementById('invCost').value) || 0;
+            const price = parseFloat(document.getElementById('invPrice').value) || 0;
+            const stock = parseInt(document.getElementById('invStock').value) || 0;
+
+            if (!name || price <= 0) return alert('Please fill name and price');
+
+            data.inventory.push({
+                id: 'i_' + Date.now(),
+                name: name,
+                category: category,
+                cost: cost,
+                price: price,
+                stock: stock
+            });
+
+            closeModal('inventoryModal');
+            document.getElementById('invName').value = '';
+            document.getElementById('invCost').value = '';
+            document.getElementById('invPrice').value = '';
+            document.getElementById('invStock').value = '10';
+
+            saveData();
+            renderInventory();
+            renderDashboard();
+            updateBadges();
+            alert('✅ Item added to inventory!');
+        }
+
+        function renderInventory() {
+            const tbody = document.getElementById('inventoryTable');
+            if (!tbody) return;
+            if (data.inventory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999; padding:20px 0;">No inventory items</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.inventory.map(function(i) {
+                return '<tr>' +
+                    '<td><strong>' + i.name + '</strong></td>' +
+                    '<td><span class="badge badge-blue">' + i.category + '</span></td>' +
+                    '<td class="text-right">LKR ' + i.price.toLocaleString() + '</td>' +
+                    '<td class="text-right"><strong>' + i.stock + '</strong></td>' +
+                    '<td><span class="badge ' + (i.stock <= 3 ? 'badge-low' : 'badge-good') + '">' + (i.stock <= 3 ? 'Low' : 'Good') + '</span></td>' +
+                    '<td class="text-right">' +
+                        '<button class="btn btn-secondary" style="font-size:9px; padding:2px 8px;" onclick="adjustStock(\'' + i.id + '\',5)">+5</button> ' +
+                        '<button class="btn btn-secondary" style="font-size:9px; padding:2px 8px;" onclick="adjustStock(\'' + i.id + '\',-1)">-1</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        function adjustStock(id, delta) {
+            const item = data.inventory.find(function(i) { return i.id === id; });
+            if (item) {
+                item.stock = Math.max(0, item.stock + delta);
+                saveData();
+                renderInventory();
+                renderDashboard();
+                updateBadges();
+            }
+        }
+
+        // ================================================================
+        // 💰 PAYMENTS
+        // ================================================================
+
+        function renderPayments() {
+            const totalBank = data.bankAccounts.reduce(function(s, b) { return s + b.balance; }, 0);
+            const drawerCash = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; }).reduce(function(s, r) { return s + r.advance; }, 0) +
+                data.posBills.reduce(function(s, b) { return s + b.total; }, 0) -
+                data.expenses.reduce(function(s, e) { return s + e.amount; }, 0);
+
+            document.getElementById('totalBalance').textContent = 'LKR ' + (totalBank + drawerCash).toLocaleString();
+            document.getElementById('bankBalance').textContent = 'LKR ' + totalBank.toLocaleString();
+            document.getElementById('drawerBalance').textContent = 'LKR ' + Math.round(drawerCash).toLocaleString();
+
+            const tbody = document.getElementById('paymentTable');
+            if (!tbody) return;
+
+            if (data.bankTx.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No transactions</td></tr>';
+            } else {
+                const txTypes = { deposit: 'Deposit', withdraw: 'Withdrawal' };
+                tbody.innerHTML = data.bankTx.slice(0, 10).map(function(tx) {
+                    return '<tr>' +
+                        '<td>' + tx.date + '</td>' +
+                        '<td>' + tx.account + '</td>' +
+                        '<td><span class="badge ' + (tx.type === 'deposit' ? 'badge-good' : 'badge-low') + '">' + (txTypes[tx.type] || tx.type) + '</span></td>' +
+                        '<td class="text-right"><strong>LKR ' + tx.amount.toLocaleString() + '</strong></td>' +
+                    '</tr>';
+                }).join('');
+            }
+        }
+
+        function submitBank() {
+            const name = document.getElementById('bankName').value.trim();
+            const acc = document.getElementById('bankAcc').value.trim();
+            const balance = parseFloat(document.getElementById('bankBalanceInit').value) || 0;
+
+            if (!name) return alert('Please fill bank name');
+
+            data.bankAccounts.push({ id: 'b_' + Date.now(), name: name, balance: balance });
+            data.bankTx.push({
+                date: new Date().toLocaleString(),
+                account: name,
+                type: 'deposit',
+                amount: balance
+            });
+
+            data.journalEntries.push({
+                id: 'J-' + String(data.journalEntries.length + 1),
+                date: new Date().toISOString().split('T')[0],
+                desc: 'New Bank Account: ' + name,
+                debit: name + ' (1002)',
+                debitAmt: balance,
+                credit: 'Cash (1001)',
+                creditAmt: balance
+            });
+
+            closeModal('bankModal');
+            document.getElementById('bankName').value = '';
+            document.getElementById('bankAcc').value = '';
+            document.getElementById('bankBalanceInit').value = '0';
+
+            saveData();
+            renderPayments();
+            renderAccounting();
+            updateBadges();
+            alert('✅ Bank account added!');
+        }
+
+        // ================================================================
+        // 📋 CREDIT
+        // ================================================================
+
+        function renderCredit() {
+            const debtors = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; });
+
+            document.getElementById('creditCurrent').textContent = 'LKR ' + debtors.filter(function(r) {
+                const days = (new Date() - new Date(r.date)) / (1000 * 60 * 60 * 24);
+                return days <= 30;
+            }).reduce(function(s, r) { return s + (r.cost - r.advance); }, 0).toLocaleString();
+
+            document.getElementById('credit30').textContent = 'LKR ' + debtors.filter(function(r) {
+                const days = (new Date() - new Date(r.date)) / (1000 * 60 * 60 * 24);
+                return days > 30 && days <= 60;
+            }).reduce(function(s, r) { return s + (r.cost - r.advance); }, 0).toLocaleString();
+
+            document.getElementById('credit60').textContent = 'LKR ' + debtors.filter(function(r) {
+                const days = (new Date() - new Date(r.date)) / (1000 * 60 * 60 * 24);
+                return days > 60 && days <= 90;
+            }).reduce(function(s, r) { return s + (r.cost - r.advance); }, 0).toLocaleString();
+
+            document.getElementById('credit90').textContent = 'LKR ' + debtors.filter(function(r) {
+                const days = (new Date() - new Date(r.date)) / (1000 * 60 * 60 * 24);
+                return days > 90;
+            }).reduce(function(s, r) { return s + (r.cost - r.advance); }, 0).toLocaleString();
+
+            document.getElementById('credit90plus').textContent = 'LKR ' + debtors.filter(function(r) {
+                const days = (new Date() - new Date(r.date)) / (1000 * 60 * 60 * 24);
+                return days > 120;
+            }).reduce(function(s, r) { return s + (r.cost - r.advance); }, 0).toLocaleString();
+
+            const tbody = document.getElementById('creditTable');
+            if (!tbody) return;
+
+            if (debtors.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No debtors</td></tr>';
+            } else {
+                tbody.innerHTML = debtors.map(function(r) {
+                    return '<tr>' +
+                        '<td><strong>' + r.customer + '</strong></td>' +
+                        '<td>' + r.device + '</td>' +
+                        '<td class="text-right" style="color:#dc2626; font-weight:700;">LKR ' + (r.cost - r.advance).toLocaleString() + '</td>' +
+                        '<td class="text-right">' +
+                          '<button class="btn btn-primary" style="font-size:10px; padding:2px 12px;" onclick="collectDebt(\'' + r.id + '\')">Collect</button>' +
+                        '</td>' +
+                    '</tr>';
+                }).join('');
+            }
+        }
+
+        function collectDebt(id) {
+            const job = data.repairs.find(function(r) { return r.id === id; });
+            if (!job) return;
+            const due = job.cost - job.advance;
+            if (due <= 0) return alert('No amount due!');
+
+            const amt = prompt('Collect amount (LKR):', due);
+            if (!amt || isNaN(amt) || parseFloat(amt) <= 0) return;
+            const collected = parseFloat(amt);
+
+            job.advance += collected;
+            if (job.advance >= job.cost) job.status = 'DELIVERED';
+
+            data.transactions.push({
+                date: new Date().toLocaleString(),
+                type: 'CREDIT_COLLECT',
+                desc: job.customer + ' - ' + job.device,
+                amount: collected
+            });
+
+            data.journalEntries.push({
+                id: 'J-' + String(data.journalEntries.length + 1),
+                date: new Date().toISOString().split('T')[0],
+                desc: 'Credit Collection: ' + job.id + ' (' + job.customer + ')',
+                debit: 'Cash (1001)',
+                debitAmt: collected,
+                credit: 'Accounts Receivable (1301)',
+                creditAmt: collected
+            });
+
+            saveData();
+            renderCredit();
+            renderDashboard();
+            renderAccounting();
+            updateBadges();
+            alert('✅ LKR ' + collected.toLocaleString() + ' collected!');
+        }
+
+        // ================================================================
+        // 📊 ACCOUNTING — Amazon Style with Double-Entry
+        // ================================================================
+
+        function renderAccounting() {
+            let totalRevenue = 0, totalExpenses = 0, totalDebits = 0, totalCredits = 0;
+
+            const revenueAccounts = ['Sales Revenue (4001)', 'Repair Revenue (4002)', 'Print Revenue (4003)'];
+            const expenseAccounts = ['Operating Expense (5001)', 'Cost of Goods Sold (5002)'];
+
+            data.journalEntries.forEach(function(j) {
+                if (revenueAccounts.includes(j.credit)) {
+                    totalRevenue += j.creditAmt;
+                }
+                if (expenseAccounts.includes(j.debit)) {
+                    totalExpenses += j.debitAmt;
+                }
+                if (j.debitAmt) totalDebits += j.debitAmt;
+                if (j.creditAmt) totalCredits += j.creditAmt;
+            });
+
+            const posRevenue = data.posBills.reduce(function(s, b) { return s + b.total; }, 0);
+            const repairRevenue = data.repairs.filter(function(r) { return r.status === 'DELIVERED'; }).reduce(function(s, r) { return s + (r.cost - r.advance); }, 0);
+            const printRevenue = data.prints.reduce(function(s, p) { return s + (p.total - p.advance); }, 0);
+
+            totalRevenue += posRevenue + repairRevenue + printRevenue;
+            const expTotal = data.expenses.reduce(function(s, e) { return s + e.amount; }, 0);
+            totalExpenses += expTotal;
+            const netProfit = totalRevenue - totalExpenses;
+
+            if (document.getElementById('accRevenue')) document.getElementById('accRevenue').textContent = 'LKR ' + totalRevenue.toLocaleString();
+            if (document.getElementById('accExpenses')) document.getElementById('accExpenses').textContent = 'LKR ' + totalExpenses.toLocaleString();
+            if (document.getElementById('accProfit')) document.getElementById('accProfit').textContent = 'LKR ' + netProfit.toLocaleString();
+            if (document.getElementById('trialStatus')) document.getElementById('trialStatus').textContent = totalDebits === totalCredits ? '✅ Balanced' : '⚠️ Unbalanced';
+
+            const journalTbody = document.getElementById('journalTable');
+            if (journalTbody) {
+                if (data.journalEntries.length === 0) {
+                    journalTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No journal entries</td></tr>';
+                } else {
+                    journalTbody.innerHTML = data.journalEntries.slice(0, 30).map(function(j) {
+                        return '<tr>' +
+                            '<td>' + j.date + '</td>' +
+                            '<td>' + j.desc + '</td>' +
+                            '<td class="text-right" style="color:#067d62;">' + (j.debitAmt ? 'LKR ' + j.debitAmt.toLocaleString() : '-') + '</td>' +
+                            '<td class="text-right" style="color:#dc2626;">' + (j.creditAmt ? 'LKR ' + j.creditAmt.toLocaleString() : '-') + '</td>' +
+                        '</tr>';
+                    }).join('');
+                }
+            }
+
+            const trialTbody = document.getElementById('trialBalanceTable');
+            if (trialTbody) {
+                const trialData = {};
+                data.journalEntries.forEach(function(j) {
+                    if (j.debitAmt) {
+                        trialData[j.debit] = trialData[j.debit] || { debit: 0, credit: 0 };
+                        trialData[j.debit].debit += j.debitAmt;
+                    }
+                    if (j.creditAmt) {
+                        trialData[j.credit] = trialData[j.credit] || { debit: 0, credit: 0 };
+                        trialData[j.credit].credit += j.creditAmt;
+                    }
+                });
+
+                if (Object.keys(trialData).length === 0) {
+                    trialTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No trial balance data</td></tr>';
+                } else {
+                    let totalDr = 0, totalCr = 0;
+                    trialTbody.innerHTML = Object.keys(trialData).map(function(acc) {
+                        const d = trialData[acc];
+                        totalDr += d.debit;
+                        totalCr += d.credit;
+                        return '<tr>' +
+                            '<td><strong>' + acc + '</strong></td>' +
+                            '<td><span class="badge badge-blue">' + (d.debit > 0 && d.credit > 0 ? 'Both' : d.debit > 0 ? 'Debit' : 'Credit') + '</span></td>' +
+                            '<td class="text-right">' + (d.debit ? 'LKR ' + d.debit.toLocaleString() : '-') + '</td>' +
+                            '<td class="text-right">' + (d.credit ? 'LKR ' + d.credit.toLocaleString() : '-') + '</td>' +
+                        '</tr>';
+                    }).join('');
+
+                    if (document.getElementById('totalDebits')) document.getElementById('totalDebits').textContent = 'LKR ' + totalDr.toLocaleString();
+                    if (document.getElementById('totalCredits')) document.getElementById('totalCredits').textContent = 'LKR ' + totalCr.toLocaleString();
+                    if (document.getElementById('trialDiff')) document.getElementById('trialDiff').textContent = 'Difference: LKR ' + Math.abs(totalDr - totalCr).toLocaleString();
+                    if (document.getElementById('trialBalanceBadge')) {
+                        document.getElementById('trialBalanceBadge').textContent = totalDr === totalCr ? '✅ Balanced' : '⚠️ Unbalanced';
+                        document.getElementById('trialBalanceBadge').className = totalDr === totalCr ? 'badge badge-good' : 'badge badge-low';
+                    }
+                }
+            }
+
+            // Income Statement (P&L)
+            const posSales = data.posBills.reduce(function(s, b) { return s + b.total; }, 0);
+            const repairRev = data.repairs.filter(function(r) { return r.status === 'DELIVERED'; }).reduce(function(s, r) { return s + (r.cost - r.advance); }, 0);
+            const printRev = data.prints.reduce(function(s, p) { return s + (p.total - p.advance); }, 0);
+
+            if (document.getElementById('plPosSales')) document.getElementById('plPosSales').textContent = 'LKR ' + posSales.toLocaleString();
+            if (document.getElementById('plRepairs')) document.getElementById('plRepairs').textContent = 'LKR ' + repairRev.toLocaleString();
+            if (document.getElementById('plPrinting')) document.getElementById('plPrinting').textContent = 'LKR ' + printRev.toLocaleString();
+            if (document.getElementById('plTotalRevenue')) document.getElementById('plTotalRevenue').textContent = 'LKR ' + totalRevenue.toLocaleString();
+            if (document.getElementById('plOpEx')) document.getElementById('plOpEx').textContent = 'LKR ' + expTotal.toLocaleString();
+            if (document.getElementById('plCogs')) document.getElementById('plCogs').textContent = 'LKR ' + (data.inventory.reduce(function(s, i) { return s + (i.cost * i.stock); }, 0) * 0.3).toLocaleString();
+            if (document.getElementById('plTotalExpenses')) document.getElementById('plTotalExpenses').textContent = 'LKR ' + totalExpenses.toLocaleString();
+            if (document.getElementById('plNetProfit')) document.getElementById('plNetProfit').textContent = 'LKR ' + netProfit.toLocaleString();
+
+            // Balance Sheet
+            const totalBank = data.bankAccounts.reduce(function(s, b) { return s + b.balance; }, 0);
+            const drawerCash = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; }).reduce(function(s, r) { return s + r.advance; }, 0) +
+                data.posBills.reduce(function(s, b) { return s + b.total; }, 0) -
+                data.expenses.reduce(function(s, e) { return s + e.amount; }, 0);
+            const inventoryVal = data.inventory.reduce(function(s, i) { return s + ((i.cost || 100) * i.stock); }, 0);
+            const receivables = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; }).reduce(function(s, r) { return s + (r.cost - r.advance); }, 0);
+            const advances = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; }).reduce(function(s, r) { return s + r.advance; }, 0) + data.prints.reduce(function(s, p) { return s + p.advance; }, 0);
+            const retained = netProfit > 0 ? netProfit : 0;
+
+            if (document.getElementById('bsCash')) document.getElementById('bsCash').textContent = 'LKR ' + Math.round(drawerCash).toLocaleString();
+            if (document.getElementById('bsBank')) document.getElementById('bsBank').textContent = 'LKR ' + totalBank.toLocaleString();
+            if (document.getElementById('bsInventory')) document.getElementById('bsInventory').textContent = 'LKR ' + inventoryVal.toLocaleString();
+            if (document.getElementById('bsReceivable')) document.getElementById('bsReceivable').textContent = 'LKR ' + receivables.toLocaleString();
+            const totalAssets = Math.round(drawerCash) + totalBank + inventoryVal + receivables;
+            if (document.getElementById('bsTotalAssets')) document.getElementById('bsTotalAssets').textContent = 'LKR ' + totalAssets.toLocaleString();
+
+            if (document.getElementById('bsAdvances')) document.getElementById('bsAdvances').textContent = 'LKR ' + advances.toLocaleString();
+            if (document.getElementById('bsCapital')) document.getElementById('bsCapital').textContent = 'LKR ' + (totalAssets - netProfit).toLocaleString();
+            if (document.getElementById('bsRetained')) document.getElementById('bsRetained').textContent = 'LKR ' + retained.toLocaleString();
+            const totalLiab = advances + (totalAssets - netProfit) + retained;
+            if (document.getElementById('bsTotalLiab')) document.getElementById('bsTotalLiab').textContent = 'LKR ' + totalLiab.toLocaleString();
+        }
+
+        function submitJournal() {
+            const desc = document.getElementById('journalDesc').value.trim();
+            const debit = document.getElementById('journalDebit').value.trim();
+            const debitAmt = parseFloat(document.getElementById('journalDebitAmt').value) || 0;
+            const credit = document.getElementById('journalCredit').value.trim();
+            const creditAmt = parseFloat(document.getElementById('journalCreditAmt').value) || 0;
+
+            if (!desc || !debit || !credit || debitAmt <= 0 || creditAmt <= 0) {
+                return alert('Please fill all fields with valid amounts');
+            }
+
+            data.journalEntries.push({
+                id: 'J-' + String(data.journalEntries.length + 1),
+                date: new Date().toISOString().split('T')[0],
+                desc: desc,
+                debit: debit,
+                debitAmt: debitAmt,
+                credit: credit,
+                creditAmt: creditAmt
+            });
+
+            closeModal('journalModal');
+            document.getElementById('journalDesc').value = '';
+            document.getElementById('journalDebit').value = '';
+            document.getElementById('journalDebitAmt').value = '';
+            document.getElementById('journalCredit').value = '';
+            document.getElementById('journalCreditAmt').value = '';
+
+            saveData();
+            renderAccounting();
+            alert('✅ Journal entry posted!');
+        }
+
+        // ================================================================
+        // 📈 PERFORMANCE
+        // ================================================================
+
+        function renderPerformance() {
+            const canvas = document.getElementById('perfChart');
+            const pieCanvas = document.getElementById('perfPieChart');
+            if (!canvas || !pieCanvas) return;
+
+            if (chartInstances.perf) chartInstances.perf.destroy();
+            if (chartInstances.perfPie) chartInstances.perfPie.destroy();
+
+            const totalRev = data.repairs.reduce(function(s, r) { return s + r.cost; }, 0) +
+                data.posBills.reduce(function(s, b) { return s + b.total; }, 0);
+
+            chartInstances.perf = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Monthly Revenue',
+                        data: [12500, 14800, 11200, 16400, 19500, totalRev || 22000],
+                        backgroundColor: ['#ff9900', '#e68a00', '#ff9900', '#e68a00', '#ff9900', '#e68a00'],
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f0f2f5' }, ticks: { font: { size: 10 }, color: '#999' } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#999' } }
+                    }
+                }
+            });
+
+            chartInstances.perfPie = new Chart(pieCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Repairs', 'POS Sales', 'Printing'],
+                    datasets: [{
+                        data: [45, 35, 20],
+                        backgroundColor: ['#ff9900', '#067d62', '#0066c0'],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 10 }, color: '#999', boxWidth: 10 } }
+                    },
+                    cutout: '60%',
+                }
+            });
+        }
+
+        // ================================================================
+        // 📋 REPORTS
+        // ================================================================
+
+        function renderReports() {
+            const totalOrders = data.repairs.length + data.posBills.length;
+            const totalRevenue = data.repairs.reduce(function(s, r) { return s + r.cost; }, 0) +
+                data.posBills.reduce(function(s, b) { return s + b.total; }, 0);
+            const avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+            const activeRepairs = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; }).length;
+            const debtTotal = data.repairs.filter(function(r) { return r.status !== 'DELIVERED'; })
+                .reduce(function(s, r) { return s + (r.cost - r.advance); }, 0);
+
+            document.getElementById('reportOrders').textContent = totalOrders;
+            document.getElementById('reportCustomers').textContent = data.customers.length;
+            document.getElementById('reportRevenue').textContent = 'LKR ' + totalRevenue.toLocaleString();
+            document.getElementById('reportAvgOrder').textContent = 'LKR ' + Math.round(avgOrder).toLocaleString();
+
+            document.getElementById('rOrders').textContent = totalOrders;
+            document.getElementById('rRevenue').textContent = 'LKR ' + totalRevenue.toLocaleString();
+            document.getElementById('rActive').textContent = activeRepairs;
+            document.getElementById('rDebt').textContent = 'LKR ' + debtTotal.toLocaleString();
+        }
+
+        // ================================================================
+        // 👥 CUSTOMERS
+        // ================================================================
+
+        function renderCustomers() {
+            const search = (document.getElementById('custSearch')?.value || '').toLowerCase();
+            const filtered = data.customers.filter(function(c) {
+                return c.name.toLowerCase().includes(search) || c.phone.includes(search);
+            });
+
+            const tbody = document.getElementById('customerTable');
+            if (!tbody) return;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:20px 0;">No customers</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(function(c) {
+                return '<tr>' +
+                    '<td><strong>' + c.name + '</strong></td>' +
+                    '<td>' + c.phone + '</td>' +
+                    '<td>' + (c.address || '-') + '</td>' +
+                    '<td class="text-right">' + (c.visits || 0) + '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        function submitCustomer() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+
+            if (!name || !phone) return alert('Please fill name and phone');
+
+            data.customers.push({
+                id: 'c_' + Date.now(),
+                name: name,
+                phone: phone,
+                address: address || '-',
+                visits: 0
+            });
+
+            closeModal('customerModal');
+            document.getElementById('custName').value = '';
+            document.getElementById('custPhone').value = '';
+            document.getElementById('custAddress').value = '';
+
+            saveData();
+            renderCustomers();
+            renderDashboard();
+            updateBadges();
+            alert('✅ Customer registered!');
+        }
+
+        // ================================================================
+        // ⚙️ SETTINGS
+        // ================================================================
+
+        function saveSettings() {
+            data.settings.name = document.getElementById('settingsName').value;
+            data.settings.phone = document.getElementById('settingsPhone').value;
+            data.settings.address = document.getElementById('settingsAddress').value;
+            data.settings.printer = document.getElementById('settingsPrinter').value;
+            data.settings.language = document.getElementById('settingsLanguage').value;
+            saveData();
+            alert('✅ Settings saved!');
+        }
+
+        // ================================================================
+        // 🚀 INIT
+        // ================================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('settingsName')) document.getElementById('settingsName').value = data.settings.name || 'DIGIBIZ';
+            if (document.getElementById('settingsPhone')) document.getElementById('settingsPhone').value = data.settings.phone || '0771234567';
+            if (document.getElementById('settingsAddress')) document.getElementById('settingsAddress').value = data.settings.address || 'Main Street, Kurunegala';
+            if (document.getElementById('settingsPrinter')) document.getElementById('settingsPrinter').value = data.settings.printer || '80mm';
+            if (document.getElementById('settingsLanguage')) document.getElementById('settingsLanguage').value = data.settings.language || 'en';
+
+            navigateTo('dashboard');
+
+            console.log('🛍️ DIGIBIZ — Seller Central Complete System Loaded!');
+            console.log('✅ Features: Dashboard, POS (with QTY Type + Change Calc), Repairs, Printing, Inventory, Payments, Credit, Accounting (Double-Entry), Performance, Reports, Customers');
+            console.log('📦 Data:', data);
+        });
+    </script>
+
+</body>
+</html>

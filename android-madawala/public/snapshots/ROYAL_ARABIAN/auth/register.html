@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="si">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="/snapshots/ROYAL_ARABIAN/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - DIGIBIZ</title>
+    <!-- Open Graph Sharing Metadata -->
+    <meta property="og:title" content="DIGIBIZ - Empower Your Business" />
+    <meta property="og:description" content="Register for a 7-day free trial and experience the ultimate business management system." />
+    <meta property="og:image" content="https://digibiz-sys.web.app/assets/images/referral-banner.jpg?v=3" />
+    <meta property="og:url" content="https://digibiz-sys.web.app/auth/register.html" />
+    <meta property="og:type" content="website" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap&v=4"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=4">
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
+    <script src="../core/firebase-init.js?v=5"></script>
+    <script src="../core/business-types.js?v=48"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html,body{width:100%;overflow-x:hidden;}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#10b981 0%,#059669 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px;}
+        .register-card{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:450px;box-shadow:0 20px 40px rgba(0,0,0,0.2);box-sizing:border-box;}
+
+        /* Animated Slide-Down Notice Banner */
+        .demo-notice-banner {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transform: translateY(-8px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: linear-gradient(135deg, #f0fdf4 0%, #fffbeb 100%);
+            border: 1px solid #10b981;
+            border-left: 4px solid #10b981;
+            border-radius: 12px;
+            margin-top: 0;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.12);
+        }
+
+        .demo-notice-banner.show {
+            max-height: 250px;
+            opacity: 1;
+            transform: translateY(0);
+            margin-top: 10px;
+            padding: 14px 16px;
+        }
+
+        .demo-notice-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #065f46;
+            font-weight: 800;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .demo-notice-header i {
+            color: #10b981;
+            font-size: 15px;
+        }
+
+        .demo-notice-banner p {
+            font-size: 12.5px;
+            color: #334155;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .demo-notice-banner strong {
+            color: #0f766e;
+            font-weight: 800;
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 12px 10px; }
+            .register-card { padding: 24px 16px; border-radius: 18px; max-width: 100%; }
+            h1 { font-size: 20px; }
+            .sub { font-size: 13px; margin-bottom: 18px; }
+            input, select, button { padding: 11px 12px; font-size: 13.5px; }
+        }
+
+        h1 {
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .sub {
+            color: #64748b;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 6px;
+            margin-left: 4px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #10b981;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        button:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .google-btn {
+            background: #fff;
+            color: #1a1a2e;
+            border: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 0;
+            box-shadow: none;
+        }
+
+        .google-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error {
+            color: #ef4444;
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.05);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error.visible {
+            display: block;
+        }
+
+        .success {
+            color: #10b981;
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success.visible {
+            display: block;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            margin: 24px 0;
+            border: none;
+            border-top: 1px solid #f1f5f9;
+            position: relative;
+            overflow: visible;
+        }
+
+        hr::after {
+            content: 'OR';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 0 12px;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="position: absolute; top: 16px; left: 16px; z-index: 10;">
+        <a href="/index.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(255, 255, 255, 0.95); color: #059669; text-decoration: none; font-weight: 700; font-size: 13px; border-radius: 20px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); backdrop-filter: blur(8px); transition: transform 0.15s;">
+            <span style="font-size: 15px;">←</span> Back to Home
+        </a>
+    </div>
+    <div class="register-card">
+        <h1>📝 Create Account</h1>
+        <p class="sub">Empower your business with DIGIBIZ</p>
+        <div id="message" class="error"></div>
+        <div class="input-group">
+            <span class="input-label">Full Name</span>
+            <input type="text" id="ownerName" placeholder="e.g. Kamal Perera">
+        </div>
+        <div class="input-group">
+            <span class="input-label">Email Address</span>
+            <input type="email" id="email" placeholder="e.g. kamal@example.com">
+        </div>
+
+        <div class="input-group">
+            <span class="input-label">Create Password</span>
+            <input type="password" id="password" placeholder="Minimum 6 characters">
+        </div>
+        <div class="input-group">
+            <span class="input-label">Business Name</span>
+            <input type="text" id="businessName" placeholder="e.g. Kamal's Grocery">
+        </div>
+        <div class="input-group">
+            <span class="input-label">Business Type (ව්‍යාපාර වර්ගය)</span>
+            <select id="businessType" style="background:#ffffff; border-color:#cbd5e1; font-weight:600; color:#0f172a;">
+                <option value="retail" selected>🛒 Retail Store / Shop (සිල්ලර ව්‍යාපාර)</option>
+                <option value="hardware">🛠️ Hardware Store (හාඩ්වෙයාර් ව්‍යාපාර)</option>
+                <option value="pharmacy">💊 Pharmacy / Medical (ඖෂධසැල)</option>
+                <option value="tire_centre">🛞 Tire & Service Centre (ටයර් සහ සර්විස් මධ්‍යස්ථානය)</option>
+                <option value="auto_care">🚗 Auto Care / Garage (වාහන සේවා මධ්‍යස්ථානය)</option>
+                <option value="distributor">🚚 Distributor & Wholesale (බෙදාහැරීමේ ව්‍යාපාර)</option>
+                <option value="bakery">🥖 Bakery & Confectionery (බේකරි සහ රසකැවිලි නිෂ්පාදන)</option>
+                <option value="manufacturer">🏭 Manufacturer & Factory (නිෂ්පාදන ව්‍යාපාර)</option>
+                <option value="garment">👔 Garment / Apparel (ඇඟලුම් ව්‍යාපාර)</option>
+                <option value="restaurant">🍽️ Restaurant & Cafe (ආපනශාලා)</option>
+                <option value="service">💇 Salon & Personal Care (රූපලාවන්‍ය හා සේවා)</option>
+                <option value="coconut">🥥 Coconut Wholesale & Mills (පොල් සහ ලෙලි ව්‍යාපාර)</option>
+                <option value="attendance_payroll">⏱️ Attendance & Payroll (පැමිණීම් හා වේතන කළමනාකරණය)</option>
+                <option value="quick_billing">🧾 Quick Billing & Invoicing (ක්ෂණික බිල්පත් නිකුත් කිරීම)</option>
+                <option value="other">❓ Other / Special Business (වෙනත් විශේෂිත ව්‍යාපාර)</option>
+            </select>
+        </div>
+        <div class="input-group" id="otherBusinessGroup" style="display: none;">
+            <span class="input-label" style="color: #0369a1; font-weight: 600;">ඔබේ ව්‍යාපාරය ගැන කෙටි විස්තරයක් ලබා දෙන්න *</span>
+            <textarea id="businessDescription" placeholder="උදා: මම රසායනික ද්‍රව්‍ය බෙදාහරින ව්‍යාපාරයක් පවත්වාගෙන යමි..." style="width:100%;padding:12px;border:1px solid #e9ecef;border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;height:80px;resize:vertical;background:#f0f9ff;margin-bottom: 12px;"></textarea>
+            
+            <div style="margin-bottom: 14px;">
+                <span class="input-label" style="color: #0369a1; font-weight: 600;">ඔබගේ දුරකථන අංකය (Phone Number) *</span>
+                <input type="tel" id="otherPhone" placeholder="උදා: 0712345678" style="width:100%;padding:12px;border:1.5px solid #bae6fd;border-radius:12px;font-size:14px;font-weight:600;background:#f0f9ff;">
+            </div>
+
+            <div style="background: #fffbeb; padding: 15px; border-radius: 12px; border: 1px solid #fef3c7;">
+                <p style="font-size: 14px; color: #92400e; font-weight: 600; margin-bottom: 10px;">අප ඔබව දුරකථනයෙන් සම්බන්ධ කර ගැනීම අවශ්‍යද?</p>
+                <div style="display: flex; gap: 20px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #4b5563;">
+                        <input type="radio" name="callPreference" value="yes" checked style="width: 18px; height: 18px; cursor: pointer;"> ඔව්
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #4b5563;">
+                        <input type="radio" name="callPreference" value="no" style="width: 18px; height: 18px; cursor: pointer;"> එපා
+                    </label>
+                </div>
+            </div>
+            <p id="callNotice" style="display: block; font-size: 13px; color: #059669; margin-top: 10px; font-weight: 600; padding-left: 5px; animation: fadeIn 0.3s; line-height: 1.5;">
+                ✓ ස්තූතියි! අපගේ නියෝජිතයෙකු 0713446500 යන අංකයෙන් ඔබව ඉක්මනින්ම සම්බන්ධ කර ගනු ඇත. එතෙක් ඔබව අපගේ පද්ධති වල ස්වභාවය පරික්ෂා කිරීම සදහා 'Distributor' (බෙදාහැරීමේ) ව්‍යාපාර පද්ධතිය වෙත යොමු කරන්නෙමු.
+            </p>
+        </div>
+        <button id="registerBtn">Start 7 Day Free Trial →</button>
+        <div class="login-link">Already have an account? <a href="login.html">Login</a></div>
+    </div>
+
+    <script src="../core/business-types.js?v=71"></script>
+    <script src="../core/dashboard-core.js?v=2135"></script>
+    <script src="../core/registration-utils.js?v=2"></script>
+    <script src="../core/auth-utils.js?v=2"></script>
+    <script>
+        const registerBtn = document.getElementById('registerBtn');
+        const messageDiv = document.getElementById('message');
+        const businessTypeSelect = document.getElementById('businessType');
+        const businessNameInput = document.getElementById('businessName');
+        const demoNoticeBanner = document.getElementById('demoNoticeBanner');
+        const functionsSvc = firebase.functions();
+        const urlParams = new URLSearchParams(window.location.search);
+        const referrerId = urlParams.get('ref');
+
+        // Toggle other business description box
+        businessTypeSelect.onchange = () => {
+            const otherGroup = document.getElementById('otherBusinessGroup');
+            if (businessTypeSelect.value === 'other') {
+                otherGroup.style.display = 'block';
+                document.getElementById('businessDescription').focus();
+            } else {
+                otherGroup.style.display = 'none';
+            }
+        };
+
+        // Toggle call notice
+        document.querySelectorAll('input[name="callPreference"]').forEach(radio => {
+            radio.onchange = (e) => {
+                const notice = document.getElementById('callNotice');
+                if (e.target.value === 'yes') {
+                    notice.innerHTML = `✓ ස්තූතියි! අපගේ නියෝජිතයෙකු 0713446500 යන අංකයෙන් ඔබව ඉක්මනින්ම සම්බන්ධ කර ගනු ඇත. එතෙක් ඔබව අපගේ පද්ධති වල ස්වභාවය පරික්ෂා කිරීම සදහා 'Distributor' (බෙදාහැරීමේ) ව්‍යාපාර පද්ධතිය වෙත යොමු කරන්නෙමු.`;
+                    notice.style.color = '#059669';
+                } else {
+                    notice.innerHTML = `✓ ස්තූතියි! එසේනම් ඔබව අපගේ පද්ධති වල ස්වභාවය පරික්ෂා කිරීම සදහා 'Distributor' (බෙදාහැරීමේ) ව්‍යාපාර පද්ධතිය වෙත යොමු කරන්නෙමු.`;
+                    notice.style.color = '#0369a1';
+                }
+                notice.style.display = 'block';
+            };
+        });
+
+        function showMessage(text, type = 'error') {
+            messageDiv.textContent = text;
+            messageDiv.className = type === 'error' ? 'error visible' : 'success visible';
+        }
+
+        async function sendRegistrationNotification(payload) {
+            try {
+                const notify = functionsSvc.httpsCallable('sendNewUserNotification');
+                await notify({
+                    userEmail: String(payload.email || '').trim().toLowerCase(),
+                    userId: String(payload.userId || '').trim(),
+                    ownerName: String(payload.ownerName || '').trim(),
+                    businessName: String(payload.businessName || '').trim(),
+                    businessType: payload.businessType,
+                    phone: String(payload.phone || '').trim(),
+                    description: String(payload.description || '').trim(),
+                    requestCall: !!payload.requestCall,
+                    timestamp: new Date().toISOString(),
+                    assignedBusiness: 'NEW_TENANT'
+                });
+            } catch (e) {
+                console.warn('Registration notification failed:', e?.message || e);
+            }
+        }
+
+        registerBtn.onclick = async () => {
+            const ownerName = document.getElementById('ownerName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const otherPhoneVal = document.getElementById('otherPhone') ? document.getElementById('otherPhone').value.trim() : '';
+            const password = document.getElementById('password').value;
+            const businessName = document.getElementById('businessName').value.trim();
+            const selectedType = businessTypeSelect.value;
+            const phone = selectedType === 'other' ? otherPhoneVal : '';
+            const description = document.getElementById('businessDescription').value.trim();
+            const callPref = document.querySelector('input[name="callPreference"]:checked');
+            const requestCall = callPref ? callPref.value === 'yes' : false;
+
+            if (!ownerName || !email || !password || !businessName || !selectedType) {
+                showMessage('Please fill all required fields and select a business type');
+                return;
+            }
+            if (selectedType === 'other') {
+                if (!description) {
+                    showMessage('කරුණාකර ඔබේ ව්‍යාපාරය ගැන කෙටි විස්තරයක් ලබා දෙන්න');
+                    return;
+                }
+                if (!phone || phone.length < 9) {
+                    showMessage('කරුණාකර ඔබගේ දුරකථන අංකය ඇතුළත් කරන්න (Please enter a valid phone number)');
+                    if (document.getElementById('otherPhone')) document.getElementById('otherPhone').focus();
+                    return;
+                }
+            }
+            if (password.length < 6) {
+                showMessage('මුරපදය අවම වශයෙන් අක්ෂර 6ක් විය යුතුය (Password must be at least 6 characters)');
+                return;
+            }
+
+            try {
+                registerBtn.disabled = true;
+                registerBtn.textContent = 'Creating Account...';
+                showMessage('Setting up your business environment...', 'success');
+
+                const finalBusinessType = selectedType === 'other' ? 'distributor' : selectedType;
+
+                // 1. Create Auth User with automatic stale auth self-healing fallback
+                let userCred;
+                try {
+                    userCred = await auth.createUserWithEmailAndPassword(email, password);
+                } catch (eAuth) {
+                    if (eAuth && eAuth.code === 'auth/email-already-in-use') {
+                        // Check if an active business profile already exists in Firestore
+                        const [bSnap1, bSnap2] = await Promise.all([
+                            window.db.collection('businesses').where('ownerEmail', '==', email).limit(1).get().catch(() => ({ empty: true })),
+                            window.db.collection('businesses').where('email', '==', email).limit(1).get().catch(() => ({ empty: true }))
+                        ]);
+                        const activeBizExists = (!bSnap1.empty || !bSnap2.empty);
+                        if (activeBizExists) {
+                            throw new Error('This email address is already registered with an active business profile. Please sign in instead.');
+                        }
+
+                        // Stale / orphaned auth account detected - attempt to self-heal
+                        let healed = false;
+                        try {
+                            if (window.firebase && typeof window.firebase.functions === 'function') {
+                                const wipeFn = window.firebase.functions().httpsCallable('wipeStaleAuthOnRegister');
+                                const wipeRes = await wipeFn({ targetEmail: email });
+                                if (wipeRes && wipeRes.data && wipeRes.data.deletedAuth) {
+                                    userCred = await auth.createUserWithEmailAndPassword(email, password);
+                                    healed = true;
+                                }
+                            }
+                        } catch (eWipe) {
+                            console.warn('[Register] Stale wipe notice:', eWipe);
+                        }
+
+                        if (!healed) {
+                            try {
+                                userCred = await auth.signInWithEmailAndPassword(email, password);
+                            } catch (eSign) {
+                                throw new Error('An account with this email already exists in authentication. If you own this email, please log in or contact support.');
+                            }
+                        }
+                    } else {
+                        throw eAuth;
+                    }
+                }
+                const userId = userCred.user.uid;
+                const businessId = userId;
+
+                // 2. Create Business Document
+                await window.db.collection('businesses').doc(businessId).set({
+                    name: businessName,
+                    ownerId: userId,
+                    ownerEmail: email,
+                    ownerName: ownerName,
+                    businessType: finalBusinessType,
+                    originalType: selectedType,
+                    description: description,
+                    requestCall: requestCall,
+                    status: 'TRIAL',
+                    referredBy: referrerId || null,
+                    trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    onboardingCompleted: false,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+
+                // 3. Create User Document
+                await window.db.collection('users').doc(userId).set({
+                    name: ownerName,
+                    ownerName: ownerName,
+                    email: email,
+                    phone: phone,
+                    role: 'BUSINESS_OWNER',
+                    businessId: businessId,
+                    businessType: finalBusinessType,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+
+                // 4. Add user to business users sub-collection
+                await window.db.collection('businesses').doc(businessId).collection('users').doc(userId).set({
+                    email: email,
+                    name: ownerName,
+                    role: 'BUSINESS_OWNER',
+                    isActive: true,
+                    createdAt: new Date()
+                });
+
+                // 5. If Other business type or lead with phone, save to special_leads collection
+                if (selectedType === 'other' || phone || requestCall) {
+                    try {
+                        await window.db.collection('special_leads').doc(businessId).set({
+                            businessId: businessId,
+                            ownerName: ownerName,
+                            businessName: businessName,
+                            phone: phone || '',
+                            email: email,
+                            description: description || 'Special Business Inquiry',
+                            requestCall: requestCall,
+                            status: 'PENDING',
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        }, { merge: true });
+                    } catch (eLead) {
+                        console.warn('[Lead Save] notice:', eLead);
+                    }
+                }
+
+                await sendRegistrationNotification({
+                    email,
+                    userId,
+                    ownerName,
+                    businessName,
+                    businessType: finalBusinessType,
+                    phone,
+                    description,
+                    requestCall
+                });
+
+                // System default is English for all accounts
+                localStorage.setItem('preferredLanguage', 'en');
+
+                if (selectedType === 'other') {
+                    sessionStorage.setItem('showDemoNotice', 'true');
+                    showMessage('✅ ලියාපදිංචි වීම සාර්ථකයි! ඔබව Dashboard වෙත යොමු කරයි...', 'success');
+                } else {
+                    showMessage('✅ Registration successful! Setting up your workspace...', 'success');
+                }
+
+                setTimeout(() => {
+                    if (window.AuthUI) {
+                        window.AuthUI.routeToUniversalDashboard(auth.currentUser);
+                    }
+                }, selectedType === 'other' ? 7000 : 2000);
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Start 7 Day Free Trial →';
+                showMessage(error.message);
+            }
+        };
+    </script>
+</body>
+
+</html>

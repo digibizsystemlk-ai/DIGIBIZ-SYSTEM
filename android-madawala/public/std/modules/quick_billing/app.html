@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="si">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DIGIBIZ BILL — Quick Billing Terminal</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#059669">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DIGIBIZ BILL">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;600;700;800;900&family=Noto+Sans+Tamil:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Global Error Logging -->
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            console.error(`[QuickBilling] Error: ${msg} (Line ${line}:${col}) in ${url}`, error);
+            return false;
+        };
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error(`[QuickBilling] Promise Rejection: ${e.reason?.message || e.reason}`);
+        });
+    </script>
+
+    <!-- Vendor Libraries -->
+    <script src="/std/assets/vendor/html2canvas.min.js"></script>
+    <script src="/std/assets/vendor/sweetalert2.all.min.js"></script>
+
+    <!-- Firebase Compat SDKs -->
+    <script src="/std/assets/vendor/firebase-app-compat.js"></script>
+    <script src="/std/assets/vendor/firebase-auth-compat.js"></script>
+    <script src="/std/assets/vendor/firebase-firestore-compat.js"></script>
+
+    <!-- Core App Config & Official DIGIBIZ Sidebar -->
+    <script src="/std/core/firebase-init.js?v=200"></script>
+    <script src="/std/core/pwa-init.js"></script>
+    <script src="/std/scripts/admin-impersonation.js?v=200"></script>
+    <script src="/std/core/aggregate-utils.js"></script>
+    <script src="/std/core/auth-roles.js?v=2265"></script>
+    <script src="/std/core/business-types.js?v=71"></script>
+    <script src="/std/core/dashboard-core.js?v=2265"></script>
+    <script src="/std/core/subscription-manager.js?v=120"></script>
+    <script src="/std/core/sidebar.js?v=2116"></script>
+
+    <style>
+        .swal2-container {
+            z-index: 9999999 !important;
+        }
+
+        html.digibiz-sidebar-reserved body {
+            margin-left: 260px;
+        }
+
+        @media (max-width: 768px) {
+            html.digibiz-sidebar-reserved body {
+                margin-left: 0;
+            }
+        }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-dark: #064e3b;
+            --primary-light: #ecfdf5;
+            --accent: #10b981;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #0284c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Sinhala', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 10px;
+            padding-bottom: 95px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Online / Offline Connectivity Bar */
+        .status-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        .biz-title-text {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        .connection-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .connection-pill.online {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .connection-pill.offline {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #fed7aa;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+            animation: pulseDot 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25);
+        }
+
+        @keyframes pulseDot {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        /* Step Card Elements */
+        .step-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            border: 1.5px solid var(--border-color);
+            transition: all 0.25s ease;
+        }
+
+        .step-card.active {
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+        }
+
+        .step-card.collapsed .step-body {
+            display: none;
+        }
+
+        .step-header {
+            background: #f8fafc;
+            padding: 12px 14px;
+            font-size: 13.5px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .step-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-number-badge {
+            background: #059669;
+            color: #ffffff;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .step-card.collapsed .step-number-badge {
+            background: #94a3b8;
+        }
+
+        .step-summary-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #059669;
+        }
+
+        .step-toggle-icon {
+            font-size: 14px;
+            color: #64748b;
+            transition: transform 0.2s;
+        }
+
+        .step-card.collapsed .step-toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .step-body {
+            padding: 12px 14px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Form Inputs */
+        .form-input, .form-select {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 600;
+            background: #ffffff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--accent);
+        }
+
+        /* Customer Row */
+        .customer-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-new-cust {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1.5px solid #a7f3d0;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* Item Entry Row */
+        .item-search-wrap {
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .autocomplete-item {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .autocomplete-item:hover, .autocomplete-item:active {
+            background: #f0fdf4;
+        }
+
+        .item-inputs-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr auto;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stepper-input-wrap {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .btn-stepper {
+            background: #f8fafc;
+            border: none;
+            width: 32px;
+            height: 42px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+
+        .stepper-field {
+            width: 44px;
+            text-align: center;
+            border: none;
+            font-size: 14px;
+            font-weight: 800;
+            outline: none;
+        }
+
+        .btn-add-item {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: #ffffff;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 900;
+            cursor: pointer;
+            white-space: nowrap;
+            height: 44px;
+        }
+
+        /* Cart Items List */
+        .cart-list-container {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #f8fafc;
+            padding: 8px 10px;
+            max-height: 220px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+
+        .cart-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .cart-row:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-name {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .cart-item-sub {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .cart-qty-wrap {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .btn-cart-step {
+            background: #f1f5f9;
+            border: none;
+            width: 26px;
+            height: 28px;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .cart-qty-input {
+            width: 32px;
+            text-align: center;
+            border: none;
+            font-size: 12.5px;
+            font-weight: 800;
+            outline: none;
+        }
+
+        .cart-row-total {
+            font-size: 13.5px;
+            font-weight: 900;
+            color: var(--primary-dark);
+            min-width: 65px;
+            text-align: right;
+            margin: 0 6px;
+        }
+
+        .btn-del-item {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Payment Chips */
+        .payment-modes-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        @media (max-width: 480px) {
+            .payment-modes-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .pay-chip {
+            background: #f8fafc;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            padding: 9px 4px;
+            text-align: center;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .pay-chip.active {
+            background: #059669;
+            color: #ffffff;
+            border-color: #059669;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+        }
+
+        /* Credit Due Date Panel */
+        .credit-due-box {
+            background: #fffbeb;
+            border: 1.5px solid #fde68a;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .credit-due-box.open {
+            display: block;
+        }
+
+        .due-presets-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .btn-due-preset {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid #fcd34d;
+            padding: 6px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #92400e;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-due-preset.active {
+            background: #f59e0b;
+            color: #ffffff;
+            border-color: #d97706;
+        }
+
+        /* Calculations */
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .summary-line.total {
+            border-top: 1.5px dashed var(--border-color);
+            padding-top: 8px;
+            margin-top: 6px;
+            margin-bottom: 0;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        /* Sticky Action Button */
+        .sticky-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 10px 14px;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+            z-index: 100;
+        }
+
+        .sticky-bottom-inner {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-submit-order {
+            flex: 1;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            pointer-events: none !important;
+        }
+
+        .modal-overlay.open {
+            display: flex !important;
+            pointer-events: auto !important;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 440px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .receipt-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 16px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        .btn-modal-close {
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* Thermal Receipt Paper (80mm @ 96dpi / 302px) */
+        .receipt-paper {
+            background: #ffffff;
+            border: 1px dashed #cbd5e1;
+            width: 302px;
+            padding: 12px 10px;
+            margin: 0 auto 14px auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            color: #000;
+            line-height: 1.35;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #receiptPaperContent,
+            #receiptPaperContent * {
+                visibility: visible;
+            }
+
+            #receiptPaperContent {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+
+        /* Hide floating support button since it is now in the sidebar menu */
+        .digibiz-support-fab {
+            display: none !important;
+        }
+
+        .text-right { text-align: right !important; }
+        .lang-switch-wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 2px 4px;
+        }
+        .lang-title-text {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: 0.2px;
+        }
+        .lang-btn-group {
+            display: inline-flex;
+            background: #e2e8f0;
+            border-radius: 10px;
+            padding: 3px;
+            gap: 3px;
+        }
+        .btn-lang {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-lang.active {
+            background: #ffffff;
+            color: var(--primary-dark);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .text-center { text-align: center !important; }
+        .font-bold { font-weight: bold !important; }
+    </style>
+</head>
+
+<body>
+    <!-- Terminal Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:2px 4px;">
+        <div class="lang-title-text" id="lblTerminalHeader" style="font-size:15px; font-weight:800; color:var(--text-dark);">⚡ Fast Billing Terminal</div>
+        <button id="pwaInstallBtn" class="pwa-install-btn" type="button" onclick="triggerPwaInstall()"
+            style="background:linear-gradient(135deg, #059669 0%, #047857 100%); color:#fff; border:none; padding:7px 13px; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer; box-shadow:0 2px 6px rgba(4,120,87,0.3); display:inline-flex; align-items:center; gap:6px;">
+            📲 Install App
+        </button>
+    </div>
+
+    <script>
+        let deferredPwaPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPwaPrompt = e;
+            window.deferredPwaPrompt = e;
+            const btns = document.querySelectorAll('.pwa-install-btn, #pwaInstallBtn');
+            btns.forEach(btn => btn.style.display = 'inline-flex');
+        });
+
+        async function triggerPwaInstall() {
+            const promptEvent = window.deferredPwaPrompt || deferredPwaPrompt;
+            if (promptEvent) {
+                try {
+                    promptEvent.prompt();
+                    const choiceResult = await promptEvent.userChoice;
+                    if (choiceResult && choiceResult.outcome === 'accepted') {
+                        if (typeof showNotification === 'function') showNotification('✅ App Installed Successfully!');
+                    }
+                    window.deferredPwaPrompt = null;
+                    deferredPwaPrompt = null;
+                } catch (err) {
+                    console.warn('PWA install error:', err);
+                }
+            } else {
+                alert('📲 Direct Install (ඇප් එක ස්ථාපනය කිරීමට):\n\nChrome Browser එකේ ඉහළ දකුණු කෙළවරේ ඇති තිත් 3 (⋮) ඔබා "Install App" හෝ "Add to Home screen" (මුල් තිරයට එක් කරන්න) තෝරන්න.');
+            }
+        }
+
+        function checkAndHideInstalledPwaBtn() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                || window.matchMedia('(display-mode: window-controls-overlay)').matches
+                || window.navigator.standalone === true
+                || localStorage.getItem('pwaInstalled') === 'true';
+
+            if (isStandalone) {
+                const btns = document.querySelectorAll('.pwa-install-btn, #pwaInstallBtn');
+                btns.forEach(b => b.style.setProperty('display', 'none', 'important'));
+            }
+        }
+        window.addEventListener('appinstalled', function () {
+            localStorage.setItem('pwaInstalled', 'true');
+            checkAndHideInstalledPwaBtn();
+        });
+        document.addEventListener('DOMContentLoaded', checkAndHideInstalledPwaBtn);
+    </script>
+
+
+
+    <!-- Step 1: Customer -->
+    <div class="step-card active" id="stepCustomerCard">
+        <div class="step-header" onclick="toggleStep('stepCustomerCard')">
+            <div class="step-header-left">
+                <span class="step-number-badge">1</span>
+                <span id="step1TitleText">CUSTOMER</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="step-summary-label" id="custStepSummary">Guest</span>
+                <span class="step-toggle-icon">▾</span>
+            </div>
+        </div>
+        <div class="step-body">
+            <div class="customer-row">
+                <select id="customerSelect" class="form-select">
+                    <option value="GUEST">🛍️ Guest / Walk-in Customer</option>
+                </select>
+                <button type="button" id="btnQuickCustomer" class="btn-new-cust">
+                    ➕ New
+                </button>
+            </div>
+            <div id="customerInfoBadge" style="display:none; margin-top:8px; font-size:12px; font-weight:700; color:#0369a1; background:#f0f9ff; padding:6px 10px; border-radius:8px; border:1px solid #bae6fd;">
+                📞 <span id="custPhoneSpan"></span> | 📍 <span id="custAreaSpan"></span> | 💳 Balance: <span id="custBalSpan">Rs. 0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Items -->
+    <div class="step-card active" id="stepItemsCard">
+        <div class="step-header" onclick="toggleStep('stepItemsCard')">
+            <div class="step-header-left">
+                <span class="step-number-badge">2</span>
+                <span id="step2TitleText">ITEMS (Add Products)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="step-summary-label" id="itemsStepSummary">📦 භාණ්ඩ වර්ග 0</span>
+                <span class="step-toggle-icon">▾</span>
+            </div>
+        </div>
+        <div class="step-body">
+            <!-- Search & New Item Button Row -->
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                <div class="item-search-wrap" style="flex:1; margin-bottom:0;">
+                    <input type="text" id="itemNameInput" class="form-input" placeholder="Item name (Type or select)..." autocomplete="off">
+                    <div class="autocomplete-list" id="autocompleteDropdown"></div>
+                </div>
+                <button type="button" id="btnQuickNewProduct" class="btn-new-cust" onclick="openCatalogModal()" title="Add / Manage Items" style="white-space:nowrap; padding:0 12px; height:42px; display:inline-flex; align-items:center; justify-content:center; gap:4px; font-size:12px; font-weight:800;">
+                    ➕ New
+                </button>
+            </div>
+
+            <!-- Price, Quantity (+ - or type) and Add Button -->
+            <div class="item-inputs-grid">
+                <div>
+                    <input type="number" id="itemPriceInput" class="form-input" placeholder="Price (Rs.)" min="0" step="any">
+                </div>
+                <div class="stepper-input-wrap">
+                    <button type="button" class="btn-stepper" onclick="adjustDirectQty(-1)">-</button>
+                    <input type="number" id="itemQtyInput" class="stepper-field" value="1" min="1" step="any">
+                    <button type="button" class="btn-stepper" onclick="adjustDirectQty(1)">+</button>
+                </div>
+                <div>
+                    <button type="button" id="btnDirectAdd" onclick="handleAddDirectCustomItem()" class="btn-add-item">
+                        ➕ Add
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cart Items List -->
+            <div class="cart-list-container" id="cartListContainer">
+                <div id="emptyCartNotice" style="text-align:center; padding:12px; color:var(--text-muted); font-size:12px; font-weight:600;">
+                    Cart is empty. Add products above.
+                </div>
+                <div id="cartItemsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Payment Method -->
+    <div class="step-card" id="stepPaymentCard">
+        <div class="step-header" onclick="toggleStep('stepPaymentCard')">
+            <div class="step-header-left">
+                <span class="step-number-badge">3</span>
+                <span id="step3TitleText">PAYMENT METHOD</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="step-summary-label" id="payStepSummary">CASH</span>
+                <span class="step-toggle-icon">▾</span>
+            </div>
+        </div>
+        <div class="step-body">
+            <div class="payment-modes-grid">
+                <div class="pay-chip active" data-mode="CASH">💵 CASH</div>
+                <div class="pay-chip" data-mode="CREDIT">📝 CREDIT</div>
+                <div class="pay-chip" data-mode="CARD">💳 CARD</div>
+                <div class="pay-chip" data-mode="BANK">🏦 BANK</div>
+                <div class="pay-chip" data-mode="CHEQUE">📄 CHEQUE</div>
+            </div>
+
+            <!-- Golden Credit Due Date Box -->
+            <div class="credit-due-box" id="creditDueBox">
+                <div style="font-size:12px; font-weight:800; color:#92400e; margin-bottom:4px;" id="lblDueDate">
+                    📅 Payment Due Date:
+                </div>
+                <input type="date" id="creditDueDateInput" class="form-input" style="background:#fff;">
+                <div class="due-presets-row">
+                    <button type="button" class="btn-due-preset active" data-days="7">+7 Days</button>
+                    <button type="button" class="btn-due-preset" data-days="14">+14 Days</button>
+                    <button type="button" class="btn-due-preset" data-days="30">+30 Days</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 4: Bill Totals & Discount -->
+    <div class="step-card" id="stepTotalsCard">
+        <div class="step-header" onclick="toggleStep('stepTotalsCard')">
+            <div class="step-header-left">
+                <span class="step-number-badge">4</span>
+                <span id="step4TitleText">BILL TOTALS & DISCOUNT</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="step-summary-label" id="totalsStepSummary">Rs. 0.00</span>
+                <span class="step-toggle-icon">▾</span>
+            </div>
+        </div>
+        <div class="step-body">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                <div>
+                    <label style="font-size:11px; font-weight:700; color:var(--text-muted);" id="lblDiscount">Discount (Rs.)</label>
+                    <input type="number" id="discountInput" class="form-input" placeholder="0.00" min="0" step="any">
+                </div>
+                <div id="cashReceivedBox">
+                    <label style="font-size:11px; font-weight:700; color:var(--text-muted);" id="lblCashReceived">Cash Received (Rs.)</label>
+                    <input type="number" id="cashReceivedInput" class="form-input" placeholder="0.00" min="0" step="any">
+                </div>
+            </div>
+
+            <div id="changeDueContainer" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 12px; border-radius:10px; margin-bottom:8px; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:#166534;">
+                <span id="lblChangeDue">Change Due:</span>
+                <span id="changeDueAmt" style="font-size:16px; font-weight:900; color:#059669;">Rs. 0.00</span>
+            </div>
+
+            <div style="background:#f8fafc; border-radius:12px; padding:10px 12px; border:1px solid var(--border-color);">
+                <div class="summary-line">
+                    <span id="lblSubtotal">Subtotal:</span>
+                    <span id="subtotalDisplay">Rs. 0.00</span>
+                </div>
+                <div class="summary-line" id="discountSummaryLine" style="display:none; color:#ef4444;">
+                    <span id="lblDiscountSummary">Discount:</span>
+                    <span id="discountDisplay">- Rs. 0.00</span>
+                </div>
+                <div class="summary-line total">
+                    <span id="lblNetTotal">NET TOTAL:</span>
+                    <span id="grandTotalDisplay">Rs. 0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Bottom Bar -->
+    <div class="sticky-bottom-bar">
+        <div class="sticky-bottom-inner">
+            <div style="display:flex; flex-direction:column;">
+                <span style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Total Bill</span>
+                <span style="font-size:20px; font-weight:900; color:var(--primary-dark);" id="stickyTotalAmt">Rs. 0.00</span>
+            </div>
+            <button type="button" id="btnSubmitBill" onclick="handleSubmitBill()" ontouchend="handleSubmitBill()" class="btn-submit-order">
+                ⚡ Issue & Print Bill
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Add Customer Modal -->
+    <div class="modal-overlay" id="newCustomerModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>➕ Add New Customer</span>
+                <button type="button" class="btn-modal-close" onclick="closeNewCustomerModal()">×</button>
+            </div>
+            <form id="newCustomerForm">
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Customer Name *</label>
+                    <input type="text" id="custNameInput" class="form-input" required placeholder="e.g. Nimal Perera">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Phone Number</label>
+                        <input type="tel" id="custPhoneInput" class="form-input" placeholder="07XXXXXXXX">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">City / Area</label>
+                        <input type="text" id="custAreaInput" class="form-input" placeholder="e.g. Kandy">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit-order" style="width:100%;">
+                    💾 Save Customer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Receipt Preview & Thermal Print Modal (100% Distributor Standard) -->
+    <!-- Receipt Modal (100% Distributor Rep App Standard) -->
+    <div id="receiptModal" class="modal-overlay">
+        <div class="receipt-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h3 style="margin:0; color:#064e3b; font-size:16px; font-weight:900;">📄 Sales Receipt</h3>
+                <button type="button" onclick="closeReceiptModal()" ontouchend="closeReceiptModal()" class="btn-modal-close"
+                    style="background:#fee2e2; color:#ef4444; border:none; width:36px; height:36px; border-radius:50%; font-weight:900; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
+
+            <!-- Credit Sale 2-Copy Switcher Tabs (Only shown when order is CREDIT) -->
+            <div id="receiptCopyTabs" style="display:none; justify-content:center; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+                <button type="button" id="tabCopyBoth" onclick="switchReceiptCopyTab('BOTH')"
+                    style="padding:6px 10px; border-radius:8px; font-size:11px; font-weight:800; border:1.5px solid #047857; background:#047857; color:#fff; cursor:pointer;">
+                    📑 Both Copies (2ක්ම)
+                </button>
+                <button type="button" id="tabCopyCust" onclick="switchReceiptCopyTab('CUSTOMER')"
+                    style="padding:6px 10px; border-radius:8px; font-size:11px; font-weight:800; border:1.5px solid #cbd5e1; background:#f8fafc; color:#334155; cursor:pointer;">
+                    📄 Customer Copy
+                </button>
+                <button type="button" id="tabCopyOffice" onclick="switchReceiptCopyTab('OFFICE')"
+                    style="padding:6px 10px; border-radius:8px; font-size:11px; font-weight:800; border:1.5px solid #cbd5e1; background:#f8fafc; color:#334155; cursor:pointer;">
+                    📝 Signed Copy (අත්සන)
+                </button>
+            </div>
+
+            <div id="receiptPaperContent" class="receipt-paper"></div>
+
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+                <button type="button" id="btnMainInstantPrint" onclick="printInstantReceiptImage(this)" class="btn-submit-order"
+                    style="background:#047857; color:#fff; font-size:15px; padding:13px; font-weight:900; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 10px rgba(4,120,87,0.3);">
+                    🖨️ INSTANT 1-CLICK PRINT (මුද්‍රණය කරන්න)
+                </button>
+
+                <!-- Dedicated Credit Single Copy Print Actions -->
+                <div id="creditExtraPrintButtons" style="display:none; gap:6px;">
+                    <button type="button" onclick="printSpecificCopyRawBT('CUSTOMER')"
+                        style="flex:1; background:#f0fdf4; color:#15803d; border:1px solid #86efac; border-radius:8px; padding:8px 4px; font-size:11px; font-weight:800; cursor:pointer;">
+                        📄 Print Customer Only
+                    </button>
+                    <button type="button" onclick="printSpecificCopyRawBT('OFFICE')"
+                        style="flex:1; background:#fff7ed; color:#c2410c; border:1px solid #fdba74; border-radius:8px; padding:8px 4px; font-size:11px; font-weight:800; cursor:pointer;">
+                        📝 Print Signed Copy Only
+                    </button>
+                </div>
+
+                <button type="button" onclick="viewReceiptImageOnScreen()"
+                    style="background:#0284c7; color:#fff; border:none; border-radius:12px; font-size:13px; padding:10px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                    👁️ VIEW / SAVE IMAGE ON PHONE (තිරයෙන් බලන්න)
+                </button>
+
+                <button type="button" onclick="shareOrPrintReceiptImage()"
+                    style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:10px; font-size:12px; padding:8px; font-weight:700; cursor:pointer;">
+                    📲 Share / Export Receipt Image
+                </button>
+
+                <button type="button" onclick="startNewBill(); closeReceiptModal();" ontouchend="startNewBill(); closeReceiptModal();"
+                    style="background:#f1f5f9; color:#0f172a; border:1.5px solid #cbd5e1; border-radius:12px; font-size:13px; padding:12px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                    ⚡ START NEW BILL / CLOSE (නව බිලක් / වසන්න)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thermal Print Image Full Preview & Direct Save Modal -->
+    <div id="imagePreviewModal" class="modal-overlay" style="z-index:10000;">
+        <div class="receipt-box" style="max-width:420px; text-align:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="margin:0; color:#064e3b; font-size:16px; font-weight:900;">🖼️ Print Image Preview</h3>
+                <button type="button" onclick="closeImagePreviewModal()" ontouchend="closeImagePreviewModal()" class="btn-modal-close"
+                    style="background:#fee2e2; color:#ef4444; border:none; width:36px; height:36px; border-radius:50%; font-weight:900; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
+            <div style="max-height:65vh; overflow-y:auto; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; background:#f8fafc; margin-bottom:12px;">
+                <img id="previewImgElement" src="" style="width:100%; height:auto; display:block; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" />
+            </div>
+            <div style="font-size:11px; color:#64748b; margin-bottom:10px; font-weight:600;">
+                මෙය mLabel / Thermal Printer එකට යන මුද්‍රණ රූපයේ සැබෑ පෙනුමයි (100% Photo Preview).
+            </div>
+            <a id="downloadPreviewLink" href="" download="Receipt_Image.png" style="display:block; width:100%; background:#0284c7; color:#fff; text-align:center; padding:12px; border-radius:10px; font-weight:800; text-decoration:none; box-shadow:0 2px 6px rgba(2,132,199,0.3); margin-bottom:8px;">
+                💾 SAVE IMAGE TO PHONE (දුරකථනයට සුරකින්න)
+            </a>
+            <button type="button" onclick="closeImagePreviewModal()" ontouchend="closeImagePreviewModal()"
+                style="display:block; width:100%; background:#f1f5f9; color:#475569; text-align:center; padding:11px; border-radius:10px; font-weight:800; border:1px solid #cbd5e1; cursor:pointer;">
+                ✕ CLOSE PREVIEW (වසන්න)
+            </button>
+        </div>
+    </div>
+
+    <!-- Bill History Modal -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>📜 Bill History & Summary</span>
+                <button type="button" class="btn-modal-close" onclick="closeBillHistoryModal()">×</button>
+            </div>
+            <div style="display:grid; grid-template-columns:2fr 1.5fr; gap:8px; margin-bottom:12px;">
+                <input type="text" id="historySearchInput" class="form-input" placeholder="Search Customer / Bill #...">
+                <input type="date" id="historyDateFilter" class="form-input">
+            </div>
+            <div id="historySummaryBanner" style="background:#f0fdf4; border:1px solid #bbf7d0; padding:10px 14px; border-radius:12px; margin-bottom:12px; display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#166534;">
+                <span>Total Bills: <span id="histBillCount">0</span></span>
+                <span>Revenue: <span id="histTotalRev">Rs. 0.00</span></span>
+            </div>
+            <div id="historyListContainer" style="max-height:340px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- Catalog Management Modal -->
+    <div class="modal-overlay" id="catalogModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>📦 Manage Products & Pricing</span>
+                <button type="button" class="btn-modal-close" onclick="closeCatalogModal()">×</button>
+            </div>
+            <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:14px; padding:12px; margin-bottom:12px;">
+                <div style="font-size:13px; font-weight:800; color:#064e3b; margin-bottom:8px;">➕ Add New Product</div>
+                <div style="display:grid; grid-template-columns:2fr 1fr; gap:8px; margin-bottom:8px;">
+                    <input type="text" id="newCatName" class="form-input" placeholder="Item Name *">
+                    <input type="number" id="newCatPrice" class="form-input" placeholder="Price (LKR) *" min="0" step="any">
+                </div>
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="button" onclick="handleSaveNewCatalogItem()" class="btn-submit-order" style="padding:8px 14px; font-size:12px; border-radius:10px;">
+                        💾 Save Item
+                    </button>
+                </div>
+            </div>
+            <div style="margin-bottom:10px;">
+                <input type="text" id="catalogSearchInput" class="form-input" placeholder="Search catalog items...">
+            </div>
+            <div id="catalogListContainer" style="max-height:280px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- Customer Directory Modal -->
+    <div class="modal-overlay" id="customerDirectoryModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>👥 Customers Directory</span>
+                <button type="button" class="btn-modal-close" onclick="closeCustomerDirectoryModal()">×</button>
+            </div>
+            <div style="margin-bottom:10px;">
+                <input type="text" id="manageCustomerSearch" class="form-input" placeholder="Search customer name or phone...">
+            </div>
+            <div id="customerDirectoryList" style="max-height:320px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- DIGIBIZ BILL Dedicated Login Modal -->
+    <div id="loginModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); backdrop-filter:blur(8px); z-index:99999; justify-content:center; align-items:center; padding:16px;">
+        <div class="modal-card" style="max-width:380px; width:100%; border-radius:24px; padding:32px 24px; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.3); background:#ffffff;">
+            <div style="text-align:center; margin-bottom:20px;">
+                <div style="font-size:42px; margin-bottom:8px;">⚡</div>
+                <h2 style="margin:0; color:#064e3b; font-size:22px; font-weight:900; letter-spacing:0.5px;">DIGIBIZ BILL</h2>
+                <p style="margin:4px 0 0 0; color:#64748b; font-size:13px; font-weight:600;">Quick Billing & Invoicing Terminal</p>
+            </div>
+            <form id="billLoginForm" action="javascript:void(0);" onsubmit="handleBillLogin(event)">
+                <div style="margin-bottom:14px; text-align:left;">
+                    <label style="font-size:12px; font-weight:800; color:#334155;">Email Address</label>
+                    <input type="email" id="loginEmailInput" class="form-input" placeholder="e.g. store@example.com" required style="margin-top:4px;">
+                </div>
+                <div style="margin-bottom:16px; text-align:left;">
+                    <label style="font-size:12px; font-weight:800; color:#334155;">Password</label>
+                    <input type="password" id="loginPasswordInput" class="form-input" placeholder="Enter password" required style="margin-top:4px;">
+                </div>
+                <button type="submit" id="btnBillLoginSubmit" class="btn-submit-order" style="width:100%;">
+                    🔐 LOGIN (ඇතුල් වන්න)
+                </button>
+            </form>
+            <div id="loginErrorMsg" style="color:#ef4444; font-size:13px; margin-top:12px; text-align:center; font-weight:700;"></div>
+        </div>
+    </div>
+
+    <!-- Core App Logic -->
+    <script src="app.js?v=2026_quickbill_cashbreakdown_v35"></script>
+    <script>
+        // Immediate Fallback Trigger
+        try {
+            if (typeof initApp === 'function') {
+                initApp();
+            }
+        } catch (e) {
+            console.error('App bootstrap error:', e);
+        }
+    </script>
+</body>
+
+</html>

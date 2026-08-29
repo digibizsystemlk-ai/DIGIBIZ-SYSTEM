@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 භාවිත මාර්ගෝපදේශය (User Manual) - DIGIBIZ Tire</title>
+    
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Firebase Standard Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="/core/firebase-init.js"></script>
+    <script src="/core/sidebar.js?v=2105"></script>
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-emerald: #047857;
+            --emerald-light: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            --accent-amber: #d97706;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --bg-canvas: #f8fafc;
+            --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-canvas); color: var(--text-dark); min-height: 100vh; padding-bottom: 60px; }
+        #sidebar-container { position: fixed; left: 0; top: 0; z-index: 1000; }
+        .main-wrapper { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+        /* Hero Header */
+        .manual-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%);
+            border-radius: var(--radius-lg);
+            padding: 36px 32px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.25);
+            margin-bottom: 28px;
+        }
+        .manual-hero::after {
+            content: "📖";
+            position: absolute;
+            right: 20px;
+            bottom: -20px;
+            font-size: 140px;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: #34d399;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .manual-hero h1 { font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 10px; }
+        .manual-hero p { color: #94a3b8; font-size: 14.5px; line-height: 1.6; max-width: 780px; }
+
+        /* Search & Quick Jump Nav */
+        .quick-nav-bar {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 28px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .search-box-wrap { position: relative; flex: 1; min-width: 260px; }
+        .search-box-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-box-wrap input:focus { border-color: var(--primary-emerald); box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.15); }
+        .search-box-wrap::before { content: "🔍"; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+        .quick-links { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+        .quick-chip {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        .quick-chip:hover { background: var(--primary-emerald); color: #ffffff; border-color: var(--primary-emerald); }
+
+        /* Step Card Styling */
+        .step-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid #e2e8f0;
+            padding: 28px 30px;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .step-card:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.08); }
+        .step-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+        .step-number-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(4, 120, 87, 0.25);
+        }
+        .step-title-wrap h2 { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+        .step-subtitle { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+        .step-body { color: #334155; font-size: 14px; line-height: 1.7; }
+        .guide-list { list-style: none; margin: 14px 0; }
+        .guide-list li { position: relative; padding-left: 26px; margin-bottom: 10px; font-size: 14px; color: #1e293b; }
+        .guide-list li::before { content: "➔"; position: absolute; left: 0; top: 1px; color: var(--primary-emerald); font-weight: 900; }
+        .tip-box {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-left: 4px solid #d97706;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-top: 16px;
+            font-size: 13.5px;
+            color: #78350f;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .action-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f0fdf4;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            text-decoration: none;
+            margin-top: 14px;
+            transition: all 0.2s;
+        }
+        .action-link-btn:hover { background: #047857; color: #ffffff; border-color: #047857; }
+        .manual-footer { text-align: center; padding: 24px; color: #94a3b8; font-size: 13px; font-weight: 600; }
+
+        @media (max-width: 768px) {
+            .manual-hero { padding: 24px 20px; }
+            .manual-hero h1 { font-size: 22px; }
+            .step-card { padding: 20px 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar-container"></div>
+
+    <div class="main-wrapper">
+        <!-- Hero Header -->
+        <div class="manual-hero">
+            <div class="hero-badge">🛞 Tire & Battery Center Guide</div>
+            <h1>Tire Center භාවිත මාර්ගෝපදේශය</h1>
+            <p>ටයර් අලෙවිය, වීල් එලයින්මන්ට්, බැටරි සේවා සහ පාරිභෝගික වාහන ඉතිහාසය කාර්යක්ෂමව පාලනය කිරීමේ සම්පූර්ණ අත්පොත.</p>
+        </div>
+
+        <!-- Search & Quick Navigation -->
+        <div class="quick-nav-bar">
+            <div class="search-box-wrap">
+                <input type="text" id="manualSearchInput" placeholder="මාර්ගෝපදේශය තුල සොයන්න..." oninput="filterManualSteps()">
+            </div>
+            <div class="quick-links">
+                
+                <a href="#step1" class="quick-chip">1. ටයර් සහ බැටරි තොග ඇතුළත් කිරීම</a>
+    
+                <a href="#step2" class="quick-chip">2. සේවා ලැයිස්තුව සැකසීම</a>
+    
+                <a href="#step3" class="quick-chip">3. POS බිල්පත් සහ වාහන අංකය ඇතුළත් කිරීම</a>
+    
+                <a href="#step4" class="quick-chip">4. පාරිභෝගික සහ වාහන සේවා ඉතිහාසය</a>
+    
+                <a href="#step5" class="quick-chip">5. දෛනික ගනුදෙනු සහ මූල්‍ය පාලනය</a>
+    
+            </div>
+        </div>
+
+        <!-- STEPS CONTAINER -->
+        <div id="stepsContainer">
+            
+            <!-- STEP 1 -->
+            <div class="step-card" id="step1">
+                <div class="step-header">
+                    <div class="step-number-badge">01</div>
+                    <div class="step-title-wrap">
+                        <h2>ටයර් සහ බැටරි තොග ඇතුළත් කිරීම (Tire & Battery Stock)</h2>
+                        <div class="step-subtitle">Sizes, Brands (DSI, CEAT, Dunlop), Batch & Selling Rates</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <ul class="guide-list">
+                        <li>Inventory පිටුවට ගොස් ටයර් ප්‍රමාණය (Size - උදා: 185/65 R15), Brand එක සහ විකුණුම් මිල ඇතුළත් කරන්න.</li>
+                        <li>බැටරි වර්ග (Exide, Amaron) සහ Warranty කාලසීමාවන් සටහන් කරන්න.</li>
+                    </ul>
+                    
+                    <a href="/modules/tire_centre/inventory.html" class="action-link-btn">📦 Inventory පිටුවට යන්න ➔</a>
+                </div>
+            </div>
+    
+
+            <!-- STEP 2 -->
+            <div class="step-card" id="step2">
+                <div class="step-header">
+                    <div class="step-number-badge">02</div>
+                    <div class="step-title-wrap">
+                        <h2>සේවා ලැයිස්තුව සැකසීම (Services Catalog)</h2>
+                        <div class="step-subtitle">3D Alignment, Wheel Balancing, Puncture Repairs & Nitrogen Air</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <ul class="guide-list">
+                        <li>Services පිටුවෙන් Wheel Alignment, Wheel Balancing, Tube/Tubeless Repairs සඳහා වන ගාස්තු ඇතුළත් කරන්න.</li>
+                    </ul>
+                    
+                    <a href="/modules/tire_centre/services.html" class="action-link-btn">🛠️ Services පිටුවට යන්න ➔</a>
+                </div>
+            </div>
+    
+
+            <!-- STEP 3 -->
+            <div class="step-card" id="step3">
+                <div class="step-header">
+                    <div class="step-number-badge">03</div>
+                    <div class="step-title-wrap">
+                        <h2>POS බිල්පත් සහ වාහන අංකය ඇතුළත් කිරීම (POS & Vehicle Billing)</h2>
+                        <div class="step-subtitle">Vehicle Number, Tire Serial Numbers, Warranty & Combined Bill</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <ul class="guide-list">
+                        <li>POS තිරයේදී පාරිභෝගිකයාගේ වාහන අංකය (Vehicle No) ඇතුළත් කරන්න.</li>
+                        <li>අලෙවි කරන ටයර් සහ සිදුකළ සේවා එකම බිල්පතකට ඇතුළත් කර මුද්‍රණය කරන්න.</li>
+                    </ul>
+                    
+                    <a href="/modules/tire_centre/pos.html" class="action-link-btn">🛒 POS තිරයට යන්න ➔</a>
+                </div>
+            </div>
+    
+
+            <!-- STEP 4 -->
+            <div class="step-card" id="step4">
+                <div class="step-header">
+                    <div class="step-number-badge">04</div>
+                    <div class="step-title-wrap">
+                        <h2>පාරිභෝගික සහ වාහන සේවා ඉතිහාසය (Customer Vehicle History)</h2>
+                        <div class="step-subtitle">Mileage Tracking, Previous Tire Sizes & Repeat Service</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <ul class="guide-list">
+                        <li>Customers පිටුවෙන් ඕනෑම වාහන අංකයක් සෙවීම මගින් කලින් දැමූ ටයර් වර්ග සහ දිනයන් ක්ෂණිකව බලාගත හැක.</li>
+                    </ul>
+                    
+                    <a href="/modules/tire_centre/customers.html" class="action-link-btn">👥 Customers පිටුවට යන්න ➔</a>
+                </div>
+            </div>
+    
+
+            <!-- STEP 5 -->
+            <div class="step-card" id="step5">
+                <div class="step-header">
+                    <div class="step-number-badge">05</div>
+                    <div class="step-title-wrap">
+                        <h2>දෛනික ගනුදෙනු සහ මූල්‍ය පාලනය (Daily Workbench & Accounts)</h2>
+                        <div class="step-subtitle">Daily Cash Inflow, Card Settlements, Expenses & P&L</div>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <ul class="guide-list">
+                        <li>Workbench සහ Accounting පිටු මගින් දවසේ ශුද්ධ ආදායම හා වියදම් නිරීක්ෂණය කරන්න.</li>
+                    </ul>
+                    
+                    <a href="/modules/tire_centre/workbench.html" class="action-link-btn">📋 Workbench වෙත යන්න ➔</a>
+                </div>
+            </div>
+    
+        </div>
+
+        <div class="manual-footer">
+            DIGIBIZ Universal Business System • Tire Center භාවිත මාර්ගෝපදේශය • All Rights Reserved
+        </div>
+    </div>
+
+    <script>
+        function filterManualSteps() {
+            const query = (document.getElementById('manualSearchInput').value || '').trim().toLowerCase();
+            const cards = document.querySelectorAll('.step-card');
+
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (!query || text.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

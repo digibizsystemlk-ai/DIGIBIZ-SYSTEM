@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="/royal_arabian/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula Payroll Engine & Reports - DIGIBIZ</title>
+    <style>
+        html.digibiz-sidebar-reserved body {
+            margin-left: 260px;
+        }
+
+        @media (max-width:768px) {
+            html.digibiz-sidebar-reserved body {
+                margin-left: 0;
+            }
+        }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+
+    <script src="/royal_arabian/core/firebase-init.js?v=100"></script>
+    <script src="/royal_arabian/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/royal_arabian/core/auth-roles.js?v=2265"></script>
+    <script src="/royal_arabian/core/business-types.js?v=4"></script>
+    <script src="/royal_arabian/core/sidebar.js?v=2116"></script>
+    <script src="attendance-core.js?v=560"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            padding: 30px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header-title h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-bank {
+            background: #059669;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        }
+
+        .btn-bank:hover {
+            background: #047857;
+        }
+
+        .btn-epf {
+            background: #7c3aed;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+        }
+
+        .btn-epf:hover {
+            background: #6d28d9;
+        }
+
+        .controls-bar {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-group label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+        }
+
+        .tab-btn {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            background: transparent;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #2563eb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-banner {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .sum-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        .sum-card span {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        .sum-card strong {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .card-box {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-custom th,
+        .table-custom td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 12.5px;
+        }
+
+        .table-custom th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .table-custom tr:hover {
+            background: #f8fafc;
+        }
+
+        .btn-payslip {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-payslip:hover {
+            background: #bae6fd;
+        }
+
+        /* Modal & Printables */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            width: 100%;
+            max-width: 760px;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .printable-doc {
+            background: white;
+            padding: 24px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Courier New', Courier, monospace;
+            color: #000;
+        }
+
+        .printable-doc table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+
+        .printable-doc th,
+        .printable-doc td {
+            padding: 5px 8px;
+            font-size: 12px;
+            text-align: left;
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        .format-select-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .format-option-btn {
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .format-option-btn:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .format-option-btn i {
+            font-size: 32px;
+            color: #2563eb;
+        }
+
+        .format-option-btn strong {
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        .format-option-btn span {
+            font-size: 11px;
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-section">
+        <div class="header-title">
+            <h2>💵 <span id="bizNameTitle">Company</span> - Formula Payroll Engine</h2>
+            <p>EPF & Casual සේවක ගණනය කිරීම්, වැටුප් අත්තිකාරම් (Salary Advance) සහ ගෙවීම් වාර්තා</p>
+        </div>
+        <div class="action-bar" style="flex-wrap:wrap;">
+            <button class="btn-primary" style="background:#8b5cf6;" onclick="openSheet1Modal()"><i
+                    class="fa-solid fa-file-excel"></i> Sheet 1: Permanent Advance</button>
+            <button class="btn-primary" style="background:#ec4899;" onclick="openSheet2Modal()"><i
+                    class="fa-solid fa-file-excel"></i> Sheet 2: Casual Advance</button>
+            <button class="btn-primary" style="background:#f59e0b;" onclick="openSheet3Modal()"><i
+                    class="fa-solid fa-vault"></i> Sheet 3: Savings Summary</button>
+            <button class="btn-primary btn-bank" onclick="openBankFormatModal()"><i
+                    class="fa-solid fa-building-columns"></i> Peoples Bank Transfer</button>
+            <button class="btn-primary btn-epf" onclick="openEpfFormatModal()"><i class="fa-solid fa-file-invoice"></i>
+                EPF C-Form Report</button>
+        </div>
+    </div>
+
+    <div class="controls-bar">
+        <div class="control-group">
+            <label>Payroll Month (මාසය)</label>
+            <input type="month" id="selectedMonth" onchange="calculatePayroll()">
+        </div>
+        <div class="control-group">
+            <label>Late Grace Period</label>
+            <select disabled>
+                <option>First 15 Mins FREE</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Late Formula</label>
+            <select disabled>
+                <option>Basic ÷ 200 × 3 ÷ 60 / min</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Normal OT Formula</label>
+            <select disabled>
+                <option>Basic ÷ 200 × 1.5</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Double OT Formula</label>
+            <select disabled>
+                <option>Basic ÷ 200 × 2.0</option>
+            </select>
+        </div>
+        <div style="margin-left:auto;align-self:flex-end;">
+            <button class="btn-primary" onclick="calculatePayroll()"><i class="fa-solid fa-arrows-rotate"></i>
+                Recalculate Payroll</button>
+        </div>
+    </div>
+
+    <!-- Dual Summary Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="tab-btn active" id="tabAll" onclick="setStaffFilter('ALL')">👥 All Employees (සියලුම
+            සේවකයින්)</button>
+        <button class="tab-btn" id="tabEpf" onclick="setStaffFilter('EPF')">🏢 EPF Permanent Staff Summary</button>
+        <button class="tab-btn" id="tabCasual" onclick="setStaffFilter('Casual')">🔨 Casual Staff Breakdown (කැෂුවල්
+            වාර්තාව)</button>
+    </div>
+
+    <div class="summary-banner">
+        <div class="sum-card">
+            <span>Total Basic Salaries</span>
+            <strong id="sumTotalBasic">Rs. 0.00</strong>
+        </div>
+        <div class="sum-card">
+            <span>Total Overtime Paid</span>
+            <strong id="sumTotalOt" style="color:#2563eb;">Rs. 0.00</strong>
+        </div>
+        <div class="sum-card">
+            <span>Total EPF (8% + 12%)</span>
+            <strong id="sumTotalEpf" style="color:#8b5cf6;">Rs. 0.00</strong>
+        </div>
+        <div class="sum-card">
+            <span>Total Net Salary Payable</span>
+            <strong id="sumTotalNet" style="color:#10b981;">Rs. 0.00</strong>
+        </div>
+    </div>
+
+    <div class="card-box">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>EMP ID & EPF No</th>
+                    <th>Employee Name & Category</th>
+                    <th>Basic Salary</th>
+                    <th>Allowances</th>
+                    <th>Overtime (Normal + Sundry)</th>
+                    <th>Salary Advance</th>
+                    <th>Loan / Late Deduct</th>
+                    <th>EPF 8%</th>
+                    <th>Balance Net Pay</th>
+                    <th>Official Payslip</th>
+                </tr>
+            </thead>
+            <tbody id="payrollTableBody">
+                <!-- Populated dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Official Payslip Modal -->
+    <div class="modal-overlay" id="payslipModal">
+        <div class="modal-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="font-size:18px;font-weight:800;">📄 Official Pay Report Preview</h3>
+                <button class="btn-primary" onclick="printElement('printablePayslip')"><i class="fa-solid fa-print"></i>
+                    Print / Download PDF</button>
+            </div>
+
+            <div class="printable-doc" id="printablePayslip">
+                <div
+                    style="border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-end;">
+                    <div>
+                        <strong style="font-size:16px;"><span id="psCompanyName">Company</span> - Pay Report</strong>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="font-size:14px;font-weight:700;text-decoration:underline;" id="psMonthHeader">Month of 2026/August</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:14px;line-height:1.7;font-size:13px;">
+                    <div>Name : Mr/Miss <strong id="psName">-- Employee Name --</strong></div>
+                    <div>Designation : <span id="psDes">--</span></div>
+                    <div style="font-family:monospace;font-weight:700;font-size:12.5px;color:#0f172a;margin-top:2px;">
+                        <span id="psNicLine">NIC-123456789</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span id="psTinLine">TIN 123456789</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span id="psEpfLine">EPF NO-001</span>
+                    </div>
+                </div>
+
+                <table style="border:none;">
+                    <tr>
+                        <td style="border:none;">Basic Salary</td>
+                        <td style="border:none;text-align:right;" id="psBasic">30,000.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Travelling Allowance</td>
+                        <td style="border:none;text-align:right;" id="psTravel">-</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Production Incentive</td>
+                        <td style="border:none;text-align:right;" id="psProd">-</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Attendants Allowance</td>
+                        <td style="border:none;text-align:right;" id="psAttnAllow">-</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Meals Allowance (<span id="psMealsRate">200.00</span> x <span
+                                id="psMealsDays">6</span>)</td>
+                        <td style="border:none;text-align:right;" id="psMealsTotal">1,200.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Over Time (<span id="psOtHrs">73:00</span> @ <span
+                                id="psOtRate">225.00</span>)</td>
+                        <td style="border:none;text-align:right;" id="psOtTotal">16,425.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Sundry OT (<span id="psSundryHrs">8:00</span> @ <span
+                                id="psSundryRate">300.00</span>)</td>
+                        <td style="border:none;text-align:right;" id="psSundryTotal">2,400.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Festival Bonus</td>
+                        <td style="border:none;text-align:right;" id="psFestivalBonus">-</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Special Add Amounts</td>
+                        <td style="border:none;text-align:right;" id="psSpecialAdd">-</td>
+                    </tr>
+                    <tr style="border-top:1.5px solid #000;border-bottom:1.5px solid #000;font-weight:bold;">
+                        <td style="border:none;">Total Gross Salary</td>
+                        <td style="border:none;text-align:right;" id="psGross">50,025.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">E.P.F 12% Company</td>
+                        <td style="border:none;text-align:right;" id="psEpf12">3,600.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">E.T.F 3% Company</td>
+                        <td style="border:none;text-align:right;" id="psEtf3">900.00</td>
+                    </tr>
+                </table>
+
+                <div style="font-weight:bold;margin-top:10px;text-decoration:underline;">Deductions:</div>
+                <table style="border:none;width:100%;font-size:12px;">
+                    <tr>
+                        <td style="border:none;width:26%;">EPF 8%</td>
+                        <td style="border:none;width:54%;"></td>
+                        <td style="border:none;text-align:right;width:20%;" id="psEpf8">4,400.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">APIT</td>
+                        <td style="border:none;"></td>
+                        <td style="border:none;text-align:right;" id="psApitTax">-</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Salary Advance</td>
+                        <td style="border:none;"></td>
+                        <td style="border:none;text-align:right;" id="psAdvance">5,000.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Deduct Loan Details</td>
+                        <td style="border:none;font-family:monospace;font-size:11px;" id="psLoanDetails">60000.00 -15000.00 - 3 = 45000.00</td>
+                        <td style="border:none;text-align:right;" id="psLoan">5,000.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Deduct Late - Minutes</td>
+                        <td style="border:none;font-family:monospace;font-size:11px;" id="psLateDetails">115 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 13.75</td>
+                        <td style="border:none;text-align:right;" id="psLateDeduct">1,375.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Deduct Attendants - No pay</td>
+                        <td style="border:none;font-family:monospace;font-size:11px;" id="psAttnDetails">3.00 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1,833.33</td>
+                        <td style="border:none;text-align:right;" id="psDeductAttendance">5,500.00</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none;">Special Deductions</td>
+                        <td style="border:none;"></td>
+                        <td style="border:none;text-align:right;" id="psSpecialDeduct">-</td>
+                    </tr>
+                    <tr style="border-top:1.5px solid #000;border-bottom:1.5px solid #000;font-weight:bold;color:#000;">
+                        <td style="border:none;" colspan="2">Total Deductions:</td>
+                        <td style="border:none;text-align:right;font-weight:bold;" id="psTotalDeductions">21,275.00</td>
+                    </tr>
+                    <tr style="border-top:1.5px solid #000;border-bottom:4px double #000;font-weight:bold;font-size:13.5px;">
+                        <td style="border:none;" colspan="2">Balance Salary Rs :</td>
+                        <td style="border:none;text-align:right;" id="psBalanceSalary">128,725.00</td>
+                    </tr>
+                </table>
+
+                <div style="margin-top:35px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;">
+                    <div>Employee's Signature: ___________________________</div>
+                    <div>Authorized Signature: ___________________________</div>
+                </div>
+            </div>
+
+            <div style="text-align:right;margin-top:16px;">
+                <button class="btn-primary" style="background:#64748b;"
+                    onclick="closeModal('payslipModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Peoples Bank Format Selector Modal -->
+    <div class="modal-overlay" id="bankFormatModal">
+        <div class="modal-card" style="max-width:500px;">
+            <h3 style="font-size:18px;font-weight:800;color:#0f172a;text-align:center;">🏛️ Peoples Bank Salary Transfer
+                Report</h3>
+            <p style="font-size:13px;color:#64748b;text-align:center;margin-top:4px;">ඔබට අවශ්‍ය වාර්තා Format එක
+                තෝරාගන්න:</p>
+
+            <div class="format-select-box">
+                <div class="format-option-btn" onclick="exportBankCsv()">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <strong>Excel / CSV Format</strong>
+                    <span>ගිණුම්කරණය සහ Excel භාවිතය සඳහා</span>
+                </div>
+                <div class="format-option-btn" onclick="openBankPdfPreview()">
+                    <i class="fa-solid fa-file-pdf" style="color:#ef4444;"></i>
+                    <strong>PDF Document</strong>
+                    <span>බැංකුවට භාරදීමට මුද්‍රණය සඳහා</span>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:20px;">
+                <button class="btn-primary" style="background:#64748b;"
+                    onclick="closeModal('bankFormatModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EPF C-Form Format Selector Modal -->
+    <div class="modal-overlay" id="epfFormatModal">
+        <div class="modal-card" style="max-width:500px;">
+            <h3 style="font-size:18px;font-weight:800;color:#7c3aed;text-align:center;">📄 EPF C-Form Act No 15 of 1958
+            </h3>
+            <p style="font-size:13px;color:#64748b;text-align:center;margin-top:4px;">ලියාපදිංචි අංකය:
+                <strong>53728/B</strong> | Format එක තෝරාගන්න:
+            </p>
+
+            <div class="format-select-box">
+                <div class="format-option-btn" onclick="exportEpfCsv()">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <strong>Excel / CSV Format</strong>
+                    <span>EPF System Upload සඳහා</span>
+                </div>
+                <div class="format-option-btn" onclick="openEpfPdfPreview()">
+                    <i class="fa-solid fa-file-pdf" style="color:#ef4444;"></i>
+                    <strong>PDF Document</strong>
+                    <span>මහ බැංකුවට භාරදීමට මුද්‍රණය සඳහා</span>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:20px;">
+                <button class="btn-primary" style="background:#64748b;"
+                    onclick="closeModal('epfFormatModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let activeStaffFilter = 'ALL';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const boot = async () => {
+                if (window.AttendanceCore && AttendanceCore.bootstrapAuthorizedBusiness) {
+                    await AttendanceCore.bootstrapAuthorizedBusiness();
+                }
+                loadBizNameHeader();
+                bootPage();
+            };
+
+            if (window.AttendanceCore && AttendanceCore.canAccessModule) {
+                AttendanceCore.canAccessModule().then(ok => {
+                    if (!ok) {
+                        alert('⚠️ නැවත ලොගින් වීමට අවශ්‍යයි. මෙය Administration පිටුවක් බැවින් Owner/Admin/Accountant ලෙස පමණක් ප්‍රවේශය හිමි වේ.');
+                        window.location.href = '/';
+                        return;
+                    }
+                    boot();
+                });
+            } else {
+                boot();
+            }
+        });
+
+        function bootPage() {
+            // Default to the current/previous month dynamically (H-4)
+            const now = new Date();
+            const monthInput = document.getElementById('selectedMonth');
+            if (monthInput && !monthInput.value) {
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                monthInput.value = `${y}-${m}`;
+            }
+            calculatePayroll();
+            initFirestorePayrollListener();
+        }
+
+        async function initFirestorePayrollListener() {
+            let firestoreDb = null;
+            let bizId = null;
+            let attempts = 0;
+
+            while (attempts < 20) {
+                firestoreDb = window.db || (window.firebase && window.firebase.firestore ? window.firebase.firestore() : null);
+                if (window.AttendanceCore && AttendanceCore.getAuthorizedBusinessId) {
+                    try {
+                        bizId = await AttendanceCore.getAuthorizedBusinessId();
+                    } catch (e) {
+                        bizId = AttendanceCore.resolveBusinessId();
+                    }
+                } else if (window.AttendanceCore) {
+                    bizId = AttendanceCore.resolveBusinessId();
+                }
+                if (firestoreDb && bizId) break;
+                attempts++;
+                await new Promise(r => setTimeout(r, 200));
+            }
+
+            if (!firestoreDb || !bizId) return;
+
+            const handleEmpList = (list) => {
+                if (Array.isArray(list) && list.length > 0) {
+                    if (window.AttendanceCore) AttendanceCore.setEmployees(list);
+                    window.__cachedEmployees = list;
+                    calculatePayroll();
+                }
+            };
+
+            // 1. Snapshot on doc
+            firestoreDb.collection('businesses').doc(bizId).onSnapshot(async doc => {
+                if (!doc.exists) return;
+                const data = doc.data() || {};
+                let list = data.registered_employees || data.employees || data.staff || [];
+
+                if (!Array.isArray(list) || list.length === 0) {
+                    try {
+                        const subSnap = await firestoreDb.collection('businesses').doc(bizId).collection('registered_employees').get();
+                        if (!subSnap.empty) {
+                            list = [];
+                            subSnap.forEach(d => list.push(d.data()));
+                        } else {
+                            const empSnap = await firestoreDb.collection('businesses').doc(bizId).collection('employees').get();
+                            if (!empSnap.empty) {
+                                list = [];
+                                empSnap.forEach(d => list.push(d.data()));
+                            }
+                        }
+                    } catch (e) { }
+                }
+
+                handleEmpList(list);
+            }, err => console.warn('Firestore payroll employees sync error:', err));
+
+            // Immediate get() for zero-latency initial load
+            try {
+                let snap = await firestoreDb.collection('businesses').doc(bizId).get();
+                if (!snap.exists || !snap.data() || !Array.isArray(snap.data().registered_employees) || snap.data().registered_employees.length === 0) {
+                    const user = window.firebase && window.firebase.auth ? window.firebase.auth().currentUser : null;
+                    if (user && user.email) {
+                        const q = await firestoreDb.collection('businesses').where('ownerEmail', '==', String(user.email).trim().toLowerCase()).limit(1).get();
+                        if (!q.empty) snap = q.docs[0];
+                    }
+                }
+                if (snap && snap.exists) {
+                    const data = snap.data() || {};
+                    let list = data.registered_employees || data.employees || data.staff || [];
+                    if (!Array.isArray(list) || list.length === 0) {
+                        const subSnap = await firestoreDb.collection('businesses').doc(snap.id).collection('registered_employees').get();
+                        if (!subSnap.empty) {
+                            list = [];
+                            subSnap.forEach(d => list.push(d.data()));
+                        } else {
+                            const empSnap = await firestoreDb.collection('businesses').doc(snap.id).collection('employees').get();
+                            if (!empSnap.empty) {
+                                list = [];
+                                empSnap.forEach(d => list.push(d.data()));
+                            }
+                        }
+                    }
+                    if (Array.isArray(list) && list.length > 0) {
+                        handleEmpList(list);
+                    }
+                }
+            } catch (e) { }
+
+            // 2. Listen to attendance logs
+            firestoreDb.collection('businesses').doc(bizId).collection('attendance_logs').onSnapshot(snap => {
+                const logs = [];
+                snap.forEach(doc => { if (doc.exists) logs.push(doc.data()); });
+                if (logs.length > 0 && window.AttendanceCore) {
+                    AttendanceCore.setAttendanceLogs(logs);
+                    calculatePayroll();
+                }
+            }, err => console.warn('Firestore payroll attendance logs sync error:', err));
+
+            // 3. Listen to salary loans
+            firestoreDb.collection('businesses').doc(bizId).collection('salary_loans').onSnapshot(snap => {
+                const loans = [];
+                snap.forEach(doc => { if (doc.exists) loans.push({ id: doc.id, ...doc.data() }); });
+                if (loans.length > 0 && window.AttendanceCore) {
+                    AttendanceCore.setLoans(loans);
+                    calculatePayroll();
+                }
+            }, err => console.warn('Firestore payroll loans sync error:', err));
+        }
+
+        function loadBizNameHeader() {
+            const bizTitle = document.getElementById('bizNameTitle');
+            if (!bizTitle) return;
+            const bid = window.AttendanceCore ? AttendanceCore.resolveBusinessId() : null;
+            if (bid && window.db) {
+                window.db.collection('businesses').doc(bid).get().then(snap => {
+                    if (snap.exists && snap.data().name) {
+                        bizTitle.textContent = snap.data().name;
+                    }
+                }).catch(() => { });
+            }
+        }
+
+        function setStaffFilter(type) {
+            activeStaffFilter = type;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (type === 'ALL') document.getElementById('tabAll').classList.add('active');
+            if (type === 'EPF') document.getElementById('tabEpf').classList.add('active');
+            if (type === 'Casual') document.getElementById('tabCasual').classList.add('active');
+            calculatePayroll();
+        }
+
+        function getSunroseEmployees() {
+            let stored = window.AttendanceCore ? AttendanceCore.getEmployees() : [];
+            if (!stored || stored.length === 0) {
+                stored = window.__cachedEmployees || [];
+            }
+
+            if (stored && stored.length > 0) {
+                return stored.map((e, idx) => ({
+                    ...e,
+                    epfNo: e.epfNo || String(idx + 1).padStart(3, '0'),
+                    empId: e.empId || String(idx + 1),
+                    empType: e.empType || 'EPF',
+                    name: e.name || 'Unnamed Employee',
+                    basic: e.basic ? Number(e.basic) : 30000,
+                    salaryAdvance: e.salaryAdvance ? Number(e.salaryAdvance) : 0,
+                    travel: e.travel ? Number(e.travel) : 0,
+                    prod: e.prod ? Number(e.prod) : 0,
+                    attnAllow: e.attnAllow ? Number(e.attnAllow) : 0,
+                    nightMeals: e.nightMeals ? Number(e.nightMeals) : 0,
+                    festivalBonus: e.festivalBonus ? Number(e.festivalBonus) : 0,
+                    loanInstalment: e.loanInstalment ? Number(e.loanInstalment) : 0,
+                    totalLoanAmount: e.totalLoanAmount ? Number(e.totalLoanAmount) : 0,
+                    repaidLoanAmount: e.repaidLoanAmount ? Number(e.repaidLoanAmount) : 0,
+                    remainingInstallments: e.remainingInstallments ? Number(e.remainingInstallments) : 0,
+                    noPayDays: e.noPayDays !== undefined ? Number(e.noPayDays) : (e.absentDays ? Number(e.absentDays) : 0),
+                    lateMinutes: e.lateMinutes ? Number(e.lateMinutes) : 0,
+                    deductAttendance: e.deductAttendance ? Number(e.deductAttendance) : (e.deductAttnd ? Number(e.deductAttnd) : 0),
+                    deductLate: e.deductLate ? Number(e.deductLate) : 0,
+                    savingsFund: e.savingsFund ? Number(e.savingsFund) : 0,
+                    specialAdd: e.specialAdd ? Number(e.specialAdd) : 0,
+                    specialDeduct: e.specialDeduct ? Number(e.specialDeduct) : 0,
+                    apitTax: (e.apitTax !== undefined && e.apitTax !== null) ? Number(e.apitTax) : (e.epfTax ? Number(e.epfTax) : null),
+                    des: e.designation || 'Staff',
+                    bankAcct: e.bank || 'N/A',
+                    phone: e.phone || '',
+                    dob: e.dob || '1990-01-01',
+                    doj: e.doj || '2023-01-01',
+                    address: e.address || ''
+                }));
+            }
+
+            return [];
+        }
+
+        // ---------- Sri Lanka IRD APIT (Advance Personal Income Tax) Slabs ----------
+        // Tax-Free Threshold: Rs. 150,000/month (Rs. 1.8M/year)
+        // Band 1: Next Rs. 41,666.67 @ 6%
+        // Band 2: Next Rs. 41,666.67 @ 12%
+        // Band 3: Next Rs. 41,666.67 @ 18%
+        // Band 4: Next Rs. 41,666.67 @ 24%
+        // Band 5: Next Rs. 41,666.67 @ 30%
+        // Band 6: Above Rs. 358,333.33 @ 36%
+        function calculateSriLankaAPIT(monthlyGross) {
+            if (!monthlyGross || monthlyGross <= 150000) return 0;
+            let taxable = monthlyGross - 150000;
+            let tax = 0;
+            const bandSize = 41666.67;
+
+            // Band 1 (6%)
+            let b1 = Math.min(taxable, bandSize);
+            tax += b1 * 0.06;
+            taxable -= b1;
+
+            // Band 2 (12%)
+            if (taxable > 0) {
+                let b2 = Math.min(taxable, bandSize);
+                tax += b2 * 0.12;
+                taxable -= b2;
+            }
+            // Band 3 (18%)
+            if (taxable > 0) {
+                let b3 = Math.min(taxable, bandSize);
+                tax += b3 * 0.18;
+                taxable -= b3;
+            }
+            // Band 4 (24%)
+            if (taxable > 0) {
+                let b4 = Math.min(taxable, bandSize);
+                tax += b4 * 0.24;
+                taxable -= b4;
+            }
+            // Band 5 (30%)
+            if (taxable > 0) {
+                let b5 = Math.min(taxable, bandSize);
+                tax += b5 * 0.30;
+                taxable -= b5;
+            }
+            // Band 6 (36%)
+            if (taxable > 0) {
+                tax += taxable * 0.36;
+            }
+            return Math.round(tax * 100) / 100;
+        }
+
+        // ---------- Attendance-derived payroll helpers (CPU-1 / H-2) ----------
+        // Applies the unified rest-break rule: >=20h -> 2h, >=8.5h -> 1h, else 0.
+        // IMPORTANT (CPU-5): OT hours are exact, NOT rounded.
+        function calcAttnMetrics(inStr, outStr, dateStr, shift) {
+            if (window.AttendanceCore && AttendanceCore.calcShiftMetrics) {
+                const res = AttendanceCore.calcShiftMetrics(shift, inStr, outStr, dateStr);
+                return {
+                    normalOtHrs: res.otHoursNum,
+                    sundryOtHrs: res.sundryOtHoursNum,
+                    workDay: res.activeWorkHoursNum > 0,
+                    nightDay: res.totalShiftHoursNum >= 12 || (shift && String(shift).toLowerCase().includes('night')) || (inStr && inStr.includes('PM'))
+                };
+            }
+
+            function toMins(t) {
+                if (!t || t === '--:--') return 0;
+                const parts = String(t).split(' ');
+                let [h, m] = parts[0].split(':').map(Number);
+                if (parts[1]) {
+                    const ap = parts[1].toUpperCase();
+                    if (ap === 'PM' && h < 12) h += 12;
+                    if (ap === 'AM' && h === 12) h = 0;
+                }
+                return (h || 0) * 60 + (m || 0);
+            }
+            let inM = toMins(inStr), outM = toMins(outStr);
+            if (!inStr || inStr === '--:--' || outM === 0) {
+                return { normalOtHrs: 0, sundryOtHrs: 0, workDay: false, nightDay: false };
+            }
+            if (outM < inM) outM += 24 * 60;
+            const elapsed = (outM - inM) / 60;
+            let rest = 0;
+            if (elapsed >= 20) rest = 2.0;
+            else if (elapsed >= 8.5) rest = 1.0;
+            const active = Math.max(0, elapsed - rest);
+
+            const isHoliday = window.AttendanceCore && AttendanceCore.isMercantileHoliday
+                ? AttendanceCore.isMercantileHoliday(dateStr, shift)
+                : (shift && (String(shift).toLowerCase().includes('mercantile') || String(shift).toLowerCase().includes('holiday')));
+
+            let normalOtHrs = 0;
+            let sundryOtHrs = 0;
+
+            if (isHoliday) {
+                sundryOtHrs = active;
+                normalOtHrs = 0;
+            } else {
+                normalOtHrs = Math.max(0, active - 8.0);
+                sundryOtHrs = 0;
+            }
+
+            const isNight = (shift && String(shift).toLowerCase().includes('night')) || (inStr && inStr.includes('PM')) || elapsed >= 12;
+
+            return { normalOtHrs, sundryOtHrs, workDay: active > 0, nightDay: isNight };
+        }
+
+        function getEmployeeMonthlyAttendance(empId, phone, monthVal) {
+            let normalOtHrs = 0;
+            let sundryOtHrs = 0;
+            let workDays = 0;
+            let nightDays = 0;
+            const logs = window.AttendanceCore ? AttendanceCore.getAttendanceLogs() : [];
+            if (!Array.isArray(logs)) return { normalOtHrs, sundryOtHrs, workDays, nightDays };
+            try {
+                const empIdStr = String(empId || '');
+                const empPhoneStr = String(phone || '').replace(/[^0-9]/g, '');
+                logs.forEach(l => {
+                    if (!l || !l.date) return;
+                    if (!String(l.date).startsWith(monthVal)) return;
+                    const lid = String(l.empId || '');
+                    const lphone = String(l.phone || '').replace(/[^0-9]/g, '');
+                    const match = (lid === empIdStr) || (empPhoneStr && lphone === empPhoneStr);
+                    if (!match) return;
+                    const inT = l.inTime || l.time;
+                    const outT = l.outTime;
+                    if (!inT || inT === '--:--') return;
+                    const m = calcAttnMetrics(inT, outT, l.date, l.shift);
+                    normalOtHrs += m.normalOtHrs;
+                    sundryOtHrs += m.sundryOtHrs;
+                    if (m.workDay) workDays++;
+                    if (m.nightDay) nightDays++;
+                });
+            } catch (e) { }
+            return { 
+                normalOtHrs: Number(normalOtHrs.toFixed(2)), 
+                sundryOtHrs: Number(sundryOtHrs.toFixed(2)), 
+                workDays, 
+                nightDays 
+            };
+        }
+
+        let computedPayrollData = [];
+
+        function calculatePayroll() {
+            let employees = getSunroseEmployees();
+
+            if (activeStaffFilter === 'EPF') {
+                employees = employees.filter(e => e.empType !== 'Casual');
+            } else if (activeStaffFilter === 'Casual') {
+                employees = employees.filter(e => e.empType === 'Casual');
+            }
+
+            const tbody = document.getElementById('payrollTableBody');
+
+            if (!employees || employees.length === 0) {
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:#64748b;font-weight:600;"><i class="fa-solid fa-sync fa-spin"></i> සේවක දත්ත පද්ධතියෙන් (Cloud Firestore) ලබාගනිමින් පවතී... <button class="btn-outline" onclick="initFirestorePayrollListener()" style="margin-left:10px;padding:4px 10px;font-size:12px;"><i class="fa-solid fa-rotate"></i> Sync Data</button></td></tr>';
+                }
+                document.getElementById('sumTotalBasic').textContent = 'Rs. 0.00';
+                document.getElementById('sumTotalOt').textContent = 'Rs. 0.00';
+                document.getElementById('sumTotalEpf').textContent = 'Rs. 0.00';
+                document.getElementById('sumTotalNet').textContent = 'Rs. 0.00';
+                return;
+            }
+
+            let sumBasic = 0;
+            let sumOt = 0;
+            let sumEpf = 0;
+            let sumNet = 0;
+
+            computedPayrollData = [];
+            let tbodyHtml = '';
+
+            employees.forEach(emp => {
+                const isCasual = emp.empType === 'Casual';
+                const basic = emp.basic || 30000;
+                const otHourlyRate = (basic / 200) * 1.5;
+                const sundryOtHourlyRate = (basic / 200) * 2.0;
+
+                const monthVal = document.getElementById('selectedMonth').value;
+                const attn = getEmployeeMonthlyAttendance(emp.empId, emp.phone, monthVal);
+                const normalOtHrs = attn.normalOtHrs;
+                const sundryOtHrs = attn.sundryOtHrs || (emp.sundryOtHrs ? Number(emp.sundryOtHrs) : (emp.sundryOt ? Number(emp.sundryOt) : 0));
+                const workedDays = attn.workDays;
+                const nightDays = attn.nightDays;
+
+                const travel = emp.travel || 0;
+                const prod = emp.prod || 0;
+                const attnAllow = emp.attnAllow || 0;
+                const nightMealsRate = emp.nightMeals || 0;
+                const nightMealsTotal = nightMealsRate * nightDays;
+                const festivalBonus = emp.festivalBonus || 0;
+                const specialAdd = emp.specialAdd || 0;
+                const specialDeduct = emp.specialDeduct || 0;
+
+                const normalOtPay = normalOtHrs * otHourlyRate;
+                const sundryOtPay = sundryOtHrs * sundryOtHourlyRate;
+                const totalOtPay = normalOtPay + sundryOtPay;
+
+                const totalAllowances = travel + prod + attnAllow + nightMealsTotal + festivalBonus;
+                const grossSalary = basic + totalAllowances + totalOtPay + specialAdd;
+
+                const epf8 = isCasual ? 0 : basic * 0.08;
+                const epf12 = isCasual ? 0 : basic * 0.12;
+                const etf3 = isCasual ? 0 : basic * 0.03;
+
+                const profileAdvance = Number(emp.salaryAdvance || 0);
+                const savingsFund = Number(emp.savingsFund || 0);
+
+                const firestoreLoansList = (window.AttendanceCore && typeof window.AttendanceCore.getLoans === 'function') ? window.AttendanceCore.getLoans() : [];
+                let extraLoansAdvance = 0;
+                let extraLoansInstalment = 0;
+                let matchedLoanDoc = null;
+
+                if (Array.isArray(firestoreLoansList)) {
+                    firestoreLoansList.forEach(l => {
+                        const lEmpId = String(l.empId || '').trim();
+                        const lEmpName = String(l.empName || '').trim().toLowerCase();
+                        const empName = String(emp.name || '').trim().toLowerCase();
+                        const empMatch = (lEmpId === String(emp.empId).trim()) || (lEmpId === String(emp.epfNo || '').trim()) || (lEmpId === String(emp.nic || '').trim()) || (lEmpName && empName && lEmpName === empName);
+                        
+                        if (empMatch) {
+                            const typeStr = String(l.type || '').toLowerCase();
+                            if ((typeStr.includes('advance') || typeStr.includes('savings')) && (!l.id || !l.id.startsWith('DIR_'))) {
+                                extraLoansAdvance += Number(l.monthlyDeduction || l.totalAmount || 0);
+                            } else if ((typeStr.includes('loan') || typeStr.includes('staff')) && (!l.id || !l.id.startsWith('DIR_'))) {
+                                extraLoansInstalment += Number(l.monthlyDeduction || 0);
+                                matchedLoanDoc = l;
+                            }
+                        }
+                    });
+                }
+
+                const salaryAdvance = extraLoansAdvance > 0 ? (profileAdvance + extraLoansAdvance) : profileAdvance;
+                const totalAdvance = salaryAdvance + savingsFund;
+
+                const autoApitTax = isCasual ? 0 : calculateSriLankaAPIT(grossSalary);
+                const apitTax = (emp.apitTax !== null && emp.apitTax !== undefined && emp.apitTax > 0) ? emp.apitTax : autoApitTax;
+
+                // Loan Details & Installment Deduction (Fix: Prevent duplication of profile & loan record)
+                const profileLoanInstalment = Number(emp.loanInstalment || 0);
+                const loanInstalment = matchedLoanDoc ? Number(matchedLoanDoc.monthlyDeduction || extraLoansInstalment || profileLoanInstalment) : (extraLoansInstalment > 0 ? extraLoansInstalment : profileLoanInstalment);
+
+                let totalLoanAmount = Number(emp.totalLoanAmount || 0);
+                let remainingLoanBalance = 0;
+                let repaidLoanAmount = Number(emp.repaidLoanAmount || 0);
+
+                if (matchedLoanDoc) {
+                    if (!totalLoanAmount && matchedLoanDoc.totalAmount) totalLoanAmount = Number(matchedLoanDoc.totalAmount);
+                    if (matchedLoanDoc.balanceRemaining !== undefined && matchedLoanDoc.balanceRemaining !== null) {
+                        remainingLoanBalance = Number(matchedLoanDoc.balanceRemaining);
+                        repaidLoanAmount = Math.max(0, totalLoanAmount - remainingLoanBalance);
+                    } else if (repaidLoanAmount > 0 && totalLoanAmount > 0) {
+                        remainingLoanBalance = Math.max(0, totalLoanAmount - repaidLoanAmount);
+                    }
+                } else {
+                    if (!totalLoanAmount && loanInstalment > 0) totalLoanAmount = loanInstalment * 12;
+                    remainingLoanBalance = Math.max(0, totalLoanAmount - repaidLoanAmount);
+                }
+
+                let loanDetailsStr = '-';
+                if (totalLoanAmount > 0 || loanInstalment > 0) {
+                    if (!repaidLoanAmount && totalLoanAmount > 0 && remainingLoanBalance > 0 && remainingLoanBalance <= totalLoanAmount) {
+                        repaidLoanAmount = Math.max(0, totalLoanAmount - remainingLoanBalance);
+                    }
+                    const instCount = loanInstalment > 0 ? Math.ceil(totalLoanAmount / loanInstalment) : 12;
+                    const remInstCount = loanInstalment > 0
+                        ? Math.ceil(remainingLoanBalance / loanInstalment)
+                        : ((emp.remainingInstallments && Number(emp.remainingInstallments) > 0) ? Number(emp.remainingInstallments) : Math.max(0, instCount - Math.floor(repaidLoanAmount / (loanInstalment || 1))));
+                    loanDetailsStr = `${totalLoanAmount.toFixed(2)} - ${repaidLoanAmount.toFixed(2)} = ${remainingLoanBalance.toFixed(2)} - Rem Inst: ${remInstCount}`;
+                }
+
+                // Late Minutes & Deduction Breakdown (Formula: Basic / 200 * 3 / 60, Grace: 15 mins)
+                const graceMins = 15;
+                const lateMinutes = Number(emp.lateMinutes || (attn && attn.lateMinutes) || 0);
+                const netLateMinutes = Math.max(0, lateMinutes - graceMins);
+                const lateRatePerMin = (basic / 200) * (3 / 60); // Basic / 200 * 3 / 60 -> e.g. 13.75 for 55k
+                const deductLate = (emp.deductLate !== undefined && emp.deductLate !== null && emp.deductLate > 0)
+                    ? Number(emp.deductLate)
+                    : Math.round(netLateMinutes * lateRatePerMin * 100) / 100;
+                let lateDetailsStr = '-';
+                if (lateMinutes > 0 || deductLate > 0) {
+                    if (lateMinutes > graceMins) {
+                        lateDetailsStr = `${netLateMinutes} mins (${lateMinutes}-${graceMins}g) @ Rs. ${lateRatePerMin.toFixed(2)}/min`;
+                    } else {
+                        lateDetailsStr = `${lateMinutes} mins (Free Grace) @ Rs. ${lateRatePerMin.toFixed(2)}/min`;
+                    }
+                }
+
+                // No Pay Days & Attendance Deduction Breakdown
+                const noPayDays = Number(emp.noPayDays || emp.absentDays || 0);
+                const noPayRatePerDay = (basic / 30);
+                const deductAttendance = (emp.deductAttendance !== undefined && emp.deductAttendance !== null && emp.deductAttendance > 0)
+                    ? Number(emp.deductAttendance)
+                    : Math.round(noPayDays * noPayRatePerDay * 100) / 100;
+                let attnDetailsStr = '-';
+                if (noPayDays > 0 || deductAttendance > 0) {
+                    attnDetailsStr = `${noPayDays.toFixed(1)} days @ Rs. ${noPayRatePerDay.toFixed(2)}/day`;
+                }
+
+                const totalDeductions = epf8 + totalAdvance + loanInstalment + deductAttendance + deductLate + specialDeduct + apitTax;
+
+                const balanceNetPay = grossSalary - totalDeductions;
+
+                sumBasic += basic;
+                sumOt += totalOtPay;
+                sumEpf += (epf8 + epf12);
+                sumNet += balanceNetPay;
+
+                const item = {
+                    ...emp,
+                    normalOtHrs,
+                    normalOtPay,
+                    sundryOtHrs,
+                    sundryOtPay,
+                    totalOtPay,
+                    nightMealsRate,
+                    nightMealsTotal,
+                    festivalBonus,
+                    totalAllowances,
+                    specialAdd,
+                    grossSalary,
+                    epf8,
+                    epf12,
+                    etf3,
+                    salaryAdvance,
+                    savingsFund,
+                    totalAdvance,
+                    loanInstalment,
+                    totalLoanAmount,
+                    repaidLoanAmount,
+                    remainingLoanBalance,
+                    loanDetailsStr,
+                    lateMinutes,
+                    deductLate,
+                    lateDetailsStr,
+                    noPayDays,
+                    deductAttendance,
+                    attnDetailsStr,
+                    specialDeduct,
+                    apitTax,
+                    totalDeductions,
+                    balanceNetPay,
+                    otHourlyRate,
+                    sundryOtHourlyRate,
+                    workedDays,
+                    nightDays
+                };
+
+                computedPayrollData.push(item);
+
+                const typeBadge = isCasual
+                    ? `<span style="font-size:10.5px;color:#b45309;background:#fef3c7;padding:2px 6px;border-radius:4px;font-weight:800;">Casual</span>`
+                    : `<span style="font-size:10.5px;color:#15803d;background:#dcfce7;padding:2px 6px;border-radius:4px;font-weight:800;">EPF Staff</span>`;
+
+                const fmtHrs = (val) => {
+                    const num = Number(val || 0);
+                    return Number.isInteger(num) ? String(num) : num.toFixed(2);
+                };
+                const otDetailStr = sundryOtHrs > 0 ? `(${fmtHrs(normalOtHrs)}h Norm + ${fmtHrs(sundryOtHrs)}h Sundry)` : `(${fmtHrs(normalOtHrs)}h)`;
+
+                tbodyHtml += `
+                    <tr>
+                        <td>
+                            <strong>${emp.empId}</strong><br>
+                            <span style="font-size:11px;color:#7e22ce;font-weight:700;">EPF: ${emp.epfNo}</span>
+                        </td>
+                        <td>
+                            <strong>${emp.name}</strong> ${typeBadge}<br>
+                            <span style="font-size:11px;color:#64748b;">${emp.des}</span>
+                        </td>
+                        <td>Rs. ${basic.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td>Rs. ${totalAllowances.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td><strong style="color:#2563eb;">Rs. ${totalOtPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> <span style="font-size:11px;color:#475569;">${otDetailStr}</span></td>
+                        <td><strong style="color:#dc2626;">Rs. ${totalAdvance.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></td>
+                        <td>Rs. ${loanInstalment.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td>Rs. ${epf8.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td><strong style="color:#10b981;font-size:14px;">Rs. ${balanceNetPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></td>
+                        <td>
+                            <div style="display:flex;gap:4px;justify-content:center;">
+                                <button class="btn-primary" onclick="openPayslipModal('${emp.empId}')" style="padding:4px 8px;font-size:11px;">
+                                    <i class="fa-solid fa-file-invoice-dollar"></i> Payslip
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('payrollTableBody').innerHTML = tbodyHtml;
+            document.getElementById('sumTotalBasic').textContent = `Rs. ${sumBasic.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('sumTotalOt').textContent = `Rs. ${sumOt.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('sumTotalEpf').textContent = `Rs. ${sumEpf.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('sumTotalNet').textContent = `Rs. ${sumNet.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        }
+
+        function openPayslipModal(empId) {
+            const searchId = String(empId).trim();
+            const emp = computedPayrollData.find(e => String(e.empId).trim() === searchId || String(e.nic || '').trim() === searchId || String(e.epfNo || '').trim() === searchId);
+            if (!emp) {
+                alert(`⚠️ "${empId}" සේවකයාගේ වැටුප් පත්‍රිකාව සොයාගත නොහැකි විය.`);
+                return;
+            }
+
+            const setTxt = (id, txt) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = txt;
+            };
+
+            const rawMonth = document.getElementById('selectedMonth')?.value || '';
+            let monthTitle = 'Month of 2026/August';
+            if (rawMonth) {
+                const parts = rawMonth.split('-');
+                if (parts.length === 2) {
+                    const y = parts[0];
+                    const mNum = parseInt(parts[1], 10);
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    const mName = monthNames[mNum - 1] || 'August';
+                    monthTitle = `Month of ${y}/${mName}`;
+                }
+            }
+            setTxt('psMonthHeader', monthTitle);
+
+            setTxt('psName', emp.name || '-');
+            setTxt('psDes', emp.designation || emp.des || '-');
+
+            const nicVal = emp.nic || emp.nicNo || '123456789';
+            const tinVal = emp.tin || emp.tinNo || '123456789';
+            const epfVal = emp.epfNo || '001';
+            setTxt('psNicLine', `NIC-${nicVal}`);
+            setTxt('psTinLine', `TIN ${tinVal}`);
+            setTxt('psEpfLine', `EPF NO-${epfVal}`);
+
+            const bizTitleEl = document.getElementById('psCompanyName');
+            if (bizTitleEl) {
+                const bid = window.AttendanceCore ? AttendanceCore.resolveBusinessId() : null;
+                if (bid && window.db) {
+                    window.db.collection('businesses').doc(bid).get().then(snap => {
+                        if (snap.exists && snap.data().name) bizTitleEl.textContent = snap.data().name;
+                    }).catch(() => { });
+                }
+            }
+
+            setTxt('psBasic', emp.basic ? emp.basic.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00');
+            setTxt('psTravel', emp.travel ? emp.travel.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psProd', emp.prod ? emp.prod.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psAttnAllow', emp.attnAllow ? emp.attnAllow.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            
+            const mealsRate = emp.nightMeals || 200;
+            const mealsDays = emp.nightDays || 0;
+            setTxt('psMealsRate', mealsRate.toLocaleString('en-US', { minimumFractionDigits: 2 }));
+            setTxt('psMealsDays', mealsDays);
+            setTxt('psMealsTotal', mealsDays > 0 ? (mealsRate * mealsDays).toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            
+            setTxt('psOtHrs', `${Math.floor(emp.normalOtHrs || 0)}:${String(Math.round(((emp.normalOtHrs || 0) % 1) * 60)).padStart(2, '0')}`);
+            setTxt('psOtRate', emp.otHourlyRate ? emp.otHourlyRate.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00');
+            setTxt('psOtTotal', emp.normalOtPay ? emp.normalOtPay.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            
+            setTxt('psSundryHrs', `${Math.floor(emp.sundryOtHrs || 0)}:${String(Math.round(((emp.sundryOtHrs || 0) % 1) * 60)).padStart(2, '0')}`);
+            setTxt('psSundryRate', emp.sundryOtHourlyRate ? emp.sundryOtHourlyRate.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00');
+            setTxt('psSundryTotal', emp.sundryOtPay ? emp.sundryOtPay.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            
+            setTxt('psFestivalBonus', emp.festivalBonus ? emp.festivalBonus.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psSpecialAdd', emp.specialAdd ? emp.specialAdd.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psGross', emp.grossSalary ? emp.grossSalary.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00');
+
+            setTxt('psEpf12', emp.epf12 ? emp.epf12.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psEtf3', emp.etf3 ? emp.etf3.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psEpf8', emp.epf8 ? emp.epf8.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psAdvance', emp.totalAdvance ? emp.totalAdvance.toLocaleString('en-US', { minimumFractionDigits: 2 }) : (emp.salaryAdvance ? emp.salaryAdvance.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-'));
+            setTxt('psSavingsFund', emp.savingsFund ? emp.savingsFund.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+
+            setTxt('psLoanDetails', emp.loanDetailsStr || '-');
+            setTxt('psLoan', emp.loanInstalment ? emp.loanInstalment.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psAttnDetails', emp.attnDetailsStr || '-');
+            setTxt('psDeductAttendance', emp.deductAttendance ? emp.deductAttendance.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psLateDetails', emp.lateDetailsStr || '-');
+            setTxt('psLateDeduct', emp.deductLate ? emp.deductLate.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+
+            setTxt('psSpecialDeduct', emp.specialDeduct ? emp.specialDeduct.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psApitTax', emp.apitTax ? emp.apitTax.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-');
+            setTxt('psTotalDeductions', emp.totalDeductions ? emp.totalDeductions.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00');
+            setTxt('psBalanceSalary', emp.balanceNetPay ? emp.balanceNetPay.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00');
+
+            document.getElementById('payslipModal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function openBankFormatModal() {
+            document.getElementById('bankFormatModal').style.display = 'flex';
+        }
+
+        function openEpfFormatModal() {
+            document.getElementById('epfFormatModal').style.display = 'flex';
+        }
+
+        function exportBankCsv() {
+            let csv = "EPF NO,EMPLOYEE NAME,BANK ACCOUNT NO,SALARY ADVANCE,BALANCE NET PAY RS\n";
+            computedPayrollData.forEach(e => {
+                csv += `"${e.epfNo}","${e.name}","${e.bankAcct}",${e.advance},${e.balanceNetPay}\n`;
+            });
+            downloadFile(csv, "Peoples_Bank_Salary_Transfer.csv", "text/csv");
+            closeModal('bankFormatModal');
+        }
+
+        function exportEpfCsv() {
+            let csv = "EPF REG NO,MEMBER NO,MEMBER NAME,NIC NO,GROSS SALARY,EPF 8%,EPF 12%,TOTAL EPF 20%\n";
+            computedPayrollData.filter(e => e.empType !== 'Casual').forEach(e => {
+                const tot = e.epf8 + e.epf12;
+                csv += `"53728/B","${e.epfNo}","${e.name}","${e.empId}",${e.grossSalary},${e.epf8},${e.epf12},${tot}\n`;
+            });
+            downloadFile(csv, "EPF_C_Form_Report.csv", "text/csv");
+            closeModal('epfFormatModal');
+        }
+
+        function downloadFile(content, fileName, mimeType) {
+            const a = document.createElement('a');
+            const blob = new Blob([content], { type: mimeType });
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            a.click();
+        }
+
+        function renderSheetRows(empList, isSummary) {
+            if (!empList || empList.length === 0) return '';
+            let html = '';
+            empList.forEach((emp, idx) => {
+                const no = idx + 1;
+                const id = emp.empId || emp.epfNo || '-';
+                const name = (emp.name || '-');
+                const nic = emp.nic || emp.empId || '';
+                const savings = Number(emp.savingsFund || emp.savings || 0);
+                const advance = Number(emp.salaryAdvance || emp.advance || 0);
+                const total = savings + advance;
+                const fmt = v => v.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                if (isSummary) {
+                    // Sheet 3: Savings Fund Summary
+                    html += `
+                        <tr>
+                            <td style="border:1px solid #000;padding:5px;text-align:center;">${no}</td>
+                            <td style="border:1px solid #000;padding:5px;text-align:center;">${id}</td>
+                            <td style="border:1px solid #000;padding:5px;">${name} - ${nic}</td>
+                            <td style="border:1px solid #000;padding:5px;text-align:right;">${fmt(savings)}</td>
+                        </tr>
+                    `;
+                } else {
+                    // Sheet 1 & 2: Savings Fund + Salary Advance
+                    html += `
+                        <tr>
+                            <td style="border:1px solid #000;padding:5px;text-align:center;">${no}</td>
+                            <td style="border:1px solid #000;padding:5px;text-align:center;">${id}</td>
+                            <td style="border:1px solid #000;padding:5px;">${name} - ${nic}</td>
+                            <td style="border:1px solid #000;padding:5px;text-align:right;">${fmt(savings)}</td>
+                            <td style="border:1px solid #000;padding:5px;text-align:right;">${fmt(advance)}</td>
+                            <td style="border:1px solid #000;padding:5px;text-align:right;font-weight:bold;">${fmt(total)}</td>
+                            <td style="border:1px solid #000;"></td>
+                        </tr>
+                    `;
+                }
+            });
+            return html;
+        }
+
+        function renderSheetTotals(empList, isSummary) {
+            if (!empList || empList.length === 0) return '';
+            let totalSavings = 0, totalAdvance = 0;
+            empList.forEach(emp => {
+                totalSavings += Number(emp.savingsFund || emp.savings || 0);
+                totalAdvance += Number(emp.salaryAdvance || emp.advance || 0);
+            });
+            const fmt = v => v.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (isSummary) {
+                return `<tr style="font-weight:bold;background:#f1f5f9;border-top:2px solid #000;">
+                    <td colspan="3" style="border:1px solid #000;padding:8px;text-align:right;">Total Collection Amounts Rs :</td>
+                    <td style="border:1px solid #000;padding:8px;text-align:right;">${fmt(totalSavings)}</td>
+                </tr>`;
+            }
+            return `<tr style="font-weight:bold;background:#f1f5f9;border-top:2px solid #000;">
+                <td colspan="3" style="border:1px solid #000;padding:8px;text-align:right;">Total Amount Rs :</td>
+                <td style="border:1px solid #000;padding:8px;text-align:right;">${fmt(totalSavings)}</td>
+                <td style="border:1px solid #000;padding:8px;text-align:right;">${fmt(totalAdvance)}</td>
+                <td style="border:1px solid #000;padding:8px;text-align:right;">${fmt(totalSavings + totalAdvance)}</td>
+                <td style="border:1px solid #000;"></td>
+            </tr>`;
+        }
+
+        function openSheet1Modal() {
+            // CPU-3: Sheet 1 = Permanent (EPF) employees, data from master records
+            const permanent = computedPayrollData.filter(e => e.empType !== 'Casual');
+            const body = document.querySelector('#printableSheet1 tbody');
+            const foot = document.querySelector('#printableSheet1 tfoot');
+            if (body) {
+                body.innerHTML = renderSheetRows(permanent, false) ||
+                    '<tr><td colspan="7" style="border:1px solid #000;padding:8px;text-align:center;">No permanent employees found.</td></tr>';
+            }
+            if (foot) foot.innerHTML = renderSheetTotals(permanent, false);
+            document.getElementById('sheet1Modal').style.display = 'flex';
+        }
+
+        function openSheet2Modal() {
+            // CPU-3: Sheet 2 = Casual staff, data from master records
+            const casual = computedPayrollData.filter(e => e.empType === 'Casual');
+            const body = document.querySelector('#printableSheet2 tbody');
+            const foot = document.querySelector('#printableSheet2 tfoot');
+            if (body) {
+                body.innerHTML = renderSheetRows(casual, false) ||
+                    '<tr><td colspan="7" style="border:1px solid #000;padding:8px;text-align:center;">No casual staff found.</td></tr>';
+            }
+            if (foot) foot.innerHTML = renderSheetTotals(casual, false);
+            document.getElementById('sheet2Modal').style.display = 'flex';
+        }
+
+        function openSheet3Modal() {
+            // CPU-3: Sheet 3 = Year Savings summary for all employees
+            const all = computedPayrollData;
+            const body = document.querySelector('#printableSheet3 tbody');
+            const foot = document.querySelector('#printableSheet3 tfoot');
+            if (body) {
+                body.innerHTML = renderSheetRows(all, true) ||
+                    '<tr><td colspan="4" style="border:1px solid #000;padding:8px;text-align:center;">No employees found.</td></tr>';
+            }
+            if (foot) foot.innerHTML = renderSheetTotals(all, true);
+            document.getElementById('sheet3Modal').style.display = 'flex';
+        }
+    </script>
+
+    <!-- Sheet 1 Modal: Permanent Salary Advance -->
+    <div class="modal-overlay" id="sheet1Modal">
+        <div class="modal-card" style="max-width:920px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="font-size:18px;font-weight:800;">📄 Salary Advance - Permanent Employees List (Sheet 1)</h3>
+                <button class="btn-primary" onclick="printElement('printableSheet1')"><i class="fa-solid fa-print"></i>
+                    Print A4 / Export PDF</button>
+            </div>
+
+            <div class="printable-doc" id="printableSheet1"
+                style="background:white;padding:24px;border:1px solid #cbd5e1;font-family:'Courier New',Courier,monospace;color:#000;">
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:2px solid #000;padding-bottom:8px;">
+                    <div style="font-size:18px;font-weight:bold;text-decoration:underline;">Salary Advance - Permanent
+                        Employees List</div>
+                    <div style="font-size:14px;font-weight:bold;">25-Jul-26</div>
+                </div>
+
+                <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin:10px 0;">
+                    <thead>
+                        <tr style="background:#e2e8f0;border-bottom:1.5px solid #000;">
+                            <th style="border:1px solid #000;padding:6px;text-align:center;width:40px;">No</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:center;width:60px;">EMP ID</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:left;">Name</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:right;">Employees Savings Fund
+                                Collect Amount Rs :</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:right;">Salary Advance Amount Rs :
+                            </th>
+                            <th style="border:1px solid #000;padding:6px;text-align:right;">Total Amount Rs :</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:center;width:90px;">Signature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by openSheet1Modal() from the current
+                             business's employee data (never static/hard-coded). -->
+                    </tbody>
+                    <tfoot>
+                        <!-- Totals populated dynamically by openSheet1Modal(). -->
+                    </tfoot>
+                </table>
+
+                <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:center;">
+                    <div>Authorized Signature: ________________________________________</div>
+                </div>
+            </div>
+
+            <div style="text-align:right;margin-top:16px;">
+                <button class="btn-primary" style="background:#64748b;"
+                    onclick="closeModal('sheet1Modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:center;">
+        <div>Authorized Signature: ________________________________________</div>
+    </div>
+    </div>
+
+    <div style="text-align:right;margin-top:16px;">
+        <button class="btn-primary" style="background:#64748b;" onclick="closeModal('sheet1Modal')">Close</button>
+    </div>
+    </div>
+    </div>
+
+    <!-- Sheet 2 Modal: Casual / Trainee Salary Advance -->
+    <div class="modal-overlay" id="sheet2Modal">
+        <div class="modal-card" style="max-width:920px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="font-size:18px;font-weight:800;">📄 Salary Advance - Casual / Trainee Employees List (Sheet
+                    2)</h3>
+                <button class="btn-primary" onclick="printElement('printableSheet2')"><i class="fa-solid fa-print"></i>
+                    Print A4 / Export PDF</button>
+            </div>
+
+            <div class="printable-doc" id="printableSheet2"
+                style="background:white;padding:24px;border:1px solid #cbd5e1;font-family:'Courier New',Courier,monospace;color:#000;">
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:2px solid #000;padding-bottom:8px;">
+                    <div style="font-size:18px;font-weight:bold;text-decoration:underline;">Salary Advance - Employees
+                        List</div>
+                    <div style="font-size:14px;font-weight:bold;">25-Jul-26</div>
+                </div>
+
+                <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin:10px 0;">
+                    <thead>
+                        <tr style="background:#e2e8f0;border-bottom:1.5px solid #000;">
+                            <th style="border:1px solid #000;padding:6px;text-align:center;width:40px;">No</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:center;width:60px;">Emp ID</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:left;">Name</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:right;">Employees Savings Fund
+                                Collect Amount Rs :</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:right;">Salary Advance Amount Rs :
+                            </th>
+                            <th style="border:1px solid #000;padding:6px;text-align:right;">Total Amount Rs :</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:center;width:90px;">Signature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by openSheet2Modal() from the current
+                             business's casual-staff data (never static/hard-coded). -->
+                    </tbody>
+                    <tfoot>
+                        <!-- Totals populated dynamically by openSheet2Modal(). -->
+                    </tfoot>
+                </table>
+
+                <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:center;">
+                    <div>Authorized Signature: ________________________________________</div>
+                </div>
+            </div>
+
+            <div style="text-align:right;margin-top:16px;">
+                <button class="btn-primary" style="background:#64748b;"
+                    onclick="closeModal('sheet2Modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sheet 3 Modal: 2026 Year Savings Fund Total Collections -->
+    <div class="modal-overlay" id="sheet3Modal">
+        <div class="modal-card" style="max-width:850px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="font-size:18px;font-weight:800;">💰 2026 Year Savings Fund Total Collections (Sheet 3)</h3>
+                <button class="btn-primary" onclick="printElement('printableSheet3')"><i class="fa-solid fa-print"></i>
+                    Print A4 / Export PDF</button>
+            </div>
+
+            <div class="printable-doc" id="printableSheet3"
+                style="background:white;padding:24px;border:1px solid #cbd5e1;font-family:'Courier New',Courier,monospace;color:#000;">
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:2px solid #000;padding-bottom:8px;">
+                    <div style="font-size:18px;font-weight:bold;text-decoration:underline;">2026 Year Savings Fund Total
+                        Collections</div>
+                    <div style="font-size:14px;font-weight:bold;">25-Jul-26</div>
+                </div>
+
+                <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin:10px 0;">
+                    <thead>
+                        <tr style="background:#e2e8f0;border-bottom:1.5px solid #000;">
+                            <th style="border:1px solid #000;padding:6px;text-align:center;width:40px;">No</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:center;width:60px;">EMP ID</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:left;">Name</th>
+                            <th style="border:1px solid #000;padding:6px;text-align:right;">Fund Collect Amount Rs :
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by openSheet3Modal() from the current
+                             business's employee data (never static/hard-coded). -->
+                    </tbody>
+                    <tfoot>
+                        <!-- Totals populated dynamically by openSheet3Modal(). -->
+                    </tfoot>
+                </table>
+
+                <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:center;">
+                    <div>Authorized Signature: ________________________________________</div>
+                </div>
+            </div>
+
+            <div style="text-align:right;margin-top:16px;">
+                <button class="btn-primary" style="background:#64748b;"
+                    onclick="closeModal('sheet3Modal')">Close</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="/snapshots/ROYAL_ARABIAN/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Settings - DIGIBIZ™</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/firebase-init.js?v=100"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/auth-roles.js?v=2135"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/event-bus.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/business-types.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/subscription-manager.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/sidebar.js?v=2116"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; min-height: 100vh; }
+        .main-content { padding: 32px 40px; min-height: 100vh; max-width: 1000px; margin: 0 auto; }
+        @media (max-width: 768px) { .main-content { padding: 20px 16px; } }
+
+        .page-header { margin-bottom: 28px; }
+        .page-title { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 12px; }
+        .page-subtitle { color: #64748b; font-size: 14px; margin-top: 6px; font-weight: 500; }
+
+        .lang-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        
+        .lang-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .lang-card:hover {
+            transform: translateY(-4px);
+            border-color: #94a3b8;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+        }
+        .lang-card.active {
+            border-color: #10b981;
+            background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+        }
+
+        .lang-flag { font-size: 38px; line-height: 1; margin-bottom: 14px; }
+        .lang-name-primary { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; }
+        .lang-name-secondary { font-size: 14px; font-weight: 600; color: #64748b; margin-top: 2px; margin-bottom: 12px; }
+        .lang-desc { font-size: 13px; color: #475569; line-height: 1.5; margin-bottom: 18px; }
+
+        .lang-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: fit-content;
+        }
+        .lang-card.active .lang-status-badge {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .lang-card:not(.active) .lang-status-badge {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .action-banner {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .btn-quick-nav {
+            background: #0f3b2c;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-quick-nav:hover {
+            background: #165b44;
+            transform: translateY(-2px);
+        }
+        .btn-secondary-nav {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-secondary-nav:hover {
+            background: #e2e8f0;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 14px 22px;
+            border-radius: 14px;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 99999;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        .toast-msg.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <span>🌐</span>
+                <span id="pageTitleText">Language Settings (භාෂා සැකසුම් / மொழி)</span>
+            </div>
+            <p class="page-subtitle" id="pageSubtitleText">Choose your preferred system display language and receipt printing format.</p>
+        </div>
+
+        <div class="lang-grid">
+            <!-- English Card -->
+            <div class="lang-card" id="card-en" onclick="selectSystemLanguage('en')">
+                <div>
+                    <div class="lang-flag">🇬🇧</div>
+                    <div class="lang-name-primary">English</div>
+                    <div class="lang-name-secondary">International Standard (Default)</div>
+                    <div class="lang-desc">
+                        Full English UI, standard invoices, receipts, and system navigation across all business modules.
+                    </div>
+                </div>
+                <div>
+                    <div class="lang-status-badge" id="badge-en">
+                        <i class="fas fa-check"></i> <span id="status-en">Select English</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sinhala Card -->
+            <div class="lang-card" id="card-si" onclick="selectSystemLanguage('si')">
+                <div>
+                    <div class="lang-flag">🇱🇰</div>
+                    <div class="lang-name-primary">සිංහල</div>
+                    <div class="lang-name-secondary">Sinhala Language</div>
+                    <div class="lang-desc">
+                        පද්ධති මෙනු, පියවර, ආකෘති, WhatsApp පණිවිඩ සහ මුද්‍රිත බිල්පත් සම්පූර්ණයෙන්ම සිංහල භාෂාවෙන්.
+                    </div>
+                </div>
+                <div>
+                    <div class="lang-status-badge" id="badge-si">
+                        <i class="fas fa-check"></i> <span id="status-si">සිංහල තෝරන්න</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tamil Card -->
+            <div class="lang-card" id="card-ta" onclick="selectSystemLanguage('ta')">
+                <div>
+                    <div class="lang-flag">🇮🇳 / 🇱🇰</div>
+                    <div class="lang-name-primary">தமிழ்</div>
+                    <div class="lang-name-secondary">Tamil Language</div>
+                    <div class="lang-desc">
+                        கணினி மெனுக்கள், படிவங்கள், WhatsApp ரசீதுகள் மற்றும் அச்சு விலைப்பட்டியல் அனைத்தும் தமிழில்.
+                    </div>
+                </div>
+                <div>
+                    <div class="lang-status-badge" id="badge-ta">
+                        <i class="fas fa-check"></i> <span id="status-ta">தமிழைத் தேர்ந்தெடுக்கவும்</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action & Quick Jump Banner -->
+        <div class="action-banner">
+            <div>
+                <div style="font-size: 15px; font-weight: 800; color: #0f172a;" id="actionBannerTitle">
+                    ⚡ Instant Synchronized Updates
+                </div>
+                <div style="font-size: 13px; color: #64748b; margin-top: 4px;" id="actionBannerSubtitle">
+                    Language preferences apply immediately to Sidebar menus, Quick Billing, and Receipt engines.
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="/modules/quick_billing/app.html" class="btn-quick-nav" id="btnGoBilling">
+                    <span>⚡ Quick Billing Terminal</span>
+                </a>
+                <a href="/modules/company/settings.html" class="btn-secondary-nav" id="btnGoSettings">
+                    <i class="fas fa-sliders-h"></i> <span>All Settings</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-msg" id="toastMsg">
+        <i class="fas fa-check-circle" style="color: #34d399; font-size: 18px;"></i>
+        <span id="toastText">Language updated successfully!</span>
+    </div>
+
+    <script>
+        const I18N_PAGE = {
+            en: {
+                title: "Language Settings (භාෂා සැකසුම් / மொழி)",
+                subtitle: "Choose your preferred system display language and receipt printing format.",
+                activeBadge: "Active Language",
+                selectBadge: "Select",
+                toast: "Language set to English successfully!",
+                bannerTitle: "⚡ Instant Synchronized Updates",
+                bannerSubtitle: "Language preferences apply immediately to Sidebar menus, Quick Billing, and Receipt engines."
+            },
+            si: {
+                title: "භාෂා සැකසුම් (Language Settings)",
+                subtitle: "පද්ධති මෙනු සහ බිල්පත් මුද්‍රණය සඳහා ඔබ කැමති භාෂාව තෝරන්න.",
+                activeBadge: "සක්‍රිය භාෂාව",
+                selectBadge: "තෝරන්න",
+                toast: "භාෂාව සිංහල ලෙස සාර්ථකව සකස් කරන ලදී!",
+                bannerTitle: "⚡ ක්ෂණික සමමුහුර්ත වෙනස්කම්",
+                bannerSubtitle: "මෙහිදී තෝරාගන්නා භාෂාව Sidebar මෙනු, Quick Billing සහ බිල්පත් මුද්‍රණයට එකවර ක්‍රියාත්මක වේ."
+            },
+            ta: {
+                title: "மொழி அமைப்புகள் (Language Settings)",
+                subtitle: "கணினி காட்சி மற்றும் ரசீது அச்சிடலுக்கான உங்கள் விருப்ப மொழியைத் தேர்ந்தெடுக்கவும்.",
+                activeBadge: "செயலில் உள்ள மொழி",
+                selectBadge: "தேர்ந்தெடு",
+                toast: "மொழி தமிழாக வெற்றிகரமாக மாற்றப்பட்டது!",
+                bannerTitle: "⚡ உடனடி ஒத்திசைவு மாற்றங்கள்",
+                bannerSubtitle: "Sidebar மெனுக்கள், Quick Billing மற்றும் ரசீதுகளுக்கு உடனடியாகப் பொருந்தும்."
+            }
+        };
+
+        function getCurrentLanguage() {
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+
+        function updateCardUI(lang) {
+            ['en', 'si', 'ta'].forEach(code => {
+                const card = document.getElementById(`card-${code}`);
+                const statusSpan = document.getElementById(`status-${code}`);
+                const isActive = code === lang;
+                
+                if (card) card.classList.toggle('active', isActive);
+                if (statusSpan) {
+                    const textDict = I18N_PAGE[lang] || I18N_PAGE.en;
+                    if (isActive) {
+                        statusSpan.textContent = textDict.activeBadge;
+                    } else {
+                        if (code === 'en') statusSpan.textContent = "Select English";
+                        if (code === 'si') statusSpan.textContent = "සිංහල තෝරන්න";
+                        if (code === 'ta') statusSpan.textContent = "தமிழைத் தேர்ந்தெடுக்கவும்";
+                    }
+                }
+            });
+
+            const pageText = I18N_PAGE[lang] || I18N_PAGE.en;
+            const tTitle = document.getElementById('pageTitleText');
+            const tSub = document.getElementById('pageSubtitleText');
+            const bTitle = document.getElementById('actionBannerTitle');
+            const bSub = document.getElementById('actionBannerSubtitle');
+
+            if (tTitle) tTitle.textContent = pageText.title;
+            if (tSub) tSub.textContent = pageText.subtitle;
+            if (bTitle) bTitle.textContent = pageText.bannerTitle;
+            if (bSub) bSub.textContent = pageText.bannerSubtitle;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastMsg');
+            const txt = document.getElementById('toastText');
+            if (txt) txt.textContent = msg;
+            if (toast) {
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+        }
+
+        function selectSystemLanguage(lang) {
+            if (!['en', 'si', 'ta'].includes(lang)) lang = 'en';
+            try {
+                localStorage.setItem('preferredLanguage', lang);
+            } catch (e) {}
+
+            updateCardUI(lang);
+
+            // Re-render sidebar immediately
+            if (window.sidebar && typeof window.sidebar.render === 'function') {
+                window.sidebar.render();
+            }
+
+            // Dispatch event for other active listeners
+            window.dispatchEvent(new CustomEvent('digibiz:languageChanged', { detail: { lang } }));
+
+            const textDict = I18N_PAGE[lang] || I18N_PAGE.en;
+            showToast(textDict.toast);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const lang = getCurrentLanguage();
+            updateCardUI(lang);
+        });
+    </script>
+</body>
+
+</html>

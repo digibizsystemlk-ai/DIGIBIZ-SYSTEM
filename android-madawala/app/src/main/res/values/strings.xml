@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appName">DIGIBIZ BUSINESS SYSTEM</string>
+    <string name="launcherName">DIGIBIZ BUSINESS SYSTEM</string>
+    <string name="hostName">digibiz-sys.web.app</string>
+    <string name="assetStatements">
+    [{
+        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+        \"target\": {
+            \"namespace\": \"web\",
+            \"site\": \"https://digibiz-sys.web.app\"
+        }
+    }]
+    </string>  
+</resources>

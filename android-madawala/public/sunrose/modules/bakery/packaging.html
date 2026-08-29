@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="/sunrose/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bakery Packaging Department - DIGIBIZ</title>
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="/sunrose/core/firebase-init.js?v=100"></script>
+    <script src="/sunrose/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/sunrose/core/event-validation.js?v=2"></script>
+    <script src="/sunrose/core/event-bus.js?v=2"></script>
+    <script src="/sunrose/core/accounts-core.js?v=2"></script>
+    <script src="/sunrose/core/aggregate-utils.js"></script>
+    <script src="/sunrose/core/dashboard-core.js?v=2265"></script>
+    <script src="/sunrose/core/sidebar.js?v=2116"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-database-compat.js"></script>
+    <script src="/sunrose/core/sms-wallet-core.js?v=4"></script>
+    <script src="/sunrose/core/ui-helpers.js?v=1"></script>
+    <script src="/sunrose/modules/bakery/bakery-common.js?v=22"></script>
+
+    <style>
+        :root {
+            --primary: #e11d48;
+            --primary-dark: #be123c;
+            --primary-light: #ffe4e6;
+            --indigo: #4f46e5;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --bg-page: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .pkg-wrap {
+            padding: 24px;
+            max-width: 1440px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        @media (max-width: 768px) { .pkg-wrap { padding: 12px; } }
+
+        .pkg-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .pkg-head h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0 0 4px 0;
+            letter-spacing: -0.5px;
+        }
+        .pkg-head p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .summary-bar {
+            background: linear-gradient(135deg, #1e1b4b, #311042);
+            color: #ffffff;
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+        }
+        .summary-metric-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #cbd5e1;
+            margin-bottom: 4px;
+        }
+        .summary-metric-val {
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 20px;
+            align-items: start;
+        }
+        @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
+
+        .pkg-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
+            box-sizing: border-box;
+        }
+        .pkg-card h3 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .form-row3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        @media (max-width: 640px) { .form-row, .form-row3 { grid-template-columns: 1fr; gap: 8px; } }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input, select, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            font-size: 13.5px;
+            font-family: inherit;
+            color: var(--text-main);
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            background-color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        }
+
+        .cost-hero-box {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .btn-save-pkg {
+            width: 100%;
+            padding: 14px;
+            font-size: 14.5px;
+            font-weight: 900;
+            color: #ffffff;
+            background: linear-gradient(135deg, #e11d48, #be123c);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+            transition: all 0.2s ease;
+        }
+        .btn-save-pkg:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(225, 29, 72, 0.45);
+        }
+
+        .pkg-msg {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            display: none;
+        }
+        .pkg-msg:not(:empty) { display: block; }
+        .pkg-msg.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .pkg-msg:not(.err) { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+        th { background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; padding: 9px 10px; text-align: left; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+        td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+        tr:hover td { background: #f8fafc; }
+    </style>
+</head>
+<body>
+<div class="pkg-wrap">
+    
+    <!-- Top Header -->
+    <div class="pkg-head">
+        <div>
+            <h2>🎀 Packaging Department (ඇසුරුම් අංශය)</h2>
+            <p id="pkgBusinessCtx">Bakery Packaged Finished Goods & Direct Costing Hub</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="/modules/bakery/outbound.html" style="padding:9px 16px; background:#d97706; color:#fff; text-decoration:none; border-radius:8px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(217,119,6,0.3);">
+                🥖 Baking & Batching (outbound.html ⬅️)
+            </a>
+            <a href="/modules/bakery/inbound.html" style="padding:9px 16px; background:#475569; color:#fff; text-decoration:none; border-radius:8px; font-weight:700; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+                📥 Raw Materials
+            </a>
+            <a href="/modules/bakery/stock.html?tab=fg" style="padding:9px 16px; background:#7c3aed; color:#fff; text-decoration:none; border-radius:8px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(124,58,237,0.3);">
+                📦 Finished Goods Stock (stock.html 🔗)
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Metrics Banner -->
+    <div class="summary-bar">
+        <div>
+            <div class="summary-metric-label">🥖 Unpackaged Baked Batches (ඇසුරුම් නොකළ තොග)</div>
+            <div class="summary-metric-val" id="pkgPendingBatchesVal" style="color:#fde047;">0 Batches</div>
+        </div>
+        <div>
+            <div class="summary-metric-label">📦 Packaged Finished Stock (ඇසුරුම් කළ නිමි භාණ්ඩ)</div>
+            <div class="summary-metric-val" id="pkgPackagedStockVal" style="color:#38bdf8;">Rs. 0.00</div>
+        </div>
+        <div>
+            <div class="summary-metric-label">🎀 Total Packaging Runs</div>
+            <div class="summary-metric-val" id="pkgTotalRunsVal" style="color:#f43f5e;">0 Runs</div>
+        </div>
+    </div>
+
+    <!-- Main Workflow Grid -->
+    <div class="main-grid">
+        
+        <!-- STEP 1 & 2: SELECT BATCH & PACKAGING COST BREAKDOWN -->
+        <div class="pkg-card" style="border-top: 4px solid var(--primary);">
+            <h3>
+                <span>1️⃣</span> Select Baked Batch & Product to Package
+            </h3>
+
+            <!-- Batch Selection Dropdown -->
+            <div style="margin-bottom:14px;">
+                <label>Select Baked Batch / Product *</label>
+                <select id="selectedBatchSelect" style="font-weight:700;" onchange="onBatchSelectionChange()">
+                    <option value="">-- Choose a Recent Baked Batch or Product --</option>
+                </select>
+                <div id="batchInfoBanner" style="display:none; margin-top:8px; font-size:12px; color:#be123c; background:#fff1f2; border:1px solid #fecdd3; padding:10px 12px; border-radius:8px;"></div>
+            </div>
+
+            <!-- Batch Output Quantities -->
+            <div class="form-row3" style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:16px;">
+                <div>
+                    <label>Total Units (කෑලි ගණන)</label>
+                    <input type="number" id="pkgTotalUnitsInput" value="0" min="1" step="1" style="font-weight:800; color:#0f172a;" oninput="recalcPackagingCosts()">
+                </div>
+                <div>
+                    <label>Packets to Produce (පැකට්)</label>
+                    <input type="number" id="pkgPacketsCountInput" value="0" min="0.01" step="0.01" style="font-weight:800; color:#e11d48;" oninput="recalcPackagingCosts()">
+                </div>
+                <div>
+                    <label>Base Baked Cost / Pkt</label>
+                    <input type="number" id="pkgBaseBakedCostPerPktInput" value="0" min="0" step="0.01" style="font-weight:800; color:#0284c7;" oninput="recalcPackagingCosts()">
+                </div>
+            </div>
+
+            <!-- Packaging Overheads Breakdown -->
+            <div style="background:#fff1f2; border:1px solid #ffe4e6; border-radius:10px; padding:14px; margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:800; color:#9f1239; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>🎀 Packaging Materials & Labor Costs (ඇසුරුම් ද්‍රව්‍ය හා ශ්‍රම පිරිවැය)</span>
+                    <span style="font-size:11px; font-weight:600; color:#e11d48;">Per-Packet Rate Model</span>
+                </div>
+
+                <!-- 1. Polythene / Pouch Bags -->
+                <div style="background:#ffffff; border:1px solid #fecdd3; border-radius:8px; padding:10px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <label style="margin:0; font-size:11.5px; font-weight:800; color:#0f172a;">
+                            🛍️ Polythene / Pouch Bags (පොලිතින් / කවර වියදම):
+                        </label>
+                        <span id="polytheneCostBadge" style="font-size:13px; font-weight:900; color:#e11d48;">Rs. 0.00</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <div>
+                            <label style="font-size:10px;">Cost Per Packet/Bag (Rs.)</label>
+                            <input type="number" id="polytheneUnitRateInput" value="2.50" min="0" step="0.01" style="font-size:12px; font-weight:700; padding:6px 8px;" oninput="recalcPackagingCosts()">
+                        </div>
+                        <div>
+                            <label style="font-size:10px;">Total Polythene Cost (Rs.)</label>
+                            <input type="number" id="totalPolytheneCostInput" value="0" min="0" step="0.01" readonly style="font-size:12px; font-weight:800; color:#e11d48; padding:6px 8px; background:#f8fafc;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Labels / Stickers -->
+                <div style="background:#ffffff; border:1px solid #fecdd3; border-radius:8px; padding:10px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <label style="margin:0; font-size:11.5px; font-weight:800; color:#0f172a;">
+                            🏷️ Labels & Stickers (ලේබල් / ස්ටිකර් වියදම):
+                        </label>
+                        <span id="labelCostBadge" style="font-size:13px; font-weight:900; color:#e11d48;">Rs. 0.00</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <div>
+                            <label style="font-size:10px;">Cost Per Label (Rs.)</label>
+                            <input type="number" id="labelUnitRateInput" value="1.20" min="0" step="0.01" style="font-size:12px; font-weight:700; padding:6px 8px;" oninput="recalcPackagingCosts()">
+                        </div>
+                        <div>
+                            <label style="font-size:10px;">Total Labels Cost (Rs.)</label>
+                            <input type="number" id="totalLabelCostInput" value="0" min="0" step="0.01" readonly style="font-size:12px; font-weight:800; color:#e11d48; padding:6px 8px; background:#f8fafc;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Packaging Labor -->
+                <div style="background:#ffffff; border:1px solid #fecdd3; border-radius:8px; padding:10px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <label style="margin:0; font-size:11.5px; font-weight:800; color:#0f172a;">
+                            👨‍🏭 Packaging Labor (ඇසුරුම් ශ්‍රමය):
+                        </label>
+                        <span id="packingLaborCostBadge" style="font-size:13px; font-weight:900; color:#2563eb;">Rs. 0.00</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <div>
+                            <label style="font-size:10px;">Labor Cost per Packet (Rs.)</label>
+                            <input type="number" id="packingLaborRateInput" value="2.00" min="0" step="0.01" style="font-size:12px; font-weight:700; padding:6px 8px;" oninput="recalcPackagingCosts()">
+                        </div>
+                        <div>
+                            <label style="font-size:10px;">Total Packing Labor (Rs.)</label>
+                            <input type="number" id="totalPackingLaborInput" value="0" min="0" step="0.01" readonly style="font-size:12px; font-weight:800; color:#2563eb; padding:6px 8px; background:#f8fafc;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Other Packaging Overheads (Outer Boxes, Tape, Inner Trays) -->
+                <div style="background:#ffffff; border:1px solid #fecdd3; border-radius:8px; padding:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <label style="margin:0; font-size:11.5px; font-weight:800; color:#0f172a;">
+                            📦 Outer Cartons & Tape (වෙනත් ඇසුරුම් වියදම්):
+                        </label>
+                        <span id="otherPackingCostBadge" style="font-size:13px; font-weight:900; color:#475569;">Rs. 0.00</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <div>
+                            <label style="font-size:10px;">Rate per Packet (Rs.)</label>
+                            <input type="number" id="otherPackingRateInput" value="1.00" min="0" step="0.01" style="font-size:12px; font-weight:700; padding:6px 8px;" oninput="recalcPackagingCosts()">
+                        </div>
+                        <div>
+                            <label style="font-size:10px;">Total Other Packing (Rs.)</label>
+                            <input type="number" id="totalOtherPackingInput" value="0" min="0" step="0.01" readonly style="font-size:12px; font-weight:800; color:#475569; padding:6px 8px; background:#f8fafc;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3 & 4: FINAL PACKAGED COST, PRICING & STOCK FINALIZE -->
+        <div class="pkg-card" style="border-top: 4px solid var(--indigo);">
+            <h3>
+                <span>2️⃣</span> Final Packaged Unit Cost & Selling Price
+            </h3>
+
+            <!-- Final Costing Hero Box -->
+            <div class="cost-hero-box">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#c7d2fe; font-weight:800; margin-bottom:10px;">
+                    🎯 Absorption Cost Breakdown (සමස්ත පිරිවැය සාරාංශය)
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div>
+                        <div style="font-size:10.5px; color:#cbd5e1;">BASE BAKED PRODUCT COST:</div>
+                        <div style="font-size:17px; font-weight:900; color:#38bdf8;" id="displayBaseBakedTotal">Rs. 0.00</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10.5px; color:#cbd5e1;">TOTAL PACKAGING COST:</div>
+                        <div style="font-size:17px; font-weight:900; color:#f43f5e;" id="displayTotalPackagingCost">Rs. 0.00</div>
+                    </div>
+                </div>
+
+                <div style="border-top:1px solid rgba(255,255,255,0.15); padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:10px; color:#e0e7ff;">FINAL PACKAGED COST / PKT:</div>
+                        <div style="font-size:20px; font-weight:900; color:#fde047;" id="displayFinalPackagedCostPerPkt">Rs. 0.00 / pkt</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px; color:#e0e7ff;">TOTAL BATCH VALUE:</div>
+                        <div style="font-size:20px; font-weight:900; color:#4ade80;" id="displayFinalBatchTotal">Rs. 0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Target Profit Margin & Suggested Pricing Engine -->
+            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:800; color:#1e293b; margin-bottom:10px;">
+                    💰 Suggested Selling Price & Profit Margin (විකුණුම් මිල සහ ලාභය):
+                </div>
+
+                <div class="form-row3" style="margin-bottom:10px;">
+                    <div>
+                        <label>Profit Margin %</label>
+                        <input type="number" id="profitMarginPercentInput" value="25" min="0" step="1" style="font-weight:800; color:#059669;" oninput="recalcSellingPrices()">
+                    </div>
+                    <div>
+                        <label>Wholesale Price (Rs.)</label>
+                        <input type="number" id="wholesalePriceInput" value="0" min="0" step="1" style="font-weight:800; color:#0f172a;" oninput="onManualPriceChange()">
+                    </div>
+                    <div>
+                        <label>Retail / MRP (Rs.)</label>
+                        <input type="number" id="retailPriceInput" value="0" min="0" step="1" style="font-weight:800; color:#d97706;">
+                    </div>
+                </div>
+
+                <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11.5px; font-weight:700; color:#065f46;">Estimated Profit Per Packet:</span>
+                    <span style="font-size:15px; font-weight:900; color:#059669;" id="profitPerPktDisplay">Rs. 0.00</span>
+                </div>
+            </div>
+
+            <!-- Complete Packaging Run Button -->
+            <button type="button" id="savePackagingBtn" class="btn-save-pkg" onclick="savePackagingRun()">
+                🎀 Complete Packaging & Transfer to Finished Goods Stock
+            </button>
+
+            <div id="pkgMsg" class="pkg-msg"></div>
+        </div>
+
+    </div>
+
+    <!-- Packaging Runs History Table -->
+    <div class="pkg-card" style="margin-top:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+            <h3 style="margin:0; font-size:16px; font-weight:800;">📜 Packaging Batch Records History (ඇසුරුම් කළ නිමි භාණ්ඩ වාර්තා)</h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="date" id="pkgFilterFromDate" style="width:auto; padding:6px 10px; font-size:12px;">
+                <span>to</span>
+                <input type="date" id="pkgFilterToDate" style="width:auto; padding:6px 10px; font-size:12px;">
+                <button type="button" onclick="loadPackagingHistory()" style="padding:6px 12px; background:#0f172a; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+                    Filter
+                </button>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Packaging ID & Date</th>
+                        <th>Product & Recipe</th>
+                        <th style="text-align:center;">Packets</th>
+                        <th style="text-align:right;">Packaging Cost</th>
+                        <th style="text-align:right;">Total Packaged Cost</th>
+                        <th style="text-align:right;">Cost / Pkt</th>
+                        <th style="text-align:right;">Wholesale Price</th>
+                        <th style="text-align:center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="packagingHistoryBody">
+                    <tr><td colspan="8" style="text-align:center; padding:24px; color:#94a3b8;">Loading packaging history...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let recentBakedBatches = [];
+    let currentSelectedBatch = null;
+
+    function recalcPackagingCosts() {
+        const packets = Math.max(0, Number(document.getElementById('pkgPacketsCountInput')?.value || 0));
+        const baseBakedCostPerPkt = Math.max(0, Number(document.getElementById('pkgBaseBakedCostPerPktInput')?.value || 0));
+
+        // 1. Polythene
+        const polyRate = Number(document.getElementById('polytheneUnitRateInput')?.value || 0);
+        const polyTotal = Number((packets * polyRate).toFixed(2));
+        document.getElementById('totalPolytheneCostInput').value = polyTotal;
+        document.getElementById('polytheneCostBadge').textContent = 'Rs. ' + polyTotal.toFixed(2);
+
+        // 2. Labels
+        const labelRate = Number(document.getElementById('labelUnitRateInput')?.value || 0);
+        const labelTotal = Number((packets * labelRate).toFixed(2));
+        document.getElementById('totalLabelCostInput').value = labelTotal;
+        document.getElementById('labelCostBadge').textContent = 'Rs. ' + labelTotal.toFixed(2);
+
+        // 3. Packaging Labor
+        const laborRate = Number(document.getElementById('packingLaborRateInput')?.value || 0);
+        const laborTotal = Number((packets * laborRate).toFixed(2));
+        document.getElementById('totalPackingLaborInput').value = laborTotal;
+        document.getElementById('packingLaborCostBadge').textContent = 'Rs. ' + laborTotal.toFixed(2);
+
+        // 4. Other Overheads
+        const otherRate = Number(document.getElementById('otherPackingRateInput')?.value || 0);
+        const otherTotal = Number((packets * otherRate).toFixed(2));
+        document.getElementById('totalOtherPackingInput').value = otherTotal;
+        document.getElementById('otherPackingCostBadge').textContent = 'Rs. ' + otherTotal.toFixed(2);
+
+        // Aggregations
+        const totalBaseBaked = Number((packets * baseBakedCostPerPkt).toFixed(2));
+        const totalPackaging = polyTotal + labelTotal + laborTotal + otherTotal;
+        const finalBatchTotal = totalBaseBaked + totalPackaging;
+        const finalCostPerPkt = packets > 0 ? Number((finalBatchTotal / packets).toFixed(2)) : 0;
+
+        document.getElementById('displayBaseBakedTotal').textContent = 'Rs. ' + totalBaseBaked.toFixed(2);
+        document.getElementById('displayTotalPackagingCost').textContent = 'Rs. ' + totalPackaging.toFixed(2);
+        document.getElementById('displayFinalPackagedCostPerPkt').textContent = 'Rs. ' + finalCostPerPkt.toFixed(2) + ' / pkt';
+        document.getElementById('displayFinalBatchTotal').textContent = 'Rs. ' + finalBatchTotal.toFixed(2);
+
+        recalcSellingPrices();
+    }
+    window.recalcPackagingCosts = recalcPackagingCosts;
+
+    function recalcSellingPrices() {
+        const packets = Math.max(0, Number(document.getElementById('pkgPacketsCountInput')?.value || 0));
+        const baseBakedCostPerPkt = Math.max(0, Number(document.getElementById('pkgBaseBakedCostPerPktInput')?.value || 0));
+        const polyTotal = Number(document.getElementById('totalPolytheneCostInput')?.value || 0);
+        const labelTotal = Number(document.getElementById('totalLabelCostInput')?.value || 0);
+        const laborTotal = Number(document.getElementById('totalPackingLaborInput')?.value || 0);
+        const otherTotal = Number(document.getElementById('totalOtherPackingInput')?.value || 0);
+
+        const totalBatchCost = (packets * baseBakedCostPerPkt) + polyTotal + labelTotal + laborTotal + otherTotal;
+        const costPerPkt = packets > 0 ? (totalBatchCost / packets) : 0;
+
+        const marginPct = Number(document.getElementById('profitMarginPercentInput')?.value || 25);
+        const wholesalePrice = Math.round(costPerPkt * (1 + (marginPct / 100)));
+        const retailPrice = Math.round(wholesalePrice * 1.15); // standard 15% retail markup
+        const profitPerPkt = wholesalePrice - costPerPkt;
+
+        document.getElementById('wholesalePriceInput').value = wholesalePrice;
+        document.getElementById('retailPriceInput').value = retailPrice;
+        document.getElementById('profitPerPktDisplay').textContent = 'Rs. ' + profitPerPkt.toFixed(2) + ' / packet (' + marginPct + '% margin)';
+    }
+    window.recalcSellingPrices = recalcSellingPrices;
+
+    function onManualPriceChange() {
+        const wholesalePrice = Number(document.getElementById('wholesalePriceInput')?.value || 0);
+        document.getElementById('retailPriceInput').value = Math.round(wholesalePrice * 1.15);
+    }
+    window.onManualPriceChange = onManualPriceChange;
+
+    function onBatchSelectionChange() {
+        const sel = document.getElementById('selectedBatchSelect');
+        const batchId = sel ? sel.value : '';
+        const banner = document.getElementById('batchInfoBanner');
+
+        if (!batchId) {
+            currentSelectedBatch = null;
+            if (banner) banner.style.display = 'none';
+            return;
+        }
+
+        currentSelectedBatch = recentBakedBatches.find(b => b.batchId === batchId || b.id === batchId);
+        if (!currentSelectedBatch) return;
+
+        const productName = currentSelectedBatch.productName || 'Bakery Product';
+        const recipeCode = currentSelectedBatch.recipeCode || 'BAKE';
+        const units = Number(currentSelectedBatch.actualProducedUnits || currentSelectedBatch.producedQty || 0);
+        const pkts = Number(currentSelectedBatch.actualProducedPkts || 0);
+        const unitCost = Number(currentSelectedBatch.unitCost || 0);
+        const totalBatchCost = Number(currentSelectedBatch.totalBatchCost || (units * unitCost) || 0);
+        const costPerPkt = pkts > 0 ? (totalBatchCost / pkts) : (unitCost * (units / (pkts || 1)));
+
+        if (banner) {
+            banner.style.display = 'block';
+            banner.innerHTML = '<strong>Selected Baked Batch:</strong> ' + productName + ' (' + recipeCode + ') | Output: ' + units.toLocaleString() + ' Units (' + pkts + ' Pkts) | Baked Unit Cost: Rs. ' + unitCost.toFixed(2) + ' / unit';
+        }
+
+        document.getElementById('pkgTotalUnitsInput').value = units;
+        document.getElementById('pkgPacketsCountInput').value = pkts;
+        document.getElementById('pkgBaseBakedCostPerPktInput').value = costPerPkt.toFixed(2);
+
+        recalcPackagingCosts();
+    }
+    window.onBatchSelectionChange = onBatchSelectionChange;
+
+    async function loadBakedBatches(bid) {
+        const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+        if (!bid || !firestoreDb) return;
+        try {
+            const snap = await firestoreDb.collection('bakery_production_batches')
+                .where('businessId', '==', bid)
+                .limit(50)
+                .get()
+                .catch(() => ({ docs: [] }));
+
+            recentBakedBatches = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => {
+                    const ta = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+                    const tb = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+                    return tb - ta;
+                });
+
+            const sel = document.getElementById('selectedBatchSelect');
+            if (sel) {
+                sel.innerHTML = '<option value="">-- Choose a Recent Baked Batch or Product --</option>' +
+                    recentBakedBatches.map(b => {
+                        const dStr = b.createdAt ? (window.BakeryModule ? BakeryModule.formatDate(b.createdAt) : new Date(b.createdAt).toLocaleDateString()) : '';
+                        return '<option value="' + (b.batchId || b.id) + '">' + (b.batchId || b.id) + ' - ' + b.productName + ' (' + (b.actualProducedUnits || b.producedQty || 0) + ' Units / ' + (b.actualProducedPkts || 0) + ' Pkts) [' + dStr + ']</option>';
+                    }).join('');
+            }
+
+            const pendingCount = recentBakedBatches.filter(b => b.status === 'BAKED_UNPACKAGED' || b.packagingStatus === 'PENDING_PACKAGING').length;
+            const countEl = document.getElementById('pkgPendingBatchesVal');
+            if (countEl) countEl.textContent = (pendingCount || recentBakedBatches.length) + ' Batches';
+
+            // Check URL param ?batchId=...
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoBatchId = urlParams.get('batchId');
+            if (autoBatchId && sel) {
+                sel.value = autoBatchId;
+                onBatchSelectionChange();
+            }
+        } catch (err) {
+            console.warn('[Bakery Packaging] Batches load error:', err);
+        }
+    }
+
+    async function loadPackagingHistory() {
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+        if (!bid || !firestoreDb) return;
+        try {
+            const snap = await firestoreDb.collection('bakery_packaging_batches')
+                .where('businessId', '==', bid)
+                .limit(50)
+                .get()
+                .catch(() => ({ docs: [] }));
+
+            const tbody = document.getElementById('packagingHistoryBody');
+            if (!tbody) return;
+
+            if (snap.docs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#94a3b8;">No packaging runs recorded yet.</td></tr>';
+                return;
+            }
+
+            const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => {
+                    const ta = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+                    const tb = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+                    return tb - ta;
+                });
+
+            const countEl = document.getElementById('pkgTotalRunsVal');
+            if (countEl) countEl.textContent = docs.length + ' Runs';
+
+            tbody.innerHTML = docs.map(p => {
+                const dStr = p.createdAt ? (window.BakeryModule ? BakeryModule.formatDate(p.createdAt) : new Date(p.createdAt).toLocaleDateString()) : '-';
+                return '<tr>' +
+                    '<td>' +
+                        '<div style="font-weight:800; color:#0f172a;">' + p.packagingId + '</div>' +
+                        '<div style="font-size:11px; color:#64748b;">' + dStr + '</div>' +
+                    '</td>' +
+                    '<td>' +
+                        '<span style="background:#ffe4e6; color:#be123c; font-weight:800; font-size:11px; padding:2px 6px; border-radius:4px;">' + (p.recipeCode || 'PKG') + '</span> ' +
+                        '<strong style="color:#1e293b;">' + p.productName + '</strong>' +
+                    '</td>' +
+                    '<td style="text-align:center; font-weight:800;">' + (p.packagedPackets || 0) + ' Pkts</td>' +
+                    '<td style="text-align:right; font-weight:700; color:#e11d48;">Rs. ' + Number(p.totalPackagingCost || 0).toFixed(2) + '</td>' +
+                    '<td style="text-align:right; font-weight:800; color:#059669;">Rs. ' + Number(p.finalTotalBatchCost || 0).toFixed(2) + '</td>' +
+                    '<td style="text-align:right; font-weight:800;">Rs. ' + Number(p.finalCostPerPacket || 0).toFixed(2) + '</td>' +
+                    '<td style="text-align:right; font-weight:900; color:#2563eb;">Rs. ' + Number(p.wholesalePrice || 0).toFixed(2) + '</td>' +
+                    '<td style="text-align:center;"><span style="background:#dcfce7; color:#15803d; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">PACKAGED</span></td>' +
+                '</tr>';
+            }).join('');
+        } catch (e) {
+            console.warn('[Bakery Packaging] History error:', e);
+        }
+    }
+
+    async function savePackagingRun() {
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+        const msgEl = document.getElementById('pkgMsg');
+        msgEl.className = 'pkg-msg';
+
+        if (!bid || !firestoreDb) {
+            msgEl.classList.add('err');
+            msgEl.textContent = 'No business connected or Firestore unavailable.';
+            return;
+        }
+
+        const batchSelect = document.getElementById('selectedBatchSelect');
+        const batchId = batchSelect ? batchSelect.value : '';
+        const packets = Number(document.getElementById('pkgPacketsCountInput')?.value || 0);
+        const totalUnits = Number(document.getElementById('pkgTotalUnitsInput')?.value || 0);
+        const baseCostPerPkt = Number(document.getElementById('pkgBaseBakedCostPerPktInput')?.value || 0);
+
+        if (packets <= 0) {
+            msgEl.classList.add('err');
+            msgEl.textContent = 'Please specify valid packets to produce (> 0).';
+            return;
+        }
+
+        const polyCost = Number(document.getElementById('totalPolytheneCostInput')?.value || 0);
+        const labelCost = Number(document.getElementById('totalLabelCostInput')?.value || 0);
+        const laborCost = Number(document.getElementById('totalPackingLaborInput')?.value || 0);
+        const otherCost = Number(document.getElementById('totalOtherPackingInput')?.value || 0);
+        const totalPackagingCost = polyCost + labelCost + laborCost + otherCost;
+
+        const totalBakedCost = packets * baseCostPerPkt;
+        const finalTotalBatchCost = Math.max(0.01, totalBakedCost + totalPackagingCost);
+        const finalCostPerPacket = Number((finalTotalBatchCost / packets).toFixed(2));
+        const wholesalePrice = Number(document.getElementById('wholesalePriceInput')?.value || (finalCostPerPacket * 1.25));
+        const retailPrice = Number(document.getElementById('retailPriceInput')?.value || (wholesalePrice * 1.15));
+
+        const now = new Date();
+        const pkgId = 'PKG-' + now.toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.floor(1000 + Math.random() * 9000);
+        const productName = currentSelectedBatch ? currentSelectedBatch.productName : (batchSelect.options[batchSelect.selectedIndex]?.text || 'Bakery Finished Good');
+        const recipeCode = currentSelectedBatch ? currentSelectedBatch.recipeCode : 'BAKE';
+
+        const btn = document.getElementById('savePackagingBtn');
+        btn.disabled = true;
+        btn.textContent = 'Transferring to Stock...';
+
+        try {
+            const batch = firestoreDb.batch();
+
+            // 1. Save packaging run doc
+            const pkgRef = firestoreDb.collection('bakery_packaging_batches').doc(pkgId);
+            batch.set(pkgRef, {
+                packagingId: pkgId,
+                businessId: bid,
+                sourceBatchId: batchId || null,
+                recipeCode: recipeCode,
+                productName: productName,
+                totalUnits: totalUnits,
+                packagedPackets: packets,
+                baseBakedCost: totalBakedCost,
+                polytheneCost: polyCost,
+                labelCost: labelCost,
+                packagingLaborCost: laborCost,
+                otherPackagingCost: otherCost,
+                totalPackagingCost: totalPackagingCost,
+                finalTotalBatchCost: finalTotalBatchCost,
+                finalCostPerPacket: finalCostPerPacket,
+                wholesalePrice: wholesalePrice,
+                retailPrice: retailPrice,
+                status: 'COMPLETED',
+                createdAt: now,
+                updatedAt: now
+            });
+
+            // 2. Update Finished Goods Inventory in bakery_finished_products
+            const prodDocId = bid + '_' + recipeCode.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+            const fgRef = firestoreDb.collection('bakery_finished_products').doc(prodDocId);
+            batch.set(fgRef, {
+                businessId: bid,
+                recipeCode: recipeCode,
+                productName: productName,
+                stockPackets: firebase.firestore.FieldValue.increment(packets),
+                unitCost: finalCostPerPacket,
+                wholesalePrice: wholesalePrice,
+                retailPrice: retailPrice,
+                lastPackagedDate: now,
+                updatedAt: now
+            }, { merge: true });
+
+            // 3. If tied to a source batch, mark it packaged
+            if (batchId) {
+                const srcBatchRef = firestoreDb.collection('bakery_production_batches').doc(batchId);
+                batch.set(srcBatchRef, {
+                    packagingStatus: 'PACKAGED',
+                    packagingId: pkgId,
+                    updatedAt: now
+                }, { merge: true });
+            }
+
+            await batch.commit();
+
+            msgEl.className = 'pkg-msg';
+            msgEl.innerHTML = '✅ Packaging Run ' + pkgId + ' completed!<br>Transferred <strong>' + packets + ' Packets</strong> to Finished Goods Stock @ Rs. ' + finalCostPerPacket + ' / pkt.<br><br>' +
+                '<a href="/modules/bakery/stock.html?tab=fg" style="display:inline-block; padding:8px 14px; background:#7c3aed; color:#fff; font-weight:800; font-size:12px; text-decoration:none; border-radius:6px; margin-top:4px;">📦 View in Finished Goods Stock ➡️</a>';
+
+            await loadPackagingHistory();
+            await loadBakedBatches(bid);
+        } catch (err) {
+            msgEl.classList.add('err');
+            msgEl.textContent = 'Error saving packaging run: ' + err.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🎀 Complete Packaging & Transfer to Finished Goods Stock';
+        }
+    }
+    window.savePackagingRun = savePackagingRun;
+
+    async function initPackagingPage() {
+        try {
+            if (window.BakeryModule && typeof window.BakeryModule.init === 'function') {
+                await BakeryModule.init('packaging');
+                const bid = BakeryModule.businessId || localStorage.getItem('currentBusinessId');
+                if (bid) {
+                    await loadBakedBatches(bid);
+                    await loadPackagingHistory();
+                }
+            }
+        } catch (e) {
+            console.warn('[Bakery Packaging] Init warning:', e);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPackagingPage);
+    } else {
+        initPackagingPage();
+    }
+</script>
+</body>
+</html>

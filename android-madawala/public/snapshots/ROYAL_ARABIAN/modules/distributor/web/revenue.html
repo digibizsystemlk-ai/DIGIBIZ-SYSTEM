@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="/snapshots/ROYAL_ARABIAN/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revenue & Profit Analysis — Distributor Terminal</title>
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f8fafc;
+            --surface: #ffffff;
+            --surface-subtle: #f1f5f9;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+            --accent-dark: #0284c7;
+            --accent-subtle: #e0f2fe;
+            --green: #10b981;
+            --green-subtle: #d1fae5;
+            --green-text: #065f46;
+            --red: #ef4444;
+            --red-subtle: #fee2e2;
+            --red-text: #991b1b;
+            --amber: #f59e0b;
+            --amber-subtle: #fef3c7;
+            --amber-text: #92400e;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .page { max-width: 1300px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: var(--surface);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .header-text h1 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        .header-text p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+        .btn {
+            background: #0f172a;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+        }
+        .btn:hover { background: #1e293b; transform: translateY(-1px); }
+
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .kpi {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi .l {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .kpi .v {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+        .kpi .sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .kpi.month-highlight {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+        .kpi.month-highlight .v { color: #1e40af; }
+        .kpi.highlight {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .kpi.highlight .v { color: #166534; }
+        .kpi.danger {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+        .kpi.danger .v { color: #991b1b; }
+        .kpi.hero {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            color: #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.35);
+        }
+        .kpi.hero .l { color: rgba(255, 255, 255, 0.85); }
+        .kpi.hero .v { color: #ffffff; }
+        .kpi.hero .sub { color: rgba(255, 255, 255, 0.8); }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        th {
+            background: var(--surface-subtle);
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+        
+        .num { text-align: right; font-family: monospace; font-weight: 700; font-size: 13px; }
+        th.num { text-align: right; }
+
+        .badge {
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .customer-link {
+            color: #2563eb;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .customer-link:hover { color: #1d4ed8; }
+
+        .total-row td {
+            background: #f8fafc;
+            font-weight: 800;
+            border-top: 2px solid #cbd5e1;
+            border-bottom: 2px solid #cbd5e1;
+        }
+
+        /* Details Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: modalIn 0.25s ease-out;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface-subtle);
+        }
+        .modal-header h2 { margin: 0; font-size: 16px; font-weight: 800; color: var(--text-main); }
+        .modal-close {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-weight: 800;
+        }
+        .modal-close:hover { background: #e2e8f0; color: var(--text-main); }
+        .modal-body { padding: 20px 24px; max-height: 70vh; overflow-y: auto; }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-info { display: flex; flex-direction: column; gap: 3px; }
+        .detail-name { font-weight: 800; color: var(--text-main); font-size: 13.5px; }
+        .detail-meta { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+        .detail-profit { font-weight: 800; color: #16a34a; font-family: monospace; text-align: right; font-size: 14px; }
+
+        .owner-restricted-box {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            color: #991b1b;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="header">
+        <div class="header-text">
+            <h1>Distributor Revenue & Profit Analysis</h1>
+            <p>Real-time profitability tracking accounting for approved sales revenue, COGS, free issues cost, returns, and daily operational expenses.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a href="/modules/distributor/web/dashboard.html" class="btn" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; text-decoration:none; box-shadow:none;">
+                <i class="fa-solid fa-arrow-left"></i> Dashboard
+            </a>
+            <button type="button" id="refreshBtn" class="btn">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh Data
+            </button>
+        </div>
+    </div>
+
+    <div id="ownerArea" style="display:none;">
+        <div class="kpis">
+            <div class="kpi">
+                <div class="l">Net Sales (Today)</div>
+                <div class="v" id="kSales">Rs 0.00</div>
+                <div class="sub" id="kSalesSub">Approved Invoices Today</div>
+            </div>
+            <div class="kpi month-highlight">
+                <div class="l">Month Sales (MTD)</div>
+                <div class="v" id="kMonthSales">Rs 0.00</div>
+                <div class="sub" id="kMonthSalesSub">This Month Net Sales</div>
+            </div>
+            <div class="kpi highlight">
+                <div class="l">Actual Gross Margin (Today)</div>
+                <div class="v" id="kMargin">Rs 0.00</div>
+                <div class="sub">Revenue - COGS - Returns</div>
+            </div>
+            <div class="kpi danger">
+                <div class="l">Daily Expenses (Today)</div>
+                <div class="v" id="kExp">Rs 0.00</div>
+                <div class="sub">Recorded Expenses</div>
+            </div>
+            <div class="kpi hero">
+                <div class="l">Net Realized Profit (Today)</div>
+                <div class="v" id="kNet">Rs 0.00</div>
+                <div class="sub">Gross Margin - Expenses</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title"><i class="fa-solid fa-file-invoice-dollar" style="color:#10b981;"></i> Today's Sales Orders & Profit Breakdown</div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Shop / Customer</th>
+                            <th>Invoice / Order</th>
+                            <th class="num">Order Total</th>
+                            <th class="num">Free Items Cost</th>
+                            <th class="num">Actual Net Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesBody">
+                        <tr><td colspan="6" style="text-align:center; padding:40px; color:#64748b;">Initializing financial data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title"><i class="fa-solid fa-wallet" style="color:#ef4444;"></i> Daily Expenses Breakdown</div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Category</th>
+                            <th class="num">Amount</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expBody">
+                        <tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;">No expenses recorded today.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title"><i class="fa-solid fa-calendar-days" style="color:#6366f1;"></i> 365 Days Daily Profit History</div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th class="num">Daily Sales</th>
+                            <th class="num">Free Issues Cost</th>
+                            <th class="num">Gross Profit</th>
+                            <th class="num">Expenses</th>
+                            <th class="num">Net Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr><td colspan="6" style="text-align:center; padding:40px; color:#64748b;">Calculating history...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="restrictedArea" class="owner-restricted-box" style="display:none;">
+        <i class="fa-solid fa-lock" style="font-size:32px; margin-bottom:12px; display:block;"></i>
+        Access Restricted: Financial Revenue & Profit Analysis is available only to the Business Owner.
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div id="detailsModal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="modalTitle">Order Profit Breakdown</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Details injected here -->
+        </div>
+    </div>
+</div>
+
+<!-- Core Firebase & Application Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/snapshots/ROYAL_ARABIAN/core/firebase-init.js"></script>
+<script src="/snapshots/ROYAL_ARABIAN/core/sidebar.js?v=2116"></script>
+
+<script>
+let DISTRIBUTOR_BUSINESS_ID = '';
+const fmt = (v) => 'Rs ' + (Number(v) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtInt = (v) => 'Rs ' + (Math.round(Number(v)) || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+function localDateKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function parseRowTimeMs(row) {
+    if (!row) return 0;
+    function parseVal(v) {
+        if (!v) return 0;
+        if (typeof v === 'object' && typeof v.toDate === 'function') {
+            const d = v.toDate();
+            return d && !isNaN(d.getTime()) ? d.getTime() : 0;
+        }
+        if (typeof v === 'object' && typeof v.seconds === 'number') {
+            return v.seconds * 1000 + Math.floor((v.nanoseconds || 0) / 1e6);
+        }
+        if (v instanceof Date) {
+            return !isNaN(v.getTime()) ? v.getTime() : 0;
+        }
+        if (typeof v === 'number' && v > 1000000000) {
+            return v < 1000000000000 ? v * 1000 : v;
+        }
+        if (typeof v === 'string') {
+            const parsed = Date.parse(v);
+            if (!isNaN(parsed) && parsed > 0) return parsed;
+        }
+        return 0;
+    }
+
+    const t1 = parseVal(row.orderDate);
+    if (t1 > 0) return t1;
+    const t2 = parseVal(row.createdAt);
+    if (t2 > 0) return t2;
+    const t3 = parseVal(row.timestamp);
+    if (t3 > 0) return t3;
+    const t4 = parseVal(row.expenseDate);
+    if (t4 > 0) return t4;
+    const t5 = parseVal(row.printedAt);
+    if (t5 > 0) return t5;
+    const t6 = parseVal(row.date);
+    if (t6 > 0) return t6;
+
+    const idStr = String(row.orderNumber || row.orderId || row.invoiceNo || row.id || '');
+    const match = idStr.match(/\b(1[6-9]\d{11,12})\b/);
+    if (match && match[1]) {
+        const epoch = Number(match[1]);
+        if (!isNaN(epoch) && epoch > 1500000000000) return epoch;
+    }
+    return 0;
+}
+
+function rowLocalDateKey(row) {
+    const tMs = parseRowTimeMs(row);
+    if (tMs > 0) {
+        return localDateKey(new Date(tMs));
+    }
+    const raw = row.orderDate || row.createdAt || row.expenseDate;
+    let dt = null;
+    if (raw && typeof raw.toDate === 'function') dt = raw.toDate();
+    else if (typeof raw === 'number') dt = new Date(raw);
+    else if (typeof raw === 'string' || raw instanceof Date) dt = new Date(raw);
+    if (!dt || Number.isNaN(dt.getTime())) return '';
+    return localDateKey(dt);
+}
+
+function isTodayRow(row) {
+    const rk = rowLocalDateKey(row);
+    const tk = localDateKey();
+    return rk && tk && rk.slice(0, 10) === tk.slice(0, 10);
+}
+
+function isThisMonthRow(row) {
+    const rk = rowLocalDateKey(row);
+    const tk = localDateKey();
+    return rk && tk && rk.slice(0, 7) === tk.slice(0, 7);
+}
+
+async function refresh() {
+    try {
+        if (!DISTRIBUTOR_BUSINESS_ID) return;
+        const todayK = localDateKey();
+        const thisMonthK = todayK.slice(0, 7);
+        const opt = navigator.onLine ? {} : { source: 'cache' };
+
+        // Fetch products catalog for fallback buying prices
+        const productsMap = {};
+        try {
+            const [pFlat, pNested] = await Promise.all([
+                db.collection('products').where('businessId', '==', DISTRIBUTOR_BUSINESS_ID).get(opt).catch(() => ({ docs: [] })),
+                db.collection('products').doc(DISTRIBUTOR_BUSINESS_ID).collection('list').get(opt).catch(() => ({ docs: [] }))
+            ]);
+            [...pFlat.docs, ...pNested.docs].forEach(doc => {
+                const p = doc.data() || {};
+                productsMap[doc.id] = p;
+                if (p.productCode) productsMap[String(p.productCode).trim()] = p;
+            });
+        } catch (eP) {
+            console.warn("Product map fetch error:", eP);
+        }
+
+        // Query distributor orders, expenses, and journal entries
+        const [oFlat, oNested, eFlat, eNested, jEntries] = await Promise.all([
+            db.collection('orders').where('businessId', '==', DISTRIBUTOR_BUSINESS_ID).limit(1000).get(opt).catch(() => ({ docs: [] })),
+            db.collection('orders').doc(DISTRIBUTOR_BUSINESS_ID).collection('list').limit(1000).get(opt).catch(() => ({ docs: [] })),
+            db.collection('expenses').where('businessId', '==', DISTRIBUTOR_BUSINESS_ID).limit(1000).get(opt).catch(() => ({ docs: [] })),
+            db.collection('expenses').doc(DISTRIBUTOR_BUSINESS_ID).collection('list').limit(1000).get(opt).catch(() => ({ docs: [] })),
+            db.collection('journal').doc(DISTRIBUTOR_BUSINESS_ID).collection('entries').limit(1000).get(opt).catch(() => ({ docs: [] }))
+        ]);
+
+        const orderDocsMap = {};
+        [...oFlat.docs, ...oNested.docs].forEach(d => { orderDocsMap[d.id] = d; });
+        const allOrderDocs = Object.values(orderDocsMap);
+
+        const expDocsMap = {};
+        [...eFlat.docs, ...eNested.docs].forEach(d => { expDocsMap[d.id] = d; });
+        const allExpDocs = Object.values(expDocsMap);
+
+        let todayGrossSales = 0;
+        let todayMarginTotal = 0;
+        let monthGrossSales = 0;
+        const salesRows = [];
+
+        allOrderDocs.forEach((d) => {
+            const b = d.data() || {};
+            const isToday = isTodayRow(b);
+            const isThisMonth = isThisMonthRow(b);
+            const status = String(b.status || '').toLowerCase();
+            
+            // STRICTLY EXCLUDE PENDING, REJECTED, CANCELLED ORDERS FROM REALIZED REVENUE
+            const isFinalized = ['approved', 'completed', 'delivered', 'dispatched'].includes(status);
+            if (!isFinalized) return;
+
+            let orderRevenue = 0;
+            let orderCogs = 0;
+            let freeIssueCost = 0;
+            const items = Array.isArray(b.items) ? b.items : (Array.isArray(b.orderItems) ? b.orderItems : []);
+
+            items.forEach((line) => {
+                const soldQty = Math.max(0, Number(line.orderedQty != null ? line.orderedQty : line.qty) || 0);
+                const freeQty = Math.max(0, Number(line.freeQty) || 0);
+                const returnQty = Math.max(0, Number(line.returnResellQty != null ? line.returnResellQty : line.returnQty) || 0);
+                const billedQty = Math.max(0, soldQty - returnQty);
+                const unitPrice = Number(line.unitPrice) || 0;
+                
+                let buyPrice = 0;
+                const pRef = productsMap[line.productId] || productsMap[line.productCode] || productsMap[line.id];
+                if (pRef) {
+                    buyPrice = Number(pRef.buyingPrice || pRef.buyingPriceRaw || pRef.costPrice || pRef.buyPrice || 0);
+                }
+                if (isNaN(buyPrice) || buyPrice <= 0) {
+                    buyPrice = Number(line.buyingPrice || line.buyingPriceRaw || line.costPrice || 0);
+                }
+                if (isNaN(buyPrice) || buyPrice <= 0) {
+                    buyPrice = unitPrice * 0.93;
+                }
+
+                const lineRev = billedQty * unitPrice;
+                const totalItemUnits = billedQty + freeQty;
+                const lineCogs = totalItemUnits * buyPrice;
+                const lineFreeCost = freeQty * buyPrice;
+
+                orderRevenue += lineRev;
+                orderCogs += lineCogs;
+                freeIssueCost += lineFreeCost;
+            });
+
+            const orderTotal = Number(b.totalAmount || b.orderLinesTotal || orderRevenue);
+            const margin = orderTotal - orderCogs;
+
+            if (isThisMonth) {
+                monthGrossSales += orderTotal;
+            }
+
+            if (isToday) {
+                todayGrossSales += orderTotal;
+                todayMarginTotal += margin;
+
+                const tMs = parseRowTimeMs(b);
+                const tlabel = tMs > 0 ? new Date(tMs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true}) : (rowLocalDateKey(b) || '-');
+
+                const breakdown = items.map(line => {
+                    const soldQty = Math.max(0, Number(line.orderedQty != null ? line.orderedQty : line.qty) || 0);
+                    const freeQty = Math.max(0, Number(line.freeQty) || 0);
+                    const returnQty = Math.max(0, Number(line.returnResellQty != null ? line.returnResellQty : line.returnQty) || 0);
+                    const billedQty = Math.max(0, soldQty - returnQty);
+                    const unitPrice = Number(line.unitPrice) || 0;
+                    
+                    let buyPrice = Number(line.buyingPrice || line.buyingPriceRaw || line.costPrice);
+                    if (isNaN(buyPrice) || buyPrice <= 0) {
+                        const pRef = productsMap[line.productId] || productsMap[line.productCode];
+                        buyPrice = pRef ? (Number(pRef.buyingPrice) || Number(pRef.unitPrice) * 0.93) : (unitPrice * 0.93);
+                    }
+
+                    const rev = billedQty * unitPrice;
+                    const cogs = (billedQty + freeQty) * buyPrice;
+                    const profit = rev - cogs;
+
+                    return {
+                        name: line.productName || line.name || 'Item',
+                        billedQty,
+                        freeQty,
+                        unitPrice,
+                        buyPrice,
+                        rev,
+                        cogs,
+                        profit
+                    };
+                });
+
+                salesRows.push({
+                    timeMs: tMs,
+                    t: tlabel,
+                    shopName: b.shopName || b.customerName || b.branchName || 'Distributor Customer',
+                    invoiceNo: b.invoiceNo || b.orderNumber || b.orderId || b.id || 'N/A',
+                    total: orderTotal,
+                    freeCost: freeIssueCost,
+                    margin: margin,
+                    items: breakdown
+                });
+            }
+        });
+
+        // Calculate Returns Deductions from Journal (Account 4-4010-02) for Today and This Month
+        let todayReturnsDeduction = 0;
+        let monthReturnsDeduction = 0;
+
+        (jEntries.docs || []).forEach(d => {
+            const j = d.data() || {};
+            const isToday = isTodayRow(j);
+            const isThisMonth = isThisMonthRow(j);
+
+            (j.entries || []).forEach(line => {
+                if (String(line.accountCode).startsWith('4-4010-02')) {
+                    const debitVal = Number(line.debit) || 0;
+                    if (isToday) todayReturnsDeduction += debitVal;
+                    if (isThisMonth) monthReturnsDeduction += debitVal;
+                }
+            });
+        });
+
+        const todayNetSales = Math.max(0, todayGrossSales - todayReturnsDeduction);
+        const todayActualMargin = Math.max(0, todayMarginTotal - todayReturnsDeduction);
+        const monthNetSales = Math.max(0, monthGrossSales - monthReturnsDeduction);
+
+        salesRows.sort((a, b) => (b.timeMs || 0) - (a.timeMs || 0));
+
+        // 1. Render Today's Sales KPI
+        document.getElementById('kSales').textContent = fmt(todayNetSales);
+        const kSalesSub = document.getElementById('kSalesSub');
+        if (kSalesSub) {
+            kSalesSub.textContent = todayReturnsDeduction > 0 
+                ? 'Gross: ' + fmt(todayGrossSales) + ' | Returns: -' + fmt(todayReturnsDeduction)
+                : (todayGrossSales > 0 ? 'Gross Invoiced: ' + fmt(todayGrossSales) : 'No sales recorded today');
+        }
+
+        // 2. Render Month Sales (MTD) KPI (Identical to Dashboard Month Sales)
+        document.getElementById('kMonthSales').textContent = fmt(monthNetSales);
+        const kMonthSalesSub = document.getElementById('kMonthSalesSub');
+        if (kMonthSalesSub) {
+            kMonthSalesSub.textContent = monthReturnsDeduction > 0 
+                ? 'Gross: ' + fmt(monthGrossSales) + ' | Returns: -' + fmt(monthReturnsDeduction)
+                : 'Gross Invoiced: ' + fmt(monthGrossSales);
+        }
+
+        // 3. Render Margin & Expenses KPIs
+        document.getElementById('kMargin').textContent = fmt(todayActualMargin);
+
+        let expTotal = 0;
+        const expRows = [];
+        allExpDocs.forEach((d) => {
+            const r = d.data() || {};
+            if (String(r.expenseDate || rowLocalDateKey(r) || '') === todayK) {
+                const a = Number(r.amount) || 0;
+                expTotal += a;
+                const tExpMs = parseRowTimeMs(r);
+                const expTlabel = tExpMs > 0 ? new Date(tExpMs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true}) : (r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true}) : '-');
+                expRows.push({
+                    timeMs: tExpMs,
+                    t: expTlabel,
+                    cat: r.category || '-',
+                    a,
+                    note: r.note || ''
+                });
+            }
+        });
+
+        expRows.sort((a, b) => (b.timeMs || 0) - (a.timeMs || 0));
+
+        document.getElementById('kExp').textContent = fmt(expTotal);
+        document.getElementById('kNet').textContent = fmt(todayActualMargin - expTotal);
+
+        document.getElementById('salesBody').innerHTML = salesRows.length
+            ? salesRows.map((r, idx) => '<tr>' +
+                '<td><span class="badge">' + r.t + '</span></td>' +
+                '<td><span class="customer-link" onclick="showDetails(' + idx + ')">' + String(r.shopName).replace(/</g,'&lt;') + '</span></td>' +
+                '<td><span style="font-family:monospace; font-weight:700;">' + r.invoiceNo + '</span></td>' +
+                '<td class="num">' + fmt(r.total) + '</td>' +
+                '<td class="num" style="color:#b45309;">' + (r.freeCost > 0 ? ('- ' + fmt(r.freeCost)) : '-') + '</td>' +
+                '<td class="num" style="color:' + (r.margin >= 0 ? '#166534' : '#991b1b') + ';">' + (r.margin >= 0 ? '+ ' : '') + fmt(r.margin) + '</td>' +
+            '</tr>').join('')
+            : '<tr><td colspan="6" style="text-align:center; padding:40px; color:#64748b;">No sales orders recorded today.</td></tr>';
+
+        document.getElementById('expBody').innerHTML = expRows.length
+            ? expRows.map((r) => '<tr><td><span class="badge">' + r.t + '</span></td><td>' + String(r.cat).replace(/</g,'&lt;') + '</td><td class="num" style="color:#991b1b;">- ' + fmt(r.a) + '</td><td>' + String(r.note).replace(/</g,'&lt;') + '</td></tr>').join('')
+            : '<tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;">No expenses recorded today.</td></tr>';
+
+        // 365 Days Daily Profit History
+        const historySalesMap = {};
+        const historyMarginMap = {};
+        const historyFreeCostMap = {};
+        const historyExpMap = {};
+
+        allOrderDocs.forEach((d) => {
+            const b = d.data() || {};
+            const dateKey = rowLocalDateKey(b);
+            if (!dateKey) return;
+            const status = String(b.status || '').toLowerCase();
+            const isApproved = ['approved', 'completed', 'delivered', 'dispatched'].includes(status);
+            if (!isApproved) return;
+
+            let orderRevenue = 0;
+            let orderCogs = 0;
+            let freeIssueCost = 0;
+            const items = Array.isArray(b.items) ? b.items : (Array.isArray(b.orderItems) ? b.orderItems : []);
+
+            items.forEach((line) => {
+                const soldQty = Math.max(0, Number(line.orderedQty != null ? line.orderedQty : line.qty) || 0);
+                const freeQty = Math.max(0, Number(line.freeQty) || 0);
+                const returnQty = Math.max(0, Number(line.returnResellQty != null ? line.returnResellQty : line.returnQty) || 0);
+                const billedQty = Math.max(0, soldQty - returnQty);
+                const unitPrice = Number(line.unitPrice) || 0;
+
+                let buyPrice = Number(line.buyingPrice || line.buyingPriceRaw || line.costPrice);
+                if (isNaN(buyPrice) || buyPrice <= 0) {
+                    const pRef = productsMap[line.productId] || productsMap[line.productCode];
+                    buyPrice = pRef ? (Number(pRef.buyingPrice) || Number(pRef.unitPrice) * 0.93) : (unitPrice * 0.93);
+                }
+
+                orderRevenue += billedQty * unitPrice;
+                orderCogs += (billedQty + freeQty) * buyPrice;
+                freeIssueCost += freeQty * buyPrice;
+            });
+
+            const orderTotal = Number(b.totalAmount || b.orderLinesTotal || orderRevenue);
+            const margin = orderTotal - orderCogs;
+
+            historySalesMap[dateKey] = (historySalesMap[dateKey] || 0) + orderTotal;
+            historyMarginMap[dateKey] = (historyMarginMap[dateKey] || 0) + margin;
+            historyFreeCostMap[dateKey] = (historyFreeCostMap[dateKey] || 0) + freeIssueCost;
+        });
+
+        allExpDocs.forEach((d) => {
+            const r = d.data() || {};
+            const dateKey = String(r.expenseDate || rowLocalDateKey(r));
+            if (!dateKey) return;
+            historyExpMap[dateKey] = (historyExpMap[dateKey] || 0) + (Number(r.amount) || 0);
+        });
+
+        const allDates = Array.from(new Set([...Object.keys(historyMarginMap), ...Object.keys(historyExpMap)])).sort((a, b) => b.localeCompare(a)).slice(0, 365);
+        
+        let sumTotalSales = 0;
+        let sumTotalFreeCost = 0;
+        let sumTotalGross = 0;
+        let sumTotalExp = 0;
+        let sumTotalNet = 0;
+
+        const historyRowsHtml = allDates.map(k => {
+            const sales = historySalesMap[k] || 0;
+            const gross = historyMarginMap[k] || 0;
+            const freeCost = historyFreeCostMap[k] || 0;
+            const exp = historyExpMap[k] || 0;
+            const net = gross - exp;
+
+            sumTotalSales += sales;
+            sumTotalFreeCost += freeCost;
+            sumTotalGross += gross;
+            sumTotalExp += exp;
+            sumTotalNet += net;
+
+            return '<tr>' +
+                '<td><strong>' + k + '</strong></td>' +
+                '<td class="num">' + fmt(sales) + '</td>' +
+                '<td class="num" style="color:#b45309;">' + (freeCost > 0 ? ('- ' + fmt(freeCost)) : '-') + '</td>' +
+                '<td class="num" style="color:' + (gross >= 0 ? '#166534' : '#991b1b') + ';">' + (gross >= 0 ? '+ ' : '') + fmt(gross) + '</td>' +
+                '<td class="num" style="color:#991b1b;">' + (exp > 0 ? ('- ' + fmt(exp)) : '-') + '</td>' +
+                '<td class="num" style="font-weight:800; color:' + (net >= 0 ? '#166534' : '#991b1b') + ';">' + (net >= 0 ? '+ ' : '') + fmt(net) + '</td>' +
+            '</tr>';
+        }).join('');
+
+        const totalSummaryRow = allDates.length > 0 ? (
+            '<tr class="total-row">' +
+                '<td><strong>TOTAL SUMMARY (' + allDates.length + ' Days)</strong></td>' +
+                '<td class="num">' + fmt(sumTotalSales) + '</td>' +
+                '<td class="num" style="color:#b45309;">' + (sumTotalFreeCost > 0 ? ('- ' + fmt(sumTotalFreeCost)) : '-') + '</td>' +
+                '<td class="num" style="color:' + (sumTotalGross >= 0 ? '#166534' : '#991b1b') + ';">' + (sumTotalGross >= 0 ? '+ ' : '') + fmt(sumTotalGross) + '</td>' +
+                '<td class="num" style="color:#991b1b;">' + (sumTotalExp > 0 ? ('- ' + fmt(sumTotalExp)) : '-') + '</td>' +
+                '<td class="num" style="font-weight:900; color:' + (sumTotalNet >= 0 ? '#166534' : '#991b1b') + ';">' + (sumTotalNet >= 0 ? '+ ' : '') + fmt(sumTotalNet) + '</td>' +
+            '</tr>'
+        ) : '';
+
+        document.getElementById('historyBody').innerHTML = allDates.length
+            ? (historyRowsHtml + totalSummaryRow)
+            : '<tr><td colspan="6" style="text-align:center; padding:40px; color:#64748b;">No financial history available yet.</td></tr>';
+
+        window.currentTodaySalesRows = salesRows;
+    } catch (e) {
+        console.error("Revenue calculation error:", e);
+    }
+}
+
+function showDetails(idx) {
+    if (!window.currentTodaySalesRows || !window.currentTodaySalesRows[idx]) return;
+    const order = window.currentTodaySalesRows[idx];
+    document.getElementById('modalTitle').textContent = 'Order #' + order.invoiceNo + ' - ' + order.shopName;
+    const body = document.getElementById('modalBody');
+    body.innerHTML = (order.items || []).map(it => 
+        '<div class="detail-row">' +
+            '<div class="detail-info">' +
+                '<span class="detail-name">' + String(it.name).replace(/</g,'&lt;') + '</span>' +
+                '<span class="detail-meta">Billed: ' + it.billedQty + (it.freeQty > 0 ? (' (+ ' + it.freeQty + ' Free)') : '') + ' × ' + fmt(it.unitPrice) + ' | Cost: ' + fmt(it.buyPrice) + '</span>' +
+            '</div>' +
+            '<div class="detail-profit">' +
+                '<div>' + (it.profit >= 0 ? '+' : '') + fmt(it.profit) + '</div>' +
+                '<div style="font-size:11px; color:#64748b; font-weight:normal;">Gross Margin</div>' +
+            '</div>' +
+        '</div>'
+    ).join('');
+    document.getElementById('detailsModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('detailsModal').style.display = 'none';
+}
+
+document.getElementById('refreshBtn').addEventListener('click', () => {
+    refresh();
+});
+
+// Authentication & Impersonation resolution
+firebase.auth().onAuthStateChanged(async (user) => {
+    if (!user) {
+        window.location.href = '/login.html';
+        return;
+    }
+
+    try {
+        let bid = localStorage.getItem('digibiz_impersonate_biz_id') || localStorage.getItem('currentBusinessId') || localStorage.getItem('businessId');
+        let role = localStorage.getItem('digibiz_impersonate_role') || 'BUSINESS_OWNER';
+
+        if (!bid) {
+            const uDoc = await db.collection('users').doc(user.uid).get();
+            if (uDoc.exists) {
+                const uData = uDoc.data();
+                bid = uData.businessId;
+                role = uData.role || 'VIEWER';
+            }
+        }
+
+        DISTRIBUTOR_BUSINESS_ID = bid;
+        document.getElementById('ownerArea').style.display = 'block';
+        refresh();
+    } catch (err) {
+        console.error("Auth context error:", err);
+    }
+});
+</script>
+</body>
+</html>

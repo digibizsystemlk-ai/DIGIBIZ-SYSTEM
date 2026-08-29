@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="si">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Subscription & Billing Plan — DIGIBIZ</title>
+
+    <link rel="manifest" href="/v2026_08_17/manifest.json">
+    <meta name="theme-color" content="#047857">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Firebase Compat SDKs -->
+    <script src="/v2026_08_17/assets/vendor/firebase-app-compat.js"></script>
+    <script src="/v2026_08_17/assets/vendor/firebase-auth-compat.js"></script>
+    <script src="/v2026_08_17/assets/vendor/firebase-firestore-compat.js"></script>
+    <script src="/v2026_08_17/core/firebase-init.js?v=200"></script>
+
+    <style>
+        :root {
+            --primary: #047857;
+            --primary-dark: #064e3b;
+            --primary-light: #ecfdf5;
+            --accent: #10b981;
+            --bg-color: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Sinhala', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding-bottom: 50px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(6, 78, 59, 0.2);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .badge-active {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        .plan-price {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--primary-dark);
+            margin: 10px 0 4px;
+        }
+
+        .plan-period {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 16px 0;
+        }
+
+        .feature-list li {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #334155;
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bank-details-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 14px;
+            padding: 14px;
+            margin: 14px 0;
+            font-size: 13px;
+        }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: #fff;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div style="font-size:16px; font-weight:900;">💳 Subscription & Package</div>
+        <a href="app.html" class="back-btn">← Back to Terminal</a>
+    </header>
+
+    <main class="container">
+        <!-- Current Plan Overview -->
+        <div class="card" style="border: 2px solid #86efac;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Current Package</span>
+                <span class="badge-active" id="subStatusBadge">🟢 Active / සක්‍රීයයි</span>
+            </div>
+
+            <div class="plan-price">Rs. 1,000 <span style="font-size:16px; font-weight:700; color:var(--text-muted);">/ Month</span></div>
+            <div class="plan-period">Universal Quick Billing & Invoicing Plan</div>
+
+            <div style="margin-top:14px; padding-top:12px; border-top:1px dashed var(--border-color); font-size:13px; font-weight:700; color:#0369a1;">
+                🗓️ Renewal Due: <span id="renewalDateSpan">30 Days from Registration</span>
+            </div>
+
+            <ul class="feature-list">
+                <li>✓ 100% Offline-First Quick Billing Terminal</li>
+                <li>✓ Unlimited Customer Invoices & Digital Bills</li>
+                <li>✓ Bluetooth ESC/POS Mobile Thermal Direct Printing</li>
+                <li>✓ 1-Click WhatsApp Digital Receipts & Canvas Images</li>
+                <li>✓ Multilingual (සිංහල / தமிழ் / English) Receipts</li>
+                <li>✓ Automatic Double-Entry GL Journal Accounting</li>
+                <li>✓ Full 24/7 Cloud Backup & Instant Sync</li>
+            </ul>
+        </div>
+
+        <!-- Renewal & Payment Instructions -->
+        <div class="card">
+            <h3 style="font-size:16px; font-weight:900; color:var(--primary-dark); margin-bottom:8px;">💳 මාසික ගාස්තු ගෙවීම් උපදෙස් (Renewal)</h3>
+            <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+                ඔබගේ මාසික රු. 1,000 ගාස්තුව පහත ඕනෑම බැංකු ගිණුමකට තැන්පත් කර රිසිට්පත අපගේ WhatsApp අංකයට යොමු කරන්න.
+            </p>
+
+            <div class="bank-details-box">
+                <div style="font-weight:800; color:#166534; margin-bottom:4px;">Commercial Bank</div>
+                <div>Account Name: <strong>DIGIBIZ TECHNOLOGIES</strong></div>
+                <div>Account Number: <strong>800 123 4567</strong></div>
+                <div>Branch: <strong>Colombo Super Branch</strong></div>
+            </div>
+
+            <a href="https://wa.me/94713446500?text=Hello%20DIGIBIZ,%20I%20have%20transferred%20the%20monthly%20subscription%20fee%20for%20Quick%20Billing." target="_blank" class="btn-whatsapp">
+                📲 Send Payment Slip to WhatsApp (071 344 6500)
+            </a>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bizName = localStorage.getItem('digibiz_qb_biz_name') || 'Your Business';
+            const renewalSpan = document.getElementById('renewalDateSpan');
+            const now = new Date();
+            now.setDate(now.getDate() + 30);
+            if (renewalSpan) {
+                renewalSpan.textContent = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+        });
+    </script>
+</body>
+
+</html>

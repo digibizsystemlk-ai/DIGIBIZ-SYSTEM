@@ -1,0 +1,41 @@
+{
+  "name": "DIGIBIZ BILL",
+  "short_name": "DIGIBIZ BILL",
+  "description": "DIGIBIZ BILL - High-Speed Quick Billing & Invoicing POS Terminal",
+  "lang": "si",
+  "start_url": "/modules/quick_billing/app.html",
+  "id": "/digibiz-quick-billing-app",
+  "scope": "/modules/quick_billing/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "theme_color": "#059669",
+  "background_color": "#064e3b",
+  "orientation": "portrait",
+  "categories": ["business", "productivity", "finance", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

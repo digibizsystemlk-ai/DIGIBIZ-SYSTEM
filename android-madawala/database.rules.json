@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "sms_gateway": {
+      "$businessId": {
+        "pending_sms": {
+          ".read": "auth != null && (auth.token.role === 'SUPER_ADMIN' || auth.token.businessId === $businessId || auth.uid === $businessId)",
+          ".write": "auth != null && (auth.token.role === 'SUPER_ADMIN' || auth.token.businessId === $businessId || auth.uid === $businessId)",
+          "$msgId": {
+            ".read": "auth != null && (auth.token.role === 'SUPER_ADMIN' || auth.token.businessId === $businessId || auth.uid === $businessId)",
+            ".write": "auth != null && (auth.token.role === 'SUPER_ADMIN' || auth.token.businessId === $businessId || auth.uid === $businessId)",
+            ".validate": "!newData.exists() || (newData.hasChild('mobile') && newData.hasChild('message') && newData.child('mobile').isString() && newData.child('message').isString())"
+          }
+        }
+      }
+    },
+    "users": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || auth.token.role === 'SUPER_ADMIN')",
+        ".write": "auth != null && (auth.uid === $userId || auth.token.role === 'SUPER_ADMIN')"
+      }
+    }
+  }
+}

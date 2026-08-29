@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Activity - DIGIBIZ</title>
+    
+    <style>
+        html.digibiz-sidebar-reserved body {
+            margin-left: 260px;
+        }
+        @media (max-width: 768px) {
+            html.digibiz-sidebar-reserved body {
+                margin-left: 0;
+            }
+        }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/core/event-bus.js"></script>
+    <script src="/core/auth-roles.js?v=2265"></script>
+    <script src="/core/business-types.js"></script>
+    <script src="/core/sidebar.js?v=2116"></script>
+    <script src="/core/live-presence.js?v=2116"></script>
+    
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
+            background: #090e17;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            padding: 36px 32px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        @media (max-width: 768px) {
+            .main-content { padding: 20px; }
+        }
+        
+        .portal-card {
+            background: linear-gradient(135deg, #111a28 0%, #0d1522 100%);
+            border: 1.5px solid #1e293b;
+            border-radius: 24px;
+            padding: 48px 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, #10b981, #38bdf8, #818cf8);
+        }
+
+        .radar-pulse-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid #10b981;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #10b981;
+            margin-bottom: 24px;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        
+        .portal-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+        
+        .portal-desc {
+            font-size: 15px;
+            color: #94a3b8;
+            max-width: 680px;
+            margin: 0 auto 32px auto;
+            line-height: 1.7;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            max-width: 800px;
+            margin: 0 auto 36px auto;
+            text-align: left;
+        }
+
+        .feature-item {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .feature-item i {
+            color: #10b981;
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
+        .feature-item div h4 {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 3px;
+        }
+
+        .feature-item div p {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .btn-launch-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 800;
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.4);
+            transition: all 0.2s ease;
+            border: 1px solid #34d399;
+        }
+
+        .btn-launch-live:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(5, 150, 105, 0.6);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #475569;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+        <div class="portal-card">
+            <div class="radar-pulse-icon">
+                <i class="fas fa-satellite-dish"></i>
+            </div>
+            
+            <h1 class="portal-title">සජීවී පරිශීලක ක්‍රියාකාරකම් නිරීක්ෂණ කේන්ද්‍රය</h1>
+            <p class="portal-desc">
+                පද්ධතිය තුළ සිදු වන සියලුම සජීවී පරිශීලක ක්‍රියාකාරකම්, පරණ යකඩ බිල්පත් නිකුත් කිරීම්, ගෙවීම්, භාණ්ඩ පැටවීම් සහ පරිශීලක හැසිරීම් තත්‍ය කාලීනව (Real-Time Live Telemetry) නිරීක්ෂණය කිරීම සඳහා මධ්‍යම පාලන කේන්ද්‍රය වෙත පිවිසෙන්න.
+            </p>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-bolt"></i>
+                    <div>
+                        <h4>Real-Time Telemetry</h4>
+                        <p>තත්පරයෙන් තත්පරය පරිශීලකයා කරන දේ සජීවීව පෙනේ</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-receipt"></i>
+                    <div>
+                        <h4>Scrap Billing & Buying</h4>
+                        <p>පරණ යකඩ මිලදී ගැනීමේ බිල්පත් සජීවීව නිරීක්ෂණය</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-briefcase"></i>
+                    <div>
+                        <h4>Business Model Badges</h4>
+                        <p>එක් එක් පරිශීලකයාගේ ව්‍යාපාර මාදිලිය සහ තොරතුරු</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div>
+                        <h4>Device & Presence</h4>
+                        <p>Mobile / PC, Online / Idle තත්ත්වයන් නිරීක්ෂණය</p>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/modules/admin/live-activity.html" class="btn-launch-live">
+                <span>⚡ සජීවී ක්‍රියාකාරකම් නිරීක්ෂණය කරන්න (Open Live Monitor)</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <footer>
+            <p>© 2026 DIGIBIZ - Central Real-Time Activity Telemetry Engine</p>
+        </footer>
+    </div>
+
+    <script>
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+================================================================================
+🚨 WARNING: DO NOT DIRECTLY EDIT ANY FILES IN THIS DIRECTORY (/public/std/) 🚨
+================================================================================
+
+This directory is the SEALED STANDARD PRODUCTION VAULT generated automatically
+by `node scripts/sync-std.js`.
+
+Any manual edits made here will be overwritten on the next sync and will break
+the 100% Zero-Leak Isolation system.
+
+HOW TO MAKE CHANGES:
+1. Make your code changes in the root `/public/` directories:
+   - /public/modules/
+   - /public/core/
+   - /public/css/
+   - /public/scripts/
+   - /public/admin/
+   - /public/auth/
+2. Test thoroughly on the Live Master URLs (https://digibiz-sys.web.app/modules/...).
+3. When approved, synchronize to this directory by running:
+   node scripts/sync-std.js
+4. Deploy to Firebase:
+   firebase deploy --only hosting
+================================================================================

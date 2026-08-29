@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <script src="/snapshots/SUNROSE/core/pwa-init.js?v=1"></script>
+    <script src="/snapshots/SUNROSE/scripts/admin-impersonation.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DIGIBIZ — Smart Universal Business System</title>
+    <meta name="description" content="DIGIBIZ — Cloud business management system for retail, distribution, pharmacy, attendance, tire centre, and more.">
+    <meta name="google-site-verification" content="YP3CkN2WnSMkqNQvZ6YZryd7YyqZvwVAuanqf8O86-o" />
+    <meta name="google-site-verification" content="google0e45d45f13a18e54" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="core/firebase-init.js?v=73"></script>
+    <script src="core/event-bus.js?v=73"></script>
+    <script src="core/accounts-core.js?v=73"></script>
+    <script src="core/auth-roles.js?v=120"></script>
+    <script src="core/business-types.js?v=73"></script>
+    <script src="core/dashboard-core.js?v=74"></script>
+    <script src="core/plugin-loader.js?v=73"></script>
+
+    <style>
+        :root {
+            --bg0: #061510;
+            --bg1: #0a1f18;
+            --bg2: #0f3b2c;
+            --accent: #ffd966;
+            --mint: #34d399;
+            --glass: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --nav-h: 56px;
+            --bottom-nav: 64px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(165deg, var(--bg0) 0%, var(--bg1) 35%, var(--bg2) 100%);
+            color: var(--text);
+            min-height: 100dvh;
+            overflow-x: hidden;
+            padding-bottom: calc(var(--bottom-nav) + env(safe-area-inset-bottom, 0px));
+            -webkit-tap-highlight-color: transparent;
+        }
+        @media (min-width: 769px) {
+            body { padding-bottom: 0; }
+        }
+
+
+
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
+            padding-top: env(safe-area-inset-top, 0px);
+            z-index: 1000;
+            background: rgba(6, 21, 16, 0.88);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: var(--nav-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .brand-mark {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #10b981, #0f3b2c);
+            display: grid;
+            place-items: center;
+            font-size: 18px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+        .brand-text { font-size: 17px; font-weight: 900; letter-spacing: 0.04em; color: var(--accent); }
+        .brand-sub { display: none; font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; }
+        @media (min-width: 400px) {
+            .brand-sub { display: block; }
+        }
+
+        .nav-center { display: none; align-items: center; justify-content: center; gap: 6px; flex: 1; }
+        @media (min-width: 960px) {
+            .nav-center { display: flex; }
+        }
+        .nav-center a {
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 7px 11px;
+            border-radius: 10px;
+            transition: color 0.2s, background 0.2s;
+            white-space: nowrap;
+        }
+        .nav-center a:hover { color: var(--accent); background: var(--glass); }
+
+        .header-actions { display: none; align-items: center; gap: 8px; }
+        @media (min-width: 600px) {
+            .header-actions { display: flex; }
+        }
+        .btn-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-pill:active { transform: scale(0.98); }
+        .btn-gold {
+            background: linear-gradient(135deg, #fbbf24, var(--accent));
+            color: #000000;
+            font-weight: 800;
+            box-shadow: 0 6px 20px rgba(255, 217, 102, 0.25);
+        }
+        .btn-ghost {
+            background: var(--glass);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .burger {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(15, 59, 44, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            color: var(--accent);
+        }
+        @media (min-width: 900px) {
+            .burger { display: none; }
+        }
+        .burger span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 1px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        html.drawer-open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        html.drawer-open .burger span:nth-child(2) { opacity: 0; }
+        html.drawer-open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        html.drawer-open .drawer-overlay { opacity: 1; pointer-events: auto; }
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(300px, 88vw);
+            height: 100dvh;
+            background: linear-gradient(180deg, #0a2a22 0%, #0f3b2c 100%);
+            z-index: 1002;
+            transform: translateX(100%);
+            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: calc(env(safe-area-inset-top, 0px) + 72px) 20px 24px;
+            border-left: 1px solid var(--border);
+            box-shadow: -12px 0 40px rgba(0, 0, 0, 0.4);
+        }
+        html.drawer-open .drawer { transform: translateX(0); }
+        .drawer a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 14px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            border: 1px solid transparent;
+        }
+        .drawer a:hover, .drawer a:focus-visible {
+            background: var(--glass);
+            border-color: var(--border);
+            color: var(--accent);
+        }
+
+        main { padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 20px); }
+
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 18px 48px;
+            display: grid;
+            gap: 32px;
+            align-items: center;
+        }
+        @media (min-width: 900px) {
+            .hero { grid-template-columns: 1.05fr 0.95fr; padding: 40px 24px 64px; }
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--mint);
+            background: rgba(52, 211, 153, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            padding: 8px 14px;
+            border-radius: 999px;
+            margin-bottom: 16px;
+        }
+        .hero h1 {
+            font-size: clamp(1.75rem, 5vw, 2.75rem);
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 14px;
+        }
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, #fde68a, var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero-lead {
+            font-size: 15px;
+            line-height: 1.65;
+            color: var(--muted);
+            max-width: 520px;
+            margin-bottom: 22px;
+        }
+        .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+        .hero-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+        .hero-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .hero-card-top span { font-size: 12px; font-weight: 700; color: var(--accent); }
+        .mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .mini-tile {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 12px 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .mini-tile strong { display: block; font-size: 18px; color: var(--mint); }
+        .mini-tile small { font-size: 10px; color: var(--muted); font-weight: 600; }
+
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 18px;
+        }
+        .section-head { text-align: center; margin-bottom: 28px; }
+        .section-head h2 { font-size: clamp(1.35rem, 4vw, 2rem); font-weight: 900; color: #fff; margin-bottom: 8px; }
+        .section-head p { color: var(--muted); font-size: 14px; max-width: 560px; margin: 0 auto; line-height: 1.55; }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        @media (min-width: 700px) {
+            .stats-row { grid-template-columns: repeat(4, 1fr); }
+        }
+        .stat-card {
+            text-align: center;
+            padding: 20px 12px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+        }
+        .stat-card b { font-size: clamp(1.5rem, 4vw, 2rem); color: var(--accent); display: block; }
+        .stat-card span { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+        .pricing-grid {
+            display: grid;
+            gap: 14px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        @media (min-width: 640px) {
+            .pricing-grid { grid-template-columns: 1fr 1fr; }
+        }
+        .price-card {
+            border-radius: 20px;
+            padding: 24px 20px;
+            border: 1px solid var(--border);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.15));
+        }
+        .price-card.featured { border-color: rgba(255, 217, 102, 0.45); box-shadow: 0 0 0 1px rgba(255, 217, 102, 0.12); }
+        .price-card h3 { font-size: 14px; color: var(--accent); margin-bottom: 8px; font-weight: 800; }
+        .price-card .amt { font-size: 2rem; font-weight: 900; color: #fff; }
+        .price-card p { font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+        .features-grid {
+            display: grid;
+            gap: 12px;
+        }
+        @media (min-width: 640px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 960px) {
+            .features-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .feat {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.18);
+            border: 1px solid var(--border);
+            align-items: flex-start;
+        }
+        .feat i { font-size: 22px; flex-shrink: 0; }
+        .feat div { font-size: 13px; color: var(--muted); line-height: 1.5; }
+        .feat strong { display: block; color: #fff; font-size: 14px; margin-bottom: 4px; }
+
+        .biz-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        @media (min-width: 520px) {
+            .biz-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width: 800px) {
+            .biz-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .biz-tile {
+            padding: 16px 10px;
+            text-align: center;
+            border-radius: 14px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            cursor: default;
+            color: inherit;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+        .biz-tile:hover { border-color: rgba(255, 217, 102, 0.3); }
+        .biz-tile .ic { font-size: 28px; margin-bottom: 6px; }
+        .biz-tile .nm { font-size: 11px; font-weight: 700; color: var(--text); line-height: 1.25; }
+
+        .contact-block {
+            text-align: center;
+            padding: 48px 18px;
+            margin: 24px 12px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(15, 59, 44, 0.9));
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .contact-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .contact-copy { text-align: center; }
+        .contact-lead {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            margin-top: 8px;
+            line-height: 1.55;
+        }
+        .contact-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .contact-block h2,
+        .contact-copy h2 { font-size: 1.25rem; margin-bottom: 8px; font-weight: 800; }
+        .contact-block .phone {
+            font-size: clamp(1.5rem, 5vw, 2.25rem);
+            font-weight: 900;
+            color: var(--accent);
+            margin: 16px 0;
+            letter-spacing: 0.02em;
+        }
+        .contact-block a.wa {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #25d366;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 8px;
+        }
+
+        footer {
+            padding: 40px 18px 100px;
+            border-top: 1px solid var(--border);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (min-width: 769px) {
+            footer { padding-bottom: 40px; }
+        }
+        .footer-grid {
+            display: grid;
+            gap: 24px;
+        }
+        @media (min-width: 640px) {
+            .footer-grid { grid-template-columns: 2fr 1fr 1fr; }
+        }
+        .footer-grid h4 { color: var(--accent); font-size: 14px; margin-bottom: 12px; }
+        .footer-grid a, .footer-grid p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.8;
+            text-decoration: none;
+            display: block;
+        }
+        .footer-grid a:hover { color: var(--mint); }
+        .copyright { text-align: center; margin-top: 28px; font-size: 11px; color: var(--muted); }
+
+        .bottom-nav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            display: flex;
+            justify-content: space-around;
+            align-items: stretch;
+            min-height: var(--bottom-nav);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            background: rgba(6, 21, 16, 0.94);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+        }
+        @media (min-width: 769px) {
+            .bottom-nav { display: none; }
+        }
+        .bottom-nav a {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 8px 4px;
+            min-width: 0;
+        }
+        .bottom-nav a .bi { font-size: 20px; line-height: 1; }
+        .bottom-nav a:hover, .bottom-nav a:focus-visible { color: var(--accent); }
+        .bottom-nav a.active { color: var(--mint); }
+
+        /* ----- Desktop / wide layout (1024px+): professional web presentation ----- */
+        @media (min-width: 1024px) {
+            body {
+                background:
+                    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(16, 185, 129, 0.14), transparent 52%),
+                    linear-gradient(165deg, var(--bg0) 0%, var(--bg1) 38%, var(--bg2) 100%);
+            }
+            .site-header {
+                background: rgba(6, 21, 16, 0.92);
+                border-bottom-color: rgba(255, 255, 255, 0.08);
+            }
+            .header-inner {
+                max-width: 1320px;
+                padding: 0 28px;
+            }
+            .brand-mark {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+            }
+            .brand-text { font-size: 19px; }
+            main {
+                padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 28px);
+            }
+            .hero {
+                max-width: 1280px;
+                gap: 48px;
+                padding: 40px 32px 72px;
+                min-height: min(76vh, 760px);
+                align-items: center;
+            }
+            .hero h1 {
+                font-size: clamp(2.35rem, 3.2vw, 3.15rem);
+                line-height: 1.12;
+            }
+            .hero-lead {
+                font-size: 17px;
+                max-width: 560px;
+                line-height: 1.7;
+            }
+            .hero-card {
+                padding: 28px;
+                border-radius: 24px;
+            }
+            .section {
+                max-width: 1280px;
+                padding: 56px 32px;
+            }
+            .section-head { margin-bottom: 36px; }
+            .section-head h2 { font-size: clamp(1.85rem, 2.4vw, 2.35rem); }
+            .section-head p { font-size: 16px; max-width: 640px; line-height: 1.65; }
+            .stats-row { gap: 20px; }
+            .stat-card {
+                padding: 28px 20px;
+                border-radius: 18px;
+            }
+            .pricing-grid {
+                max-width: 920px;
+                gap: 24px;
+            }
+            .features-grid { gap: 20px; }
+            .feat {
+                padding: 22px 20px;
+                border-radius: 16px;
+            }
+            .feat div { font-size: 14px; }
+            .feat strong { font-size: 15px; }
+            .biz-grid { gap: 14px; }
+            .biz-tile { padding: 20px 12px; }
+            .contact-block {
+                max-width: 1100px;
+                padding: 52px 48px;
+                margin: 40px auto;
+                border-radius: 28px;
+            }
+            .contact-inner {
+                display: grid;
+                grid-template-columns: 1.15fr 1fr;
+                gap: 40px;
+                align-items: center;
+                text-align: left;
+            }
+            .contact-copy { text-align: left; }
+            .contact-lead { font-size: 16px; max-width: 420px; }
+            .contact-actions {
+                align-items: flex-start;
+            }
+            .contact-block .phone { margin: 0; }
+            footer {
+                max-width: 1280px;
+                padding: 52px 32px 48px;
+            }
+            .footer-grid { gap: 40px; }
+        }
+
+
+        @media (min-width: 1400px) {
+            .hero { max-width: 1360px; }
+            .section { max-width: 1360px; }
+            footer { max-width: 1360px; }
+        }
+
+        /* Demo Hub Custom Styling */
+        .demo-section {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 59, 44, 0.5) 100%);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 28px;
+            padding: 36px 20px;
+            margin: 20px auto 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+        }
+        @media (min-width: 768px) {
+            .demo-section { padding: 48px 36px; }
+        }
+        .demo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0a1f18;
+            font-weight: 800;
+            font-size: 11px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3);
+        }
+        .demo-grid-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-top: 28px;
+        }
+        @media (min-width: 960px) {
+            .demo-grid-wrapper {
+                grid-template-columns: 1fr 1fr;
+                align-items: stretch;
+            }
+        }
+        .demo-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        @media (min-width: 520px) {
+            .demo-selector-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .demo-type-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .demo-type-card:hover, .demo-type-card.active {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(255, 217, 102, 0.18));
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        .demo-type-card .icon {
+            font-size: 26px;
+            margin-bottom: 6px;
+        }
+        .demo-type-card .title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.25;
+        }
+        .demo-type-card.active .title {
+            color: var(--accent);
+        }
+        .demo-display-box {
+            background: rgba(6, 21, 16, 0.92);
+            border: 1px solid rgba(255, 217, 102, 0.35);
+            border-radius: 24px;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+            backdrop-filter: blur(12px);
+        }
+        .demo-box-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        .demo-box-icon {
+            font-size: 38px;
+            background: rgba(16, 185, 129, 0.18);
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            border-radius: 16px;
+            width: 60px;
+            height: 60px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+        .demo-box-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .demo-box-desc {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 4px;
+            line-height: 1.45;
+        }
+        .demo-cred-row {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .demo-cred-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .demo-cred-val {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--mint);
+            font-family: monospace;
+        }
+        .demo-copy-btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .demo-copy-btn:hover {
+            background: rgba(255, 217, 102, 0.2);
+            color: var(--accent);
+        }
+        .demo-login-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+            margin-top: 14px;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .demo-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5);
+        }
+        .demo-reset-notice {
+            margin-top: 16px;
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #fde68a;
+            line-height: 1.5;
+        }
+        .demo-steps-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 14px;
+            margin-top: 28px;
+        }
+        @media (min-width: 768px) {
+            .demo-steps-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .demo-step-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px 16px;
+            text-align: left;
+        }
+        .demo-step-num {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--accent);
+            background: rgba(255, 217, 102, 0.15);
+            padding: 4px 10px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+        }
+        .demo-step-card h4 { font-size: 14px; color: #fff; font-weight: 700; margin-bottom: 6px; }
+        .demo-step-card p { font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+        /* Mobile Desktop Notice Modal Styling */
+        .mobile-demo-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(12px);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .mobile-demo-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .mobile-demo-modal {
+            background: linear-gradient(165deg, #09231b 0%, #0f3b2c 100%);
+            border: 1.5px solid rgba(255, 217, 102, 0.45);
+            border-radius: 24px;
+            padding: 28px 22px;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.25s ease;
+        }
+        .mobile-demo-overlay.active .mobile-demo-modal {
+            transform: translateY(0);
+        }
+        .mobile-demo-modal .icon-header {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .mobile-demo-modal h3 {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 12px;
+            line-height: 1.35;
+        }
+        .mobile-demo-modal p {
+            font-size: 13px;
+            color: var(--text);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        .mobile-demo-modal .btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .mobile-demo-modal .btn-main {
+            background: linear-gradient(135deg, #fbbf24, var(--accent));
+            color: #0a1f18;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(251, 191, 36, 0.35);
+        }
+        .mobile-demo-modal .btn-sub {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 13px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .mobile-demo-modal .btn-link {
+            color: var(--muted);
+            font-size: 12px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            margin-top: 6px;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Desktop Advisory Modal -->
+    <div class="mobile-demo-overlay" id="mobileDemoOverlay">
+        <div class="mobile-demo-modal">
+            <button type="button" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;" id="closeMobileDemoModal">✕</button>
+            <div class="icon-header">💻</div>
+            <h3>Recommended on Desktop / Tablet</h3>
+            <p>
+                To explore all rich features including POS, Inventory, Sales, Invoicing & Financial Reports with optimal view, <strong>we recommend logging in from a Desktop, Laptop, or Tablet.</strong>
+            </p>
+            <div class="btn-stack">
+                <button type="button" class="btn-main" id="mobileCopyCredsBtn">
+                    📋 Copy Login Email & Password
+                </button>
+                <a class="btn-sub" id="mobileShareWaBtn" href="#" target="_blank">
+                    💬 Share Link via WhatsApp to PC
+                </a>
+                <button type="button" class="btn-link" id="mobileProceedAnywayBtn">
+                    📱 Proceed on Mobile Screen Anyway
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="/index.html">
+                <span class="brand-mark">D</span>
+                <div>
+                    <div class="brand-text">DIGIBIZ</div>
+                    <div class="brand-sub">BUSINESS SYSTEM</div>
+                </div>
+            </a>
+            <!-- 🎯 Center Navigation (Middle Space) -->
+            <nav class="nav-center" aria-label="Main Navigation">
+                <a href="/blog.html" id="navBlog" class="btn-pill" style="background:rgba(52,211,153,0.14);border:1.5px solid rgba(52,211,153,0.45);color:var(--mint);font-weight:800;font-size:13.5px;padding:7px 14px;box-shadow:0 2px 10px rgba(16,185,129,0.25);display:inline-flex;align-items:center;gap:6px;">📰 News and Update</a>
+                <a href="#features" id="navFeatures" style="font-weight:700;font-size:13.5px;">Features</a>
+                <a href="#business-types" id="navBusinesses" style="font-weight:700;font-size:13.5px;">Businesses</a>
+                <a href="#demo" id="navDemo" style="color:var(--accent);font-weight:800;font-size:13.5px;">🎮 Live Demo</a>
+                <a href="#pricing" id="navPricing" style="font-weight:700;font-size:13.5px;">Pricing</a>
+                <button type="button" class="btn-pill" id="langToggleBtn" style="background:rgba(255,255,255,0.08);border:1px solid var(--border);color:var(--text);padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <span>🌐</span><span class="lang-label">English</span>
+                </button>
+            </nav>
+
+            <!-- 🔑 Far-Right Actions: Login & Try Free -->
+            <div class="header-actions">
+                <a href="/auth/login.html" class="btn-pill btn-ghost" id="navLogin" style="font-weight:700;">Login</a>
+                <a href="/auth/register.html" class="btn-pill btn-gold" id="navTryFree" style="font-weight:900;color:#000000;box-shadow:0 4px 14px rgba(255,217,102,0.35);">Try Free</a>
+            </div>
+            <button type="button" class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <aside class="drawer" id="drawer" aria-hidden="true">
+        <button type="button" class="btn-pill" id="drawerLangToggleBtn" style="background:rgba(255,255,255,0.08);border:1px solid var(--border);color:var(--text);padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:14px;">
+            <span>🌐</span><span class="lang-label">English</span>
+        </button>
+        <a href="/blog.html" data-close-drawer id="drawerBlog" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);color:var(--mint);font-weight:800;font-size:15px;padding:12px;border-radius:12px;display:block;margin-bottom:6px;">📰 News and Update</a>
+        <a href="#features" data-close-drawer id="drawerFeatures">Features</a>
+        <a href="#business-types" data-close-drawer id="drawerBusinesses">Businesses</a>
+        <a href="#demo" data-close-drawer id="drawerDemo" style="color:var(--accent);font-weight:800;">🎮 Live Demo</a>
+        <a href="#pricing" data-close-drawer id="drawerPricing">Pricing</a>
+        <a href="/auth/login.html" data-close-drawer id="drawerLogin">Login</a>
+        <a href="/auth/register.html" data-close-drawer id="drawerTryFree" style="color:#000000;font-weight:900;background:linear-gradient(135deg, #fbbf24, #ffd966);text-align:center;border-radius:12px;padding:12px;margin-top:6px;display:block;">Try Free</a>
+    </aside>
+
+    <main>
+        <section class="hero">
+            <div>
+                <div class="hero-badge" id="heroBadge">Universal Business OS · Cloud Platform</div>
+                <h1 id="heroTitle">ලංකාවේ ඕනෑම සුළු හා මධ්‍ය පරිමාණ ව්‍යාපාරයකට <em>අනුරූපී කළමනාකරණ පද්ධතිය</em></h1>
+                <p class="hero-lead" id="heroLead">DIGIBIZ — ලංකාවේ ඕනෑම සුළු හා මධ්‍ය පරිමාණ ව්‍යාපාරයකට (Retail, Tire Center, Pharmacy, Restaurant, Manufacturer, Distributor, Services) අදාළව සකසන ලද එකම පූර්ණ Cloud කළමනාකරණ පද්ධතියයි. Mobile & Desktop දෙකෙන්ම ඉහළම කාර්යක්ෂමතාවයකින් ක්‍රියාත්මක වේ.</p>
+                <div class="hero-cta" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                    <a href="/auth/register.html" class="btn-pill btn-gold" id="heroBtnFree" style="padding:12px 20px;font-weight:900;color:#000000;">නොමිලේ අත්හදා බලන්න</a>
+                    <a href="/auth/login.html" class="btn-pill btn-ghost" id="heroBtnLogin" style="padding:12px 20px;font-weight:700;">Login</a>
+                    <a href="/blog.html" class="btn-pill btn-ghost" style="border-color:rgba(52,211,153,0.3);color:var(--mint);padding:12px 20px;font-weight:700;">📰 News and Update</a>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="hero-card-top">
+                    <span id="heroCardTitle">සජීවී ව්‍යාපාරික දත්ත (Live Overview)</span>
+                    <span style="font-size:10px;color:var(--mint);">● Cloud Synced</span>
+                </div>
+                <div class="mini-grid">
+                    <div class="mini-tile"><strong id="heroTile1">20+</strong><small id="heroTile1Sub">ව්‍යාපාරික ආකෘති</small></div>
+                    <div class="mini-tile"><strong id="heroTile2">100%</strong><small id="heroTile2Sub">Cloud ආරක්ෂාව</small></div>
+                    <div class="mini-tile"><strong id="heroTile3">7</strong><small id="heroTile3Sub">දින නොමිලේ</small></div>
+                </div>
+                <p id="heroCardDesc" style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.55;">POS, තොග පාලනය, සේවකයින්, මූල්‍ය ලෙජර & වාර්තා — ඔබගේ ව්‍යාපාරික ක්ෂේත්‍රයටම ආවේණික ලෙස සකසා ඇත.</p>
+            </div>
+        </section>
+
+        <section class="section" id="stats" aria-label="Highlights">
+            <div class="stats-row">
+                <div class="stat-card"><b id="stat1Num">20+</b><span id="stat1Text">ව්‍යාපාරික ආකෘති (Business Models)</span></div>
+                <div class="stat-card"><b id="stat2Num">100%</b><span id="stat2Text">වලාකුළු තාක්ෂණය (Cloud Based)</span></div>
+                <div class="stat-card"><b id="stat3Num">24/7</b><span id="stat3Text">සහය සහ සේවාව (Full Support)</span></div>
+                <div class="stat-card"><b id="stat4Num">දින 7</b><span id="stat4Text">නොමිලේ අත්හදා බලන්න (Free Trial)</span></div>
+            </div>
+        </section>
+
+        <section class="section" id="pricing">
+            <div class="section-head">
+                <h2 id="pricingTitle">සැඟවුණු ගාස්තු නැති, සරල ගාස්තු ක්‍රමවේදය</h2>
+                <p id="pricingLead">ඔබේ ව්‍යාපාරයේ වර්ධනයට අනුරූපී සාධාරණ හා විනිවිදභාවයෙන් යුතු ගාස්තු.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="price-card featured">
+                    <h3 id="priceCard1Title">මුල් දින 7 — නොමිලේ (Free Trial)</h3>
+                    <div class="amt" id="priceCard1Amt">Rs. 0</div>
+                    <p id="priceCard1Desc">මුල් දින 7 පද්ධතියේ සියලුම පහසුකම් නොමිලේම අත්හදා බලන්න.</p>
+                </div>
+                <div class="price-card">
+                    <h3 id="priceCard2Title">8 වන දින සිට මාසික ගාස්තුව</h3>
+                    <div class="amt" id="priceCard2Amt">Rs. 1,000 <small style="font-size:14px;color:var(--muted);font-weight:600;">/ මාසිකව</small></div>
+                    <p id="priceCard2Desc">මාසික ගාස්තුව රු. 1,000 කි (දිනකට රු. 33 වැනි ඉතා සුළු මුදලක්). කිසිදු සැඟවුණු ගාස්තුවක් නැත.</p>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:24px;">
+                <a href="/auth/register.html" class="btn-pill btn-gold" id="priceBtn" style="padding:14px 28px;font-size:15px;">දින 7 නොමිලේ අත්හදා බලන්න</a>
+            </div>
+        </section>
+
+        <section class="section" id="features">
+            <div class="section-head">
+                <h2 id="featTitle">පද්ධතියේ ප්‍රධාන පහසුකම් (Core Features)</h2>
+                <p id="featLead">විකුණුම්, තොග පාලනය, වියදම් සහ වාර්තා සියල්ල එකම තැනකින්.</p>
+            </div>
+            <div class="features-grid" id="featuresGrid">
+                <div class="feat"><i>💰</i><div><strong>POS & Invoicing</strong>ක්ෂණික බිල්පත් සැකසීම සහ ගනුදෙනු පාලනය.</div></div>
+                <div class="feat"><i>📦</i><div><strong>Stock & Inventory</strong>තොග ප්‍රමාණයන්, මිල ගණන් සහ Low Stock Alerts.</div></div>
+                <div class="feat"><i>📊</i><div><strong>Analytics & Reports</strong>සජීවී විකුණුම් වාර්තා සහ ව්‍යාපාරික විශ්ලේෂණ.</div></div>
+                <div class="feat"><i>🚚</i><div><strong>Suppliers & Purchases</strong>මිලදී ගැනීමේ බිල්පත් සහ සැපයුම්කරුවන්ගේ ණය/හිඟ.</div></div>
+                <div class="feat"><i>📒</i><div><strong>Accounting & Ledger</strong>ස්වයංක්‍රීය ආදායම්/වියදම් සහ මූල්‍ය ලෙජර.</div></div>
+                <div class="feat"><i>🔔</i><div><strong>Smart Alerts</strong>තොග අඩුවන විට සහ ගනුදෙනුවලදී ලැබෙන ක්ෂණික Alerts.</div></div>
+            </div>
+        </section>
+
+        <section class="section" id="business-types">
+            <div class="section-head">
+                <h2 id="bizTitle">සහාය දක්වන ව්‍යාපාරික ක්ෂේත්‍රයන් (Supported Businesses)</h2>
+                <p id="bizLead">ලංකාවේ ඕනෑම සුළු හා මධ්‍ය පරිමාණ ව්‍යාපාරික ආකෘතියකට ගැලපෙන පරිදි සකසන ලද එකම පද්ධතිය.</p>
+            </div>
+            <div class="biz-grid" id="businessGrid"></div>
+        </section>
+
+        <!-- Live Demo Hub Section -->
+        <section class="section" id="demo">
+            <div class="demo-section">
+                <div style="text-align:center;">
+                    <div class="demo-badge" id="demoBadge">🎮 Live Interactive Demo Hub</div>
+                    <h2 id="demoTitle">නොමිලේම අත්හදා බලන්න <em>(Free Live Demo)</em></h2>
+                    <p id="demoLead" style="color:var(--muted);font-size:14px;max-width:620px;margin:8px auto 0;line-height:1.6;">
+                        ඔබගේ ව්‍යාපාරික මාදිලියට (Business Model) අදාළ ඩෙමෝ ගිණුම තෝරාගෙන පද්ධතියේ සියලුම පහසුකම් නොමිලේම පරික්ෂා කර බලන්න.
+                    </p>
+                </div>
+
+                <div class="demo-grid-wrapper">
+                    <div>
+                        <p id="demoSelectLabel" style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">
+                            👇 ව්‍යාපාරික ආකෘතිය තෝරන්න (Select Business):
+                        </p>
+                        <div class="demo-selector-grid" id="demoSelectorGrid"></div>
+                    </div>
+
+                    <div class="demo-display-box" id="demoDisplayBox">
+                        <!-- Dynamic Demo Card Content rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- 3 Steps Guide -->
+                <div class="demo-steps-grid">
+                    <div class="demo-step-card">
+                        <span class="demo-step-num">Step 1</span>
+                        <h4 id="demoStep1Title">1. ව්‍යාපාරය තෝරන්න</h4>
+                        <p id="demoStep1Desc">ඔබගේ ව්‍යාපාරික ක්ෂේත්‍රයට අදාළව ඉහත ඇති ඩෙමෝ කාඩ්පත මත ක්ලික් කරන්න.</p>
+                    </div>
+                    <div class="demo-step-card">
+                        <span class="demo-step-num">Step 2</span>
+                        <h4 id="demoStep2Title">2. 1-Click ලොග් වන්න</h4>
+                        <p id="demoStep2Desc">ලබාදී ඇති ඊමේල් සහ මුරපදය (123456) භාවිතයෙන් හෝ '1-Click Direct Login' ඔබන්න.</p>
+                    </div>
+                    <div class="demo-step-card">
+                        <span class="demo-step-num">Step 3</span>
+                        <h4 id="demoStep3Title">3. නිදහසේ පරික්ෂා කරන්න</h4>
+                        <p id="demoStep3Desc">POS, Stock, Sales, Reports, Attendance ආදී සියලුම පහසුකම් අත්හදා බලන්න (පැයකින් දත්ත Auto Reset වේ).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="contact-block">
+            <div class="contact-inner">
+                <div class="contact-copy">
+                    <h2 id="contactTitle">අදම ඔබේ දින 7 නොමිලේ අත්හදා බැලීම ආරම්භ කරන්න</h2>
+                    <p class="contact-lead" id="contactLead">විනාඩි 2 කින් ඔබේ ව්‍යාපාරය ඩිජිටල්කරණය කරගෙන සාර්ථකත්වය කරා පියනගන්න.</p>
+                </div>
+                <div class="contact-actions">
+                    <div class="phone">071 344 6500</div>
+                    <a class="wa" id="contactWa" href="https://wa.me/94713446500">WhatsApp හරහා සම්බන්ධ වන්න</a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-grid">
+                <div>
+                    <h4 id="footerAboutTitle">DIGIBIZ BUSINESS SYSTEM</h4>
+                    <p id="footerAboutDesc">ලංකාවේ ඕනෑම ව්‍යාපාරයකට ගැළපෙන පූර්ණ Cloud කළමනාකරණ පද්ධතිය.</p>
+                </div>
+                <div>
+                    <h4 id="footerNavTitle">Navigate</h4>
+                    <a href="#features" id="footerNavFeatures">පහසුකම්</a>
+                    <a href="#pricing" id="footerNavPricing">ගාස්තු</a>
+                    <a href="#business-types" id="footerNavBiz">ව්‍යාපාර මාදිලි</a>
+                    <a href="/blog.html" id="footerNavBlog" style="color:var(--mint);font-weight:700;">📰 News and Update</a>
+                </div>
+                <div>
+                    <h4 id="footerAccountTitle">Account</h4>
+                    <a href="https://digibiz-pro.web.app/" target="_blank" rel="noopener" id="footerNavBizLogin" style="color:#34d399;font-weight:800;">🏢 Business Login (Pro)</a>
+                    <a href="/auth/login.html" id="footerNavLogin">Login</a>
+                    <a href="/auth/register.html" id="footerNavRegister">ලියාපදිංචි වන්න</a>
+                </div>
+            </div>
+            <div class="copyright" id="footerCopyright">&copy; 2026 DIGIBIZ Universal. All rights reserved.</div>
+        </footer>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Mobile navigation">
+        <a href="/index.html" class="active"><span class="bi">⌂</span>Home</a>
+        <a href="#features"><span class="bi">✦</span>Features</a>
+        <a href="#demo"><span class="bi">🎮</span>Demo</a>
+        <a href="#pricing"><span class="bi">$</span>Pricing</a>
+        <a href="/auth/login.html"><span class="bi">→</span>Login</a>
+    </nav>
+
+    <script>
+        const PAGE_I18N = {
+            si: {
+                langLabel: "English",
+                navFeatures: "Features",
+                navBusinesses: "Businesses",
+                navBlog: "📰 News and Update",
+                navDemo: "🎮 Live Demo",
+                navPricing: "Pricing",
+                navLogin: "Login",
+                navTryFree: "Try Free",
+                drawerFeatures: "Features",
+                drawerBusinesses: "Businesses",
+                drawerBlog: "📰 News and Update",
+                drawerDemo: "🎮 Live Demo",
+                drawerPricing: "Pricing",
+                drawerLogin: "Login",
+                drawerTryFree: "Try Free",
+                heroBadge: "Universal Business OS · Cloud Platform",
+                heroTitle: "ලංකාවේ ඕනෑම සුළු හා මධ්‍ය පරිමාණ ව්‍යාපාරයකට <em>අනුරූපී කළමනාකරණ පද්ධතිය</em>",
+                heroLead: "DIGIBIZ — ලංකාවේ ඕනෑම සුළු හා මධ්‍ය පරිමාණ ව්‍යාපාරයකට (Retail, Tire Center, Pharmacy, Restaurant, Manufacturer, Distributor, Services) අදාළව සකසන ලද එකම පූර්ණ Cloud කළමනාකරණ පද්ධතියයි. Mobile & Desktop දෙකෙන්ම ඉහළම කාර්යක්ෂමතාවයකින් ක්‍රියාත්මක වේ.",
+                heroBtnFree: "නොමිලේ අත්හදා බලන්න",
+                heroBtnLogin: "Login",
+                heroCardTitle: "සජීවී ව්‍යාපාරික දත්ත (Live Overview)",
+                heroTile1: "20+",
+                heroTile1Sub: "ව්‍යාපාරික ආකෘති",
+                heroTile2: "100%",
+                heroTile2Sub: "Cloud ආරක්ෂාව",
+                heroTile3: "7",
+                heroTile3Sub: "දින නොමිලේ",
+                heroCardDesc: "POS, තොග පාලනය, සේවකයින්, මූල්‍ය ලෙජර & වාර්තා — ඔබගේ ව්‍යාපාරික ක්ෂේත්‍රයටම ආවේණික ලෙස සකසා ඇත.",
+                stat1Num: "20+",
+                stat1Text: "ව්‍යාපාරික ආකෘති (Business Models)",
+                stat2Num: "100%",
+                stat2Text: "වලාකුළු තාක්ෂණය (Cloud Based)",
+                stat3Num: "24/7",
+                stat3Text: "සහය සහ සේවාව (Full Support)",
+                stat4Num: "දින 7",
+                stat4Text: "නොමිලේ අත්හදා බලන්න (Free Trial)",
+                pricingTitle: "සැඟවුණු ගාස්තු නැති, සරල ගාස්තු ක්‍රමවේදය",
+                pricingLead: "ඔබේ ව්‍යාපාරයේ වර්ධනයට අනුරූපී සාධාරණ හා විනිවිදභාවයෙන් යුතු ගාස්තු.",
+                priceCard1Title: "මුල් දින 7 — නොමිලේ (Free Trial)",
+                priceCard1Amt: "Rs. 0",
+                priceCard1Desc: "මුල් දින 7 පද්ධතියේ සියලුම පහසුකම් නොමිලේම අත්හදා බලන්න.",
+                priceCard2Title: "8 වන දින සිට මාසික ගාස්තුව",
+                priceCard2Amt: "Rs. 1,000 <small style=\"font-size:14px;color:var(--muted);font-weight:600;\">/ මාසිකව</small>",
+                priceCard2Desc: "මාසික ගාස්තුව රු. 1,000 කි (දිනකට රු. 33 වැනි ඉතා සුළු මුදලක්). කිසිදු සැඟවුණු ගාස්තුවක් නැත.",
+                priceBtn: "දින 7 නොමිලේ අත්හදා බලන්න",
+                featTitle: "පද්ධතියේ ප්‍රධාන පහසුකම් (Core Features)",
+                featLead: "විකුණුම්, තොග පාලනය, වියදම් සහ වාර්තා සියල්ල එකම තැනකින්.",
+                features: [
+                    { icon: '💰', title: 'POS & Invoicing', desc: 'ක්ෂණික බිල්පත් සැකසීම සහ ගනුදෙනු පාලනය.' },
+                    { icon: '📦', title: 'Stock & Inventory', desc: 'තොග ප්‍රමාණයන්, මිල ගණන් සහ Low Stock Alerts.' },
+                    { icon: '📊', title: 'Analytics & Reports', desc: 'සජීවී විකුණුම් වාර්තා සහ ව්‍යාපාරික විශ්ලේෂණ.' },
+                    { icon: '🚚', title: 'Suppliers & Purchases', desc: 'මිලදී ගැනීමේ බිල්පත් සහ සැපයුම්කරුවන්ගේ ණය/හිඟ.' },
+                    { icon: '📒', title: 'Accounting & Ledger', desc: 'ස්වයංක්‍රීය ආදායම්/වියදම් සහ මූල්‍ය ලෙජර.' },
+                    { icon: '🔔', title: 'Smart Alerts', desc: 'තොග අඩුවන විට සහ ගනුදෙනුවලදී ලැබෙන ක්ෂණික Alerts.' }
+                ],
+                bizTitle: "සහාය දක්වන ව්‍යාපාරික ක්ෂේත්‍රයන් (Supported Businesses)",
+                bizLead: "ලංකාවේ ඕනෑම සුළු හා මධ්‍ය පරිමාණ ව්‍යාපාරික ආකෘතියකට ගැලපෙන පරිදි සකසන ලද එකම පද්ධතිය.",
+                demoBadge: "🎮 Live Interactive Demo Hub",
+                demoTitle: "නොමිලේම අත්හදා බලන්න <em>(Free Live Demo)</em>",
+                demoLead: "ඔබගේ ව්‍යාපාරික මාදිලියට (Business Model) අදාළ ඩෙමෝ ගිණුම තෝරාගෙන පද්ධතියේ සියලුම පහසුකම් නොමිලේම පරික්ෂා කර බලන්න.",
+                demoSelectLabel: "👇 ව්‍යාපාරික ආකෘතිය තෝරන්න (Select Business):",
+                demoStep1Title: "1. ව්‍යාපාරය තෝරන්න",
+                demoStep1Desc: "ඔබගේ ව්‍යාපාරික ක්ෂේත්‍රයට අදාළව ඉහත ඇති ඩෙමෝ කාඩ්පත මත ක්ලික් කරන්න.",
+                demoStep2Title: "2. 1-Click ලොග් වන්න",
+                demoStep2Desc: "ලබාදී ඇති ඊමේල් සහ මුරපදය (123456) භාවිතයෙන් හෝ '1-Click Direct Login' ඔබන්න.",
+                demoStep3Title: "3. නිදහසේ පරික්ෂා කරන්න",
+                demoStep3Desc: "POS, Stock, Sales, Reports, Attendance ආදී සියලුම පහසුකම් අත්හදා බලන්න (පැයකින් දත්ත Auto Reset වේ).",
+                demoNotice: "🛡️ <strong>ආරක්ෂිත පරික්ෂණ ගිණුමකි:</strong> මෙම ඩෙමෝ ගිණුමට ඔබ ඇතුළත් කරන දත්ත සෑම පැයකටම වරක් ස්වයංක්‍රීයව පිරිසිදු වී (Auto Reset) නැවුම් වේ. එමනිසා ගැටලුවකින් තොරව ඕනෑම පහසුකමක් පරික්ෂා කළ හැක.",
+                contactTitle: "අදම ඔබේ දින 7 නොමිලේ අත්හදා බැලීම ආරම්භ කරන්න",
+                contactLead: "විනාඩි 2 කින් ඔබේ ව්‍යාපාරය ඩිජිටල්කරණය කරගෙන සාර්ථකත්වය කරා පියනගන්න.",
+                contactWa: "WhatsApp හරහා සම්බන්ධ වන්න",
+                footerAboutTitle: "DIGIBIZ BUSINESS SYSTEM",
+                footerAboutDesc: "ලංකාවේ ඕනෑම ව්‍යාපාරයකට ගැළපෙන පූර්ණ Cloud කළමනාකරණ පද්ධතිය.",
+                footerNavTitle: "Navigate",
+                footerNavFeatures: "පහසුකම්",
+                footerNavPricing: "ගාස්තු",
+                footerNavBiz: "ව්‍යාපාර මාදිලි",
+                footerNavBlog: "📰 News and Update",
+                footerAccountTitle: "Account",
+                footerNavLogin: "Login",
+                footerNavRegister: "ලියාපදිංචි වන්න",
+                footerCopyright: "&copy; 2026 DIGIBIZ Universal. All rights reserved."
+            },
+            en: {
+                langLabel: "සිංහල",
+                navFeatures: "Features",
+                navBusinesses: "Businesses",
+                navBlog: "📰 News and Update",
+                navDemo: "🎮 Live Demo",
+                navPricing: "Pricing",
+                navLogin: "Login",
+                navTryFree: "Try Free",
+                drawerFeatures: "Features",
+                drawerBusinesses: "Business Types",
+                drawerBlog: "📰 News and Update",
+                drawerDemo: "🎮 Live Demo",
+                drawerPricing: "Pricing",
+                drawerLogin: "Login",
+                drawerTryFree: "Sign Up Free",
+                heroBadge: "Universal Business OS · Cloud Platform",
+                heroTitle: "Intelligent Management System for <em>Any Modern Business</em>",
+                heroLead: "DIGIBIZ — The complete, multi-industry cloud business management platform tailored for Retail, Distribution, Manufacturing, Tire & Auto Care, Pharmacy, Wholesale, and Services. Operates with maximum speed and reliability on both Mobile & Desktop.",
+                heroBtnFree: "Start 7-Day Free Trial",
+                heroBtnLogin: "Login",
+                heroCardTitle: "Live Business Overview",
+                heroTile1: "20+",
+                heroTile1Sub: "Business Models",
+                heroTile2: "100%",
+                heroTile2Sub: "Cloud Secure",
+                heroTile3: "7 Days",
+                heroTile3Sub: "Free Trial",
+                heroCardDesc: "POS, Stock Control, Invoicing, Staff, Financial Ledgers & Real-time Analytics — custom-built for your business vertical.",
+                stat1Num: "20+",
+                stat1Text: "Business Verticals",
+                stat2Num: "100%",
+                stat2Text: "Cloud Architecture",
+                stat3Num: "24/7",
+                stat3Text: "Continuous Support",
+                stat4Num: "7 Days",
+                stat4Text: "Full Free Trial",
+                pricingTitle: "Zero Hidden Fees, Transparent Pricing",
+                pricingLead: "Predictable, flat-rate business software designed to scale with your enterprise.",
+                priceCard1Title: "First 7 Days — Free Trial",
+                priceCard1Amt: "$0.00",
+                priceCard1Desc: "Experience all enterprise modules and features completely free for the first 7 days.",
+                priceCard2Title: "Monthly Subscription",
+                priceCard2Amt: "$3.00 <small style=\"font-size:14px;color:var(--muted);font-weight:600;\">/ Monthly</small>",
+                priceCard2Desc: "Flat, cost-effective monthly subscription with zero lock-in contracts and continuous cloud updates.",
+                priceBtn: "Start 7-Day Free Trial",
+                featTitle: "Core Platform Capabilities",
+                featLead: "Point of sale, inventory control, expenses, and automated reports all in one unified workspace.",
+                features: [
+                    { icon: '💰', title: 'POS & Invoicing', desc: 'Instant billing, barcode support, and fast checkout workflows.' },
+                    { icon: '📦', title: 'Stock & Inventory', desc: 'Real-time stock tracking, multi-warehouse support, and low stock alerts.' },
+                    { icon: '📊', title: 'Analytics & Reports', desc: 'Live financial analytics, revenue tracking, and automated summaries.' },
+                    { icon: '🚚', title: 'Suppliers & Purchases', desc: 'Purchase orders, GRN verification, and supplier payable management.' },
+                    { icon: '📒', title: 'Accounting & Ledger', desc: 'Automated income/expense tracking, journals, and financial statements.' },
+                    { icon: '🔔', title: 'Smart Notifications', desc: 'Instant transaction alerts and automated business health indicators.' }
+                ],
+                bizTitle: "Supported Business Verticals",
+                bizLead: "Designed and fine-tuned for small, medium, and expanding enterprises worldwide.",
+                demoBadge: "🎮 Live Interactive Demo Hub",
+                demoTitle: "Explore Live Demo <em>(No Signup Required)</em>",
+                demoLead: "Select any business vertical below and test the full live system instantly with sample data.",
+                demoSelectLabel: "👇 Select Business Vertical:",
+                demoStep1Title: "1. Choose Business",
+                demoStep1Desc: "Click on the demo tile matching your industry vertical.",
+                demoStep2Title: "2. 1-Click Login",
+                demoStep2Desc: "Click '1-Click Direct Test Login' or use password '123456'.",
+                demoStep3Title: "3. Test Freely",
+                demoStep3Desc: "Explore POS, Stock, Sales, and Reports (demo data auto-resets hourly).",
+                demoNotice: "🛡️ <strong>Isolated Demo Account:</strong> Data entered in this demo auto-resets every hour. You can safely explore all workflows and modules.",
+                contactTitle: "Get Started with Your 7-Day Free Trial Today",
+                contactLead: "Digitize and streamline your entire business operations in less than 2 minutes.",
+                contactWa: "Contact via WhatsApp",
+                footerAboutTitle: "DIGIBIZ BUSINESS SYSTEM",
+                footerAboutDesc: "Universal Cloud Business Management & POS Platform.",
+                footerNavTitle: "Navigate",
+                footerNavFeatures: "Features",
+                footerNavPricing: "Pricing",
+                footerNavBiz: "Businesses",
+                footerNavBlog: "📰 News and Update",
+                footerAccountTitle: "Account",
+                footerNavLogin: "Login",
+                footerNavRegister: "Register",
+                footerCopyright: "&copy; 2026 DIGIBIZ Universal. All rights reserved."
+            }
+        };
+
+        let currentLang = 'si';
+
+        function determineInitialLanguage() {
+            const isApp = sessionStorage.getItem('is_android_app') === 'true'
+                || (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.includes('DIGIBIZ_ANDROID_APP'))
+                || window.location.search.includes('platform=android');
+            
+            if (isApp) return 'en';
+
+            const saved = sessionStorage.getItem('digibiz_landing_lang') || localStorage.getItem('digibiz_landing_lang');
+            if (saved === 'si' || saved === 'en') return saved;
+
+            return 'si'; // Default to Sinhala for Landing Page marketing view only
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            // Isolate language selection ONLY to index landing page
+            sessionStorage.setItem('digibiz_landing_lang', lang);
+            localStorage.setItem('digibiz_landing_lang', lang);
+            const dict = PAGE_I18N[lang] || PAGE_I18N.si;
+
+            // Update Language Toggle Labels
+            document.querySelectorAll('.lang-label').forEach(el => {
+                el.textContent = dict.langLabel;
+            });
+
+            // Update Simple Text Fields
+            for (const key in dict) {
+                if (key === 'features' || key === 'langLabel') continue;
+                const el = document.getElementById(key);
+                if (el) {
+                    if (key.includes('Title') || key.includes('Amt') || key.includes('Notice') || key.includes('Copyright')) {
+                        el.innerHTML = dict[key];
+                    } else {
+                        el.textContent = dict[key];
+                    }
+                }
+            }
+
+            // Render Features Grid
+            const featGrid = document.getElementById('featuresGrid');
+            if (featGrid && dict.features) {
+                featGrid.innerHTML = dict.features.map(f => `
+                    <div class="feat">
+                        <i>${f.icon}</i>
+                        <div><strong>${f.title}</strong>${f.desc}</div>
+                    </div>
+                `).join('');
+            }
+
+            const notice = document.getElementById('demoResetNotice');
+            if (notice && dict.demoNotice) {
+                notice.innerHTML = dict.demoNotice;
+            }
+        }
+
+        function toggleLanguage() {
+            const nextLang = currentLang === 'si' ? 'en' : 'si';
+            applyLanguage(nextLang);
+        }
+
+        function getDynamicDemoAccountsHub() {
+            const btMap = window.BUSINESS_TYPES || {};
+            const list = [];
+            const seenIds = new Set();
+            
+            for (const key in btMap) {
+                const item = btMap[key];
+                if (!item || item.hidden === true) continue;
+
+                const itemId = String(item.id || key).trim();
+                // Never show scrap collection in public demo hub
+                if (itemId.includes('scrap') || key.includes('scrap')) continue;
+
+                // Deduplicate aliases (e.g. easy_bill, billing, quick_bill)
+                if (seenIds.has(itemId)) continue;
+                seenIds.add(itemId);
+
+                let email = item.demoEmail;
+                if (!email) {
+                    const cleanId = itemId.replace(/_/g, '').toLowerCase();
+                    email = `test@${cleanId}.com`;
+                }
+
+                list.push({
+                    type: itemId,
+                    name: item.name,
+                    icon: item.icon || '💼',
+                    email: email,
+                    pass: '123456',
+                    desc: item.description || `${item.name} management system.`
+                });
+            }
+
+            // Sort business list alphabetically by name, but always keep quick_billing at the very end
+            list.sort(function (a, b) {
+                if (a.type === 'quick_billing' || a.type === 'easy_bill') return 1;
+                if (b.type === 'quick_billing' || b.type === 'easy_bill') return -1;
+                return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
+            });
+
+            return list;
+        }
+
+        function scrollToId(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function closeDrawer() {
+            document.documentElement.classList.remove('drawer-open');
+            document.getElementById('drawer').setAttribute('aria-hidden', 'true');
+            document.getElementById('burger').setAttribute('aria-expanded', 'false');
+        }
+
+        document.getElementById('burger').addEventListener('click', function () {
+            const open = !document.documentElement.classList.contains('drawer-open');
+            document.documentElement.classList.toggle('drawer-open', open);
+            document.getElementById('drawer').setAttribute('aria-hidden', open ? 'false' : 'true');
+            this.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+        document.querySelectorAll('[data-close-drawer]').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                if (this.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    closeDrawer();
+                    scrollToId(this.getAttribute('href').slice(1));
+                } else {
+                    closeDrawer();
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Apply language on load
+            const initLang = determineInitialLanguage();
+            applyLanguage(initLang);
+
+            // Wire Language Toggle Buttons
+            document.getElementById('langToggleBtn')?.addEventListener('click', toggleLanguage);
+            document.getElementById('drawerLangToggleBtn')?.addEventListener('click', toggleLanguage);
+
+            const demoItems = getDynamicDemoAccountsHub();
+            const grid = document.getElementById('businessGrid');
+            if (grid) {
+                grid.innerHTML = demoItems.map(function (b) {
+                    return '<div class="biz-tile"><div class="ic">' + b.icon + '</div><div class="nm">' + b.name + '</div></div>';
+                }).join('');
+            }
+            renderDemoHub(demoItems);
+
+            // Wire Mobile Modal Listeners
+            const closeBtn = document.getElementById('closeMobileDemoModal');
+            const overlay = document.getElementById('mobileDemoOverlay');
+            const copyBtn = document.getElementById('mobileCopyCredsBtn');
+            const proceedBtn = document.getElementById('mobileProceedAnywayBtn');
+
+            if (closeBtn) closeBtn.addEventListener('click', hideMobileAdvisoryModal);
+            if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) hideMobileAdvisoryModal(); });
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function() {
+                    if (currentItemForMobile) {
+                        const textToCopy = `Email: ${currentItemForMobile.email}\nPassword: 123456`;
+                        navigator.clipboard.writeText(textToCopy);
+                        copyBtn.textContent = '✅ Copied to Clipboard!';
+                        setTimeout(() => {
+                            copyBtn.textContent = '📋 Login Email & Password Copy';
+                        }, 2000);
+                    }
+                });
+            }
+            if (proceedBtn) {
+                proceedBtn.addEventListener('click', function() {
+                    hideMobileAdvisoryModal();
+                    if (pendingMobileLoginUrl) {
+                        window.location.href = pendingMobileLoginUrl;
+                    }
+                });
+            }
+
+            // Wire navigation live demo links for mobile devices
+            document.querySelectorAll('a[href="#demo"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (isMobileDevice()) {
+                        e.preventDefault();
+                        const items = getDynamicDemoAccountsHub();
+                        if (items.length > 0) {
+                            showMobileAdvisoryModal(items[0], `/auth/login.html?email=${encodeURIComponent(items[0].email)}&pass=123456&auto=true`);
+                            scrollToId('demo');
+                        }
+                    }
+                });
+            });
+
+            if (window.eventBus) console.log('Event Bus loaded');
+            if (window.accountsCore) console.log('Accounts Core loaded');
+        });
+
+        let pendingMobileLoginUrl = '';
+        let currentItemForMobile = null;
+
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function showMobileAdvisoryModal(item, targetUrl) {
+            currentItemForMobile = item || (window.BUSINESS_TYPES ? getDynamicDemoAccountsHub()[0] : null);
+            pendingMobileLoginUrl = targetUrl || (currentItemForMobile ? `/auth/login.html?email=${encodeURIComponent(currentItemForMobile.email)}&pass=123456&auto=true` : '/auth/login.html');
+            
+            const overlay = document.getElementById('mobileDemoOverlay');
+            const shareWa = document.getElementById('mobileShareWaBtn');
+            if (!overlay) return;
+
+            if (currentItemForMobile) {
+                const text = `DIGIBIZ Demo System Login:\nBusiness: ${currentItemForMobile.name}\nEmail: ${currentItemForMobile.email}\nPassword: 123456\nLink: https://digibiz-sys.web.app/auth/login.html?email=${encodeURIComponent(currentItemForMobile.email)}&pass=123456&auto=true`;
+                if (shareWa) shareWa.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            }
+
+            overlay.classList.add('active');
+        }
+
+        function hideMobileAdvisoryModal() {
+            const overlay = document.getElementById('mobileDemoOverlay');
+            if (overlay) overlay.classList.remove('active');
+        }
+
+        function renderDemoHub(demoItems) {
+            const items = demoItems || getDynamicDemoAccountsHub();
+            const selectorGrid = document.getElementById('demoSelectorGrid');
+            const displayBox = document.getElementById('demoDisplayBox');
+            if (!selectorGrid || !displayBox || items.length === 0) return;
+
+            let selectedType = items[0].type;
+
+            function updateDisplay(item) {
+                const targetUrl = `/auth/login.html?email=${encodeURIComponent(item.email)}&pass=${encodeURIComponent(item.pass)}&auto=true`;
+                const dict = PAGE_I18N[currentLang] || PAGE_I18N.en;
+                displayBox.innerHTML = `
+                    <div>
+                        <div class="demo-box-header">
+                            <div class="demo-box-icon">${item.icon}</div>
+                            <div>
+                                <div class="demo-box-title">${item.name}</div>
+                                <div class="demo-box-desc">${item.desc}</div>
+                            </div>
+                        </div>
+
+                        <div class="demo-cred-row">
+                            <div>
+                                <div class="demo-cred-label">Demo Email Address:</div>
+                                <div class="demo-cred-val">${item.email}</div>
+                            </div>
+                            <button type="button" class="demo-copy-btn" onclick="navigator.clipboard.writeText('${item.email}');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+                        </div>
+
+                        <div class="demo-cred-row">
+                            <div>
+                                <div class="demo-cred-label">Demo Password:</div>
+                                <div class="demo-cred-val">${item.pass}</div>
+                            </div>
+                            <button type="button" class="demo-copy-btn" onclick="navigator.clipboard.writeText('${item.pass}');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <a href="${targetUrl}" class="demo-login-btn" id="activeDemoLoginBtn">
+                            ⚡ 1-Click Direct Test Login
+                        </a>
+
+                        <div class="demo-reset-notice" id="demoResetNotice">
+                            ${dict.demoNotice}
+                        </div>
+                    </div>
+                `;
+
+                const btn = document.getElementById('activeDemoLoginBtn');
+                if (btn) {
+                    btn.addEventListener('click', function(e) {
+                        if (isMobileDevice()) {
+                            e.preventDefault();
+                            showMobileAdvisoryModal(item, targetUrl);
+                        }
+                    });
+                }
+            }
+
+            function renderSelectors() {
+                selectorGrid.innerHTML = items.map(item => {
+                    const activeClass = item.type === selectedType ? 'active' : '';
+                    return `
+                        <div class="demo-type-card ${activeClass}" data-type="${item.type}">
+                            <div class="icon">${item.icon}</div>
+                            <div class="title">${item.name}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                selectorGrid.querySelectorAll('.demo-type-card').forEach(card => {
+                    card.addEventListener('click', function () {
+                        selectedType = this.getAttribute('data-type');
+                        renderSelectors();
+                        const found = items.find(x => x.type === selectedType);
+                        if (found) updateDisplay(found);
+                    });
+                });
+            }
+
+            renderSelectors();
+            updateDisplay(items[0]);
+        }
+
+        auth.onAuthStateChanged(function (user) {
+            // Keep buttons strictly as 'Login'
+            const navLogin = document.getElementById('navLogin');
+            if (navLogin) {
+                navLogin.textContent = 'Login';
+                navLogin.href = '/auth/login.html';
+            }
+            const heroBtnLogin = document.getElementById('heroBtnLogin');
+            if (heroBtnLogin) {
+                heroBtnLogin.textContent = 'Login';
+                heroBtnLogin.href = '/auth/login.html';
+            }
+            const drawerLogin = document.getElementById('drawerLogin');
+            if (drawerLogin) {
+                drawerLogin.textContent = 'Login';
+                drawerLogin.href = '/auth/login.html';
+            }
+        });
+
+
+
+    </script>
+</body>
+</html>

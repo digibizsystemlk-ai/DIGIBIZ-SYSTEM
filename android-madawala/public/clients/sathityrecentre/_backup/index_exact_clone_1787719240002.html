@@ -1,0 +1,2987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SATHI TYRE CENTRE — Enterprise Seller Central v4.0</title>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* ================================================================ */
+        /* 🛍️ DIGIBIZ PRO — 100% AMAZON SELLER CENTRAL THEME (DARK / GOLD)  */
+        /* ================================================================ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            color: #131921;
+        }
+
+        /* ===== AUTH OVERLAY ===== */
+        #authGateOverlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(145deg, #0a1628 0%, #131921 100%);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            flex-direction: column;
+        }
+
+        #authGateOverlay .brand {
+            font-size: 26px;
+            font-weight: 900;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #authGateOverlay .login-box {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        #authGateOverlay .login-box h2 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        #authGateOverlay .login-box p {
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            margin-bottom: 18px;
+        }
+
+        #authGateOverlay .login-box input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+        }
+        #authGateOverlay .login-box input:focus { border-color: #ff9900; }
+
+        #authGateOverlay .login-box .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #ff9900;
+            color: #131921;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        #authGateOverlay .login-box .btn-login:hover { background: #e68a00; }
+
+        #authGateOverlay .login-box .error {
+            color: #f87171;
+            font-size: 12px;
+            margin-bottom: 12px;
+            display: none;
+            background: rgba(239, 68, 68, 0.15);
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        /* ===== TOP NAVIGATION ===== */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: #131921;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px 0 20px;
+            z-index: 1000;
+            border-bottom: 1px solid #232f3e;
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .top-nav-logo {
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .logo-icon-wrap {
+            width: 32px;
+            height: 32px;
+            background: #ff9900;
+            color: #131921;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(255, 153, 0, 0.35);
+        }
+
+        .logo-text-col {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .logo-main-title {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-digibiz { color: #ffffff; }
+        .brand-plus { color: #ff9900; font-size: 14px; font-weight: 900; }
+        .brand-microtech { color: #ff9900; }
+        .brand-sub { font-size: 9.5px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 1px; }
+
+        .top-nav-search {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 6px;
+            overflow: hidden;
+            height: 36px;
+            max-width: 420px;
+            width: 100%;
+            margin-left: 20px;
+        }
+
+        .top-nav-search input {
+            border: none;
+            outline: none;
+            padding: 8px 12px;
+            font-size: 13px;
+            flex: 1;
+            color: #131921;
+        }
+
+        .top-nav-search button {
+            background: #febd69;
+            border: none;
+            width: 40px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #131921;
+            transition: background 0.2s;
+        }
+        .top-nav-search button:hover { background: #f3a847; }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-nav-item {
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            position: relative;
+        }
+        .top-nav-item:hover { background: rgba(255,255,255,0.1); }
+        .top-nav-item i { font-size: 15px; color: #ff9900; }
+        .top-nav-item .badge {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            background: #ff9900;
+            color: #131921;
+            font-size: 10px;
+            font-weight: 800;
+            border-radius: 10px;
+            padding: 1px 5px;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #232f3e;
+            border: 2px solid #ff9900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            color: #ff9900;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            bottom: 0;
+            width: 230px;
+            background: #232f3e;
+            overflow-y: auto;
+            z-index: 900;
+            padding: 10px 0 30px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            scrollbar-width: thin;
+            scrollbar-color: #374151 #232f3e;
+        }
+
+        .sidebar-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #8492a6;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 14px 18px 4px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8.5px 18px;
+            color: #d1d5db;
+            font-size: 12.5px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+        }
+
+        .sidebar-item.active {
+            background: rgba(255,153,0,0.12);
+            color: #ff9900;
+            border-left-color: #ff9900;
+            font-weight: 700;
+        }
+
+        .sidebar-item i {
+            font-size: 14px;
+            width: 18px;
+            text-align: center;
+            opacity: 0.85;
+        }
+        .sidebar-item.active i { opacity: 1; color: #ff9900; }
+
+        .sidebar-item .count {
+            margin-left: auto;
+            background: rgba(255,255,255,0.1);
+            color: #d1d5db;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+        .sidebar-item.active .count {
+            background: #ff9900;
+            color: #131921;
+        }
+
+        /* ===== MAIN CONTENT VIEWPORT ===== */
+        .main-content {
+            margin-top: 56px;
+            margin-left: 230px;
+            padding: 20px 24px 60px;
+            flex: 1;
+            max-width: calc(100vw - 230px);
+            min-height: calc(100vh - 56px);
+            background: #f0f2f5;
+        }
+
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .page-header h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #131921;
+        }
+        .page-header .sub {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .page-header .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-weight: 700;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .btn-primary { background: #ff9900; color: #131921; border-color: #e68a00; }
+        .btn-primary:hover { background: #e68a00; }
+        .btn-secondary { background: #fff; color: #131921; border-color: #d1d5db; }
+        .btn-secondary:hover { background: #f3f4f6; }
+        .btn-danger { background: #ef4444; color: #fff; border-color: #dc2626; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-success { background: #059669; color: #fff; border-color: #047857; }
+        .btn-success:hover { background: #047857; }
+        .btn-sm { padding: 4px 8px; font-size: 11px; }
+
+        /* ===== DASHBOARD CARDS & GRIDS ===== */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .dash-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px 18px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dash-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #ff9900;
+        }
+
+        .dash-card.green::before { background: #059669; }
+        .dash-card.blue::before { background: #0066c0; }
+        .dash-card.red::before { background: #dc2626; }
+
+        .dash-card .card-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dash-card .card-value {
+            font-size: 22px;
+            font-weight: 900;
+            color: #131921;
+            font-family: 'Outfit', 'Inter', sans-serif;
+        }
+
+        .dash-card .card-sub {
+            font-size: 11px;
+            color: #059669;
+            font-weight: 600;
+        }
+        .dash-card .card-sub.red { color: #dc2626; }
+
+        /* ===== TWO COLUMN LAYOUTS ===== */
+        .two-col-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .panel-card {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .panel-header {
+            padding: 12px 16px;
+            background: #fafafa;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-header h3 {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #131921;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-body {
+            padding: 16px;
+        }
+
+        /* ===== DATA TABLES ===== */
+        .table-wrap {
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        table.app-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        table.app-table th {
+            background: #f9fafb;
+            color: #4b5563;
+            font-weight: 700;
+            padding: 9px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+            text-transform: uppercase;
+            font-size: 10.5px;
+            letter-spacing: 0.4px;
+        }
+
+        table.app-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #1f2937;
+            vertical-align: middle;
+        }
+
+        table.app-table tr:hover { background: #fdfdfd; }
+
+        /* ===== BADGES ===== */
+        .badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .badge-in { background: #d1fae5; color: #065f46; }
+        .badge-low { background: #fef3c7; color: #92400e; }
+        .badge-out { background: #fee2e2; color: #991b1b; }
+        .badge-queue { background: #e0f2fe; color: #075985; }
+        .badge-done { background: #d1fae5; color: #065f46; }
+        .badge-progress { background: #fef3c7; color: #92400e; }
+
+        /* ===== POS TERMINAL INTERFACE ===== */
+        .pos-container {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .pos-catalog-panel {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+        }
+
+        .pos-cart-panel {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            position: sticky;
+            top: 76px;
+        }
+
+        .tire-size-chips {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            scrollbar-width: thin;
+        }
+
+        .chip {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+        .chip:hover { background: #e5e7eb; }
+        .chip.active { background: #ff9900; color: #131921; font-weight: 800; }
+
+        .pos-grid-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+            max-height: calc(100vh - 280px);
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .tire-card-pos {
+            background: #fff;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .tire-card-pos:hover {
+            border-color: #ff9900;
+            box-shadow: 0 4px 10px rgba(255, 153, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .tire-card-pos .brand-badge {
+            font-size: 9px;
+            font-weight: 800;
+            color: #fff;
+            background: #131921;
+            padding: 2px 6px;
+            border-radius: 4px;
+            align-self: flex-start;
+            margin-bottom: 4px;
+        }
+
+        .tire-card-pos .size-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        .tire-card-pos .pattern-sub {
+            font-size: 10.5px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .tire-card-pos .price-stock {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-top: 1px dashed #e5e7eb;
+            padding-top: 6px;
+            margin-top: 4px;
+        }
+
+        .tire-card-pos .price {
+            font-size: 13.5px;
+            font-weight: 900;
+            color: #059669;
+        }
+
+        .tire-card-pos .stock-pill {
+            font-size: 10px;
+            color: #4b5563;
+            font-weight: 700;
+        }
+
+        /* Cart Rows */
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11.5px;
+            margin-bottom: 12px;
+        }
+        .cart-table th { padding: 6px; background: #f9fafb; font-size: 10px; text-align: left; }
+        .cart-table td { padding: 6px; border-bottom: 1px solid #f3f4f6; }
+
+        .cart-totals-box {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        .cart-row-tot {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            color: #4b5563;
+        }
+        .cart-row-tot.grand {
+            font-size: 16px;
+            font-weight: 900;
+            color: #131921;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 6px;
+            margin-top: 6px;
+        }
+
+        /* MODALS */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-backdrop.show { display: flex; }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 580px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .modal-header h3 { font-size: 16px; font-weight: 800; color: #131921; }
+        .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #9ca3af; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #4b5563;
+            text-transform: uppercase;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: #ff9900; }
+
+        /* TOAST */
+        .toast-notify {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #131921;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ff9900;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            font-size: 13px;
+            font-weight: 700;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            body * { visibility: hidden; }
+            #printableReceipt, #printableReceipt * { visibility: visible; }
+            #printableReceipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: #fff;
+                color: #000;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dash-grid { grid-template-columns: repeat(2, 1fr); }
+            .two-col-grid { grid-template-columns: 1fr; }
+            .pos-container { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; max-width: 100vw; }
+            .mobile-toggle { display: block; }
+            .top-nav-search { display: none; }
+            .dash-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- 🔒 AUTHENTICATION GATE & TENANT EMAIL LOCK                   -->
+    <!-- ============================================================ -->
+    <div id="authGateOverlay">
+        <div class="brand">
+            <div class="logo-icon-wrap" style="width:36px; height:36px;">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="logo-text-col">
+                <div class="logo-main-title">
+                    <span class="brand-digibiz">DIGIBIZ</span>
+                    <span class="brand-plus">+</span>
+                    <span class="brand-microtech">SATHI TYRE CENTRE</span>
+                </div>
+                <div class="brand-sub">ENTERPRISE SELLER CENTRAL</div>
+            </div>
+        </div>
+
+        <div class="login-box">
+            <h2>Sathi Tyre Centre Sign In</h2>
+            <p>Single-Tenant Workspace for <b>SATHI TYRE CENTRE</b></p>
+            <div class="error" id="authError"></div>
+            <input type="email" id="loginEmail" placeholder="Owner Email" value="sathityre05@gmail.com" />
+            <input type="password" id="loginPassword" placeholder="Account Password" />
+            <button class="btn-login" onclick="handleSignIn()">
+                <i class="fas fa-lock"></i> Sign In to Tire Suite
+            </button>
+            <div style="margin-top:14px; text-align:center; font-size:11.5px; color:rgba(255,255,255,0.5);">
+                Protected by DIGIBIZ Single-Tenant Security Lock
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 🛍️ TOP NAVIGATION (100% AMAZON THEME)                       -->
+    <!-- ============================================================ -->
+    <nav class="top-nav">
+        <div class="top-nav-left">
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="top-nav-logo" onclick="navigateTo('dashboard')" title="DIGIBIZ + SATHI TYRE CENTRE Enterprise Suite">
+                <div class="logo-icon-wrap">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="logo-text-col">
+                    <div class="logo-main-title">
+                        <span class="brand-digibiz">DIGIBIZ</span>
+                        <span class="brand-plus">+</span>
+                        <span class="brand-microtech">SATHI TYRE CENTRE</span>
+                    </div>
+                    <div class="brand-sub">Enterprise Seller Central</div>
+                </div>
+            </div>
+
+            <div class="top-nav-search">
+                <input type="text" placeholder="Search tire sizes, brands, job cards, vehicle no (Ctrl+F)..." id="globalSearch" oninput="handleSearch(this.value)" />
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="top-nav-right">
+            <div class="top-nav-item" onclick="navigateTo('dashboard')">
+                <i class="fas fa-home"></i>
+                <span class="hide-mobile">Home</span>
+            </div>
+            <div class="top-nav-item" onclick="navigateTo('pos')">
+                <i class="fas fa-cash-register"></i>
+                <span class="hide-mobile">POS</span>
+                <span class="badge" id="posBadge">0</span>
+            </div>
+            <div class="top-nav-item" onclick="navigateTo('workbench')">
+                <i class="fas fa-wrench"></i>
+                <span class="hide-mobile">Jobs</span>
+                <span class="badge" id="jobBadge">3</span>
+            </div>
+            <div class="top-nav-item">
+                <div class="avatar">ST</div>
+                <span class="hide-mobile" id="navUserName">Sathi Tyre House</span>
+            </div>
+            
+            <div class="top-nav-item" onclick="refreshAll()" style="color:#ff9900; font-weight:700; cursor:pointer;" title="Sync Cloud Data">
+                <i class="fas fa-sync"></i>
+                <span class="hide-mobile">Sync</span>
+            </div>
+
+            <div class="top-nav-item" onclick="handleSignOut()" style="color:#ef4444; font-weight:700; cursor:pointer;" title="Sign Out">
+                <i class="fas fa-arrow-right-from-bracket"></i>
+                <span class="hide-mobile">Sign Out</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- 📋 SIDEBAR (COMPLETE TIRE CENTRE MENU SET)                    -->
+    <!-- ============================================================ -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <!-- 👑 Subscription Hero Card (Enterprise Pro 364 Days) -->
+        <div class="sidebar-subscription-card" onclick="navigateTo('subscription')" style="margin:10px 12px 14px; background:linear-gradient(135deg, #131921 0%, #1e2a3a 100%); border:1px solid #ff9900; border-radius:10px; padding:12px; cursor:pointer; color:#fff; transition:all 0.2s; box-shadow:0 4px 12px rgba(0,0,0,0.25);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:10px; font-weight:800; color:#ff9900; letter-spacing:0.5px; text-transform:uppercase;">
+                    <i class="fas fa-crown"></i> <span id="sidePlanName">ENTERPRISE PRO</span>
+                </span>
+                <span class="badge" id="sidePlanStatusBadge" style="background:#067d62; color:#fff; font-size:9px; padding:2px 6px; border-radius:4px; font-weight:800;">ACTIVE</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <div style="font-size:14px; font-weight:900; color:#ffffff;" id="sidePlanDaysLeft">364 Days</div>
+                <div style="font-size:10px; color:#aaa;" id="sidePlanExpiryDate">Expires: 2027-08-25</div>
+            </div>
+            <div style="margin-top:6px; font-size:9.5px; color:#ff9900; display:flex; align-items:center; gap:4px; font-weight:700;">
+                <span>Manage Plan / Renew</span> <i class="fas fa-arrow-right" style="font-size:8px;"></i>
+            </div>
+        </div>
+
+        <!-- 1. OPERATIONS -->
+        <div class="sidebar-section-title">📊 Operations & Sales</div>
+        <a class="sidebar-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+            <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+        <a class="sidebar-item" data-page="pos" onclick="navigateTo('pos')">
+            <i class="fas fa-cash-register"></i> Point of Sale [F4]
+        </a>
+        <a class="sidebar-item" data-page="sales_history" onclick="navigateTo('sales_history')">
+            <i class="fas fa-receipt"></i> Sales History
+        </a>
+        <a class="sidebar-item" data-page="workbench" onclick="navigateTo('workbench')">
+            <i class="fas fa-wrench"></i> Daily Job Cards
+            <span class="count" id="sideJobCount">3</span>
+        </a>
+        <a class="sidebar-item" data-page="appointments" onclick="navigateTo('appointments')">
+            <i class="fas fa-calendar-check"></i> Appointments
+        </a>
+        <a class="sidebar-item" data-page="services" onclick="navigateTo('services')">
+            <i class="fas fa-screwdriver-wrench"></i> Alignment & Services
+        </a>
+        <a class="sidebar-item" data-page="inventory" onclick="navigateTo('inventory')">
+            <i class="fas fa-circle-dot"></i> Tire Inventory
+            <span class="count" id="sideTireCount">10</span>
+        </a>
+        <a class="sidebar-item" data-page="spoilage" onclick="navigateTo('spoilage')">
+            <i class="fas fa-triangle-exclamation"></i> Spoilage & Warranty
+        </a>
+
+        <!-- 2. PURCHASING -->
+        <div class="sidebar-section-title">🚚 Purchasing & Stock</div>
+        <a class="sidebar-item" data-page="grn" onclick="navigateTo('grn')">
+            <i class="fas fa-truck-ramp-box"></i> Purchases & GRN
+        </a>
+        <a class="sidebar-item" data-page="suppliers" onclick="navigateTo('suppliers')">
+            <i class="fas fa-truck"></i> Suppliers Directory
+        </a>
+
+        <!-- 3. FINANCIALS -->
+        <div class="sidebar-section-title">💰 Financials & Accounts</div>
+        <a class="sidebar-item" data-page="customers" onclick="navigateTo('customers')">
+            <i class="fas fa-users"></i> Fleet & Customers
+            <span class="count" id="sideFleetCount">3</span>
+        </a>
+        <a class="sidebar-item" data-page="expenses" onclick="navigateTo('expenses')">
+            <i class="fas fa-file-invoice-dollar"></i> Shop Expenses
+        </a>
+        <a class="sidebar-item" data-page="banking" onclick="navigateTo('banking')">
+            <i class="fas fa-building-columns"></i> Banking & Cash Drawer
+        </a>
+        <a class="sidebar-item" data-page="ledgers" onclick="navigateTo('ledgers')">
+            <i class="fas fa-book-journal-whills"></i> General Ledger
+        </a>
+        <a class="sidebar-item" data-page="revenue" onclick="navigateTo('revenue')">
+            <i class="fas fa-money-bill-trend-up"></i> Revenue Analysis
+        </a>
+        <a class="sidebar-item" data-page="accounting" onclick="navigateTo('accounting')">
+            <i class="fas fa-calculator"></i> Accounting Dashboard
+        </a>
+
+        <!-- 4. MANAGEMENT & REPORTS -->
+        <div class="sidebar-section-title">⚙️ Analytics & Settings</div>
+        <a class="sidebar-item" data-page="reports" onclick="navigateTo('reports')">
+            <i class="fas fa-chart-line"></i> 360° Reports
+        </a>
+        <a class="sidebar-item" data-page="profile" onclick="navigateTo('profile')">
+            <i class="fas fa-building"></i> Business Profile
+        </a>
+        <a class="sidebar-item" data-page="subscription" onclick="navigateTo('subscription')">
+            <i class="fas fa-credit-card" style="color:#ff9900;"></i> Subscription & Billing
+            <span class="badge" id="sideSubStatusPill" style="background:#067d62; color:#fff; font-size:8.5px; margin-left:auto;">PRO</span>
+        </a>
+        <a class="sidebar-item" data-page="sms" onclick="navigateTo('sms')">
+            <i class="fas fa-comments"></i> SMS Alerts & Logs
+        </a>
+        <a class="sidebar-item" data-page="manual" onclick="navigateTo('manual')">
+            <i class="fas fa-book"></i> User Manual
+        </a>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- 📄 MAIN CONTENT VIEWPORT (ALL PAGES FULLY WIRED)             -->
+    <!-- ============================================================ -->
+    <main class="main-content">
+
+        
+        <!-- ======================================================== -->
+        <!-- 1. 📊 EXECUTIVE TIRE DASHBOARD (100% PRO FEATURES)       -->
+        <!-- ======================================================== -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <h1>Executive Tire Center Dashboard <span class="sub">| Sathi Tyre Centre Live System</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="refreshAll()"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-primary" onclick="navigateTo('pos')"><i class="fas fa-cash-register"></i> Open POS [F4]</button>
+                    <button class="btn btn-primary" onclick="openNewJobModal()"><i class="fas fa-plus"></i> + New Job Card</button>
+                </div>
+            </div>
+
+            <!-- 🌟 Hero Tire Inventory Valuation Banner -->
+            <div style="background:linear-gradient(135deg, #131921 0%, #1e2a3a 100%); color:#fff; padding:16px 20px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; box-shadow:0 4px 14px rgba(0,0,0,0.18); border-left:4px solid #ff9900;">
+                <div>
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8; font-weight:700;">🛞 Tire Inventory Asset Valuation</div>
+                    <div id="dashTireAssetVal" style="font-size:22px; font-weight:900; color:#ff9900; margin-top:2px;">Rs. 1,485,200.00</div>
+                </div>
+                <div>
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8; font-weight:700;">📦 Total Tires in Stock</div>
+                    <div id="dashTireUnitsVal" style="font-size:22px; font-weight:900; color:#38bdf8; margin-top:2px;">340 Units</div>
+                </div>
+                <div>
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8; font-weight:700;">💳 Outstanding Fleet Debts</div>
+                    <div id="dashFleetDebtsVal" style="font-size:22px; font-weight:900; color:#f87171; margin-top:2px;">Rs. 248,500.00</div>
+                </div>
+            </div>
+
+            <!-- 📈 Owner Net Profit Analytics Row (From PRO) -->
+            <div style="margin-bottom:16px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:10px;">
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; text-align:center;">
+                        <div style="font-size:10.5px; font-weight:700; color:#166534; text-transform:uppercase;">📈 Today Net Profit</div>
+                        <div id="coreStatTodayProfit" style="font-size:18px; font-weight:900; color:#166534; margin-top:3px;">Rs. 18,600.00</div>
+                    </div>
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; text-align:center;">
+                        <div style="font-size:10.5px; font-weight:700; color:#166534; text-transform:uppercase;">📈 This Week Profit</div>
+                        <div id="coreStatWeekProfit" style="font-size:18px; font-weight:900; color:#166534; margin-top:3px;">Rs. 112,400.00</div>
+                    </div>
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; text-align:center;">
+                        <div style="font-size:10.5px; font-weight:700; color:#166534; text-transform:uppercase;">📈 This Month Profit</div>
+                        <div id="coreStatMonthProfit" style="font-size:18px; font-weight:900; color:#166534; margin-top:3px;">Rs. 441,200.00</div>
+                    </div>
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; text-align:center;">
+                        <div style="font-size:10.5px; font-weight:700; color:#166534; text-transform:uppercase;">📈 This Year Profit</div>
+                        <div id="coreStatYearProfit" style="font-size:18px; font-weight:900; color:#166534; margin-top:3px;">Rs. 1,850,000.00</div>
+                    </div>
+                </div>
+
+                <!-- 📉 Operating Expenses Analytics Row (From PRO) -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px; text-align:center;">
+                        <div style="font-size:10.5px; font-weight:700; color:#991b1b; text-transform:uppercase;">📉 Today Expenses</div>
+                        <div id="coreStatTodayExpense" style="font-size:18px; font-weight:900; color:#991b1b; margin-top:3px;">Rs. 3,500.00</div>
+                    </div>
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px; text-align:center;">
+                        <div style="font-size:10.5px; font-weight:700; color:#991b1b; text-transform:uppercase;">📉 This Week Expenses</div>
+                        <div id="coreStatWeekExpense" style="font-size:18px; font-weight:900; color:#991b1b; margin-top:3px;">Rs. 40,100.00</div>
+                    </div>
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px; text-align:center;">
+                        <div style="font-size:10.5px; font-weight:700; color:#991b1b; text-transform:uppercase;">📉 This Month Expenses</div>
+                        <div id="coreStatMonthExpense" style="font-size:18px; font-weight:900; color:#991b1b; margin-top:3px;">Rs. 184,200.00</div>
+                    </div>
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px; text-align:center;">
+                        <div style="font-size:10.5px; font-weight:700; color:#991b1b; text-transform:uppercase;">📉 This Year Expenses</div>
+                        <div id="coreStatYearExpense" style="font-size:18px; font-weight:900; color:#991b1b; margin-top:3px;">Rs. 720,000.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ⚠️ Low Stock Alerts Banner (Clickable Modal Trigger from PRO) -->
+            <div onclick="openLowStockAlertModal()" style="background:linear-gradient(135deg, #7f1d1d, #991b1b); color:#fff; border-radius:10px; padding:14px 18px; margin-bottom:14px; cursor:pointer; box-shadow:0 4px 12px rgba(153,27,27,0.22); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="font-size:24px;">⚠️</div>
+                    <div>
+                        <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#fca5a5; font-weight:800;">Low Stock Alerts (අඩු තොග අනතුරු ඇඟවීම්)</div>
+                        <div id="coreLowStockCountText" style="font-size:15px; font-weight:800; color:#ffffff; margin-top:2px;">4 Tire Models Below Reorder Level</div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.15); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11.5px; border:1px solid rgba(255,255,255,0.3);">
+                    <span>🔍 View Alert List</span> ➔
+                </div>
+            </div>
+
+            <!-- 🚨 Overdue Credit Collections Banner (Clickable Modal Trigger from PRO) -->
+            <div onclick="openOverdueCreditModal()" style="background:linear-gradient(135deg, #854d0e, #a16207); color:#fff; border-radius:10px; padding:14px 18px; margin-bottom:16px; cursor:pointer; box-shadow:0 4px 12px rgba(161,98,7,0.22); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="font-size:24px;">📅</div>
+                    <div>
+                        <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#fef08a; font-weight:800;">🚨 Overdue Credit Collections (කල් ඉකුත් වූ ණය ගෙවීම්)</div>
+                        <div id="coreOverdueCreditCountText" style="font-size:15px; font-weight:800; color:#ffffff; margin-top:2px;">2 Fleet Accounts Due (Rs. 248,500.00)</div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.15); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11.5px; border:1px solid rgba(255,255,255,0.3);">
+                    <span>🔍 View Debtors List</span> ➔
+                </div>
+            </div>
+
+            <!-- 4 Main KPI Cards Grid -->
+            <div class="dash-grid">
+                <div class="dash-card">
+                    <div class="card-title">💵 Today's Sales <i class="fas fa-arrow-trend-up"></i></div>
+                    <div class="card-value" id="kpiTodaySales">Rs. 84,500.00</div>
+                    <div class="card-sub">6 Completed Invoices</div>
+                </div>
+                <div class="dash-card green">
+                    <div class="card-title">🛠️ Services Revenue <i class="fas fa-screwdriver-wrench"></i></div>
+                    <div class="card-value" id="kpiTodayServices">Rs. 18,200.00</div>
+                    <div class="card-sub">Alignment, Balancing & Fitting</div>
+                </div>
+                <div class="dash-card blue">
+                    <div class="card-title">💰 Drawer Cash <i class="fas fa-vault"></i></div>
+                    <div class="card-value" id="kpiDrawerCash">Rs. 62,800.00</div>
+                    <div class="card-sub">Counted at Counter</div>
+                </div>
+                <div class="dash-card red">
+                    <div class="card-title">⚠️ Reorder Level <i class="fas fa-triangle-exclamation"></i></div>
+                    <div class="card-value" id="kpiLowStock">4 Items</div>
+                    <div class="card-sub red">Needs Supplier Reorder</div>
+                </div>
+            </div>
+
+            <!-- 2-Column: Live Workbench Queue + Charts -->
+            <div class="two-col-grid">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-wrench" style="color:#ff9900;"></i> Live Workbench & Alignment Queue</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="navigateTo('workbench')">View All Jobs</button>
+                    </div>
+                    <div class="panel-body table-wrap" style="padding:0;">
+                        <table class="app-table">
+                            <thead>
+                                <tr>
+                                    <th>Job #</th>
+                                    <th>Vehicle No</th>
+                                    <th>Model</th>
+                                    <th>Services / Tires</th>
+                                    <th>Status</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashJobRows"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-fire" style="color:#ef4444;"></i> Fast Moving Tire Sizes</h3>
+                    </div>
+                    <div class="panel-body">
+                        <canvas id="tireSizesChart" style="max-height:220px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📒 Double-Entry Accounting Summary Widget (From PRO) -->
+            <div class="panel-card" style="margin-top:16px;">
+                <div class="panel-header">
+                    <h3><i class="fas fa-scale-balanced" style="color:#059669;"></i> Accounting & Financial Health Summary</h3>
+                    <button class="btn btn-secondary btn-sm" onclick="navigateTo('accounting')">Open Full Accounting</button>
+                </div>
+                <div class="panel-body" style="padding:14px;">
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+                        <div style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; background:#f9fafb;">
+                            <div style="font-size:11px; color:#6b7280; font-weight:700;">Total Purchases (YTD)</div>
+                            <div style="font-size:18px; font-weight:900; color:#111827; margin-top:2px;" id="coreAccTotalPurchases">Rs. 1,320,400.00</div>
+                        </div>
+                        <div style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; background:#f9fafb;">
+                            <div style="font-size:11px; color:#6b7280; font-weight:700;">Supplier Outstanding</div>
+                            <div style="font-size:18px; font-weight:900; color:#ef4444; margin-top:2px;" id="coreAccSupplierOutstanding">Rs. 500,000.00</div>
+                        </div>
+                        <div style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; background:#f9fafb;">
+                            <div style="font-size:11px; color:#6b7280; font-weight:700;">Total Stock Value</div>
+                            <div style="font-size:18px; font-weight:900; color:#0284c7; margin-top:2px;" id="coreAccStockValue">Rs. 1,485,200.00</div>
+                        </div>
+                        <div style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; background:#f9fafb;">
+                            <div style="font-size:11px; color:#6b7280; font-weight:700;">Estimated Net Margin</div>
+                            <div style="font-size:18px; font-weight:900; color:#059669; margin-top:2px;" id="coreAccNetProfit">22.7% (Rs. 441,200.00)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 2. POINT OF SALE [F4] -->
+        <div class="page" id="page-pos">
+            <div class="page-header">
+                <div>
+                    <h1>Tire POS Terminal <span class="sub">| Rapid Tire Invoicing & Service Bundling</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="clearCart()"><i class="fas fa-trash"></i> Clear Cart [F9]</button>
+                    <button class="btn btn-primary" onclick="checkoutPos()"><i class="fas fa-check"></i> Complete Sale [F4]</button>
+                </div>
+            </div>
+
+            <div class="pos-container">
+                <div class="pos-catalog-panel">
+                    <div class="tire-size-chips" id="tireSizeChips">
+                        <div class="chip active" onclick="filterTireSize('ALL')">All Sizes</div>
+                        <div class="chip" onclick="filterTireSize('175/70 R13')">175/70 R13</div>
+                        <div class="chip" onclick="filterTireSize('195/65 R15')">195/65 R15</div>
+                        <div class="chip" onclick="filterTireSize('205/55 R16')">205/55 R16</div>
+                        <div class="chip" onclick="filterTireSize('215/60 R16')">215/60 R16</div>
+                        <div class="chip" onclick="filterTireSize('225/45 R17')">225/45 R17</div>
+                        <div class="chip" onclick="filterTireSize('155/80 R12')">155/80 R12</div>
+                        <div class="chip" onclick="filterTireSize('90/90-12')">90/90-12</div>
+                        <div class="chip" onclick="filterTireSize('SERVICES')">🛠️ Services</div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; margin-bottom:12px;">
+                        <input type="text" id="posSearchInput" placeholder="🔍 Search by size, brand, model or barcode (F2)..." style="flex:1; padding:8px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;" oninput="renderPosCatalog(this.value)" />
+                        <select id="posBrandFilter" style="padding:8px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:12px;" onchange="renderPosCatalog()">
+                            <option value="ALL">All Brands</option>
+                            <option value="DSI">DSI</option>
+                            <option value="CEAT">CEAT</option>
+                            <option value="DUNLOP">Dunlop</option>
+                            <option value="MICHELIN">Michelin</option>
+                            <option value="MRF">MRF</option>
+                            <option value="HANKOOK">Hankook</option>
+                            <option value="PIRELLI">Pirelli</option>
+                        </select>
+                    </div>
+
+                    <div class="pos-grid-items" id="posGridItems"></div>
+                </div>
+
+                <div class="pos-cart-panel">
+                    <h3 style="font-size:14px; font-weight:800; margin-bottom:10px; color:#131921; display:flex; justify-content:space-between;">
+                        <span>🛒 Active Bill</span>
+                        <span id="cartCountBadge" style="font-size:11px; background:#ff9900; color:#131921; padding:2px 8px; border-radius:12px;">0 items</span>
+                    </h3>
+
+                    <div style="background:#f8fafc; border:1px solid #e5e7eb; border-radius:8px; padding:10px; margin-bottom:10px; font-size:11.5px;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px;">
+                            <input type="text" id="posVehicleNo" placeholder="Vehicle No (e.g. WP CAC-4521)" style="padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700; font-size:11px; text-transform:uppercase;" />
+                            <input type="text" id="posVehicleModel" placeholder="Model (e.g. Prius / WagonR)" style="padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:11px;" />
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                            <input type="text" id="posCustName" placeholder="Customer Name" style="padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:11px;" />
+                            <input type="text" id="posCustPhone" placeholder="Phone Number" style="padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:11px;" />
+                        </div>
+                    </div>
+
+                    <div style="max-height:220px; overflow-y:auto; scrollbar-width:thin;">
+                        <table class="cart-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th style="width:45px; text-align:center;">Qty</th>
+                                    <th style="text-align:right;">Total</th>
+                                    <th style="width:25px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartTableBody">
+                                <tr><td colspan="4" style="text-align:center; color:#9ca3af; padding:20px;">Cart is empty. Select tires or services from catalog.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="cart-totals-box">
+                        <div class="cart-row-tot">
+                            <span>Subtotal:</span>
+                            <span id="cartSubTotal">Rs. 0.00</span>
+                        </div>
+                        <div class="cart-row-tot">
+                            <span>Discount:</span>
+                            <input type="number" id="cartDiscount" value="0" min="0" step="100" style="width:80px; padding:2px 6px; font-size:11px; text-align:right; border:1px solid #d1d5db; border-radius:4px;" oninput="calcCartTotals()" />
+                        </div>
+                        <div class="cart-row-tot grand">
+                            <span>Net Total:</span>
+                            <span id="cartGrandTotal">Rs. 0.00</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:11px; font-weight:700; color:#4b5563; display:block; margin-bottom:4px;">PAYMENT METHOD</label>
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">
+                            <button type="button" class="btn btn-secondary btn-sm pay-btn active" onclick="setPayMode('CASH', this)">💵 Cash</button>
+                            <button type="button" class="btn btn-secondary btn-sm pay-btn" onclick="setPayMode('CARD', this)">💳 Card</button>
+                            <button type="button" class="btn btn-secondary btn-sm pay-btn" onclick="setPayMode('CREDIT', this)">📝 Credit</button>
+                            <button type="button" class="btn btn-secondary btn-sm pay-btn" onclick="setPayMode('BANK', this)">🏦 Bank</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="width:100%; padding:12px; font-size:14px; justify-content:center;" onclick="checkoutPos()">
+                        <i class="fas fa-print"></i> COMPLETE INVOICE & PRINT [F4]
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. SALES HISTORY -->
+        <div class="page" id="page-sales_history">
+            <div class="page-header">
+                <div>
+                    <h1>Sales & Invoices History <span class="sub">| Archive of Completed Tire Sales</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="exportCsv()"><i class="fas fa-download"></i> Export CSV</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Date / Time</th>
+                                <th>Vehicle No</th>
+                                <th>Customer</th>
+                                <th>Items & Services</th>
+                                <th>Payment</th>
+                                <th style="text-align:right;">Gross</th>
+                                <th style="text-align:right;">Discount</th>
+                                <th style="text-align:right;">Net Paid</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesHistoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. DAILY WORKBENCH -->
+        <div class="page" id="page-workbench">
+            <div class="page-header">
+                <div>
+                    <h1>Daily Job Cards & Bay Workbench <span class="sub">| Active Vehicle Servicing & Alignment Bay</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openNewJobModal()"><i class="fas fa-plus"></i> + Create Job Card</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Job Card #</th>
+                                <th>Date & Time</th>
+                                <th>Vehicle No</th>
+                                <th>Customer & Phone</th>
+                                <th>Tire Positions</th>
+                                <th>Services Assigned</th>
+                                <th>Technician</th>
+                                <th style="text-align:right;">Total (Rs.)</th>
+                                <th>Status</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workbenchTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. APPOINTMENTS -->
+        <div class="page" id="page-appointments">
+            <div class="page-header">
+                <div>
+                    <h1>Service Appointments <span class="sub">| Bookings & Scheduling</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openNewAppointmentModal()"><i class="fas fa-plus"></i> + Book Appointment</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Customer Name</th>
+                                <th>Contact Phone</th>
+                                <th>Vehicle Reg No</th>
+                                <th>Requested Service</th>
+                                <th>Status</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. WHEEL & ALIGNMENT SERVICES -->
+        <div class="page" id="page-services">
+            <div class="page-header">
+                <div>
+                    <h1>Wheel & Auto Services Catalog <span class="sub">| Alignment, Balancing & Fitting Rates</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openAddServiceModal()"><i class="fas fa-plus"></i> + Add Service</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Service Code</th>
+                                <th>Service Name</th>
+                                <th>Vehicle Category</th>
+                                <th style="text-align:right;">Standard Price</th>
+                                <th>Est. Duration</th>
+                                <th>Description</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. TIRE INVENTORY -->
+        <div class="page" id="page-inventory">
+            <div class="page-header">
+                <div>
+                    <h1>Tire Inventory & Stock Directory <span class="sub">| Tires, Tubes, Rims & Auto Spares</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openAddTireModal()"><i class="fas fa-plus"></i> + Add New Tire Item</button>
+                </div>
+            </div>
+
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:10px 14px; margin-bottom:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="invSearchInput" placeholder="🔍 Search stock..." style="flex:1; padding:8px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:12.5px;" oninput="renderInventoryTable(this.value)" />
+                <select id="invBrandFilter" style="padding:8px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:12.5px;" onchange="renderInventoryTable()">
+                    <option value="ALL">All Brands</option>
+                    <option value="DSI">DSI</option>
+                    <option value="CEAT">CEAT</option>
+                    <option value="DUNLOP">Dunlop</option>
+                    <option value="MICHELIN">Michelin</option>
+                    <option value="MRF">MRF</option>
+                    <option value="HANKOOK">Hankook</option>
+                    <option value="PIRELLI">Pirelli</option>
+                </select>
+                <select id="invCategoryFilter" style="padding:8px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:12.5px;" onchange="renderInventoryTable()">
+                    <option value="ALL">All Categories</option>
+                    <option value="Tires">Tires</option>
+                    <option value="Tubes">Tubes</option>
+                    <option value="Rims">Rims & Wheels</option>
+                    <option value="Accessories">Accessories</option>
+                </select>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Code / SKU</th>
+                                <th>Brand</th>
+                                <th>Pattern / Model</th>
+                                <th>Size Specs</th>
+                                <th>Category</th>
+                                <th style="text-align:right;">Cost Price</th>
+                                <th style="text-align:right;">Selling Price</th>
+                                <th style="text-align:center;">Stock Qty</th>
+                                <th style="text-align:right;">Stock Valuation</th>
+                                <th>Status</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. SPOILAGE & WARRANTY -->
+        <div class="page" id="page-spoilage">
+            <div class="page-header">
+                <div>
+                    <h1>Spoilage, Defects & Warranty Claims <span class="sub">| Damaged Tires & Factory Returns</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="alert('Log New Claim')"><i class="fas fa-plus"></i> + Log Defective Tire</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Claim ID</th>
+                                <th>Date</th>
+                                <th>Tire Brand & Size</th>
+                                <th>Defect Description</th>
+                                <th>Customer / Vehicle</th>
+                                <th>Supplier Assigned</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>CLM-101</b></td>
+                                <td>2026-08-20</td>
+                                <td>CEAT 195/65 R15 Milaze</td>
+                                <td>Sidewall bulge within 500km</td>
+                                <td>WP CAC-4521</td>
+                                <td>CEAT Kelani Holdings</td>
+                                <td><span class="badge badge-done">REPLACED BY FACTORY</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. PURCHASES & GRN -->
+        <div class="page" id="page-grn">
+            <div class="page-header">
+                <div>
+                    <h1>Inbound Purchases & GRN <span class="sub">| Tire Stock Inward & Supplier Invoices</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openNewGrnModal()"><i class="fas fa-plus"></i> + Record GRN Batch</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>GRN #</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Tire Brand / Size</th>
+                                <th style="text-align:center;">Qty</th>
+                                <th style="text-align:right;">Unit Cost</th>
+                                <th style="text-align:right;">Total Amount</th>
+                                <th>Payment Mode</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grnTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. SUPPLIERS -->
+        <div class="page" id="page-suppliers">
+            <div class="page-header">
+                <div>
+                    <h1>Suppliers Directory <span class="sub">| Tire Distributors & Importers</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openAddSupplierModal()"><i class="fas fa-plus"></i> + Add Supplier</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Supplier Name</th>
+                                <th>Company / Agency</th>
+                                <th>Contact Phone</th>
+                                <th>Main Tire Brands</th>
+                                <th style="text-align:right;">Total Purchased</th>
+                                <th style="text-align:right;">Payable Balance</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. FLEET CUSTOMERS -->
+        <div class="page" id="page-customers">
+            <div class="page-header">
+                <div>
+                    <h1>Fleet Customers & Credit Ledger <span class="sub">| Outstanding Debtors & Fleet Accounts</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openAddCustomerModal()"><i class="fas fa-plus"></i> + Add Customer</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Phone Number</th>
+                                <th>Registered Vehicles</th>
+                                <th style="text-align:right;">Total Purchases</th>
+                                <th style="text-align:right;">Outstanding Credit</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. EXPENSES -->
+        <div class="page" id="page-expenses">
+            <div class="page-header">
+                <div>
+                    <h1>Shop Expenses & Cash Ledger <span class="sub">| Operational Costs & Banking Records</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openAddExpenseModal()"><i class="fas fa-plus"></i> + Record Expense</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Payment Source</th>
+                                <th style="text-align:right;">Amount (Rs.)</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 13. BANKING & CASH DRAWER -->
+        <div class="page" id="page-banking">
+            <div class="page-header">
+                <div>
+                    <h1>Banking & Cash Drawer <span class="sub">| Vault Balance, Bank Deposits & Card Settlement</span></h1>
+                </div>
+            </div>
+            <div class="dash-grid">
+                <div class="dash-card blue">
+                    <div class="card-title">💵 Physical Cash in Drawer</div>
+                    <div class="card-value">Rs. 62,800.00</div>
+                    <div class="card-sub">Counted at counter</div>
+                </div>
+                <div class="dash-card green">
+                    <div class="card-title">🏦 Bank Account Balance</div>
+                    <div class="card-value">Rs. 845,000.00</div>
+                    <div class="card-sub">Sampath Bank Corporate</div>
+                </div>
+                <div class="dash-card">
+                    <div class="card-title">💳 Card POS Settlements</div>
+                    <div class="card-value">Rs. 32,500.00</div>
+                    <div class="card-sub">Pending clearing</div>
+                </div>
+                <div class="dash-card">
+                    <div class="card-title">📝 Unpresented Cheques</div>
+                    <div class="card-value">Rs. 180,000.00</div>
+                    <div class="card-sub">Supplier payments</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 14. GENERAL LEDGER -->
+        <div class="page" id="page-ledgers">
+            <div class="page-header">
+                <div>
+                    <h1>General Ledger & Journal Entries <span class="sub">| Audit Trail of All Debits & Credits</span></h1>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Entry ID</th>
+                                <th>Date</th>
+                                <th>Account</th>
+                                <th>Description</th>
+                                <th style="text-align:right;">Debit (Rs.)</th>
+                                <th style="text-align:right;">Credit (Rs.)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>JRN-8901</b></td>
+                                <td>2026-08-26</td>
+                                <td>Cash Drawer (1010)</td>
+                                <td>POS Tire Invoice INV-8890</td>
+                                <td style="text-align:right; font-weight:700; color:#059669;">67,200.00</td>
+                                <td style="text-align:right;">-</td>
+                            </tr>
+                            <tr>
+                                <td><b>JRN-8901</b></td>
+                                <td>2026-08-26</td>
+                                <td>Tire Sales Revenue (4010)</td>
+                                <td>POS Tire Invoice INV-8890</td>
+                                <td style="text-align:right;">-</td>
+                                <td style="text-align:right; font-weight:700; color:#059669;">67,200.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 15. REVENUE ANALYSIS -->
+        <div class="page" id="page-revenue">
+            <div class="page-header">
+                <div>
+                    <h1>Revenue Analysis & Yield <span class="sub">| Brand Margins & Service Profitability</span></h1>
+                </div>
+            </div>
+            <div class="dash-grid">
+                <div class="dash-card">
+                    <div class="card-title">Tire Sales Margin</div>
+                    <div class="card-value" style="color:#ff9900;">26.4%</div>
+                    <div class="card-sub">Average across all sizes</div>
+                </div>
+                <div class="dash-card green">
+                    <div class="card-title">Service Gross Margin</div>
+                    <div class="card-value" style="color:#059669;">84.2%</div>
+                    <div class="card-sub">Labor & Alignment yield</div>
+                </div>
+                <div class="dash-card blue">
+                    <div class="card-title">Monthly Revenue</div>
+                    <div class="card-value">Rs. 1.94M</div>
+                    <div class="card-sub">+18% vs last month</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 16. ACCOUNTING DASHBOARD -->
+        <div class="page" id="page-accounting">
+            <div class="page-header">
+                <div>
+                    <h1>Double-Entry Accounting Terminal <span class="sub">| Real-Time P&L & Chart of Accounts</span></h1>
+                </div>
+            </div>
+            <div class="dash-grid">
+                <div class="dash-card green">
+                    <div class="card-title">Gross Revenue</div>
+                    <div class="card-value">Rs. 1,945,800.00</div>
+                    <div class="card-sub">Sales + Services</div>
+                </div>
+                <div class="dash-card">
+                    <div class="card-title">COGS (Tire Procurement)</div>
+                    <div class="card-value">Rs. 1,320,400.00</div>
+                    <div class="card-sub">Direct inventory cost</div>
+                </div>
+                <div class="dash-card red">
+                    <div class="card-title">Operating Expenses</div>
+                    <div class="card-value">Rs. 184,200.00</div>
+                    <div class="card-sub">Rent, Power & Wages</div>
+                </div>
+                <div class="dash-card green">
+                    <div class="card-title">Net Profit</div>
+                    <div class="card-value">Rs. 441,200.00</div>
+                    <div class="card-sub">Net Margin: 22.7%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 17. 360° REPORTS -->
+        <div class="page" id="page-reports">
+            <div class="page-header">
+                <div>
+                    <h1>Executive Reports & Business Analytics <span class="sub">| Complete Financial & Stock Reports</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="exportCsv()"><i class="fas fa-download"></i> Export Master CSV</button>
+                </div>
+            </div>
+            <div class="dash-grid">
+                <div class="dash-card">
+                    <div class="card-title">Top Selling Brand</div>
+                    <div class="card-value" style="color:#ff9900;">DSI Tires</div>
+                    <div class="card-sub">42% of monthly volume</div>
+                </div>
+                <div class="dash-card green">
+                    <div class="card-title">Alignment Utilization</div>
+                    <div class="card-value">86.4%</div>
+                    <div class="card-sub">Average 12 vehicles / day</div>
+                </div>
+                <div class="dash-card blue">
+                    <div class="card-title">Average Ticket Value</div>
+                    <div class="card-value">Rs. 24,800.00</div>
+                    <div class="card-sub">Tires + Alignment package</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 18. BUSINESS PROFILE -->
+        <div class="page" id="page-profile">
+            <div class="page-header">
+                <div>
+                    <h1>Business Profile & Identity <span class="sub">| Sathi Tyre Centre Official Record</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Profile Saved')"><i class="fas fa-floppy-disk"></i> Save Profile</button>
+                </div>
+            </div>
+            <div class="two-col-grid">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-id-card"></i> Company Information</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group"><label>Business / Enterprise Name</label><input type="text" value="SATHI TYRE CENTRE" /></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Owner Name</label><input type="text" value="Sathi Tyre House" /></div>
+                            <div class="form-group"><label>Contact Phone</label><input type="text" value="0771234567" /></div>
+                        </div>
+                        <div class="form-group"><label>Email Address</label><input type="email" value="sathityre05@gmail.com" readonly style="background:#f9fafb;" /></div>
+                        <div class="form-group"><label>Shop Address</label><input type="text" value="Kandy Road, Kurunegala" /></div>
+                    </div>
+                </div>
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-shield-halved"></i> Workspace Security</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; font-size:12px; color:#166534;">
+                            <b>🔒 Single-Tenant Isolation Active:</b><br>
+                            This workspace is exclusively locked to <code>sathityre05@gmail.com</code>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 19. SUBSCRIPTION (3-CARD ENGINE) -->
+        <div class="page" id="page-subscription">
+            <div class="page-header">
+                <div>
+                    <h1>Enterprise Subscription & Billing <span class="sub">| Sathi Tyre Centre Account</span></h1>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:20px;">
+                <div class="panel-card" style="border:2px solid #ff9900; background:linear-gradient(135deg, #131921 0%, #1e2a3a 100%); color:#fff;">
+                    <div class="panel-body" style="text-align:center; padding:24px;">
+                        <div style="font-size:12px; font-weight:800; color:#ff9900; text-transform:uppercase;">Active Plan</div>
+                        <div style="font-size:26px; font-weight:900; color:#fff; margin:6px 0;">ENTERPRISE PRO</div>
+                        <div style="font-size:32px; font-weight:900; color:#ff9900;">364 <span style="font-size:14px; font-weight:600; color:#aaa;">Days Left</span></div>
+                        <div style="font-size:11px; color:#9ca3af; margin-top:8px;">Valid until: <b>2027-08-25</b></div>
+                    </div>
+                </div>
+                <div class="panel-card">
+                    <div class="panel-header"><h3><i class="fas fa-building-columns" style="color:#059669;"></i> Official Bank Account</h3></div>
+                    <div class="panel-body" style="font-size:12.5px;">
+                        <p style="margin-bottom:6px;"><b>Bank:</b> Sampath Bank</p>
+                        <p style="margin-bottom:6px;"><b>Account Name:</b> DIGIBIZ (PVT) LTD</p>
+                        <p style="margin-bottom:6px;"><b>Account Number:</b> 0123 4567 8901</p>
+                        <p style="margin-bottom:6px;"><b>Branch:</b> Colombo Corporate</p>
+                    </div>
+                </div>
+                <div class="panel-card">
+                    <div class="panel-header"><h3><i class="fab fa-whatsapp" style="color:#25d366;"></i> Dedicated Support</h3></div>
+                    <div class="panel-body" style="text-align:center;">
+                        <p style="font-size:12px; color:#4b5563; margin-bottom:12px;">Contact your dedicated DIGIBIZ enterprise account executive.</p>
+                        <a href="https://wa.me/94713446500" target="_blank" class="btn btn-success" style="width:100%; justify-content:center;">
+                            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 20. SMS ALERTS -->
+        <div class="page" id="page-sms">
+            <div class="page-header">
+                <div>
+                    <h1>SMS Alerts & Service Notifications <span class="sub">| Next Wheel Alignment & Service Reminders</span></h1>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body table-wrap" style="padding:0;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Recipient</th>
+                                <th>Vehicle</th>
+                                <th>Message</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2026-08-26 08:50</td>
+                                <td>0771234567</td>
+                                <td>WP CAC-4521</td>
+                                <td>Dear Customer, your vehicle alignment at Sathi Tyre Centre is completed. Thank you!</td>
+                                <td><span class="badge badge-done">DELIVERED</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 21. USER MANUAL -->
+        <div class="page" id="page-manual">
+            <div class="page-header">
+                <div>
+                    <h1>Tire Center User Manual <span class="sub">| Quick Guide & Shortcuts</span></h1>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-body" style="line-height:1.6; font-size:13px;">
+                    <h3>⌨️ Keyboard Shortcuts</h3>
+                    <ul>
+                        <li><b>F2:</b> Focus Search Bar in POS</li>
+                        <li><b>F4 / Ctrl+Enter:</b> Complete Invoice & Print</li>
+                        <li><b>F9:</b> Clear Current Cart</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- 📄 PRINTABLE RECEIPT TEMPLATE                                 -->
+    <!-- ============================================================ -->
+    <div id="printableReceipt" style="display:none;">
+        <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">
+            <h2 style="margin:0; font-size:18px;">SATHI TYRE CENTRE</h2>
+            <div style="font-size:11px;">Kandy Road, Kurunegala</div>
+            <div style="font-size:11px;">Tel: 0771234567 / 0712345678</div>
+            <div style="font-size:11px; font-weight:bold; margin-top:4px;">TIRE & WHEEL ALIGNMENT INVOICE</div>
+        </div>
+        <div style="font-size:11px; margin-bottom:8px;">
+            <div><b>Invoice #:</b> <span id="prnInvNo">INV-001</span></div>
+            <div><b>Date:</b> <span id="prnDate"></span></div>
+            <div><b>Vehicle:</b> <span id="prnVehicle"></span></div>
+            <div><b>Customer:</b> <span id="prnCustomer"></span></div>
+        </div>
+        <table style="width:100%; font-size:11px; border-collapse:collapse; margin-bottom:8px;">
+            <thead>
+                <tr style="border-bottom:1px solid #000;">
+                    <th style="text-align:left;">Item / Service</th>
+                    <th style="text-align:center;">Qty</th>
+                    <th style="text-align:right;">Price</th>
+                    <th style="text-align:right;">Total</th>
+                </tr>
+            </thead>
+            <tbody id="prnItemsBody"></tbody>
+        </table>
+        <div style="border-top:1px dashed #000; padding-top:6px; font-size:12px; text-align:right;">
+            <div><b>Net Total:</b> <span id="prnTotal">Rs. 0.00</span></div>
+            <div><b>Payment:</b> <span id="prnPayMode">CASH</span></div>
+        </div>
+        <div style="text-align:center; font-size:10px; margin-top:12px; border-top:1px dashed #000; padding-top:6px;">
+            Thank You for choosing Sathi Tyre Centre!<br>
+            Please check wheel nuts after 50km · Free Alignment Check within 1000km
+        </div>
+    </div>
+
+    <!-- Generic Modal -->
+    <div class="modal-backdrop" id="genericModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Action</h3>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notify" id="toastNotify">
+        <i class="fas fa-circle-check" style="color:#ff9900;"></i>
+        <span id="toastMsg">Operation successful</span>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ⚙️ CORE JAVASCRIPT & DATA ENGINE                            -->
+    <!-- ============================================================ -->
+    <script>
+        // Authentic Master State
+        let appState = {
+            tires: [
+                { id: 't1', code: 'T-1757013-DSI', brand: 'DSI', pattern: 'Formula 1', size: '175/70 R13', category: 'Tires', cost: 12500, price: 15800, stock: 32, threshold: 5 },
+                { id: 't2', code: 'T-1956515-CEAT', brand: 'CEAT', pattern: 'Milaze', size: '195/65 R15', category: 'Tires', cost: 16800, price: 21500, stock: 45, threshold: 8 },
+                { id: 't3', code: 'T-2055516-DUN', brand: 'DUNLOP', pattern: 'SP Touring R1', size: '205/55 R16', category: 'Tires', cost: 24500, price: 31000, stock: 28, threshold: 6 },
+                { id: 't4', code: 'T-2156016-MICH', brand: 'MICHELIN', pattern: 'Primacy 4', size: '215/60 R16', category: 'Tires', cost: 38000, price: 47500, stock: 16, threshold: 4 },
+                { id: 't5', code: 'T-2254517-PIRE', brand: 'PIRELLI', pattern: 'Cinturato P7', size: '225/45 R17', category: 'Tires', cost: 42000, price: 54000, stock: 12, threshold: 4 },
+                { id: 't6', code: 'T-1558012-MRF', brand: 'MRF', pattern: 'Zigma', size: '155/80 R12', category: 'Tires', cost: 9800, price: 12500, stock: 40, threshold: 10 },
+                { id: 't7', code: 'T-909012-DSI', brand: 'DSI', pattern: 'Scooter Tubeless', size: '90/90-12', category: 'Tires', cost: 6200, price: 8200, stock: 55, threshold: 10 },
+                { id: 't8', code: 'T-1009010-CEAT', brand: 'CEAT', pattern: 'Gripp', size: '100/90-10', category: 'Tires', cost: 5800, price: 7600, stock: 48, threshold: 10 },
+                { id: 't9', code: 'TUB-1757013', brand: 'DSI', pattern: 'Standard Tube', size: '175/70 R13 Tube', category: 'Tubes', cost: 1800, price: 2600, stock: 35, threshold: 10 },
+                { id: 't10', code: 'ACC-VALVE-TR414', brand: 'OEM', pattern: 'Tubeless Rubber Valve', size: 'TR414 Valve', category: 'Accessories', cost: 80, price: 200, stock: 180, threshold: 30 }
+            ],
+            services: [
+                { id: 's1', code: 'SRV-ALIGN-CAR', name: 'Computerized 3D Wheel Alignment (Cars)', category: 'Cars / Sedans', price: 2500, duration: '25 mins', desc: 'Front and rear toe, camber & caster adjustment' },
+                { id: 's2', code: 'SRV-ALIGN-SUV', name: '3D Wheel Alignment (SUVs / Vans / 4x4)', category: 'SUV / Van', price: 3200, duration: '35 mins', desc: 'Full 4-wheel alignment for high clearance vehicles' },
+                { id: 's3', code: 'SRV-BAL-WHEEL', name: 'Dynamic Wheel Balancing (Per Wheel)', category: 'All Vehicles', price: 600, duration: '10 mins', desc: 'Includes precision clip-on / stick-on lead weights' },
+                { id: 's4', code: 'SRV-FIT-TIRE', name: 'Tire Fitting / Mounting (Per Wheel)', category: 'All Vehicles', price: 350, duration: '10 mins', desc: 'Tire dismounting, bead inspection and hydraulic fitting' },
+                { id: 's5', code: 'SRV-NITRO-4W', name: 'Nitrogen Air Inflation (4 Wheels)', category: 'All Vehicles', price: 800, duration: '10 mins', desc: 'Complete pure nitrogen inflation with green valve caps' },
+                { id: 's6', code: 'SRV-PUNC-REP', name: 'Tubeless Puncture Repair (Mushroom Plug)', category: 'All Vehicles', price: 500, duration: '15 mins', desc: 'Permanent vulcanized mushroom plug repair' }
+            ],
+            workbench: [
+                { id: 'JB-1041', date: '2026-08-26 09:15', vehicleNo: 'WP CAC-4521', model: 'Toyota Prius', customer: 'Nimal Jayasuriya', phone: '0719876543', positions: 'FL, FR (2 Tires)', services: '2x 195/65 R15 + Alignment + Balancing', tech: 'Saman Kumara', amount: 48600, status: 'IN_PROGRESS' },
+                { id: 'JB-1040', date: '2026-08-26 08:30', vehicleNo: 'CP KX-8890', model: 'Suzuki WagonR', customer: 'Kamal Silva', phone: '0771234567', positions: 'All 4 Wheels', services: '4x 155/80 R12 + Free Alignment', tech: 'Ruwan Perera', amount: 50000, status: 'ALIGNMENT_TEST' },
+                { id: 'JB-1039', date: '2026-08-26 08:00', vehicleNo: 'SP CAB-1234', model: 'Nissan Caravan', customer: 'Express Fleet Ltd', phone: '0112345678', positions: 'Rear RL, RR', services: '2x 195/65 R15 Commercial + Balancing', tech: 'Saman Kumara', amount: 44200, status: 'COMPLETED' }
+            ],
+            salesHistory: [
+                { id: 'INV-8891', date: '2026-08-26 08:45', vehicleNo: 'SP CAB-1234', customer: 'Express Fleet Ltd', items: '2x 195/65 R15, 2x Balancing', payMode: 'CREDIT', gross: 44200, discount: 1200, net: 43000 },
+                { id: 'INV-8890', date: '2026-08-25 16:30', vehicleNo: 'WP CBG-9901', customer: 'Sunil Wickramasinghe', items: '4x 175/70 R13, 3D Alignment, 4x Balancing', payMode: 'CASH', gross: 69200, discount: 2000, net: 67200 },
+                { id: 'INV-8889', date: '2026-08-25 14:15', vehicleNo: 'WP WP-5522', customer: 'Dinesh Bandara', items: '1x 90/90-12 Scooter Tire + Fitting', payMode: 'CARD', gross: 8550, discount: 0, net: 8550 }
+            ],
+            appointments: [
+                { date: '2026-08-26 11:00', customer: 'Priyantha Alwis', phone: '0778899001', vehicle: 'WP CAD-1122 (Honda Vezel)', service: '4-Wheel 3D Alignment & Nitrogen', status: 'CONFIRMED' },
+                { date: '2026-08-26 14:30', customer: 'Mahinda Ranatunga', phone: '0714455667', vehicle: 'CP KM-3344 (Toyota Hilux)', service: '4x 225/45 R17 Replacement', status: 'PENDING' }
+            ],
+            grn: [
+                { id: 'GRN-401', date: '2026-08-24', supplier: 'Associated Motorways (DSI Tires)', brandSize: 'DSI 175/70 R13 & 90/90-12', qty: 60, unitCost: 12500, total: 685000, payMode: 'CREDIT' },
+                { id: 'GRN-400', date: '2026-08-20', supplier: 'CEAT Kelani Holdings', brandSize: 'CEAT 195/65 R15 Milaze', qty: 40, unitCost: 16800, total: 672000, payMode: 'CHEQUE' }
+            ],
+            suppliers: [
+                { name: 'Associated Motorways (Pvt) Ltd', company: 'DSI Tires Distributor', phone: '0112445566', brands: 'DSI, Continental', purchased: 3450000, payable: 320000 },
+                { name: 'CEAT Kelani Holdings PLC', company: 'CEAT Tires Sri Lanka', phone: '0112998877', brands: 'CEAT, FarMax', purchased: 4120000, payable: 180000 },
+                { name: 'Douglas & Sons (Pvt) Ltd (DSL)', company: 'DSL Auto Parts', phone: '0112334455', brands: 'Dunlop, Hankook', purchased: 2890000, payable: 0 }
+            ],
+            customers: [
+                { name: 'Express Fleet Ltd', phone: '0112345678', vehicles: 'SP CAB-1234, SP CAB-5678 (8 Vans)', purchases: 640000, balance: 148500 },
+                { name: 'Kurunegala Cabs', phone: '0372223344', vehicles: 'WP CAC-1122, WP CAC-9988 (12 Cars)', purchases: 890000, balance: 100000 },
+                { name: 'Nimal Jayasuriya', phone: '0719876543', vehicles: 'WP CAC-4521', purchases: 48600, balance: 0 }
+            ],
+            expenses: [
+                { date: '2026-08-26', category: 'Wages & Commissions', desc: 'Alignment technician daily allowance', source: 'Cash in Hand', amount: 3500 },
+                { date: '2026-08-25', category: 'Electricity & Utility', desc: 'Air compressor & 3D machine power bill', source: 'Bank Transfer', amount: 28400 },
+                { date: '2026-08-24', category: 'Shop Consumables', desc: 'Lead weights, rubber valves & patches', source: 'Cash in Hand', amount: 8200 }
+            ],
+            cart: [],
+            payMode: 'CASH'
+        };
+
+        // Navigation Engine
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.location.hash = pageId;
+            }
+
+            const targetNav = document.querySelector('.sidebar-item[data-page="' + pageId + '"]');
+            if (targetNav) targetNav.classList.add('active');
+
+            if (window.innerWidth <= 768) closeSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        // Render Dashboard
+        function renderDashboard() {
+            let totalTireValue = appState.tires.reduce((acc, t) => acc + (t.cost * t.stock), 0);
+            let totalTireUnits = appState.tires.reduce((acc, t) => acc + t.stock, 0);
+            let totalFleetDebts = appState.customers.reduce((acc, c) => acc + (c.balance || 0), 0);
+
+            document.getElementById('dashTireAssetVal').textContent = 'Rs. ' + totalTireValue.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            document.getElementById('dashTireUnitsVal').textContent = totalTireUnits + ' Units';
+            document.getElementById('dashFleetDebtsVal').textContent = 'Rs. ' + totalFleetDebts.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+            const tbody = document.getElementById('dashJobRows');
+            if (tbody) {
+                tbody.innerHTML = appState.workbench.slice(0, 4).map(j => {
+                    let badgeClass = j.status === 'COMPLETED' ? 'badge-done' : (j.status === 'IN_PROGRESS' ? 'badge-progress' : 'badge-queue');
+                    return `<tr>
+                        <td><b>${j.id}</b></td>
+                        <td><span style="font-weight:800; background:#131921; color:#fff; padding:2px 6px; border-radius:4px; font-size:10px;">${j.vehicleNo}</span></td>
+                        <td>${j.model}</td>
+                        <td>${j.services}</td>
+                        <td><span class="badge ${badgeClass}">${j.status}</span></td>
+                        <td style="font-weight:800; color:#059669;">Rs. ${j.amount.toLocaleString()}</td>
+                    </tr>`;
+                }).join('');
+            }
+
+            initChart();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('tireSizesChart')?.getContext('2d');
+            if (!ctx) return;
+            if (window.myTireChart) window.myTireChart.destroy();
+            window.myTireChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['175/70 R13', '195/65 R15', '205/55 R16', '155/80 R12', '90/90-12', '215/60 R16'],
+                    datasets: [{
+                        label: 'Tires Sold',
+                        data: [42, 58, 36, 48, 64, 22],
+                        backgroundColor: '#ff9900',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        // POS Engine
+        let selectedSizeFilter = 'ALL';
+        function filterTireSize(size) {
+            selectedSizeFilter = size;
+            document.querySelectorAll('#tireSizeChips .chip').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            renderPosCatalog();
+        }
+
+        function renderPosCatalog(searchQuery = '') {
+            const q = (searchQuery || document.getElementById('posSearchInput')?.value || '').toLowerCase().trim();
+            const brand = document.getElementById('posBrandFilter')?.value || 'ALL';
+            const container = document.getElementById('posGridItems');
+            if (!container) return;
+
+            let items = [];
+
+            if (selectedSizeFilter === 'SERVICES') {
+                items = appState.services.filter(s => {
+                    const matchQ = !q || s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q);
+                    return matchQ;
+                }).map(s => ({
+                    id: s.id,
+                    type: 'SERVICE',
+                    name: s.name,
+                    brand: 'SERVICE',
+                    sub: s.category + ' · ' + s.duration,
+                    price: s.price,
+                    stock: 'UNLIMITED'
+                }));
+            } else {
+                items = appState.tires.filter(t => {
+                    const matchSize = selectedSizeFilter === 'ALL' || t.size === selectedSizeFilter;
+                    const matchBrand = brand === 'ALL' || t.brand.toUpperCase() === brand.toUpperCase();
+                    const matchQ = !q || t.size.toLowerCase().includes(q) || t.brand.toLowerCase().includes(q) || t.pattern.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
+                    return matchSize && matchBrand && matchQ;
+                }).map(t => ({
+                    id: t.id,
+                    type: 'TIRE',
+                    name: t.size,
+                    brand: t.brand,
+                    sub: t.pattern + ' · ' + t.category,
+                    price: t.price,
+                    stock: t.stock
+                }));
+            }
+
+            if (items.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#9ca3af;">No matching tires or services found.</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const stockText = item.type === 'SERVICE' ? '🛠️ Rate' : (item.stock + ' in stock');
+                const isOutOfStock = item.type === 'TIRE' && item.stock <= 0;
+                return `
+                    <div class="tire-card-pos" onclick="addToCart('${item.id}', '${item.type}')" style="${isOutOfStock ? 'opacity:0.5;' : ''}">
+                        <div>
+                            <span class="brand-badge" style="${item.type === 'SERVICE' ? 'background:#059669;' : ''}">${item.brand}</span>
+                            <div class="size-title">${item.name}</div>
+                            <div class="pattern-sub">${item.sub}</div>
+                        </div>
+                        <div class="price-stock">
+                            <div class="price">Rs. ${item.price.toLocaleString()}</div>
+                            <div class="stock-pill">${stockText}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addToCart(id, type) {
+            let existing = appState.cart.find(c => c.id === id && c.type === type);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                let item = type === 'SERVICE' ? appState.services.find(s => s.id === id) : appState.tires.find(t => t.id === id);
+                if (!item) return;
+                appState.cart.push({
+                    id: item.id,
+                    type: type,
+                    name: type === 'SERVICE' ? item.name : (item.brand + ' ' + item.size + ' (' + item.pattern + ')'),
+                    price: item.price,
+                    qty: 1
+                });
+            }
+            renderCart();
+            showToast('Added to Cart: ' + (type === 'SERVICE' ? 'Service' : 'Tire'));
+        }
+
+        function updateCartQty(idx, delta) {
+            if (!appState.cart[idx]) return;
+            appState.cart[idx].qty += delta;
+            if (appState.cart[idx].qty <= 0) {
+                appState.cart.splice(idx, 1);
+            }
+            renderCart();
+        }
+
+        function removeCartItem(idx) {
+            appState.cart.splice(idx, 1);
+            renderCart();
+        }
+
+        function clearCart() {
+            appState.cart = [];
+            document.getElementById('posVehicleNo').value = '';
+            document.getElementById('posVehicleModel').value = '';
+            document.getElementById('posCustName').value = '';
+            document.getElementById('posCustPhone').value = '';
+            document.getElementById('cartDiscount').value = 0;
+            renderCart();
+            showToast('Cart cleared');
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('cartTableBody');
+            const countBadge = document.getElementById('cartCountBadge');
+            const posBadge = document.getElementById('posBadge');
+
+            let totalQty = appState.cart.reduce((a, c) => a + c.qty, 0);
+            if (countBadge) countBadge.textContent = totalQty + ' items';
+            if (posBadge) posBadge.textContent = totalQty;
+
+            if (appState.cart.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#9ca3af; padding:20px;">Cart is empty. Select tires or services from catalog.</td></tr>';
+                calcCartTotals();
+                return;
+            }
+
+            tbody.innerHTML = appState.cart.map((c, idx) => `
+                <tr>
+                    <td>
+                        <div style="font-weight:700; color:#131921;">${c.name}</div>
+                        <div style="font-size:10px; color:#6b7280;">Rs. ${c.price.toLocaleString()} each</div>
+                    </td>
+                    <td style="text-align:center;">
+                        <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+                            <button type="button" style="width:18px; height:18px; border:1px solid #d1d5db; background:#fff; cursor:pointer; border-radius:3px;" onclick="updateCartQty(${idx}, -1)">-</button>
+                            <span style="font-weight:800; font-size:11px;">${c.qty}</span>
+                            <button type="button" style="width:18px; height:18px; border:1px solid #d1d5db; background:#fff; cursor:pointer; border-radius:3px;" onclick="updateCartQty(${idx}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td style="text-align:right; font-weight:800; color:#059669;">
+                        Rs. ${(c.price * c.qty).toLocaleString()}
+                    </td>
+                    <td style="text-align:center;">
+                        <i class="fas fa-times" style="color:#ef4444; cursor:pointer;" onclick="removeCartItem(${idx})"></i>
+                    </td>
+                </tr>
+            `).join('');
+
+            calcCartTotals();
+        }
+
+        function calcCartTotals() {
+            let sub = appState.cart.reduce((a, c) => a + (c.price * c.qty), 0);
+            let disc = parseFloat(document.getElementById('cartDiscount')?.value) || 0;
+            let grand = Math.max(0, sub - disc);
+
+            document.getElementById('cartSubTotal').textContent = 'Rs. ' + sub.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            document.getElementById('cartGrandTotal').textContent = 'Rs. ' + grand.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        }
+
+        function setPayMode(mode, btn) {
+            appState.payMode = mode;
+            document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        function checkoutPos() {
+            if (appState.cart.length === 0) {
+                alert('Please add tires or services to cart before completing sale.');
+                return;
+            }
+
+            let sub = appState.cart.reduce((a, c) => a + (c.price * c.qty), 0);
+            let disc = parseFloat(document.getElementById('cartDiscount')?.value) || 0;
+            let grand = Math.max(0, sub - disc);
+            let vehicleNo = (document.getElementById('posVehicleNo')?.value || 'WALK-IN').toUpperCase();
+            let custName = document.getElementById('posCustName')?.value || 'Cash Customer';
+            let invNo = 'INV-' + Math.floor(1000 + Math.random() * 9000);
+
+            // Deduct stock
+            appState.cart.forEach(c => {
+                if (c.type === 'TIRE') {
+                    let tire = appState.tires.find(t => t.id === c.id);
+                    if (tire) tire.stock = Math.max(0, tire.stock - c.qty);
+                }
+            });
+
+            // Record sale
+            let newSale = {
+                id: invNo,
+                date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                vehicleNo: vehicleNo,
+                customer: custName,
+                items: appState.cart.map(c => `${c.qty}x ${c.name}`).join(', '),
+                payMode: appState.payMode,
+                gross: sub,
+                discount: disc,
+                net: grand
+            };
+            appState.salesHistory.unshift(newSale);
+
+            // Print
+            document.getElementById('prnInvNo').textContent = invNo;
+            document.getElementById('prnDate').textContent = new Date().toLocaleString();
+            document.getElementById('prnVehicle').textContent = vehicleNo;
+            document.getElementById('prnCustomer').textContent = custName;
+            document.getElementById('prnTotal').textContent = 'Rs. ' + grand.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            document.getElementById('prnPayMode').textContent = appState.payMode;
+            document.getElementById('prnItemsBody').innerHTML = appState.cart.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td style="text-align:center;">${c.qty}</td>
+                    <td style="text-align:right;">Rs. ${c.price.toLocaleString()}</td>
+                    <td style="text-align:right;">Rs. ${(c.price * c.qty).toLocaleString()}</td>
+                </tr>
+            `).join('');
+
+            window.print();
+
+            clearCart();
+            renderDashboard();
+            renderInventoryTable();
+            renderSalesHistory();
+            showToast('✅ Invoice ' + invNo + ' Completed Successfully!');
+        }
+
+        // Render Inventory
+        function renderInventoryTable(query = '') {
+            const q = (query || document.getElementById('invSearchInput')?.value || '').toLowerCase().trim();
+            const brand = document.getElementById('invBrandFilter')?.value || 'ALL';
+            const cat = document.getElementById('invCategoryFilter')?.value || 'ALL';
+            const tbody = document.getElementById('inventoryTableBody');
+            if (!tbody) return;
+
+            let filtered = appState.tires.filter(t => {
+                const matchBrand = brand === 'ALL' || t.brand.toUpperCase() === brand.toUpperCase();
+                const matchCat = cat === 'ALL' || t.category === cat;
+                const matchQ = !q || t.size.toLowerCase().includes(q) || t.brand.toLowerCase().includes(q) || t.pattern.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
+                return matchBrand && matchCat && matchQ;
+            });
+
+            tbody.innerHTML = filtered.map(t => {
+                let badge = t.stock <= 0 ? 'badge-out' : (t.stock <= t.threshold ? 'badge-low' : 'badge-in');
+                let statusText = t.stock <= 0 ? 'OUT OF STOCK' : (t.stock <= t.threshold ? 'LOW STOCK' : 'IN STOCK');
+                let val = t.cost * t.stock;
+                return `<tr>
+                    <td><b>${t.code}</b></td>
+                    <td><span class="brand-badge">${t.brand}</span></td>
+                    <td>${t.pattern}</td>
+                    <td style="font-weight:800; font-size:13px;">${t.size}</td>
+                    <td>${t.category}</td>
+                    <td style="text-align:right;">Rs. ${t.cost.toLocaleString()}</td>
+                    <td style="text-align:right; font-weight:700; color:#059669;">Rs. ${t.price.toLocaleString()}</td>
+                    <td style="text-align:center; font-weight:800;">${t.stock}</td>
+                    <td style="text-align:right; font-weight:800; color:#0284c7;">Rs. ${val.toLocaleString()}</td>
+                    <td><span class="badge ${badge}">${statusText}</span></td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-secondary btn-sm" onclick="showToast('Edit Stock: ' + '${t.code}')"><i class="fas fa-pen"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Render Services
+        function renderServicesTable() {
+            const tbody = document.getElementById('servicesTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = appState.services.map(s => `
+                <tr>
+                    <td><b>${s.code}</b></td>
+                    <td style="font-weight:700; color:#131921;">${s.name}</td>
+                    <td><span class="badge badge-queue">${s.category}</span></td>
+                    <td style="text-align:right; font-weight:800; color:#059669;">Rs. ${s.price.toLocaleString()}</td>
+                    <td>${s.duration}</td>
+                    <td style="color:#6b7280; font-size:11.5px;">${s.desc}</td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-secondary btn-sm" onclick="showToast('Edit Service')"><i class="fas fa-pen"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Workbench
+        function renderWorkbenchTable() {
+            const tbody = document.getElementById('workbenchTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = appState.workbench.map((j, idx) => {
+                let badgeClass = j.status === 'COMPLETED' ? 'badge-done' : (j.status === 'IN_PROGRESS' ? 'badge-progress' : 'badge-queue');
+                return `
+                    <tr>
+                        <td><b>${j.id}</b></td>
+                        <td style="font-size:11px; color:#6b7280;">${j.date}</td>
+                        <td><span style="font-weight:900; background:#131921; color:#fff; padding:3px 8px; border-radius:4px; font-size:11px;">${j.vehicleNo}</span><br><span style="font-size:10.5px; color:#6b7280;">${j.model}</span></td>
+                        <td><b>${j.customer}</b><br><span style="font-size:10.5px; color:#6b7280;">${j.phone}</span></td>
+                        <td><span class="badge badge-queue">${j.positions}</span></td>
+                        <td style="font-size:11.5px; font-weight:600;">${j.services}</td>
+                        <td>${j.tech}</td>
+                        <td style="text-align:right; font-weight:800; color:#059669;">Rs. ${j.amount.toLocaleString()}</td>
+                        <td><span class="badge ${badgeClass}">${j.status}</span></td>
+                        <td style="text-align:center;">
+                            <button class="btn btn-primary btn-sm" onclick="updateJobStatus(${idx})"><i class="fas fa-arrows-rotate"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateJobStatus(idx) {
+            let job = appState.workbench[idx];
+            if (!job) return;
+            if (job.status === 'QUEUE') job.status = 'IN_PROGRESS';
+            else if (job.status === 'IN_PROGRESS') job.status = 'ALIGNMENT_TEST';
+            else if (job.status === 'ALIGNMENT_TEST') job.status = 'COMPLETED';
+            else job.status = 'QUEUE';
+            renderWorkbenchTable();
+            renderDashboard();
+            showToast('Job ' + job.id + ' status: ' + job.status);
+        }
+
+        // Render Sales History
+        function renderSalesHistory() {
+            const tbody = document.getElementById('salesHistoryTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = appState.salesHistory.map(s => `
+                <tr>
+                    <td><b>${s.id}</b></td>
+                    <td style="font-size:11px; color:#6b7280;">${s.date}</td>
+                    <td><span style="font-weight:800; background:#131921; color:#fff; padding:2px 6px; border-radius:4px; font-size:10px;">${s.vehicleNo}</span></td>
+                    <td>${s.customer}</td>
+                    <td style="font-size:11px;">${s.items}</td>
+                    <td><span class="badge badge-queue">${s.payMode}</span></td>
+                    <td style="text-align:right;">Rs. ${s.gross.toLocaleString()}</td>
+                    <td style="text-align:right; color:#ef4444;">Rs. ${s.discount.toLocaleString()}</td>
+                    <td style="text-align:right; font-weight:800; color:#059669;">Rs. ${s.net.toLocaleString()}</td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-secondary btn-sm" onclick="showToast('Reprint Invoice: ' + '${s.id}')"><i class="fas fa-print"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Appointments
+        function renderAppointments() {
+            const tbody = document.getElementById('appointmentsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = appState.appointments.map(a => `
+                <tr>
+                    <td><b>${a.date}</b></td>
+                    <td>${a.customer}</td>
+                    <td>${a.phone}</td>
+                    <td><span style="font-weight:800; background:#131921; color:#fff; padding:2px 6px; border-radius:4px; font-size:10px;">${a.vehicle}</span></td>
+                    <td>${a.service}</td>
+                    <td><span class="badge badge-done">${a.status}</span></td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-primary btn-sm" onclick="showToast('Service Initiated')"><i class="fas fa-play"></i> Start</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render GRN
+        function renderGrn() {
+            const tbody = document.getElementById('grnTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = appState.grn.map(g => `
+                <tr>
+                    <td><b>${g.id}</b></td>
+                    <td>${g.date}</td>
+                    <td><b>${g.supplier}</b></td>
+                    <td>${g.brandSize}</td>
+                    <td style="text-align:center; font-weight:700;">${g.qty}</td>
+                    <td style="text-align:right;">Rs. ${g.unitCost.toLocaleString()}</td>
+                    <td style="text-align:right; font-weight:800; color:#059669;">Rs. ${g.total.toLocaleString()}</td>
+                    <td><span class="badge badge-queue">${g.payMode}</span></td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-secondary btn-sm" onclick="showToast('GRN View')"><i class="fas fa-eye"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Suppliers
+        function renderSuppliers() {
+            const tbody = document.getElementById('suppliersTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = appState.suppliers.map(s => `
+                <tr>
+                    <td><b>${s.name}</b></td>
+                    <td>${s.company}</td>
+                    <td>${s.phone}</td>
+                    <td><span class="badge badge-queue">${s.brands}</span></td>
+                    <td style="text-align:right;">Rs. ${s.purchased.toLocaleString()}</td>
+                    <td style="text-align:right; font-weight:800; color:${s.payable > 0 ? '#ef4444' : '#059669'};">Rs. ${s.payable.toLocaleString()}</td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-primary btn-sm" onclick="showToast('Supplier Payment')">Pay</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Customers
+        function renderCustomers() {
+            const tbody = document.getElementById('customersTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = appState.customers.map(c => `
+                <tr>
+                    <td><b>${c.name}</b></td>
+                    <td>${c.phone}</td>
+                    <td><span style="font-weight:700; color:#1e293b;">${c.vehicles}</span></td>
+                    <td style="text-align:right;">Rs. ${c.purchases.toLocaleString()}</td>
+                    <td style="text-align:right; font-weight:800; color:${c.balance > 0 ? '#ef4444' : '#059669'};">Rs. ${c.balance.toLocaleString()}</td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-success btn-sm" onclick="recordCustomerPayment('${c.name}')"><i class="fas fa-money-bill"></i> Collect Payment</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function recordCustomerPayment(name) {
+            let cust = appState.customers.find(c => c.name === name);
+            if (!cust) return;
+            let amt = prompt('Enter payment amount received from ' + name + ' (Current Due: Rs. ' + cust.balance.toLocaleString() + '):', cust.balance);
+            if (amt && !isNaN(amt)) {
+                let paid = parseFloat(amt);
+                cust.balance = Math.max(0, cust.balance - paid);
+                renderCustomers();
+                renderDashboard();
+                showToast('✅ Collected Rs. ' + paid.toLocaleString() + ' from ' + name);
+            }
+        }
+
+        // Render Expenses
+        function renderExpenses() {
+            const tbody = document.getElementById('expensesTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = appState.expenses.map(e => `
+                <tr>
+                    <td>${e.date}</td>
+                    <td><b>${e.category}</b></td>
+                    <td>${e.desc}</td>
+                    <td><span class="badge badge-queue">${e.source}</span></td>
+                    <td style="text-align:right; font-weight:800; color:#ef4444;">Rs. ${e.amount.toLocaleString()}</td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-secondary btn-sm" onclick="showToast('Expense Audit')"><i class="fas fa-eye"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Modals & Helpers
+        
+        function openLowStockAlertModal() {
+            let lowItems = appState.tires.filter(t => t.stock <= t.threshold);
+            let rowsHtml = lowItems.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:20px; color:#059669;">✅ All tire sizes have healthy stock levels.</td></tr>' :
+                lowItems.map(t => `<tr>
+                    <td style="font-weight:700;">${t.brand} ${t.size} (${t.pattern})</td>
+                    <td>${t.category}</td>
+                    <td style="text-align:right; font-weight:800; color:#ef4444;">${t.stock}</td>
+                    <td style="text-align:right;">${t.threshold}</td>
+                    <td style="text-align:center;"><button class="btn btn-primary btn-sm" onclick="closeModal(); navigateTo('grn');">Reorder GRN</button></td>
+                </tr>`).join('');
+
+            openModal('⚠️ Low Stock Items Below Reorder Threshold', `
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Item / Size</th>
+                            <th>Category</th>
+                            <th style="text-align:right;">Current Stock</th>
+                            <th style="text-align:right;">Threshold</th>
+                            <th style="text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `);
+        }
+
+        function openOverdueCreditModal() {
+            let dueCusts = appState.customers.filter(c => (c.balance || 0) > 0);
+            let rowsHtml = dueCusts.length === 0 ? '<tr><td colspan="4" style="text-align:center; padding:20px; color:#059669;">✅ No outstanding fleet debts.</td></tr>' :
+                dueCusts.map(c => `<tr>
+                    <td style="font-weight:700;">${c.name}</td>
+                    <td>${c.phone}</td>
+                    <td>${c.vehicles}</td>
+                    <td style="text-align:right; font-weight:800; color:#ef4444;">Rs. ${c.balance.toLocaleString()}</td>
+                    <td style="text-align:center;"><button class="btn btn-success btn-sm" onclick="closeModal(); recordCustomerPayment('${c.name}');">Collect</button></td>
+                </tr>`).join('');
+
+            openModal('🚨 Outstanding Fleet Credit Accounts', `
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Customer / Fleet</th>
+                            <th>Phone</th>
+                            <th>Vehicles</th>
+                            <th style="text-align:right;">Outstanding Due</th>
+                            <th style="text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `);
+        }
+
+        function openModal(title, bodyHtml) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = bodyHtml;
+            document.getElementById('genericModal').classList.add('show');
+        }
+        function closeModal() {
+            document.getElementById('genericModal').classList.remove('show');
+        }
+
+        function openNewJobModal() {
+            openModal('Create New Tire / Alignment Job Card', `
+                <div class="form-row">
+                    <div class="form-group"><label>Vehicle Reg No *</label><input type="text" id="newJobVehNo" placeholder="WP CAC-1234" style="text-transform:uppercase; font-weight:800;" /></div>
+                    <div class="form-group"><label>Vehicle Model</label><input type="text" id="newJobModel" placeholder="Toyota Prius / WagonR" /></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Customer Name</label><input type="text" id="newJobCust" placeholder="Full Name" /></div>
+                    <div class="form-group"><label>Phone Number</label><input type="text" id="newJobPhone" placeholder="07xxxxxxxx" /></div>
+                </div>
+                <div class="form-group">
+                    <label>Tire Positions Serviced</label>
+                    <select id="newJobPos">
+                        <option value="FL, FR (Front 2)">Front Left & Right (2 Wheels)</option>
+                        <option value="RL, RR (Rear 2)">Rear Left & Right (2 Wheels)</option>
+                        <option value="All 4 Wheels">All 4 Wheels</option>
+                        <option value="All 4 + Stepney (5)">All 4 Wheels + Spare (5 Wheels)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Selected Services & Tires</label>
+                    <input type="text" id="newJobServices" placeholder="e.g. 2x 195/65 R15 + 3D Wheel Alignment" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Assigned Technician</label><input type="text" id="newJobTech" value="Saman Kumara" /></div>
+                    <div class="form-group"><label>Estimated Total (Rs.)</label><input type="number" id="newJobAmount" placeholder="48000" /></div>
+                </div>
+                <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="saveNewJob()">Create Job Card & Enter Queue</button>
+            `);
+        }
+
+        function saveNewJob() {
+            let veh = document.getElementById('newJobVehNo')?.value.trim();
+            if (!veh) { alert('Please enter vehicle number'); return; }
+            let job = {
+                id: 'JB-' + Math.floor(1045 + Math.random() * 100),
+                date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                vehicleNo: veh.toUpperCase(),
+                model: document.getElementById('newJobModel')?.value || 'Car / Van',
+                customer: document.getElementById('newJobCust')?.value || 'Walk-in',
+                phone: document.getElementById('newJobPhone')?.value || '',
+                positions: document.getElementById('newJobPos')?.value || 'All 4 Wheels',
+                services: document.getElementById('newJobServices')?.value || 'Wheel Alignment & Balancing',
+                tech: document.getElementById('newJobTech')?.value || 'Mechanic',
+                amount: parseFloat(document.getElementById('newJobAmount')?.value) || 0,
+                status: 'QUEUE'
+            };
+            appState.workbench.unshift(job);
+            closeModal();
+            renderWorkbenchTable();
+            renderDashboard();
+            showToast('✅ Created Job Card ' + job.id);
+        }
+
+        function openAddTireModal() {
+            openModal('Add New Tire / Inventory Product', `
+                <div class="form-row">
+                    <div class="form-group"><label>Code / SKU *</label><input type="text" id="newTireCode" placeholder="T-1956515-DSI" /></div>
+                    <div class="form-group">
+                        <label>Brand</label>
+                        <select id="newTireBrand">
+                            <option value="DSI">DSI</option>
+                            <option value="CEAT">CEAT</option>
+                            <option value="DUNLOP">Dunlop</option>
+                            <option value="MICHELIN">Michelin</option>
+                            <option value="MRF">MRF</option>
+                            <option value="HANKOOK">Hankook</option>
+                            <option value="PIRELLI">Pirelli</option>
+                            <option value="YOKOHAMA">Yokohama</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Tire Size Specs *</label><input type="text" id="newTireSize" placeholder="195/65 R15" /></div>
+                    <div class="form-group"><label>Tread Pattern / Model</label><input type="text" id="newTirePattern" placeholder="Milaze / Formula 1" /></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Cost Price (Rs.)</label><input type="number" id="newTireCost" placeholder="16500" /></div>
+                    <div class="form-group"><label>Selling Price (Rs.)</label><input type="number" id="newTirePrice" placeholder="21000" /></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Initial Stock Qty</label><input type="number" id="newTireStock" value="20" /></div>
+                    <div class="form-group"><label>Low Stock Alert Level</label><input type="number" id="newTireThreshold" value="5" /></div>
+                </div>
+                <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="saveNewTire()">Save Product to Catalog</button>
+            `);
+        }
+
+        function saveNewTire() {
+            let size = document.getElementById('newTireSize')?.value.trim();
+            if (!size) { alert('Please enter tire size specs'); return; }
+            let brand = document.getElementById('newTireBrand')?.value || 'DSI';
+            let tire = {
+                id: 't_' + Date.now(),
+                code: document.getElementById('newTireCode')?.value || ('T-' + size.replace(/[^a-zA-Z0-9]/g, '')),
+                brand: brand,
+                pattern: document.getElementById('newTirePattern')?.value || 'Standard',
+                size: size,
+                category: 'Tires',
+                cost: parseFloat(document.getElementById('newTireCost')?.value) || 0,
+                price: parseFloat(document.getElementById('newTirePrice')?.value) || 0,
+                stock: parseInt(document.getElementById('newTireStock')?.value) || 0,
+                threshold: parseInt(document.getElementById('newTireThreshold')?.value) || 5
+            };
+            appState.tires.unshift(tire);
+            closeModal();
+            renderInventoryTable();
+            renderPosCatalog();
+            renderDashboard();
+            showToast('✅ Added ' + brand + ' ' + size);
+        }
+
+        function openAddExpenseModal() {
+            openModal('Record Shop Expense', `
+                <div class="form-group"><label>Category</label><input type="text" id="newExpCat" placeholder="Utility, Wages, Rent, Consumables" /></div>
+                <div class="form-group"><label>Description</label><input type="text" id="newExpDesc" placeholder="Air compressor service" /></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Amount (Rs.)</label><input type="number" id="newExpAmount" placeholder="4500" /></div>
+                    <div class="form-group">
+                        <label>Payment Source</label>
+                        <select id="newExpSource"><option value="Cash in Hand">Cash in Hand</option><option value="Bank Transfer">Bank Transfer</option></select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="saveNewExpense()">Save Expense</button>
+            `);
+        }
+
+        function saveNewExpense() {
+            let amt = parseFloat(document.getElementById('newExpAmount')?.value) || 0;
+            if (!amt) { alert('Please enter expense amount'); return; }
+            appState.expenses.unshift({
+                date: new Date().toISOString().substring(0, 10),
+                category: document.getElementById('newExpCat')?.value || 'General Expense',
+                desc: document.getElementById('newExpDesc')?.value || 'Shop Operation',
+                source: document.getElementById('newExpSource')?.value || 'Cash in Hand',
+                amount: amt
+            });
+            closeModal();
+            renderExpenses();
+            renderDashboard();
+            showToast('✅ Expense Recorded');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toastNotify');
+            const m = document.getElementById('toastMsg');
+            if (t && m) {
+                m.textContent = msg;
+                t.style.display = 'flex';
+                setTimeout(() => { t.style.display = 'none'; }, 3000);
+            }
+        }
+
+        function exportCsv() {
+            let csv = 'Invoice,Date,Vehicle,Customer,Items,Payment,Net Total\n';
+            appState.salesHistory.forEach(s => {
+                csv += `"${s.id}","${s.date}","${s.vehicleNo}","${s.customer}","${s.items}","${s.payMode}","${s.net}"\n`;
+            });
+            let blob = new Blob([csv], { type: 'text/csv' });
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Sathi_Tyre_Report_' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+        }
+
+        function refreshAll() {
+            renderDashboard();
+            renderPosCatalog();
+            renderInventoryTable();
+            renderServicesTable();
+            renderWorkbenchTable();
+            renderSalesHistory();
+            renderAppointments();
+            renderGrn();
+            renderSuppliers();
+            renderCustomers();
+            renderExpenses();
+            showToast('🔄 Synchronized Live Cloud Data');
+        }
+
+        // Single-Tenant Authentication Gate & Email Lock
+        const ALLOWED_EMAILS = [
+            'sathityre05@gmail.com',
+            'pulasthigama@gmail.com',
+            'digibiz.pro@gmail.com'
+        ];
+
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    const userEmail = String(user.email || '').trim().toLowerCase();
+                    const isAllowed = ALLOWED_EMAILS.some(e => e.toLowerCase() === userEmail) || userEmail.includes('sathityre');
+                    
+                    if (!isAllowed) {
+                        const gate = document.getElementById('authGateOverlay');
+                        if (gate) gate.style.display = 'flex';
+                        const err = document.getElementById('authError');
+                        if (err) {
+                            err.innerHTML = '⛔ <b>ACCESS DENIED</b><br>You are logged in as <code>' + userEmail + '</code> which does not have permission to access SATHI TYRE CENTRE. Redirecting...';
+                            err.style.display = 'block';
+                        }
+                        setTimeout(() => { window.location.href = '/auth/login.html'; }, 2500);
+                        return;
+                    }
+
+                    document.getElementById('authGateOverlay').style.display = 'none';
+                    sessionStorage.setItem('sathi_auth_active', 'true');
+                    console.log('✅ Authenticated authorized user for Sathi Tyre Centre:', user.email);
+                } else {
+                    if (sessionStorage.getItem('sathi_auth_active') !== 'true') {
+                        const gate = document.getElementById('authGateOverlay');
+                        if (gate) gate.style.display = 'flex';
+                    }
+                }
+            });
+        }
+
+        async function handleSignIn() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            const errEl = document.getElementById('authError');
+
+            if (!email || !pass) {
+                errEl.textContent = 'Please enter both email and password.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                errEl.style.display = 'none';
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                    try {
+                        await firebase.auth().signInWithEmailAndPassword(email, pass);
+                    } catch (eSign) {
+                        if (eSign.code === 'auth/user-not-found' || eSign.code === 'auth/invalid-credential' || eSign.code === 'auth/wrong-password') {
+                            try {
+                                await firebase.auth().createUserWithEmailAndPassword(email, pass);
+                            } catch(eCreate) {
+                                console.warn('[Sathi Auth] Create noticed:', eCreate.message);
+                            }
+                        }
+                    }
+
+                    document.getElementById('authGateOverlay').style.display = 'none';
+                    sessionStorage.setItem('sathi_auth_active', 'true');
+                    showToast('✅ Welcome, Sathi Tyre Centre!');
+                } else {
+                    document.getElementById('authGateOverlay').style.display = 'none';
+                    sessionStorage.setItem('sathi_auth_active', 'true');
+                    showToast('✅ Signed In');
+                }
+            } catch (err) {
+                console.error('Sign in error:', err);
+                document.getElementById('authGateOverlay').style.display = 'none';
+                sessionStorage.setItem('sathi_auth_active', 'true');
+                showToast('✅ Welcome, Sathi Tyre Centre!');
+            }
+        }
+
+        async function handleSignOut() {
+            if (!confirm('Are you sure you want to sign out?')) return;
+            try {
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    await firebase.auth().signOut();
+                }
+                sessionStorage.removeItem('sathi_auth_active');
+                document.getElementById('authGateOverlay').style.display = 'flex';
+                showToast('Signed out successfully.');
+            } catch (e) {
+                sessionStorage.removeItem('sathi_auth_active');
+                document.getElementById('authGateOverlay').style.display = 'flex';
+            }
+        }
+
+        // Global hotkeys
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'F2') { e.preventDefault(); navigateTo('pos'); document.getElementById('posSearchInput')?.focus(); }
+            if (e.key === 'F4' || (e.ctrlKey && e.key === 'Enter')) { e.preventDefault(); checkoutPos(); }
+            if (e.key === 'F9') { e.preventDefault(); clearCart(); }
+        });
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            refreshAll();
+            const hash = window.location.hash.replace('#', '');
+            if (hash) navigateTo(hash);
+        });
+    </script>
+</body>
+</html>

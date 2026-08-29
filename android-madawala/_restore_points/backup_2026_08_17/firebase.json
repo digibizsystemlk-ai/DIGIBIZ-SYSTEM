@@ -1,0 +1,122 @@
+{
+  "functions": {
+    "source": "functions"
+  },
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/modules/retail/purchases.html",
+        "destination": "/modules/retail/grn.html",
+        "type": 301
+      },
+      {
+        "source": "/modules/tire_centre/purchases.html",
+        "destination": "/modules/tire_centre/grn.html",
+        "type": 301
+      },
+      {
+        "source": "/v/:id",
+        "destination": "/view-bill.html?id=:id",
+        "type": 301
+      },
+      {
+        "source": "/a/:s/:b",
+        "destination": "/advance-history.html?sup=:s&bid=:b",
+        "type": 301
+      },
+      {
+        "source": "/l/:id",
+        "destination": "/loan-history.html?hl=:id",
+        "type": 301
+      },
+      {
+        "source": "/wl/:id",
+        "destination": "/view-weekly-loan.html?id=:id",
+        "type": 301
+      },
+      {
+        "source": "/dl/:id",
+        "destination": "/view-daily-loan.html?id=:id",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/v2026_08_11/**",
+        "destination": "/snapshots/STABLE_FREEZE_2026_08_11/**"
+      },
+      {
+        "source": "/v_2026_08_11/**",
+        "destination": "/snapshots/STABLE_FREEZE_2026_08_11/**"
+      },
+      {
+        "source": "/distributor-repapp",
+        "destination": "/modules/distributor/web/distributor-repapp.html"
+      },
+      {
+        "source": "/distributor-refapp",
+        "destination": "/modules/distributor/web/distributor-repapp.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "SAMEORIGIN"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Strict-Transport-Security",
+            "value": "max-age=31536000; includeSubDomains; preload"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "geolocation=(self), microphone=(), camera=()"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <script src="/sunrose/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Transactions Hub — Coconut Wholesale & Husk Products</title>
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
+    <script src="/sunrose/core/firebase-init.js?v=100"></script>
+    <script src="/sunrose/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/sunrose/core/event-validation.js?v=4"></script>
+    <script src="/sunrose/core/event-bus.js?v=4"></script>
+    <script src="/sunrose/core/accounts-core.js?v=4"></script>
+    <script src="/sunrose/core/auth-roles.js?v=2265"></script>
+    <script src="/sunrose/core/business-types.js?v=83"></script>
+    <script src="/sunrose/core/aggregate-utils.js"></script>
+    <script src="/sunrose/core/dashboard-core.js?v=2265"></script>
+    <script src="/sunrose/core/subscription-manager.js?v=4"></script>
+    <script src="/sunrose/core/sidebar.js?v=2116"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="coconut.css">
+    <script src="coconut-common.js?v=84"></script>
+    <style>
+        .tx-filters-bar {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 18px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: flex-end;
+        }
+        .tx-stream-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 14px;
+        }
+        .tx-tab-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .tx-tab-chip:hover {
+            background: #f1f5f9;
+            color: #0f3b2c;
+        }
+        .tx-tab-chip.active {
+            background: #0f3b2c;
+            color: #ffffff;
+            border-color: #0f3b2c;
+            box-shadow: 0 4px 10px rgba(15, 59, 44, 0.2);
+        }
+        .tx-kpi-ribbon {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        .tx-kpi-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 18px 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+        .tx-kpi-lbl {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        .tx-kpi-val {
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .action-btn-group {
+            display: inline-flex;
+            gap: 4px;
+        }
+        @media (max-width: 900px) {
+            .tx-kpi-ribbon { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .tx-kpi-ribbon { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="c-container">
+        <!-- Header -->
+        <div class="c-header">
+            <div class="c-header-left">
+                <h1>📑 දෛනික ගනුදෙනු ලේඛනය (Daily Transactions Hub)</h1>
+                <p>Consolidated daily audit ledger across procurement, sales, production, expenses, payments & bank movements with full rollback & reversal.</p>
+            </div>
+            <div class="c-header-actions">
+                <a href="accounting.html" class="c-btn c-btn-accent">📁 General Ledger & Financials</a>
+                <button type="button" class="c-btn c-btn-secondary" id="btnPrintDailyReport">🖨️ Print Daily Sheet</button>
+            </div>
+        </div>
+
+        <!-- KPI Performance Ribbon -->
+        <div class="tx-kpi-ribbon">
+            <div class="tx-kpi-card">
+                <div class="tx-kpi-lbl">Total Inflow (ලැබීම් / ආදායම්)</div>
+                <div class="tx-kpi-val" id="kpiTotalInflow" style="color:#059669;">Rs. 0.00</div>
+            </div>
+            <div class="tx-kpi-card">
+                <div class="tx-kpi-lbl">Total Outflow (ගෙවීම් / වියදම්)</div>
+                <div class="tx-kpi-val" id="kpiTotalOutflow" style="color:#dc2626;">Rs. 0.00</div>
+            </div>
+            <div class="tx-kpi-card">
+                <div class="tx-kpi-lbl">Net Cash Flow (ශුද්ධ මුදල් ප්‍රවාහය)</div>
+                <div class="tx-kpi-val" id="kpiNetCashFlow" style="color:#0f3b2c;">Rs. 0.00</div>
+            </div>
+            <div class="tx-kpi-card">
+                <div class="tx-kpi-lbl">Active Transactions</div>
+                <div class="tx-kpi-val" id="kpiTxCount" style="color:#0284c7;">0</div>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="tx-filters-bar">
+            <div class="c-form-group" style="width:160px;">
+                <label>දිනය (Date Range)</label>
+                <select id="datePresetFilter" class="c-select">
+                    <option value="TODAY">Today (අද)</option>
+                    <option value="YESTERDAY">Yesterday (ඊයේ)</option>
+                    <option value="THIS_WEEK">This Week</option>
+                    <option value="THIS_MONTH" selected>This Month (මෙම මස)</option>
+                    <option value="CUSTOM">Custom Date...</option>
+                </select>
+            </div>
+            <div class="c-form-group" id="customDateGroup" style="display:none; width:150px;">
+                <label>Start Date</label>
+                <input type="date" id="filterStartDate" class="c-input">
+            </div>
+            <div class="c-form-group" id="customDateEndGroup" style="display:none; width:150px;">
+                <label>End Date</label>
+                <input type="date" id="filterEndDate" class="c-input">
+            </div>
+
+            <div class="c-form-group" style="width:150px;">
+                <label>Payment Method</label>
+                <select id="paymentFilter" class="c-select">
+                    <option value="ALL">All Modes</option>
+                    <option value="CASH">Cash (අත්පිට)</option>
+                    <option value="BANK">Bank Transfer</option>
+                    <option value="CHEQUE">Cheque</option>
+                    <option value="CREDIT">Credit (ණයට)</option>
+                </select>
+            </div>
+
+            <div class="c-form-group" style="flex:1; min-width:200px;">
+                <label>Search Keyword</label>
+                <input type="text" id="searchTxInput" class="c-input" placeholder="Search reference, party name, item, or notes...">
+            </div>
+
+            <button type="button" class="c-btn c-btn-primary" id="btnRefreshTx" style="height:38px;">
+                🔄 Refresh
+            </button>
+        </div>
+
+        <!-- Stream Tabs -->
+        <div class="tx-stream-tabs">
+            <button type="button" class="tx-tab-chip active" data-stream="ALL">🌐 All Transactions (සියල්ල)</button>
+            <button type="button" class="tx-tab-chip" data-stream="COCONUT_PURCHASE">🥥 Coconut Purchases</button>
+            <button type="button" class="tx-tab-chip" data-stream="HUSK_PURCHASE">🟤 Husk Purchases</button>
+            <button type="button" class="tx-tab-chip" data-stream="SALE">🛒 Sales Invoices</button>
+            <button type="button" class="tx-tab-chip" data-stream="PRODUCTION">🏭 Production Runs</button>
+            <button type="button" class="tx-tab-chip" data-stream="EXPENSE">🧾 Operational Expenses</button>
+            <button type="button" class="tx-tab-chip" data-stream="PAYMENT">💳 Debt Payments & Receipts</button>
+            <button type="button" class="tx-tab-chip" data-stream="ADVANCE_PAYROLL">⏱️ Staff Advances & Payroll</button>
+            <button type="button" class="tx-tab-chip" data-stream="BANKING">💰 Bank Transfers</button>
+        </div>
+
+        <!-- Transactions Master Table -->
+        <div class="c-card">
+            <div class="c-table-wrapper">
+                <table class="c-table">
+                    <thead>
+                        <tr>
+                            <th style="width:130px;">Date & Time</th>
+                            <th style="width:140px;">Type / Stream</th>
+                            <th>Reference / ID</th>
+                            <th>Party / Particulars</th>
+                            <th>Mode</th>
+                            <th class="text-right" style="width:120px;">Outflow (Dr)</th>
+                            <th class="text-right" style="width:120px;">Inflow (Cr)</th>
+                            <th style="text-align:center; width:110px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="txTableBody">
+                        <tr><td colspan="8" class="text-center" style="padding:28px;">Loading transactions ledger...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- 1. Transaction Details View Modal -->
+    <div class="c-modal-overlay" id="viewTxModal">
+        <div class="c-modal" style="max-width:650px;">
+            <div class="c-modal-header">
+                <h3 id="viewTxTitle">🔍 Transaction Details</h3>
+                <button type="button" class="c-modal-close" id="btnCloseViewModal">×</button>
+            </div>
+            <div id="viewTxContent" style="padding:10px 0; font-size:13.5px;">
+                <!-- Filled dynamically -->
+            </div>
+            <div class="c-modal-footer">
+                <button type="button" class="c-btn c-btn-secondary" id="btnCloseViewBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Universal Edit Transaction Modal -->
+    <div class="c-modal-overlay" id="editTxModal">
+        <div class="c-modal" style="max-width:550px;">
+            <div class="c-modal-header">
+                <h3 id="editTxTitle">✏️ Edit Transaction Record</h3>
+                <button type="button" class="c-modal-close" id="btnCloseEditModal">×</button>
+            </div>
+            <form id="editTxForm">
+                <input type="hidden" id="editTxStream">
+                <input type="hidden" id="editTxDocId">
+
+                <div class="c-form-row">
+                    <div class="c-form-group">
+                        <label>Date *</label>
+                        <input type="date" id="editTxDate" class="c-input" required>
+                    </div>
+                    <div class="c-form-group">
+                        <label>Payment Mode *</label>
+                        <select id="editTxPaymentMode" class="c-select" required>
+                            <option value="CASH">Cash in Drawer</option>
+                            <option value="BANK">Bank Account</option>
+                            <option value="CHEQUE">Cheque</option>
+                            <option value="CREDIT">Credit</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="editDynamicFields">
+                    <!-- Quantity, Unit Cost, Amount fields rendered based on stream -->
+                </div>
+
+                <div class="c-form-group" style="margin-bottom:14px;">
+                    <label>Description / Notes</label>
+                    <input type="text" id="editTxNotes" class="c-input" placeholder="Transaction notes or memo...">
+                </div>
+
+                <div class="c-modal-footer">
+                    <button type="button" class="c-btn c-btn-secondary" id="btnCancelEdit">Cancel</button>
+                    <button type="submit" class="c-btn c-btn-primary" id="btnSaveEditTx">💾 Save Changes & Sync GL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="daily-transactions.js"></script>
+</body>
+</html>

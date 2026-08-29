@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Salary & Earnings Hub — DIGIBIZ Distributor</title>
+    <style>
+        html.digibiz-sidebar-reserved body { margin-left: 260px; }
+        @media (max-width: 768px) { html.digibiz-sidebar-reserved body { margin-left: 0; } }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="/snapshots/SUNROSE/core/pwa-init.js?v=100"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="/snapshots/SUNROSE/core/firebase-init.js?v=100"></script>
+    <script src="/snapshots/SUNROSE/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/snapshots/SUNROSE/core/auth-roles.js?v=2265"></script>
+    <script src="/snapshots/SUNROSE/core/business-types.js?v=100"></script>
+    <script src="/snapshots/SUNROSE/core/aggregate-utils.js"></script>
+    <script src="/snapshots/SUNROSE/core/dashboard-core.js?v=2265"></script>
+    <script src="/snapshots/SUNROSE/core/sidebar.js?v=2116"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #064e3b;
+            --primary-light: #10b981;
+            --accent: #047857;
+            --text-dark: #0f172a;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --bg-page: #f8fafc;
+            --shadow: 0 4px 14px rgba(6, 78, 59, 0.06);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .page {
+            padding: 24px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 0 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        p.desc {
+            font-size: 13px;
+            color: var(--text-light);
+            margin: 0;
+            font-weight: 500;
+        }
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border-left: 4px solid var(--primary-light);
+        }
+        .kpi-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .kpi-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-top: 4px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 3px 8px rgba(6,78,59,0.18);
+        }
+        .btn-primary:hover { opacity: 0.95; transform: translateY(-1px); }
+        .btn-outline {
+            background: white;
+            color: var(--text-dark);
+            border: 1.5px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-outline:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: left;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            font-size: 10.5px;
+            letter-spacing: 0.05em;
+        }
+        tr.staff-row {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        tr.staff-row:hover {
+            background: #f0fdf4 !important;
+        }
+        .staff-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .formula-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 800;
+        }
+        .pill-profit { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .pill-sales { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .pill-fixed { background: #fdf4ff; color: #86198f; border: 1px solid #f5d0fe; }
+        .pill-hybrid { background: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 15px;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            animation: modalIn 0.2s ease-out;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #334155;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #0f172a;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #064e3b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            display: none;
+            z-index: 10000;
+            font-size: 13.5px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<div class="page">
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+        <div>
+            <h1>💰 Staff Salary & Earnings Hub</h1>
+            <p class="desc">Configure remuneration models (% of Net Profit, % of Sales, Fixed Salary, Hybrid) & monitor daily staff earnings.</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <a href="/modules/company/staff.html" class="btn-outline" style="text-decoration:none;"><i class="fa-solid fa-user-plus"></i> Staff Directory</a>
+            <a href="/modules/distributor/web/revenue.html" class="btn-outline" style="text-decoration:none;"><i class="fa-solid fa-chart-line" style="color:#10b981;"></i> Revenue & Profit</a>
+            <button type="button" onclick="loadStaffAndPerformance()" class="btn-outline"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+        </div>
+    </div>
+
+    <!-- Summary KPIs -->
+    <div class="kpi-row">
+        <div class="kpi-card" style="border-left-color:#10b981;">
+            <div class="kpi-title">Today Staff Earnings (අද දින වැටුප්/කොමිස්)</div>
+            <div class="kpi-val" id="kpiTodayEarnings" style="color:#065f46;">Rs. 0.00</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#3b82f6;">
+            <div class="kpi-title">This Month Staff Payout (මෙම මස මුළු වැටුප්)</div>
+            <div class="kpi-val" id="kpiMonthEarnings" style="color:#1e40af;">Rs. 0.00</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#f59e0b;">
+            <div class="kpi-title">Total Gross Margin Generated (උපයාදුන් දළ ලාභය)</div>
+            <div class="kpi-val" id="kpiMonthProfit" style="color:#b45309;">Rs. 0.00</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#8b5cf6;">
+            <div class="kpi-title">Active Reps / Staff (කාර්ය මණ්ඩලය)</div>
+            <div class="kpi-val" id="kpiStaffCount" style="color:#6d28d9;">0</div>
+        </div>
+    </div>
+
+    <!-- Main Staff Remuneration Table -->
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <div style="font-weight:800; font-size:16px; color:#064e3b; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-users" style="color:#10b981;"></i> Staff Remuneration & Performance Roster
+            </div>
+            <div style="font-size:12px; color:#64748b; font-weight:600;">
+                💡 <em>Click any staff member's row to view their full daily performance history.</em>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Staff Member / Rep</th>
+                        <th>Assigned Role</th>
+                        <th>Salary / Commission Formula</th>
+                        <th style="text-align:right;">Today Sales</th>
+                        <th style="text-align:right;">Today Earned</th>
+                        <th style="text-align:right;">This Month Earned</th>
+                        <th style="text-align:center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="staffSalaryTableBody">
+                    <tr><td colspan="7" style="text-align:center; padding:35px; color:#94a3b8; font-weight:600;"><i class="fa-solid fa-spinner fa-spin"></i> Loading staff remuneration data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Configure Formula Modal -->
+<div id="configSalaryModal" class="modal">
+    <div class="modal-content" style="max-width:540px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #f1f5f9; padding-bottom:12px; margin-bottom:16px;">
+            <div>
+                <h3 style="margin:0; font-family:'Outfit',sans-serif; font-size:18px; font-weight:800; color:#064e3b;">⚙️ Configure Remuneration Formula</h3>
+                <div id="modalStaffSubTitle" style="font-size:12px; font-weight:600; color:#64748b; margin-top:2px;"></div>
+            </div>
+            <button type="button" onclick="closeConfigModal()" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; font-weight:800; color:#64748b;">✕</button>
+        </div>
+
+        <form id="salaryConfigForm" onsubmit="saveSalaryConfig(event)">
+            <input type="hidden" id="configStaffId">
+
+            <div class="form-group">
+                <label for="remunerationModelSelect">Remuneration Model (වැටුප් / කොමිස් මාදිලිය)</label>
+                <select id="remunerationModelSelect" onchange="toggleFormulaInputs()" required>
+                    <option value="PROFIT_COMMISSION">🎯 Net Profit Commission (% of Realized Margin / ශුද්ධ ලාභයෙන් %)</option>
+                    <option value="SALES_COMMISSION">🛒 Sales Turnover Commission (% of Invoiced Sales / විකුණුම් වලින් %)</option>
+                    <option value="HYBRID">⭐ Hybrid (Fixed Daily Base + % Commission / ස්ථාවර දීමනාව + %)</option>
+                    <option value="FIXED_SALARY">🏢 Fixed Monthly Salary (ස්ථාවර මාසික වැටුප)</option>
+                </select>
+            </div>
+
+            <div id="profitInputGroup" class="form-group">
+                <label for="profitRateInput">Commission Rate from Net Profit (%)</label>
+                <div style="position:relative;">
+                    <input type="number" id="profitRateInput" step="0.1" min="0" max="100" placeholder="e.g. 10">
+                    <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-weight:800; color:#64748b;">%</span>
+                </div>
+                <div style="font-size:11px; color:#64748b; margin-top:4px;">Distributor standard: 10% – 15% of Realized Gross Profit.</div>
+            </div>
+
+            <div id="salesInputGroup" class="form-group" style="display:none;">
+                <label for="salesRateInput">Commission Rate from Sales Turnover (%)</label>
+                <div style="position:relative;">
+                    <input type="number" id="salesRateInput" step="0.1" min="0" max="100" placeholder="e.g. 2.5">
+                    <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-weight:800; color:#64748b;">%</span>
+                </div>
+            </div>
+
+            <div id="dailyAllowanceGroup" class="form-group" style="display:none;">
+                <label for="dailyAllowanceInput">Fixed Daily Base / Allowance (LKR / Day)</label>
+                <input type="number" id="dailyAllowanceInput" step="10" min="0" placeholder="e.g. 500.00">
+            </div>
+
+            <div id="monthlySalaryGroup" class="form-group" style="display:none;">
+                <label for="monthlySalaryInput">Fixed Monthly Salary (LKR / Month)</label>
+                <input type="number" id="monthlySalaryInput" step="100" min="0" placeholder="e.g. 45000.00">
+            </div>
+
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:12px; font-size:12.5px; color:#166534; margin-bottom:16px;">
+                <i class="fa-solid fa-circle-info"></i> <strong>Live Sync:</strong> මෙම සැකසුම අනුව Rep App එකෙහි අදාළ Rep හට දෛනිකව ගොඩනැගෙන ඔහුගේ ආදායම real-time සජීවීව පෙන්වනු ඇත.
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="closeConfigModal()" class="btn-outline">Cancel</button>
+                <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Save Formula</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Daily Performance History Modal -->
+<div id="historyModal" class="modal">
+    <div class="modal-content" style="max-width:760px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #f1f5f9; padding-bottom:12px; margin-bottom:16px;">
+            <div>
+                <h3 id="historyModalStaffName" style="margin:0; font-family:'Outfit',sans-serif; font-size:19px; font-weight:800; color:#064e3b;">Staff Performance History</h3>
+                <div id="historyModalFormulaBadge" style="margin-top:4px;"></div>
+            </div>
+            <button type="button" onclick="closeHistoryModal()" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; font-weight:800; color:#64748b;">✕</button>
+        </div>
+
+        <!-- History Summary Cards -->
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:16px;">
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; text-align:center;">
+                <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase;">Total Invoiced Sales</div>
+                <div id="histSummarySales" style="font-size:17px; font-weight:900; color:#0f172a; margin-top:2px;">Rs. 0.00</div>
+            </div>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; text-align:center;">
+                <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase;">Gross Profit Generated</div>
+                <div id="histSummaryProfit" style="font-size:17px; font-weight:900; color:#b45309; margin-top:2px;">Rs. 0.00</div>
+            </div>
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:12px; text-align:center;">
+                <div style="font-size:10.5px; font-weight:800; color:#166534; text-transform:uppercase;">Total Staff Earned</div>
+                <div id="histSummaryEarned" style="font-size:17px; font-weight:900; color:#065f46; margin-top:2px;">Rs. 0.00</div>
+            </div>
+        </div>
+
+        <!-- Daily Ledger Table -->
+        <div style="max-height:380px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:12px;">
+            <table>
+                <thead style="position:sticky; top:0; z-index:10;">
+                    <tr>
+                        <th>Date</th>
+                        <th style="text-align:center;">Orders</th>
+                        <th style="text-align:right;">Sales (Rs)</th>
+                        <th style="text-align:right;">Profit Gen (Rs)</th>
+                        <th style="text-align:right;">Staff Earned (Rs)</th>
+                    </tr>
+                </thead>
+                <tbody id="histTableBody">
+                    <!-- Dynamic rows -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px;">
+            <button type="button" id="histEditConfigBtn" class="btn-outline" style="color:#047857; font-weight:700;"><i class="fa-solid fa-gear"></i> Edit Formula</button>
+            <button type="button" onclick="closeHistoryModal()" class="btn-outline">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentBusinessId = '';
+    let staffList = [];
+    let ordersList = [];
+    let salaryConfigs = {};
+    const fmt = (v) => `Rs. ${(Number(v) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        if (!t) return;
+        t.textContent = msg;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    function parseOrderDate(o) {
+        if (!o) return null;
+        if (o.orderDate && typeof o.orderDate.toDate === 'function') return o.orderDate.toDate();
+        if (o.createdAt && typeof o.createdAt.toDate === 'function') return o.createdAt.toDate();
+        if (o.orderDate) { const d = new Date(o.orderDate); if (!isNaN(d.getTime())) return d; }
+        if (o.createdAt) { const d = new Date(o.createdAt); if (!isNaN(d.getTime())) return d; }
+        if (o.timestamp) { const d = new Date(o.timestamp); if (!isNaN(d.getTime())) return d; }
+        return null;
+    }
+
+    function calculateOrderProfit(o) {
+        const amt = Number(o.totalAmount || o.grandTotal || 0);
+        let cost = 0;
+        const items = Array.isArray(o.items) ? o.items : [];
+        items.forEach(it => {
+            const q = Number(it.orderedQty || it.qty || 0);
+            const p = Number(it.unitPrice || 0);
+            const c = Number(it.buyingPrice || it.unitCost || (p * 0.93));
+            cost += (q * c);
+        });
+        if (cost > 0 && cost < amt) return Math.max(0, amt - cost);
+        return amt * 0.07; // Default 7% distributor margin fallback
+    }
+
+    function calculateStaffDailyEarnings(config, daySales, dayProfit, ordersCount) {
+        if (!config) config = { salaryType: 'PROFIT_COMMISSION', profitCommissionRate: 10 };
+        const type = config.salaryType || 'PROFIT_COMMISSION';
+        let earned = 0;
+
+        if (type === 'PROFIT_COMMISSION') {
+            const rate = (Number(config.profitCommissionRate) || 10) / 100;
+            earned = dayProfit * rate;
+        } else if (type === 'SALES_COMMISSION') {
+            const rate = (Number(config.salesCommissionRate) || 2) / 100;
+            earned = daySales * rate;
+        } else if (type === 'HYBRID') {
+            const rate = (Number(config.profitCommissionRate) || 10) / 100;
+            const allowance = Number(config.fixedDailyAllowance) || 0;
+            earned = (dayProfit * rate) + (ordersCount > 0 ? allowance : 0);
+        } else if (type === 'FIXED_SALARY') {
+            const monthly = Number(config.fixedMonthlySalary) || 30000;
+            earned = ordersCount > 0 ? (monthly / 30) : 0;
+        }
+        return Math.max(0, Number(earned.toFixed(2)));
+    }
+
+    function getFormulaBadge(config) {
+        if (!config) config = { salaryType: 'PROFIT_COMMISSION', profitCommissionRate: 10 };
+        const type = config.salaryType || 'PROFIT_COMMISSION';
+
+        if (type === 'PROFIT_COMMISSION') {
+            return `<span class="formula-pill pill-profit"><i class="fa-solid fa-chart-pie"></i> ${config.profitCommissionRate || 10}% Net Profit</span>`;
+        } else if (type === 'SALES_COMMISSION') {
+            return `<span class="formula-pill pill-sales"><i class="fa-solid fa-percent"></i> ${config.salesCommissionRate || 2}% Sales</span>`;
+        } else if (type === 'HYBRID') {
+            return `<span class="formula-pill pill-hybrid"><i class="fa-solid fa-star"></i> Rs ${config.fixedDailyAllowance || 0} + ${config.profitCommissionRate || 10}% Profit</span>`;
+        } else if (type === 'FIXED_SALARY') {
+            return `<span class="formula-pill pill-fixed"><i class="fa-solid fa-building"></i> Fixed Rs ${Number(config.fixedMonthlySalary || 0).toLocaleString()}/mo</span>`;
+        }
+        return `<span class="formula-pill pill-profit">10% Profit</span>`;
+    }
+
+    async function loadStaffAndPerformance() {
+        const body = document.getElementById('staffSalaryTableBody');
+        if (!currentBusinessId) return;
+
+        try {
+            // 1. Fetch Staff Members from businesses subcollection & users
+            const sSnap = await db.collection('businesses').doc(currentBusinessId).collection('users').get().catch(() => ({ docs: [] }));
+            staffList = sSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            if (staffList.length === 0) {
+                const uSnap = await db.collection('users').where('businessId', '==', currentBusinessId).get().catch(() => ({ docs: [] }));
+                staffList = uSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            }
+
+            // 2. Fetch Salary Configs
+            const cfgSnap = await db.collection('staff_salary_config').doc(currentBusinessId).collection('members').get().catch(() => ({ docs: [] }));
+            salaryConfigs = {};
+            cfgSnap.docs.forEach(d => { salaryConfigs[d.id] = d.data(); });
+
+            // 3. Fetch Orders
+            const oSnap = await db.collection('orders').where('businessId', '==', currentBusinessId).get().catch(() => ({ docs: [] }));
+            ordersList = oSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            renderStaffTable();
+        } catch (e) {
+            console.error('Error loading staff salary data:', e);
+            if (body) body.innerHTML = '<tr><td colspan="7" style="color:#ef4444; text-align:center; padding:20px;">Failed to load data. Please refresh.</td></tr>';
+        }
+    }
+
+    function renderStaffTable() {
+        const body = document.getElementById('staffSalaryTableBody');
+        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Colombo' });
+        const curMonthStr = todayStr.substring(0, 7);
+
+        let overallTodayEarnings = 0;
+        let overallMonthEarnings = 0;
+        let overallMonthProfit = 0;
+
+        // Group orders by rep email / staff ID
+        const repOrdersMap = {};
+        ordersList.forEach(o => {
+            const st = String(o.status || '').toLowerCase();
+            if (st === 'cancelled' || st === 'rejected') return;
+
+            const repEmail = String(o.repEmail || '').toLowerCase().trim();
+            const repId = o.repId || repEmail;
+            const dt = parseOrderDate(o);
+            const dtStr = dt ? dt.toLocaleDateString('en-CA', { timeZone: 'Asia/Colombo' }) : '';
+            const amt = Number(o.totalAmount || o.grandTotal || 0);
+            const profit = calculateOrderProfit(o);
+
+            const keys = [repEmail, repId, o.repName].filter(Boolean);
+            keys.forEach(k => {
+                if (!repOrdersMap[k]) repOrdersMap[k] = [];
+                repOrdersMap[k].push({ ...o, _dtStr: dtStr, _profit: profit, _amt: amt });
+            });
+        });
+
+        const rowsHtml = staffList.map(s => {
+            const staffId = s.id;
+            const staffEmail = String(s.email || '').toLowerCase().trim();
+            const staffName = s.displayName || s.name || staffEmail || 'Staff Member';
+            const staffRole = String(s.role || 'REP').toUpperCase();
+            const config = salaryConfigs[staffId] || salaryConfigs[staffEmail] || { salaryType: 'PROFIT_COMMISSION', profitCommissionRate: 10 };
+
+            // Find orders for this staff
+            const sOrders = repOrdersMap[staffEmail] || repOrdersMap[staffId] || [];
+
+            // Group by day for accurate daily calculations
+            const daysMap = {};
+            sOrders.forEach(ord => {
+                if (!daysMap[ord._dtStr]) daysMap[ord._dtStr] = { sales: 0, profit: 0, count: 0 };
+                daysMap[ord._dtStr].sales += ord._amt;
+                daysMap[ord._dtStr].profit += ord._profit;
+                daysMap[ord._dtStr].count++;
+            });
+
+            let todaySales = 0;
+            let todayEarned = 0;
+            let monthEarned = 0;
+
+            Object.keys(daysMap).forEach(dStr => {
+                const dayData = daysMap[dStr];
+                const dayEarned = calculateStaffDailyEarnings(config, dayData.sales, dayData.profit, dayData.count);
+
+                if (dStr === todayStr) {
+                    todaySales = dayData.sales;
+                    todayEarned = dayEarned;
+                    overallTodayEarnings += todayEarned;
+                }
+                if (dStr.startsWith(curMonthStr)) {
+                    monthEarned += dayEarned;
+                    overallMonthEarnings += dayEarned;
+                    overallMonthProfit += dayData.profit;
+                }
+            });
+
+            const initial = staffName.charAt(0).toUpperCase();
+
+            return `
+                <tr class="staff-row" onclick="openStaffHistoryModal('${staffId}')">
+                    <td>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="staff-avatar">${initial}</div>
+                            <div>
+                                <div style="font-weight:800; color:#0f172a; font-size:13.5px;">${staffName}</div>
+                                <div style="font-size:12px; color:#64748b;">${staffEmail}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span style="font-size:11px; font-weight:800; background:#f1f5f9; padding:3px 8px; border-radius:6px; color:#334155;">${staffRole}</span></td>
+                    <td>${getFormulaBadge(config)}</td>
+                    <td style="text-align:right; font-weight:700; color:#0f172a;">${fmt(todaySales)}</td>
+                    <td style="text-align:right; font-weight:900; color:#065f46;">${fmt(todayEarned)}</td>
+                    <td style="text-align:right; font-weight:900; color:#1e40af;">${fmt(monthEarned)}</td>
+                    <td style="text-align:center;" onclick="event.stopPropagation();">
+                        <div style="display:flex; gap:6px; justify-content:center;">
+                            <button type="button" class="btn-outline" style="padding:5px 10px; font-size:11.5px;" onclick="openStaffHistoryModal('${staffId}')" title="View Daily History">
+                                <i class="fa-solid fa-chart-simple"></i> History
+                            </button>
+                            <button type="button" class="btn-outline" style="padding:5px 10px; font-size:11.5px; color:#047857;" onclick="openConfigModal('${staffId}')" title="Configure Salary / Commission">
+                                <i class="fa-solid fa-gear"></i> Setup
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        if (body) {
+            body.innerHTML = rowsHtml || '<tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8; font-weight:600;">No staff members found. Add staff in Company &gt; Staff directory.</td></tr>';
+        }
+
+        // Update KPIs
+        document.getElementById('kpiTodayEarnings').textContent = fmt(overallTodayEarnings);
+        document.getElementById('kpiMonthEarnings').textContent = fmt(overallMonthEarnings);
+        document.getElementById('kpiMonthProfit').textContent = fmt(overallMonthProfit);
+        document.getElementById('kpiStaffCount').textContent = staffList.length;
+    }
+
+    window.openConfigModal = (staffId) => {
+        const staff = staffList.find(s => s.id === staffId);
+        if (!staff) return;
+
+        const config = salaryConfigs[staffId] || salaryConfigs[staff.email] || { salaryType: 'PROFIT_COMMISSION', profitCommissionRate: 10 };
+
+        document.getElementById('configStaffId').value = staffId;
+        document.getElementById('modalStaffSubTitle').textContent = `Staff: ${staff.displayName || staff.name || staff.email} (${staff.role || 'REP'})`;
+        document.getElementById('remunerationModelSelect').value = config.salaryType || 'PROFIT_COMMISSION';
+        document.getElementById('profitRateInput').value = config.profitCommissionRate != null ? config.profitCommissionRate : 10;
+        document.getElementById('salesRateInput').value = config.salesCommissionRate != null ? config.salesCommissionRate : 2;
+        document.getElementById('dailyAllowanceInput').value = config.fixedDailyAllowance || '';
+        document.getElementById('monthlySalaryInput').value = config.fixedMonthlySalary || '';
+
+        toggleFormulaInputs();
+        document.getElementById('configSalaryModal').style.display = 'flex';
+    };
+
+    window.closeConfigModal = () => {
+        document.getElementById('configSalaryModal').style.display = 'none';
+    };
+
+    function toggleFormulaInputs() {
+        const mode = document.getElementById('remunerationModelSelect').value;
+        document.getElementById('profitInputGroup').style.display = (mode === 'PROFIT_COMMISSION' || mode === 'HYBRID') ? 'block' : 'none';
+        document.getElementById('salesInputGroup').style.display = (mode === 'SALES_COMMISSION') ? 'block' : 'none';
+        document.getElementById('dailyAllowanceGroup').style.display = (mode === 'HYBRID') ? 'block' : 'none';
+        document.getElementById('monthlySalaryGroup').style.display = (mode === 'FIXED_SALARY') ? 'block' : 'none';
+    }
+
+    async function saveSalaryConfig(e) {
+        e.preventDefault();
+        const staffId = document.getElementById('configStaffId').value;
+        if (!staffId || !currentBusinessId) return;
+
+        const staff = staffList.find(s => s.id === staffId);
+        const mode = document.getElementById('remunerationModelSelect').value;
+        const configData = {
+            staffId: staffId,
+            staffEmail: staff ? staff.email : '',
+            staffName: staff ? (staff.displayName || staff.name || '') : '',
+            salaryType: mode,
+            profitCommissionRate: Number(document.getElementById('profitRateInput').value) || 0,
+            salesCommissionRate: Number(document.getElementById('salesRateInput').value) || 0,
+            fixedDailyAllowance: Number(document.getElementById('dailyAllowanceInput').value) || 0,
+            fixedMonthlySalary: Number(document.getElementById('monthlySalaryInput').value) || 0,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+            await db.collection('staff_salary_config').doc(currentBusinessId).collection('members').doc(staffId).set(configData, { merge: true });
+            
+            // Also store under staff doc for instant offline sync in Rep App
+            await db.collection('businesses').doc(currentBusinessId).collection('users').doc(staffId).set({
+                salaryConfig: configData
+            }, { merge: true }).catch(() => {});
+
+            salaryConfigs[staffId] = configData;
+            showToast('✅ Staff Remuneration Formula Saved!');
+            closeConfigModal();
+            renderStaffTable();
+        } catch (err) {
+            console.error('Error saving salary config:', err);
+            alert('Failed to save configuration: ' + err.message);
+        }
+    }
+
+    window.openStaffHistoryModal = (staffId) => {
+        const staff = staffList.find(s => s.id === staffId);
+        if (!staff) return;
+
+        const staffEmail = String(staff.email || '').toLowerCase().trim();
+        const config = salaryConfigs[staffId] || salaryConfigs[staffEmail] || { salaryType: 'PROFIT_COMMISSION', profitCommissionRate: 10 };
+
+        document.getElementById('historyModalStaffName').textContent = `📊 Daily Performance — ${staff.displayName || staff.name || staffEmail}`;
+        document.getElementById('historyModalFormulaBadge').innerHTML = getFormulaBadge(config);
+
+        document.getElementById('histEditConfigBtn').onclick = () => {
+            closeHistoryModal();
+            openConfigModal(staffId);
+        };
+
+        // Filter orders
+        const sOrders = ordersList.filter(o => {
+            const st = String(o.status || '').toLowerCase();
+            if (st === 'cancelled' || st === 'rejected') return false;
+            const rEm = String(o.repEmail || '').toLowerCase().trim();
+            return rEm === staffEmail || o.repId === staffId;
+        });
+
+        // Group by day
+        const daysMap = {};
+        sOrders.forEach(o => {
+            const dt = parseOrderDate(o);
+            const dtStr = dt ? dt.toLocaleDateString('en-CA', { timeZone: 'Asia/Colombo' }) : 'Unknown';
+            const amt = Number(o.totalAmount || o.grandTotal || 0);
+            const profit = calculateOrderProfit(o);
+
+            if (!daysMap[dtStr]) daysMap[dtStr] = { count: 0, sales: 0, profit: 0 };
+            daysMap[dtStr].count++;
+            daysMap[dtStr].sales += amt;
+            daysMap[dtStr].profit += profit;
+        });
+
+        const sortedDays = Object.keys(daysMap).sort((a, b) => b.localeCompare(a));
+
+        let totSales = 0;
+        let totProfit = 0;
+        let totEarned = 0;
+
+        const rowsHtml = sortedDays.map(dStr => {
+            const dData = daysMap[dStr];
+            const earned = calculateStaffDailyEarnings(config, dData.sales, dData.profit, dData.count);
+
+            totSales += dData.sales;
+            totProfit += dData.profit;
+            totEarned += earned;
+
+            return `
+                <tr>
+                    <td><strong>${dStr}</strong></td>
+                    <td style="text-align:center;"><span style="background:#f1f5f9; padding:2px 8px; border-radius:10px; font-weight:800; font-size:11px;">${dData.count} orders</span></td>
+                    <td style="text-align:right; font-weight:700;">${fmt(dData.sales)}</td>
+                    <td style="text-align:right; font-weight:800; color:#b45309;">${fmt(dData.profit)}</td>
+                    <td style="text-align:right; font-weight:900; color:#065f46;">${fmt(earned)}</td>
+                </tr>
+            `;
+        }).join('');
+
+        document.getElementById('histTableBody').innerHTML = rowsHtml || '<tr><td colspan="5" style="text-align:center; padding:24px; color:#94a3b8;">No orders recorded for this staff member yet.</td></tr>';
+        document.getElementById('histSummarySales').textContent = fmt(totSales);
+        document.getElementById('histSummaryProfit').textContent = fmt(totProfit);
+        document.getElementById('histSummaryEarned').textContent = fmt(totEarned);
+
+        document.getElementById('historyModal').style.display = 'flex';
+    };
+
+    window.closeHistoryModal = () => {
+        document.getElementById('historyModal').style.display = 'none';
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.firebase && firebase.auth) {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentBusinessId = (window.getActiveBusinessId && window.getActiveBusinessId()) ||
+                        localStorage.getItem('currentBusinessId') ||
+                        user.uid;
+                    loadStaffAndPerformance();
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

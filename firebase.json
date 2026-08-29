@@ -8,43 +8,78 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/*.apk"
     ],
     "cleanUrls": true,
     "trailingSlash": false,
     "redirects": [
       {
         "source": "/clients/chisathifamilyproducts",
-        "destination": "/clients/chisathifamily/",
+        "destination": "/clients/chisathifamily",
         "type": 301
       },
       {
         "source": "/clients/chisathifamilyproducts/**",
-        "destination": "/clients/chisathifamily/",
+        "destination": "/clients/chisathifamily",
         "type": 301
       },
       {
         "source": "/clients/chisathifamily/modules/**",
-        "destination": "/clients/chisathifamily/",
+        "destination": "/clients/chisathifamily",
+        "type": 301
+      },
+      {
+        "source": "/clients/darshanamadawala",
+        "destination": "/clients/madawalateashop",
+        "type": 301
+      },
+      {
+        "source": "/clients/darshanamadawala/**",
+        "destination": "/clients/madawalateashop",
         "type": 301
       }
     ],
     "rewrites": [
       {
+        "source": "/clients/chisathifamily",
+        "destination": "/clients/chisathifamily/index.html"
+      },
+      {
         "source": "/clients/chisathifamily/**",
         "destination": "/clients/chisathifamily/index.html"
+      },
+      {
+        "source": "/clients/sathityrecentre",
+        "destination": "/clients/sathityrecentre/index.html"
       },
       {
         "source": "/clients/sathityrecentre/**",
         "destination": "/clients/sathityrecentre/index.html"
       },
       {
+        "source": "/clients/madawalateashop",
+        "destination": "/clients/madawalateashop/index.html"
+      },
+      {
         "source": "/clients/madawalateashop/**",
         "destination": "/clients/madawalateashop/index.html"
       },
       {
+        "source": "/clients/thusithajayasundara",
+        "destination": "/clients/thusithajayasundara/index.html"
+      },
+      {
         "source": "/clients/thusithajayasundara/**",
         "destination": "/clients/thusithajayasundara/index.html"
+      },
+      {
+        "source": "/clients/spi_holdings",
+        "destination": "/clients/spi_holdings/index.html"
+      },
+      {
+        "source": "/clients/spi_holdings/**",
+        "destination": "/clients/spi_holdings/index.html"
       }
     ],
     "headers": [

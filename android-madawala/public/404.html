@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="utf-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>පිටුව හමු නොවීය (404) - DIGIBIZ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/core/dashboard-core.js?v=2265"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 36px 28px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            animation: fadeIn 0.4s ease-out;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-size: 13px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 800;
+            margin: 0 0 10px;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+        p {
+            font-size: 13.5px;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin: 0 0 24px;
+        }
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: #0f3b2c;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14.5px;
+            font-weight: 700;
+            border: 1px solid #166534;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 59, 44, 0.4);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background: #166534;
+        }
+        .btn-secondary {
+            display: block;
+            margin-top: 10px;
+            color: #94a3b8;
+            font-size: 12.5px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            padding: 8px;
+        }
+        .btn-secondary:hover {
+            color: #ffffff;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div style="font-size: 44px; margin-bottom: 12px;">🧭</div>
+        <div class="badge">404 • Page Not Found</div>
+        <h1>පිටුව හමු නොවීය</h1>
+        <p>ඔබ පිවිසීමට උත්සාහ කළ පිටුව වෙනස් කර හෝ ඉවත් කර ඇත. කරුණාකර ප්‍රධාන පුවරුව (Dashboard) වෙත පිවිසෙන්න.</p>
+        
+        <button id="btnSmartRedirect" class="btn-primary" type="button" onclick="smartRedirect()">
+            <span>🏠</span>
+            <span>ප්‍රධාන පුවරුවට යන්න (Go to Dashboard)</span>
+        </button>
+
+        <button class="btn-secondary" type="button" onclick="window.history.back()">
+            ↩ ආපසු යන්න (Go Back)
+        </button>
+    </div>
+
+    <script>
+        async function smartRedirect() {
+            try {
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    const user = firebase.auth().currentUser;
+                    if (user && window.dashboardCore) {
+                        const ctx = await window.dashboardCore.getContext(user);
+                        const url = window.dashboardCore.getVerticalDashboardUrl(ctx.businessType);
+                        window.location.href = url;
+                        return;
+                    }
+                }
+            } catch(e) {}
+            window.location.href = '/';
+        }
+
+        // Auto recovery after 3 seconds if logged in
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const btn = document.getElementById('btnSmartRedirect');
+                        if (btn) btn.innerHTML = '<span>⏳</span><span>ප්‍රධාන පුවරුවට යොමු කෙරේ...</span>';
+                        setTimeout(smartRedirect, 1500);
+                    } catch(e) {}
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="si">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Manage Products & Pricing — DIGIBIZ BILL</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#047857">
+
+    <style>
+        .swal2-container {
+            z-index: 9999999 !important;
+        }
+
+        html.digibiz-sidebar-reserved body {
+            margin-left: 260px;
+        }
+
+        @media (max-width: 768px) {
+            html.digibiz-sidebar-reserved body {
+                margin-left: 0;
+            }
+        }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <script src="/snapshots/ROYAL_ARABIAN/assets/vendor/sweetalert2.all.min.js"></script>
+
+    <!-- Firebase Compat SDKs -->
+    <script src="/snapshots/ROYAL_ARABIAN/assets/vendor/firebase-app-compat.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/assets/vendor/firebase-auth-compat.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/assets/vendor/firebase-firestore-compat.js"></script>
+
+    <!-- Core App Config & Sidebar -->
+    <script src="/snapshots/ROYAL_ARABIAN/core/firebase-init.js?v=200"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/pwa-init.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/scripts/admin-impersonation.js?v=200"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/aggregate-utils.js"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/auth-roles.js?v=2135"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/business-types.js?v=72"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/dashboard-core.js?v=2135"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/subscription-manager.js?v=120"></script>
+    <script src="/snapshots/ROYAL_ARABIAN/core/sidebar.js?v=2116"></script>
+
+    <style>
+        :root {
+            --primary: #047857;
+            --primary-dark: #064e3b;
+            --primary-light: #ecfdf5;
+            --accent: #10b981;
+            --bg-color: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Sinhala', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding-bottom: 80px;
+        }
+
+        /* Top Header */
+        .app-header {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: #ffffff;
+            padding: 14px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(6, 78, 59, 0.25);
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        .header-sub {
+            font-size: 11.5px;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 840px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            margin-bottom: 16px;
+        }
+
+        .top-action-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 220px;
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #ffffff;
+            color: var(--text-dark);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: #ffffff;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(4, 120, 87, 0.25);
+            transition: transform 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-outline {
+            background: #ffffff;
+            color: var(--primary-dark);
+            border: 1.5px solid var(--primary);
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Product List Grid / Cards */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .product-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .product-card:hover {
+            border-color: #86efac;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-name {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 8px;
+        }
+
+        .btn-sm-edit {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #86efac;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-sm-del {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 9999;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        .btn-close {
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 4px;
+        }
+
+        .stat-pill {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .digibiz-support-fab {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="header-row">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <a href="app.html" class="btn-outline"
+                    style="color:#fff; border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.15); padding:6px 10px; font-size:12px;">
+                    ⚡ Back to POS
+                </a>
+                <div>
+                    <div class="header-title">📦 Manage Products & Pricing</div>
+                    <div class="header-sub" id="bizSubtitle">Quick Billing Catalog</div>
+                </div>
+            </div>
+            <span class="stat-pill" id="totalCountPill">0 Products</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Top Action Bar -->
+        <div class="top-action-bar">
+            <div class="search-box">
+                <input type="text" id="searchInput" class="form-input" placeholder="🔍 Search product name..."
+                    oninput="handleSearch(this.value)">
+            </div>
+            <button type="button" class="btn-primary" onclick="openAddProductModal()">
+                ➕ Add New Product (නව භාණ්ඩයක්)
+            </button>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="productGridContainer" class="product-grid"></div>
+        <div id="emptyNotice"
+            style="display:none; text-align:center; padding:40px 10px; color:#64748b; font-size:14px; font-weight:700;">
+            📦 භාණ්ඩ කිසිවක් හමු නොවීය. ඉහළින් "Add New Product" ක්ලික් කර නව භාණ්ඩ එක් කරන්න.
+        </div>
+    </div>
+
+    <!-- Product Add / Edit Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span id="modalTitle">➕ Add New Product</span>
+                <button type="button" class="btn-close" onclick="closeProductModal()">✕</button>
+            </div>
+            <form id="productForm" onsubmit="handleSaveProduct(event)">
+                <input type="hidden" id="editProductId">
+                <div class="form-group">
+                    <label class="form-label">Product Name (භාණ්ඩයේ නම) *</label>
+                    <input type="text" id="prodNameInput" class="form-input" placeholder="e.g. Milk Powder 400g"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Price / මිල (Rs.) *</label>
+                    <input type="number" id="prodPriceInput" class="form-input" placeholder="0.00" min="0" step="any"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Unit / Unit of Measure (විකල්ප)</label>
+                    <input type="text" id="prodUnitInput" class="form-input" placeholder="e.g. pkt / kg / bottle / pcs">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn-outline" onclick="closeProductModal()"
+                        style="border-color:#cbd5e1; color:#475569;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary" id="btnSaveProduct">
+                        💾 Save Product (සුරකින්න)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let appCtx = null;
+        let allProducts = [];
+
+        async function resolveAppContext(user) {
+            let bid = localStorage.getItem('currentBusinessId') || localStorage.getItem('activeBusinessId') || (user ? user.uid : null);
+            let bName = localStorage.getItem('currentBusinessName') || localStorage.getItem('digibiz_qb_biz_name') || 'Quick Billing Catalog';
+
+            if (user && window.firebase && window.firebase.firestore) {
+                try {
+                    const db = window.firebase.firestore();
+                    const uDoc = await db.collection('users').doc(user.uid).get().catch(() => null);
+                    if (uDoc && uDoc.exists) {
+                        const uData = uDoc.data() || {};
+                        if (uData.businessId) bid = uData.businessId;
+                        if (uData.businessName) bName = uData.businessName;
+                    }
+                    if (bid && (!bName || bName === 'Quick Billing Catalog')) {
+                        const bDoc = await db.collection('businesses').doc(bid).get().catch(() => null);
+                        if (bDoc && bDoc.exists) {
+                            const bData = bDoc.data() || {};
+                            bName = bData.name || bData.businessName || bName;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Context resolve notice:', e);
+                }
+            }
+
+            if (user && window.dashboardCore) {
+                try {
+                    const coreCtx = await window.dashboardCore.getContext(user);
+                    if (coreCtx) {
+                        if (coreCtx.businessId) bid = coreCtx.businessId;
+                        if (coreCtx.businessName) bName = coreCtx.businessName;
+                    }
+                } catch (e) { }
+            }
+
+            appCtx = {
+                userId: user ? user.uid : (localStorage.getItem('digibiz_qb_uid') || 'local'),
+                businessId: bid || 'local',
+                businessName: bName
+            };
+
+            if (bid && bid !== 'local') {
+                localStorage.setItem('currentBusinessId', bid);
+                localStorage.setItem('digibiz_qb_uid', appCtx.userId);
+                localStorage.setItem('digibiz_qb_biz_name', bName);
+            }
+
+            const subtitleEl = document.getElementById('bizSubtitle');
+            if (subtitleEl && bName && bName !== 'Quick Billing Catalog') {
+                subtitleEl.textContent = bName;
+            }
+
+            return appCtx;
+        }
+
+        async function initPage() {
+            // 1. Initial cached context & products
+            await resolveAppContext(null);
+            loadProducts();
+
+            // 2. Auth listener
+            if (window.firebase && firebase.auth) {
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    await resolveAppContext(user);
+                    loadProducts();
+                });
+            }
+        }
+
+        function getScopedKey(key) {
+            const bId = (appCtx && appCtx.businessId && appCtx.businessId !== 'local') ? appCtx.businessId : (localStorage.getItem('currentBusinessId') || localStorage.getItem('activeBusinessId') || 'local');
+            return `digibiz_qb_${bId}_${key}`;
+        }
+
+        // ---- OFFLINE-FIRST SYNC HELPERS (mirrors app.js so POS & Products stay consistent) ----
+        function resolveBid() {
+            const bid = (appCtx && appCtx.businessId && appCtx.businessId !== 'local') ? appCtx.businessId : (localStorage.getItem('currentBusinessId') || localStorage.getItem('activeBusinessId'));
+            return (bid && bid !== 'local') ? bid : null;
+        }
+
+        function queueProductOfflineSync(item, bid) {
+            try {
+                let queue = [];
+                const raw = localStorage.getItem('digibiz_qb_pending_products');
+                if (raw) queue = JSON.parse(raw);
+                const filtered = queue.filter(q => q.id !== item.id && String(q.name || '').toLowerCase() !== String(item.name || '').toLowerCase());
+                filtered.push({ ...item, businessId: bid, queuedAt: Date.now() });
+                localStorage.setItem('digibiz_qb_pending_products', JSON.stringify(filtered));
+            } catch (e) { }
+        }
+
+        function removeFromPendingProductsQueue(itemId) {
+            try {
+                const raw = localStorage.getItem('digibiz_qb_pending_products');
+                if (!raw) return;
+                const queue = JSON.parse(raw).filter(q => q.id !== itemId);
+                localStorage.setItem('digibiz_qb_pending_products', JSON.stringify(queue));
+            } catch (e) { }
+        }
+
+        async function saveProductToRemote(item) {
+            const bid = resolveBid();
+            if (!bid) return;
+
+            // ALWAYS queue first -> guarantees persistence even if the network write fails
+            queueProductOfflineSync(item, bid);
+
+            if (navigator.onLine && window.firebase && window.firebase.firestore) {
+                try {
+                    const db = window.firebase.firestore();
+                    await db.collection('products').doc(bid).collection('list').doc(item.id).set({
+                        id: item.id,
+                        businessId: bid,
+                        name: item.name,
+                        price: Number(item.price) || 0,
+                        unitPrice: Number(item.price) || 0,
+                        stock: item.stock != null ? item.stock : 999,
+                        unit: item.unit || '',
+                        isActive: item.isActive !== false,
+                        updatedAt: new Date().toISOString()
+                    }, { merge: true });
+                    removeFromPendingProductsQueue(item.id);
+                } catch (e) {
+                    console.warn('[Products] queued for offline background sync:', e);
+                }
+            }
+        }
+
+        async function processPendingProductsQueue() {
+            if (!navigator.onLine || !window.firebase || !window.firebase.firestore) return;
+            const bid = resolveBid();
+            if (!bid) return;
+            try {
+                const raw = localStorage.getItem('digibiz_qb_pending_products');
+                if (!raw) return;
+                const queue = JSON.parse(raw);
+                if (!queue || !queue.length) return;
+
+                const db = window.firebase.firestore();
+                const remaining = [];
+                for (const p of queue) {
+                    const pBid = p.businessId || bid;
+                    if (pBid !== bid) { remaining.push(p); continue; }
+                    try {
+                        await db.collection('products').doc(pBid).collection('list').doc(p.id).set({
+                            id: p.id,
+                            businessId: pBid,
+                            name: p.name,
+                            price: Number(p.price) || 0,
+                            unitPrice: Number(p.price) || 0,
+                            stock: p.stock != null ? p.stock : 999,
+                            unit: p.unit || '',
+                            isActive: p.isActive !== false,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true });
+                    } catch (err) {
+                        remaining.push(p);
+                    }
+                }
+                localStorage.setItem('digibiz_qb_pending_products', JSON.stringify(remaining));
+            } catch (e) {
+                console.warn('Process product queue notice:', e);
+            }
+        }
+        // ---- END SYNC HELPERS ----
+
+        function mergeCatalogLists(localList, remoteList) {
+            if (!remoteList || !remoteList.length) {
+                return (localList || []).filter(i => i && i.name && i.name.trim().length > 0 && i.isActive !== false);
+            }
+
+            const map = new Map();
+            // 1. Remote items are authoritative
+            remoteList.forEach(item => {
+                if (item && item.name && item.name.trim().length > 0 && item.name !== 'Item' && item.isActive !== false) {
+                    const key = item.name.trim().toLowerCase();
+                    map.set(key, {
+                        id: item.id || `qb_prod_${Date.now()}`,
+                        name: item.name.trim(),
+                        price: Number(item.price != null ? item.price : (item.unitPrice != null ? item.unitPrice : 0)),
+                        unit: item.unit || '',
+                        stock: item.stock != null ? item.stock : 999,
+                        isActive: true
+                    });
+                }
+            });
+
+            // 2. Only preserve pending offline items
+            try {
+                const raw = localStorage.getItem('digibiz_qb_pending_products');
+                if (raw) {
+                    const queue = JSON.parse(raw);
+                    queue.forEach(item => {
+                        if (item && item.name && item.name.trim().length > 0 && item.isActive !== false) {
+                            const key = item.name.trim().toLowerCase();
+                            if (!map.has(key)) {
+                                map.set(key, item);
+                                if (navigator.onLine) {
+                                    saveProductToRemote(item);
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (e) { }
+
+            return Array.from(map.values());
+        }
+
+        async function loadProducts() {
+            const scopedKey = getScopedKey('catalog');
+            let raw = localStorage.getItem(scopedKey) || localStorage.getItem('digibiz_qb_catalog');
+            try {
+                allProducts = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                allProducts = [];
+            }
+
+            renderProducts(allProducts);
+
+            const bid = (appCtx && appCtx.businessId && appCtx.businessId !== 'local') ? appCtx.businessId : (localStorage.getItem('currentBusinessId') || localStorage.getItem('activeBusinessId'));
+
+            // Push any previously queued offline products first so they get read back below.
+            if (bid && bid !== 'local') {
+                await processPendingProductsQueue();
+            }
+
+            if (navigator.onLine && window.firebase && bid && bid !== 'local') {
+                const db = window.firebase.firestore();
+
+                try {
+                    let snap = await db.collection('products').doc(bid).collection('list').get().catch(() => null);
+                    let list = [];
+
+                    if (snap && !snap.empty) {
+                        snap.forEach(doc => {
+                            const d = doc.data();
+                            if (d.isActive !== false) {
+                                list.push({
+                                    id: doc.id,
+                                    name: d.name || d.productName || 'Item',
+                                    price: Number(d.unitPrice != null ? d.unitPrice : (d.price != null ? d.price : d.sellingPrice || 0)),
+                                    unit: d.unit || '',
+                                    isActive: true
+                                });
+                            }
+                        });
+                    }
+
+                    if (list.length === 0) {
+                        const rootSnap = await db.collection('products').where('businessId', '==', bid).get().catch(() => null);
+                        if (rootSnap && !rootSnap.empty) {
+                            rootSnap.forEach(doc => {
+                                const d = doc.data();
+                                if (d.isActive !== false) {
+                                    list.push({
+                                        id: doc.id,
+                                        name: d.name || d.productName || 'Item',
+                                        price: Number(d.unitPrice != null ? d.unitPrice : (d.price != null ? d.price : d.sellingPrice || 0)),
+                                        unit: d.unit || '',
+                                        isActive: true
+                                    });
+                                }
+                            });
+                        }
+                    }
+
+                    allProducts = mergeCatalogLists(allProducts, list);
+                    localStorage.setItem(scopedKey, JSON.stringify(allProducts));
+                    localStorage.setItem('digibiz_qb_catalog', JSON.stringify(allProducts));
+                    renderProducts(allProducts);
+
+                    // Attach realtime listener
+                    if (!window.__productsListenerAttached) {
+                        window.__productsListenerAttached = true;
+                        db.collection('products').doc(bid).collection('list').onSnapshot(liveSnap => {
+                            if (liveSnap && !liveSnap.empty) {
+                                const liveList = [];
+                                liveSnap.forEach(doc => {
+                                    const d = doc.data();
+                                    if (d.isActive !== false) {
+                                        liveList.push({
+                                            id: doc.id,
+                                            name: d.name || d.productName || 'Item',
+                                            price: Number(d.unitPrice != null ? d.unitPrice : (d.price != null ? d.price : d.sellingPrice || 0)),
+                                            unit: d.unit || '',
+                                            isActive: true
+                                        });
+                                    }
+                                });
+                                allProducts = mergeCatalogLists(allProducts, liveList);
+                                localStorage.setItem(scopedKey, JSON.stringify(allProducts));
+                                localStorage.setItem('digibiz_qb_catalog', JSON.stringify(allProducts));
+                                renderProducts(allProducts);
+                            }
+                        }, err => console.warn('Products live listener notice:', err));
+                    }
+                } catch (err) {
+                    console.warn('Firestore load warn:', err);
+                }
+            }
+        }
+
+        function renderProducts(items) {
+            const container = document.getElementById('productGridContainer');
+            const emptyEl = document.getElementById('emptyNotice');
+            const countPill = document.getElementById('totalCountPill');
+
+            if (countPill) countPill.textContent = `${items.length} Products`;
+
+            if (!items.length) {
+                container.innerHTML = '';
+                emptyEl.style.display = 'block';
+                return;
+            }
+
+            emptyEl.style.display = 'none';
+            container.innerHTML = items.map(item => `
+                <div class="product-card">
+                    <div>
+                        <div class="product-name">${escapeHtml(item.name)}</div>
+                        <div class="product-price">Rs. ${(Number(item.price) || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                        ${item.unit ? `<div style="font-size:11px; color:#64748b; font-weight:600; margin-bottom:8px;">Unit: ${escapeHtml(item.unit)}</div>` : ''}
+                    </div>
+                    <div class="product-actions">
+                        <button type="button" class="btn-sm-edit" onclick="openEditProductModal('${item.id}')">✏️ Edit</button>
+                        <button type="button" class="btn-sm-del" onclick="handleDeleteProduct('${item.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleSearch(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) {
+                renderProducts(allProducts);
+                return;
+            }
+            const filtered = allProducts.filter(p => (p.name || '').toLowerCase().includes(q));
+            renderProducts(filtered);
+        }
+
+        function openAddProductModal() {
+            document.getElementById('productForm').reset();
+            document.getElementById('editProductId').value = '';
+            document.getElementById('modalTitle').textContent = '➕ Add New Product';
+            document.getElementById('productModal').classList.add('open');
+            setTimeout(() => document.getElementById('prodNameInput').focus(), 150);
+        }
+
+        function openEditProductModal(id) {
+            const p = allProducts.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('editProductId').value = p.id;
+            document.getElementById('prodNameInput').value = p.name || '';
+            document.getElementById('prodPriceInput').value = p.price || 0;
+            document.getElementById('prodUnitInput').value = p.unit || '';
+            document.getElementById('modalTitle').textContent = '✏️ Edit Product';
+            document.getElementById('productModal').classList.add('open');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('open');
+        }
+
+        async function handleSaveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('editProductId').value;
+            const name = document.getElementById('prodNameInput').value.trim();
+            const price = Number(document.getElementById('prodPriceInput').value) || 0;
+            const unit = document.getElementById('prodUnitInput').value.trim();
+
+            if (!name) return;
+
+            let updatedItem;
+            if (id) {
+                const existing = allProducts.find(x => x.id === id);
+                if (existing) {
+                    existing.name = name;
+                    existing.price = price;
+                    existing.unit = unit;
+                    updatedItem = existing;
+                } else {
+                    // Edit was opened for an id that is no longer in the local list
+                    // (e.g. stale after a reload). Fall back to creating a new item so
+                    // the save never silently fails.
+                    updatedItem = {
+                        id: `ITEM_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+                        name,
+                        price,
+                        unit
+                    };
+                    allProducts.unshift(updatedItem);
+                }
+            } else {
+                updatedItem = {
+                    id: `ITEM_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+                    name,
+                    price,
+                    unit
+                };
+                allProducts.unshift(updatedItem);
+            }
+
+            const scopedKey = getScopedKey('catalog');
+            localStorage.setItem(scopedKey, JSON.stringify(allProducts));
+            localStorage.setItem('digibiz_qb_catalog', JSON.stringify(allProducts));
+            renderProducts(allProducts);
+            closeProductModal();
+
+            // Always queue -> survives offline/open failure AND syncs through the same
+            // pending queue used by the POS, so the item can never be dropped on a merge.
+            await saveProductToRemote(updatedItem);
+        }
+
+        async function handleDeleteProduct(id) {
+            if (typeof Swal !== 'undefined') {
+                const res = await Swal.fire({
+                    title: 'භාණ්ඩය ඉවත් කරන්නද?',
+                    text: 'මෙම භාණ්ඩය catalog එකෙන් ඉවත් කිරීමට අවශ්‍ය බව තහවුරු කරන්න.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'ඔව්, ඉවත් කරන්න',
+                    cancelButtonText: 'අවලංගු කරන්න'
+                });
+                if (!res.isConfirmed) return;
+            } else {
+                if (!confirm('මෙම භාණ්ඩය ඉවත් කරන්නද?')) return;
+            }
+
+            allProducts = allProducts.filter(x => x.id !== id);
+            const scopedKey = getScopedKey('catalog');
+            localStorage.setItem(scopedKey, JSON.stringify(allProducts));
+            localStorage.setItem('digibiz_qb_catalog', JSON.stringify(allProducts));
+            renderProducts(allProducts);
+
+            // Also remove from pending offline queue if present
+            try {
+                const raw = localStorage.getItem('digibiz_qb_pending_products');
+                if (raw) {
+                    const queue = JSON.parse(raw).filter(q => q.id !== id);
+                    localStorage.setItem('digibiz_qb_pending_products', JSON.stringify(queue));
+                }
+            } catch (e) { }
+
+            const bid = (appCtx && appCtx.businessId && appCtx.businessId !== 'local') ? appCtx.businessId : (localStorage.getItem('currentBusinessId') || localStorage.getItem('activeBusinessId'));
+
+            if (navigator.onLine && window.firebase && bid && bid !== 'local') {
+                try {
+                    const db = window.firebase.firestore();
+                    await db.collection('products').doc(bid).collection('list').doc(id).delete();
+                } catch (err) { console.warn('Delete product err:', err); }
+            }
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function openDiagnosticsModal() {
+            const bid = (appCtx && appCtx.businessId) ? appCtx.businessId : (localStorage.getItem('currentBusinessId') || 'NULL');
+            const bizName = (appCtx && appCtx.businessName) ? appCtx.businessName : (localStorage.getItem('digibiz_qb_biz_name') || 'NOT_RESOLVED');
+            const authUser = window.firebase && window.firebase.auth && window.firebase.auth().currentUser;
+            const authEmail = authUser ? authUser.email : (localStorage.getItem('digibiz_qb_email') || 'NO_AUTH_USER');
+            const authUid = authUser ? authUser.uid : (localStorage.getItem('digibiz_qb_uid') || 'NO_UID');
+
+            let pendingCount = 0;
+            try {
+                const rawP = localStorage.getItem('digibiz_qb_pending_products');
+                if (rawP) pendingCount = JSON.parse(rawP).length;
+            } catch(e) {}
+
+            const itemsSummary = (allProducts && allProducts.length > 0)
+                ? allProducts.map((item, idx) => `  ${idx + 1}. ${item.name} — Rs. ${Number(item.price).toFixed(2)} [ID: ${item.id}]`).join('\n')
+                : '  (No items in memory / 0 Items Loaded)';
+
+            const container = document.getElementById('diagTelemetryContent');
+            if (container) {
+                container.innerHTML = `
+                    <div style="background:#1e293b; border-radius:12px; padding:12px; margin-bottom:10px; border:1px solid #334155;">
+                        <div style="color:#38bdf8; font-weight:800; margin-bottom:6px;">📡 IDENTITY & AUTHENTICATION</div>
+                        <div>• <strong style="color:#94a3b8;">User Email:</strong> <span style="color:#4ade80;">${escapeHtml(authEmail)}</span></div>
+                        <div>• <strong style="color:#94a3b8;">Auth UID:</strong> <span style="color:#cbd5e1;">${escapeHtml(authUid)}</span></div>
+                        <div>• <strong style="color:#94a3b8;">Business ID:</strong> <span style="color:#fbbf24;">${escapeHtml(bid)}</span></div>
+                        <div>• <strong style="color:#94a3b8;">Business Name:</strong> <span style="color:#ffffff;">${escapeHtml(bizName)}</span></div>
+                    </div>
+                    <div style="background:#1e293b; border-radius:12px; padding:12px; margin-bottom:10px; border:1px solid #334155;">
+                        <div style="color:#38bdf8; font-weight:800; margin-bottom:6px;">📦 CATALOG & QUEUE</div>
+                        <div>• <strong style="color:#94a3b8;">Firestore Query Path:</strong> <span style="color:#cbd5e1;">products/${escapeHtml(bid)}/list</span></div>
+                        <div>• <strong style="color:#94a3b8;">Products in Memory:</strong> <span style="color:#38bdf8; font-weight:bold;">${allProducts.length}</span></div>
+                        <div>• <strong style="color:#94a3b8;">Offline Queue (Pending):</strong> <span style="color:#cbd5e1;">${pendingCount}</span></div>
+                    </div>
+                    <div style="background:#1e293b; border-radius:12px; padding:12px; border:1px solid #334155;">
+                        <div style="color:#38bdf8; font-weight:800; margin-bottom:4px;">📋 PRODUCTS LIST (${allProducts.length})</div>
+                        <pre style="margin:0; background:#0f172a; padding:8px; border-radius:8px; max-height:120px; overflow-y:auto; font-size:11.5px; color:#e2e8f0; white-space:pre-wrap;">${escapeHtml(itemsSummary)}</pre>
+                    </div>
+                `;
+            }
+            document.getElementById('diagnosticModal').style.display = 'flex';
+        }
+
+        function closeDiagnosticsModal() {
+            document.getElementById('diagnosticModal').style.display = 'none';
+        }
+
+        async function runDiagnosticsForceRefresh() {
+            await loadProducts();
+            openDiagnosticsModal();
+            alert(`Loaded ${allProducts.length} products from Firestore!`);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+    </script>
+
+</body>
+
+</html>

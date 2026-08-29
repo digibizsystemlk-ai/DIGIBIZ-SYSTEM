@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bakery Recipe Studio & Formula Hub - DIGIBIZ</title>
+    <style>html.digibiz-sidebar-reserved body{margin-left:260px;}@media (max-width:768px){html.digibiz-sidebar-reserved body{margin-left:0;}}</style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="/core/firebase-init.js?v=100"></script>
+    <script src="/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/core/event-validation.js?v=2"></script>
+    <script src="/core/event-bus.js?v=2"></script>
+    <script src="/core/accounts-core.js?v=2"></script>
+    <script src="/core/aggregate-utils.js"></script>
+    <script src="/core/dashboard-core.js?v=2265"></script>
+    <script src="/core/sidebar.js?v=2116"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-database-compat.js"></script>
+    <script src="/core/sms-wallet-core.js?v=4"></script>
+    <script src="/core/ui-helpers.js?v=1"></script>
+    <script src="/modules/bakery/bakery-common.js?v=18"></script>
+
+    <style>
+        :root {
+            --primary: #d97706;
+            --primary-dark: #b45309;
+            --primary-light: #fef3c7;
+            --indigo: #4f46e5;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --bg-page: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .recipe-wrap {
+            padding: 24px;
+            max-width: 1440px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        @media (max-width: 768px) { .recipe-wrap { padding: 12px; } }
+
+        .recipe-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .recipe-head h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0 0 4px 0;
+            letter-spacing: -0.5px;
+        }
+        .recipe-head p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .summary-bar {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #ffffff;
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+        }
+
+        .search-filter-bar {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .search-input {
+            padding: 8px 14px;
+            font-size: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            width: 320px;
+            max-width: 100%;
+        }
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+        }
+
+        .category-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .cat-chip {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .cat-chip:hover { background: #e2e8f0; }
+        .cat-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary-dark); }
+
+        /* Recipe Cards Grid */
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 18px;
+        }
+        @media (max-width: 600px) {
+            .recipes-grid { grid-template-columns: 1fr; }
+        }
+
+        .recipe-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .recipe-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.1);
+        }
+
+        .recipe-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .recipe-code-tag {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 900;
+            font-size: 12px;
+        }
+        .recipe-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 4px 0 0 0;
+        }
+
+        .ingredients-pill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 10px 0;
+        }
+        .ing-pill {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 3px 7px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .yield-box-mini {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .yield-mini-item label {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #64748b;
+            display: block;
+        }
+        .yield-mini-item span {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .recipe-card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 10px;
+        }
+        .btn-card-action {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .btn-card-action:hover {
+            background: #f1f5f9;
+        }
+        .btn-card-action.primary {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary-dark);
+        }
+        .btn-card-action.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 10050;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-overlay.open { display: flex !important; }
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-box label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .modal-box input, .modal-box select, .modal-box textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px 12px;
+            font-size: 13.5px;
+            font-family: inherit;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            background: #f8fafc;
+        }
+        .modal-box input:focus, .modal-box select:focus, .modal-box textarea:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+        }
+
+        .ing-row-edit {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        @media print {
+            body { background:#fff; margin:0; }
+            .recipe-head, .summary-bar, .search-filter-bar, .recipe-card-actions, .digibiz-sidebar, html.digibiz-sidebar-reserved body { margin-left:0 !important; }
+            .btn-card-action, .search-filter-bar, .recipe-head > div:last-child { display:none !important; }
+            .recipes-grid { grid-template-columns: 1fr 1fr; gap:12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="recipe-wrap">
+
+    <!-- Header -->
+    <div class="recipe-head">
+        <div>
+            <h2>📖 Bakery Recipe Studio (වට්ටෝරු කළමනාකරණය)</h2>
+            <p id="mfgBusinessCtx"></p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" id="btnOpenNewRecipe" onclick="openRecipeEditorModal()" style="padding:10px 18px; background:#d97706; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(217,119,6,0.3);">
+                ➕ Create New Recipe (නව රෙසිපියක්)
+            </button>
+            <a href="/modules/bakery/outbound.html" style="padding:10px 16px; background:#4f46e5; color:#fff; text-decoration:none; border-radius:8px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(79,70,229,0.3);">
+                🥖 Daily Baking / Production ➡️
+            </a>
+            <a href="/modules/bakery/packaging.html" style="padding:10px 16px; background:#e11d48; color:#fff; text-decoration:none; border-radius:8px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(225,29,72,0.3);">
+                🎀 Packaging Department (ඇසුරුම්) ➡️
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Banner -->
+    <div class="summary-bar">
+        <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8; font-weight:700;">📖 Total Active Recipes</div>
+            <div id="recipeCountVal" style="font-size:22px; font-weight:800; color:#f59e0b; margin-top:2px;">14 Recipes</div>
+        </div>
+        <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8; font-weight:700;">🥖 Base Reference Standard</div>
+            <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-top:4px;">10.0 Kg Flour Base</div>
+        </div>
+        <div>
+            <button type="button" onclick="resetFactoryPresets()" style="padding:8px 14px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:#fff; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">
+                🔄 Reset to Factory Spreadsheets
+            </button>
+        </div>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="search-filter-bar">
+        <input type="text" id="recipeSearchInput" class="search-input" placeholder="🔍 Search recipes by name, code, or ingredient..." oninput="renderRecipesGrid()">
+        
+        <div class="category-chips" id="categoryChips">
+            <button type="button" class="cat-chip active" onclick="setCategoryFilter('ALL', this)">All</button>
+            <button type="button" class="cat-chip" onclick="setCategoryFilter('BREAD', this)">Bread & Loaves</button>
+            <button type="button" class="cat-chip" onclick="setCategoryFilter('BUN', this)">Buns & Pastries</button>
+            <button type="button" class="cat-chip" onclick="setCategoryFilter('CAKE', this)">Cakes</button>
+            <button type="button" class="cat-chip" onclick="setCategoryFilter('SWEET', this)">Biscuits & Sweets</button>
+            <button type="button" class="cat-chip" onclick="setCategoryFilter('OTHER', this)">Other</button>
+        </div>
+    </div>
+
+    <!-- Recipes Grid (Pre-rendered for instantaneous zero-latency display) -->
+    <div class="recipes-grid" id="recipesGridContainer">
+
+        <div class="recipe-card" data-code="LS">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">LS</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Lemon Sweet / Large Sweet (LS)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>7.5 Kg</strong></span><span class="ing-pill">Margarine: <strong>1 Kg</strong></span><span class="ing-pill">Baking Powder: <strong>0.2 Kg</strong></span><span class="ing-pill">Oil: <strong>0.2 L</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">444.4</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">8.889</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('LS')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('LS')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=LS" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="SS">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">SS</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Short Sweet Biscuit / Sweet Pastry (SS)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>7.5 Kg</strong></span><span class="ing-pill">Margarine: <strong>1 Kg</strong></span><span class="ing-pill">Baking Powder: <strong>0.2 Kg</strong></span><span class="ing-pill">Oil: <strong>0.2 L</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">1,111</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">111.1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('SS')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('SS')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=SS" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="S200">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">S200</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Sweet 200 Biscuit / Bun (S200)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>7.5 Kg</strong></span><span class="ing-pill">Margarine: <strong>1 Kg</strong></span><span class="ing-pill">Baking Powder: <strong>0.2 Kg</strong></span><span class="ing-pill">Oil: <strong>0.2 L</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">1,053</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">58.48</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('S200')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('S200')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=S200" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="Ro">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">Ro</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Chocolate Rolls (Ro)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>7 Kg</strong></span><span class="ing-pill">Margarine: <strong>1 Kg</strong></span><span class="ing-pill">Baking Powder: <strong>0.2 Kg</strong></span><span class="ing-pill">Oil: <strong>0.2 L</strong></span><span class="ing-pill">Chocolate Powder: <strong>0.5 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">410</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">41</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('Ro')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('Ro')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=Ro" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="RC">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">RC</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Ribbon Cake (RC)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>10 Kg</strong></span><span class="ing-pill">Margarine: <strong>5.33 Kg</strong></span><span class="ing-pill">Baking Powder: <strong>0.2 Kg</strong></span><span class="ing-pill">Whey Powder: <strong>53.3 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">166</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">16.6</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('RC')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('RC')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=RC" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="WI">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">WI</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">White Bread / White Loaf (WI)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>0.5 Kg</strong></span><span class="ing-pill">Cita: <strong>0.1 Kg</strong></span><span class="ing-pill">Yeast: <strong>0.15 Kg</strong></span><span class="ing-pill">Salt: <strong>0.15 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">680</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">68</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('WI')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('WI')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=WI" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="BW">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">BW</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Brown Bread / Burger Buns (BW)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>0.5 Kg</strong></span><span class="ing-pill">Cita: <strong>0.1 Kg</strong></span><span class="ing-pill">Yeast: <strong>0.15 Kg</strong></span><span class="ing-pill">Salt: <strong>0.15 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">1,000</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('BW')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('BW')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=BW" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="FB">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">FB</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Fish Bun / Savory Pastry (FB)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>3.5 Kg</strong></span><span class="ing-pill">Margarine: <strong>1.5 Kg</strong></span><span class="ing-pill">Yeast: <strong>0.2 Kg</strong></span><span class="ing-pill">Salt: <strong>0.2 Kg</strong></span><span class="ing-pill">Oil: <strong>0.02 L</strong></span><span class="ing-pill">Coconut: <strong>0.2 Kg</strong></span><span class="ing-pill">Whey Powder: <strong>10 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">650</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">108.33</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('FB')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('FB')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=FB" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="3in1">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">3in1</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">3 in 1 Pastry Bun (3in1)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>3.5 Kg</strong></span><span class="ing-pill">Margarine: <strong>1.5 Kg</strong></span><span class="ing-pill">Yeast: <strong>0.2 Kg</strong></span><span class="ing-pill">Salt: <strong>0.2 Kg</strong></span><span class="ing-pill">Oil: <strong>0.02 L</strong></span><span class="ing-pill">Coconut: <strong>0.2 Kg</strong></span><span class="ing-pill">Whey Powder: <strong>10 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">888.9</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">148.15</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('3in1')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('3in1')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=3in1" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="CB">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">CB</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Cream Bun / Sweet Cream Bun (CB)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>3.5 Kg</strong></span><span class="ing-pill">Margarine: <strong>1.5 Kg</strong></span><span class="ing-pill">Yeast: <strong>0.2 Kg</strong></span><span class="ing-pill">Salt: <strong>0.2 Kg</strong></span><span class="ing-pill">Oil: <strong>0.02 L</strong></span><span class="ing-pill">Coconut: <strong>0.2 Kg</strong></span><span class="ing-pill">Whey Powder: <strong>10 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">888.9</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">148.15</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('CB')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('CB')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=CB" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="WC">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">WC</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Wedding Cake / White Cake (WC)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>10 Kg</strong></span><span class="ing-pill">Margarine: <strong>5.33 Kg</strong></span><span class="ing-pill">Baking Powder: <strong>0.2 Kg</strong></span><span class="ing-pill">Whey Powder: <strong>53.3 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">427</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">42.7</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('WC')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('WC')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=WC" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="Wa">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">Wa</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Crispy Wafers (Wa)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>7.5 Kg</strong></span><span class="ing-pill">Margarine: <strong>0.5 Kg</strong></span><span class="ing-pill">Baking Powder: <strong>0.2 Kg</strong></span><span class="ing-pill">Oil: <strong>0.2 L</strong></span><span class="ing-pill">Corn Flour: <strong>0.1 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">186.6</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">18.66</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('Wa')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('Wa')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=Wa" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="SC">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">SC</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Sponge Cake (SC)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>10 Kg</strong></span><span class="ing-pill">Margarine: <strong>6.666 Kg</strong></span><span class="ing-pill">Baking Powder: <strong>0.2 Kg</strong></span><span class="ing-pill">Whey Powder: <strong>106.6 Kg</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">790</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">79</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('SC')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('SC')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=SC" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+
+        <div class="recipe-card" data-code="RB">
+            <div>
+                <div class="recipe-card-head">
+                    <span class="recipe-code-tag">RB</span>
+                    <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>
+                </div>
+                <h4 class="recipe-title">Rusk / Twice-Baked Bread (RB)</h4>
+
+                <div class="ingredients-pill-list">
+                    <span class="ing-pill">Flour: <strong>10 Kg</strong></span><span class="ing-pill">Sugar: <strong>40 Kg</strong></span><span class="ing-pill">Biscuit Crumb: <strong>80 Kg</strong></span><span class="ing-pill">Egg: <strong>4 Units</strong></span>
+                </div>
+
+                <div class="yield-box-mini">
+                    <div class="yield-mini-item">
+                        <label>Expected Units</label>
+                        <span style="color:#0284c7;">7,600</span>
+                    </div>
+                    <div class="yield-mini-item">
+                        <label>Expected Packets</label>
+                        <span style="color:#059669;">760</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-card-action" onclick="openRecipeEditorModal('RB')">
+                    ✏️ Edit
+                </button>
+                <button type="button" class="btn-card-action" onclick="duplicateRecipe('RB')">
+                    📋 Clone
+                </button>
+                <a href="/modules/bakery/outbound.html?recipe=RB" class="btn-card-action primary" style="text-decoration:none;">
+                    🥖 Bake
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RECIPE EDITOR MODAL -->
+<div class="modal-overlay" id="recipeEditorModal">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:2px solid #f1f5f9; padding-bottom:12px;">
+            <div>
+                <h3 style="margin:0; font-size:18px; font-weight:900; color:#0f172a;" id="recipeModalTitle">➕ Create / Edit Recipe</h3>
+                <p style="margin:2px 0 0 0; font-size:12px; color:#64748b;">Specify ingredient proportions based on a 10 Kg Flour reference batch.</p>
+            </div>
+            <button type="button" onclick="closeRecipeEditorModal()" style="background:#f1f5f9; border:none; font-size:20px; font-weight:900; cursor:pointer; border-radius:50%; width:36px; height:36px;">✕</button>
+        </div>
+
+        <form id="recipeForm" onsubmit="saveRecipeFromModal(event)">
+            <input type="hidden" id="editRecipeDocId" value="">
+            
+            <div style="display:grid; grid-template-columns:1fr 2fr; gap:12px; margin-bottom:12px;">
+                <div>
+                    <label>Recipe Code (e.g. FB, WI, RC) *</label>
+                    <input type="text" id="editRecipeCode" required style="font-weight:800; text-transform:uppercase;" placeholder="FB">
+                </div>
+                <div>
+                    <label>Recipe / Product Full Name *</label>
+                    <input type="text" id="editRecipeName" required placeholder="Fish Bun / Savory Pastry (FB)">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                <div>
+                    <label>Category (වර්ගය)</label>
+                    <select id="editRecipeCategory">
+                        <option value="BUN">Buns & Pastries</option>
+                        <option value="BREAD">Bread & Loaves</option>
+                        <option value="CAKE">Cakes</option>
+                        <option value="SWEET">Biscuits & Sweets</option>
+                        <option value="OTHER">Other Confectionery</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Base Flour Reference Weight</label>
+                    <input type="number" id="editBaseFlourQty" value="10" readonly style="background:#f1f5f9; font-weight:800; color:#64748b;">
+                </div>
+            </div>
+
+            <!-- Dynamic Ingredients List -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="margin:0; font-size:11.5px; color:#1e293b;">🧪 Recipe Ingredients (per 10kg Flour base) *</label>
+                    <button type="button" onclick="addIngredientEditRow('', 1, 'Kg')" style="padding:4px 8px; font-size:11px; font-weight:700; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:6px; cursor:pointer;">
+                        ➕ Add Ingredient Line
+                    </button>
+                </div>
+                
+                <div id="ingredientsEditContainer">
+                    <!-- Dynamic ingredient rows -->
+                </div>
+            </div>
+
+            <!-- Output Yields Forecast Inputs -->
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px; margin-bottom:16px;">
+                <div style="font-size:11.5px; font-weight:800; color:#1e40af; margin-bottom:8px;">
+                    🎯 Output Yield per 10kg Flour Base (නිෂ්පාදන ඇස්තමේන්තු අනුපාත):
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div>
+                        <label style="color:#1e3a8a;">Expected Units / Pieces *</label>
+                        <input type="number" id="editExpectedUnits" min="1" step="0.1" required placeholder="e.g. 650" style="font-weight:800; font-size:15px; color:#0369a1;">
+                    </div>
+                    <div>
+                        <label style="color:#1e3a8a;">Expected Packets / Boxes</label>
+                        <input type="number" id="editExpectedPackets" min="0" step="0.01" placeholder="e.g. 108.33" style="font-weight:700; font-size:14px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Optional Notes / Baking Instructions -->
+            <div style="margin-bottom:16px;">
+                <label>Baking Temperature & Instructions (බේක් කිරීමේ උපදෙස්)</label>
+                <textarea id="editRecipeInstructions" rows="2" placeholder="e.g. Bake at 200°C for 22 mins. Let cool before packing."></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="closeRecipeEditorModal()" style="padding:10px 18px; border:1px solid #cbd5e1; background:#f8fafc; border-radius:8px; font-weight:700; cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="submit" id="saveRecipeBtn" style="padding:10px 24px; background:#d97706; color:#ffffff; border:none; border-radius:8px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(217,119,6,0.35);">
+                    💾 Save Recipe
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const DEFAULT_BAKERY_RECIPES = [
+    {
+        "code": "LS",
+        "name": "Lemon Sweet / Large Sweet (LS)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            }
+        ],
+        "expectedUnitsYield": 444.4,
+        "expectedPacketsYield": 8.889,
+        "unitsPerPacket": 50
+    },
+    {
+        "code": "SS",
+        "name": "Short Sweet Biscuit / Sweet Pastry (SS)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            }
+        ],
+        "expectedUnitsYield": 1111,
+        "expectedPacketsYield": 111.1,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "S200",
+        "name": "Sweet 200 Biscuit / Bun (S200)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            }
+        ],
+        "expectedUnitsYield": 1053,
+        "expectedPacketsYield": 58.48,
+        "unitsPerPacket": 18
+    },
+    {
+        "code": "Ro",
+        "name": "Chocolate Rolls (Ro)",
+        "category": "BUN",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            },
+            {
+                "name": "Chocolate Powder",
+                "qty": 0.5,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 410,
+        "expectedPacketsYield": 41,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "RC",
+        "name": "Ribbon Cake (RC)",
+        "category": "CAKE",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 5.33,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 53.3,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 166,
+        "expectedPacketsYield": 16.6,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "WI",
+        "name": "White Bread / White Loaf (WI)",
+        "category": "BREAD",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 0.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Cita",
+                "qty": 0.1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.15,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.15,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 680,
+        "expectedPacketsYield": 68,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "BW",
+        "name": "Brown Bread / Burger Buns (BW)",
+        "category": "BREAD",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 0.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Cita",
+                "qty": 0.1,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.15,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.15,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 1000,
+        "expectedPacketsYield": 100,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "FB",
+        "name": "Fish Bun / Savory Pastry (FB)",
+        "category": "BUN",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 3.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.02,
+                "unit": "L"
+            },
+            {
+                "name": "Coconut",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 10,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 650,
+        "expectedPacketsYield": 108.33,
+        "unitsPerPacket": 6
+    },
+    {
+        "code": "3in1",
+        "name": "3 in 1 Pastry Bun (3in1)",
+        "category": "BUN",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 3.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.02,
+                "unit": "L"
+            },
+            {
+                "name": "Coconut",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 10,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 888.9,
+        "expectedPacketsYield": 148.15,
+        "unitsPerPacket": 6
+    },
+    {
+        "code": "CB",
+        "name": "Cream Bun / Sweet Cream Bun (CB)",
+        "category": "BUN",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 3.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 1.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Yeast",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Salt",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.02,
+                "unit": "L"
+            },
+            {
+                "name": "Coconut",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 10,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 888.9,
+        "expectedPacketsYield": 148.15,
+        "unitsPerPacket": 6
+    },
+    {
+        "code": "WC",
+        "name": "Wedding Cake / White Cake (WC)",
+        "category": "CAKE",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 5.33,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 53.3,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 427,
+        "expectedPacketsYield": 42.7,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "Wa",
+        "name": "Crispy Wafers (Wa)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 7.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 0.5,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Oil",
+                "qty": 0.2,
+                "unit": "L"
+            },
+            {
+                "name": "Corn Flour",
+                "qty": 0.1,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 186.6,
+        "expectedPacketsYield": 18.66,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "SC",
+        "name": "Sponge Cake (SC)",
+        "category": "CAKE",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Margarine",
+                "qty": 6.666,
+                "unit": "Kg"
+            },
+            {
+                "name": "Baking Powder",
+                "qty": 0.2,
+                "unit": "Kg"
+            },
+            {
+                "name": "Whey Powder",
+                "qty": 106.6,
+                "unit": "Kg"
+            }
+        ],
+        "expectedUnitsYield": 790,
+        "expectedPacketsYield": 79,
+        "unitsPerPacket": 10
+    },
+    {
+        "code": "RB",
+        "name": "Rusk / Twice-Baked Bread (RB)",
+        "category": "SWEET",
+        "baseFlourQty": 10,
+        "flourUnit": "Kg",
+        "ingredients": [
+            {
+                "name": "Flour",
+                "qty": 10,
+                "unit": "Kg"
+            },
+            {
+                "name": "Sugar",
+                "qty": 40,
+                "unit": "Kg"
+            },
+            {
+                "name": "Biscuit Crumb",
+                "qty": 80,
+                "unit": "Kg"
+            },
+            {
+                "name": "Egg",
+                "qty": 4,
+                "unit": "Units"
+            }
+        ],
+        "expectedUnitsYield": 7600,
+        "expectedPacketsYield": 760,
+        "unitsPerPacket": 10
+    }
+];
+
+    // Firestore DB resolved via window.db
+    let allRecipes = [...DEFAULT_BAKERY_RECIPES];
+    let rawMaterialsCatalog = [];
+    let currentCategoryFilter = 'ALL';
+
+    function setCategoryFilter(cat, btn) {
+        currentCategoryFilter = cat;
+        document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderRecipesGrid();
+    }
+    window.setCategoryFilter = setCategoryFilter;
+
+    function renderRecipesGrid() {
+        const container = document.getElementById('recipesGridContainer');
+        if (!container) return;
+
+        const searchEl = document.getElementById('recipeSearchInput');
+        const query = (searchEl ? searchEl.value : '').toLowerCase().trim();
+
+        const filtered = allRecipes.filter(r => {
+            const matchQuery = !query
+                || (r.name && r.name.toLowerCase().includes(query))
+                || (r.code && r.code.toLowerCase().includes(query))
+                || (r.ingredients && r.ingredients.some(i => i.name && i.name.toLowerCase().includes(query)));
+
+            const cat = String(r.category || (r.code === 'WI' || r.code === 'BW' ? 'BREAD' : (r.code === 'RC' || r.code === 'WC' || r.code === 'SC' ? 'CAKE' : (r.code === 'FB' || r.code === '3in1' || r.code === 'CB' || r.code === 'Ro' ? 'BUN' : (r.code === 'LS' || r.code === 'SS' || r.code === 'S200' || r.code === 'Wa' || r.code === 'RB' ? 'SWEET' : 'OTHER'))))).toUpperCase();
+
+            const matchCat = currentCategoryFilter === 'ALL' || cat === currentCategoryFilter;
+
+            return matchQuery && matchCat;
+        });
+
+        const countEl = document.getElementById('recipeCountVal');
+        if (countEl) countEl.textContent = allRecipes.length + ' Recipes';
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: #fff; border-radius: 12px; border: 1px solid var(--border);"><p style="font-size: 16px; font-weight: 700; color: var(--text-muted); margin: 0;">No matching recipes found.</p></div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(r => {
+            const ingPills = (r.ingredients || []).map(i => '<span class="ing-pill">' + i.name + ': <strong>' + i.qty + ' ' + (i.unit || 'Kg') + '</strong></span>').join('');
+
+            return '<div class="recipe-card">' +
+                '<div>' +
+                    '<div class="recipe-card-head">' +
+                        '<span class="recipe-code-tag">' + r.code + '</span>' +
+                        '<span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">10kg Base</span>' +
+                    '</div>' +
+                    '<h4 class="recipe-title">' + r.name + '</h4>' +
+                    '<div class="ingredients-pill-list">' + ingPills + '</div>' +
+                    '<div class="yield-box-mini">' +
+                        '<div class="yield-mini-item">' +
+                            '<label>Expected Units</label>' +
+                            '<span style="color:#0284c7;">' + Number(r.expectedUnitsYield || 0).toLocaleString() + '</span>' +
+                        '</div>' +
+                        '<div class="yield-mini-item">' +
+                            '<label>Expected Packets</label>' +
+                            '<span style="color:#059669;">' + Number(r.expectedPacketsYield || 0).toLocaleString() + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    (r.instructions ? '<div style="font-size:11px; color:#64748b; font-style:italic; margin-top:4px;">💡 ' + r.instructions + '</div>' : '') +
+                '</div>' +
+                '<div class="recipe-card-actions">' +
+                    '<button type="button" class="btn-card-action" onclick="openRecipeEditorModal(\'' + r.code + '\')">✏️ Edit</button>' +
+                    '<button type="button" class="btn-card-action" onclick="duplicateRecipe(\'' + r.code + '\')">📋 Clone</button>' +
+                    '<a href="/modules/bakery/outbound.html?recipe=' + r.code + '" class="btn-card-action primary" style="text-decoration:none;">🥖 Bake</a>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+    window.renderRecipesGrid = renderRecipesGrid;
+
+    function openRecipeEditorModal(code) {
+        const modal = document.getElementById('recipeEditorModal');
+        if (!modal) return alert('Recipe editor modal not found.');
+        const container = document.getElementById('ingredientsEditContainer');
+        if (container) container.innerHTML = '';
+
+        if (code) {
+            const r = allRecipes.find(x => x.code === code);
+            if (r) {
+                document.getElementById('recipeModalTitle').textContent = '✏️ Edit Recipe: ' + r.name;
+                document.getElementById('editRecipeDocId').value = r.id || '';
+                document.getElementById('editRecipeCode').value = r.code;
+                document.getElementById('editRecipeName').value = r.name;
+                document.getElementById('editRecipeCategory').value = r.category || 'BUN';
+                document.getElementById('editExpectedUnits').value = r.expectedUnitsYield || 100;
+                document.getElementById('editExpectedPackets').value = r.expectedPacketsYield || 10;
+                document.getElementById('editRecipeInstructions').value = r.instructions || '';
+
+                if (Array.isArray(r.ingredients) && r.ingredients.length > 0) {
+                    r.ingredients.forEach(i => {
+                        addIngredientEditRow(i.name, i.qty, i.unit);
+                    });
+                } else {
+                    addIngredientEditRow('Flour', 10, 'Kg');
+                }
+            }
+        } else {
+            document.getElementById('recipeModalTitle').textContent = '➕ Create New Recipe';
+            document.getElementById('editRecipeDocId').value = '';
+            document.getElementById('editRecipeCode').value = '';
+            document.getElementById('editRecipeName').value = '';
+            document.getElementById('editExpectedUnits').value = '500';
+            document.getElementById('editExpectedPackets').value = '50';
+            document.getElementById('editRecipeInstructions').value = '';
+
+            addIngredientEditRow('Flour', 10, 'Kg');
+            addIngredientEditRow('Sugar', 3.5, 'Kg');
+            addIngredientEditRow('Margarine', 1, 'Kg');
+            addIngredientEditRow('Yeast', 0.15, 'Kg');
+            addIngredientEditRow('Salt', 0.2, 'Kg');
+        }
+
+        modal.style.display = 'flex';
+        modal.classList.add('open');
+    }
+    window.openRecipeEditorModal = openRecipeEditorModal;
+
+    function closeRecipeEditorModal() {
+        const modal = document.getElementById('recipeEditorModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('open');
+        }
+    }
+    window.closeRecipeEditorModal = closeRecipeEditorModal;
+
+    function addIngredientEditRow(name = '', qty = 1, unit = 'Kg') {
+        const container = document.getElementById('ingredientsEditContainer');
+        if (!container) return;
+
+        const row = document.createElement('div');
+        row.className = 'ing-row-edit';
+        row.innerHTML = '<input type="text" class="ing-name-input" value="' + name + '" placeholder="Ingredient name (e.g. Sugar)" required list="rawMaterialsDatalist">' +
+            '<input type="number" class="ing-qty-input" value="' + qty + '" step="0.001" min="0.001" placeholder="Qty" required style="font-weight:700;">' +
+            '<select class="ing-unit-select">' +
+                '<option value="Kg"' + (unit === 'Kg' ? ' selected' : '') + '>Kg</option>' +
+                '<option value="g"' + (unit === 'g' ? ' selected' : '') + '>g</option>' +
+                '<option value="L"' + (unit === 'L' ? ' selected' : '') + '>L</option>' +
+                '<option value="Units"' + (unit === 'Units' ? ' selected' : '') + '>Units</option>' +
+            '</select>' +
+            '<button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; border:1px solid #fecaca; color:#b91c1c; border-radius:6px; cursor:pointer; padding:6px 8px; font-weight:800;">✕</button>';
+        container.appendChild(row);
+    }
+    window.addIngredientEditRow = addIngredientEditRow;
+
+    async function saveRecipeFromModal(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        if (!bid) return alert('No business context available.');
+
+        const code = document.getElementById('editRecipeCode').value.trim().toUpperCase();
+        const name = document.getElementById('editRecipeName').value.trim();
+        const category = document.getElementById('editRecipeCategory').value;
+        const expectedUnits = Number(document.getElementById('editExpectedUnits').value || 0);
+        const expectedPackets = Number(document.getElementById('editExpectedPackets').value || 0);
+        const instructions = document.getElementById('editRecipeInstructions').value.trim();
+        const docId = document.getElementById('editRecipeDocId').value;
+
+        const ingRows = document.querySelectorAll('#ingredientsEditContainer .ing-row-edit');
+        const ingredients = [];
+        ingRows.forEach(r => {
+            const iName = r.querySelector('.ing-name-input').value.trim();
+            const iQty = Number(r.querySelector('.ing-qty-input').value || 0);
+            const iUnit = r.querySelector('.ing-unit-select').value;
+            if (iName && iQty > 0) {
+                ingredients.push({ name: iName, qty: iQty, unit: iUnit });
+            }
+        });
+
+        if (ingredients.length === 0) {
+            alert('Please add at least 1 ingredient.');
+            return;
+        }
+
+        const payload = {
+            id: docId || (bid + '_' + code),
+            code: code,
+            name: name,
+            category: category,
+            baseFlourQty: 10,
+            flourUnit: 'Kg',
+            ingredients: ingredients,
+            expectedUnitsYield: expectedUnits,
+            expectedPacketsYield: expectedPackets,
+            instructions: instructions
+        };
+
+        const btn = document.getElementById('saveRecipeBtn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
+        try {
+            if (window.BakeryModule && typeof window.BakeryModule.saveRecipe === 'function') {
+                await window.BakeryModule.saveRecipe(bid, payload);
+            }
+            const existingIdx = allRecipes.findIndex(r => r.code === code);
+            if (existingIdx >= 0) allRecipes[existingIdx] = payload;
+            else allRecipes.unshift(payload);
+
+            renderRecipesGrid();
+            closeRecipeEditorModal();
+            alert('✅ Recipe "' + payload.name + '" saved successfully!');
+        } catch (err) {
+            alert('Error saving recipe: ' + err.message);
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = '💾 Save Recipe'; }
+        }
+    }
+    window.saveRecipeFromModal = saveRecipeFromModal;
+
+    async function duplicateRecipe(code) {
+        const r = allRecipes.find(x => x.code === code);
+        if (!r) return;
+        const newCode = prompt('Enter new unique code for cloned recipe:', r.code + '_COPY');
+        if (!newCode) return;
+
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        const cloned = {
+            ...r,
+            id: bid ? (bid + '_' + newCode.trim().toUpperCase()) : undefined,
+            code: newCode.trim().toUpperCase(),
+            name: r.name + ' (Copy)'
+        };
+
+        if (window.BakeryModule && typeof window.BakeryModule.saveRecipe === 'function' && bid) {
+            await window.BakeryModule.saveRecipe(bid, cloned);
+        }
+        allRecipes.unshift(cloned);
+        renderRecipesGrid();
+        alert('✅ Cloned recipe "' + cloned.name + '" created!');
+    }
+    window.duplicateRecipe = duplicateRecipe;
+
+    async function resetFactoryPresets() {
+        if (!confirm("Are you sure you want to reset all recipes to the Factory Spreadsheet standard presets?")) return;
+        const bid = (window.BakeryModule && window.BakeryModule.businessId) || localStorage.getItem('currentBusinessId');
+        if (window.BakeryModule && typeof window.BakeryModule.seedDefaultRecipes === 'function' && bid) {
+            await window.BakeryModule.seedDefaultRecipes(bid);
+        }
+        allRecipes = [...DEFAULT_BAKERY_RECIPES];
+        renderRecipesGrid();
+        alert("✅ Factory spreadsheet recipes restored!");
+    }
+    window.resetFactoryPresets = resetFactoryPresets;
+
+    async function loadFirestoreRecipes(bid) {
+        if (!bid || !window.BakeryModule) return;
+        try {
+            const fetched = await window.BakeryModule.getRecipes(bid);
+            if (Array.isArray(fetched) && fetched.length > 0) {
+                allRecipes = fetched;
+                renderRecipesGrid();
+            }
+        } catch (e) {
+            console.warn('[Recipes] Firestore sync warning:', e);
+        }
+    }
+
+    async function initPage() {
+        try {
+            const firestoreDb = window.db || (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore());
+            if (window.BakeryModule && typeof window.BakeryModule.init === 'function') {
+                await window.BakeryModule.init('recipes');
+                const bid = window.BakeryModule.businessId || localStorage.getItem('currentBusinessId');
+                if (bid) {
+                    await loadFirestoreRecipes(bid);
+                }
+            }
+        } catch (err) {
+            console.warn('[Recipes] Async initialization warning:', err);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+        initPage();
+    }
+</script>
+
+<!-- Datalist for ingredient suggestions -->
+<datalist id="rawMaterialsDatalist">
+    <option value="Flour"></option>
+    <option value="Sugar"></option>
+    <option value="Margarine"></option>
+    <option value="Cita"></option>
+    <option value="Baking Powder"></option>
+    <option value="Yeast"></option>
+    <option value="Salt"></option>
+    <option value="Oil"></option>
+    <option value="Biscuit Crumb"></option>
+    <option value="Coconut"></option>
+    <option value="Whey Powder"></option>
+    <option value="Egg"></option>
+    <option value="Rulan"></option>
+    <option value="Chocolate Powder"></option>
+    <option value="Corn Flour"></option>
+</datalist>
+</body>
+</html>

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="si">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Customer Credit & Debt Manager — DIGIBIZ</title>
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#047857">
+
+    <style>
+        html.digibiz-sidebar-reserved body {
+            margin-left: 260px;
+        }
+
+        @media (max-width: 768px) {
+            html.digibiz-sidebar-reserved body {
+                margin-left: 0;
+            }
+        }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="/assets/vendor/sweetalert2.all.min.js"></script>
+
+    <!-- Local Self-Hosted Firebase Compat SDKs -->
+    <script src="/assets/vendor/firebase-app-compat.js"></script>
+    <script src="/assets/vendor/firebase-auth-compat.js"></script>
+    <script src="/assets/vendor/firebase-firestore-compat.js"></script>
+
+    <!-- Core App Config & Official DIGIBIZ Sidebar -->
+    <script src="/core/pwa-init.js"></script>
+    <script src="/core/firebase-init.js?v=200"></script>
+    <script src="/scripts/admin-impersonation.js?v=200"></script>
+    <script src="/core/aggregate-utils.js"></script>
+    <script src="/core/auth-roles.js?v=2105"></script>
+    <script src="/core/business-types.js?v=70"></script>
+    <script src="/core/dashboard-core.js?v=2105"></script>
+    <script src="/core/subscription-manager.js?v=120"></script>
+    <script src="/core/sidebar.js?v=2105"></script>
+
+    <style>
+        :root {
+            --primary: #047857;
+            --primary-dark: #064e3b;
+            --primary-light: #ecfdf5;
+            --accent: #10b981;
+            --bg-color: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #0284c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Sinhala', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding-bottom: 80px;
+        }
+
+        /* Top Header */
+        .app-header {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: #ffffff;
+            padding: 14px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(6, 78, 59, 0.25);
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: -0.3px;
+        }
+
+        .header-sub {
+            font-size: 11.5px;
+            color: #a7f3d0;
+            font-weight: 600;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 14px;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        @media (max-width: 540px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .kpi-card.highlight {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: #ffffff;
+            border-color: #047857;
+        }
+
+        .kpi-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+
+        .kpi-card.highlight .kpi-label {
+            color: #a7f3d0;
+        }
+
+        .kpi-val {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-dark);
+        }
+
+        .kpi-card.highlight .kpi-val {
+            color: #ffffff;
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Search & Filter Tabs */
+        .search-box {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 14px 12px 38px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #ffffff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            scrollbar-width: none;
+        }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-tab {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-weight: 800;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .filter-tab.active {
+            background: var(--primary-light);
+            border-color: var(--accent);
+            color: var(--primary-dark);
+        }
+
+        /* Credit Items List */
+        .credit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .credit-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: transform 0.1s;
+        }
+
+        .credit-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .cust-name {
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--text-dark);
+        }
+
+        .cust-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 900;
+            padding: 4px 8px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        .status-pill.overdue {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+        }
+
+        .status-pill.due-today {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .status-pill.upcoming {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .status-pill.settled {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+
+        .credit-amounts-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin: 10px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .amt-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .amt-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .amt-val {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        .amt-val.due {
+            color: #dc2626;
+            font-size: 18px;
+        }
+
+        .credit-actions-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-wa-remind {
+            background: #25d366;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-settle-pay {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* Modal Dialog */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        .modal-close {
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 36px 16px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="header-row">
+            <div class="header-left">
+                <a href="app.html" class="btn-back" title="Back to Billing Terminal">←</a>
+                <div>
+                    <div class="header-title">Customer Credit (ණය වාර්තා)</div>
+                    <div class="header-sub" id="hdrBizName">DIGIBIZ Terminal</div>
+                </div>
+            </div>
+            <button type="button" class="btn-back" onclick="loadCreditData()" title="Refresh Data">🔄</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+
+        <!-- KPI Summary Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card highlight">
+                <div class="kpi-label">මුළු ලැබීමට ඇති ණය</div>
+                <div class="kpi-val" id="kpiTotalDue">Rs. 0.00</div>
+                <div class="kpi-sub" id="kpiTotalOrders">0 Invoices Pending</div>
+            </div>
+            <div class="kpi-card" style="border-left:4px solid #ef4444;">
+                <div class="kpi-label">කල් ඉකුත් වූ ණය</div>
+                <div class="kpi-val" id="kpiOverdue" style="color:#dc2626;">Rs. 0.00</div>
+                <div class="kpi-sub" id="kpiOverdueCount" style="color:#ef4444;">0 Overdue Bills</div>
+            </div>
+            <div class="kpi-card" style="border-left:4px solid #0284c7;">
+                <div class="kpi-label">ණය පාරිභෝගිකයින්</div>
+                <div class="kpi-val" id="kpiCustomerCount">0</div>
+                <div class="kpi-sub">Active Debtors</div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="creditSearchInput" class="search-input" placeholder="පාරිභෝගික නම, දුරකථන හෝ Bill # සොයන්න...">
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button type="button" class="filter-tab active" data-filter="ALL">සියල්ල (All)</button>
+            <button type="button" class="filter-tab" data-filter="OVERDUE">🚨 කල් ඉකුත් වූ (Overdue)</button>
+            <button type="button" class="filter-tab" data-filter="DUE7">⏳ ඉදිරි දින 7 (Next 7 Days)</button>
+            <button type="button" class="filter-tab" data-filter="SETTLED">✅ පියවූ ණය (Settled)</button>
+        </div>
+
+        <!-- Credit Invoices List -->
+        <div class="credit-list" id="creditListContainer">
+            <div class="empty-state">
+                <div style="font-size:36px; margin-bottom:8px;">💳</div>
+                <div style="font-size:15px; font-weight:800;">ණය බිල්පත් කිසිවක් හමු නොවීය.</div>
+                <div style="font-size:12px; margin-top:4px;">Quick Billing Terminal එකෙන් නයට දෙන බිල්පත් මෙහි සටහන් වේ.</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Settle Payment Modal -->
+    <div class="modal-overlay" id="settleModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>💰 ණය මුදල් අයකර ගැනීම (Settle)</span>
+                <button type="button" class="modal-close" onclick="closeSettleModal()">×</button>
+            </div>
+            <form id="settleForm">
+                <div style="margin-bottom:12px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+                    <div style="font-size:14.5px; font-weight:800;" id="settleCustName">Customer Name</div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:2px;" id="settleInvoiceNo">Invoice #INV-000</div>
+                    <div style="font-size:13px; font-weight:800; color:#dc2626; margin-top:6px;">ඉතිරි ගෙවිය යුතු මුදල: <span id="settleRemainingAmt">Rs. 0.00</span></div>
+                </div>
+
+                <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">ලැබුණු මුදල (Amount Rs.) *</label>
+                <input type="number" id="settleAmountInput" class="form-input" required min="1" step="any" placeholder="0.00">
+
+                <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">ගෙවීම් මාධ්‍යය (Payment Method)</label>
+                <select id="settleMethodSelect" class="form-input" style="background:#fff;">
+                    <option value="CASH">💵 Cash (මුදල්)</option>
+                    <option value="BANK">🏦 Bank Transfer (බැංකු තැන්පතු)</option>
+                    <option value="CHEQUE">📝 Cheque (චෙක්පත්)</option>
+                </select>
+
+                <button type="submit" style="width:100%; background:var(--primary); color:#fff; border:none; padding:14px; border-radius:12px; font-size:14px; font-weight:900; cursor:pointer;">
+                    ✅ මුදල් ලබාගැනීම සටහන් කරන්න
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        let allCreditOrders = [];
+        let allCustomersMap = {};
+        let currentFilter = 'ALL';
+        let activeSettleOrder = null;
+        let bizContext = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initApp();
+            setupEvents();
+            await loadCreditData();
+        });
+
+        async function initApp() {
+            return new Promise((resolve) => {
+                const auth = window.firebase?.auth ? window.firebase.auth() : null;
+                if (!auth) return resolve();
+
+                auth.onAuthStateChanged(async (user) => {
+                    if (!user) {
+                        window.location.href = '/auth/login.html';
+                        return resolve();
+                    }
+                    const bid = localStorage.getItem('currentBusinessId') || user.uid;
+                    const bName = localStorage.getItem('digibiz_qb_biz_name') || 'Business Store';
+                    const phone = localStorage.getItem('digibiz_qb_phone') || '';
+                    bizContext = { businessId: bid, businessName: bName, phone: phone };
+                    document.getElementById('hdrBizName').textContent = bName;
+                    resolve();
+                });
+            });
+        }
+
+        function setupEvents() {
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentFilter = tab.getAttribute('data-filter');
+                    renderCreditList();
+                });
+            });
+
+            document.getElementById('creditSearchInput').addEventListener('input', () => {
+                renderCreditList();
+            });
+
+            document.getElementById('settleForm').addEventListener('submit', handleProcessSettlement);
+        }
+
+        async function loadCreditData() {
+            if (!bizContext || !window.firebase) {
+                // Fallback to local bills
+                try {
+                    const raw = localStorage.getItem('digibiz_qb_bills');
+                    if (raw) {
+                        const bills = JSON.parse(raw);
+                        allCreditOrders = bills.filter(b => b.paymentMode === 'CREDIT');
+                        renderCreditList();
+                    }
+                } catch(e) {}
+                return;
+            }
+
+            try {
+                const db = window.firebase.firestore();
+                const snap = await db.collection('orders').doc(bizContext.businessId).collection('list')
+                    .where('paymentMode', '==', 'CREDIT')
+                    .get();
+
+                if (snap && snap.docs) {
+                    allCreditOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                }
+
+                // Also fetch customers for latest balances & phone
+                const cSnap = await db.collection('customers').doc(bizContext.businessId).collection('list').get().catch(() => null);
+                if (cSnap && cSnap.docs) {
+                    cSnap.docs.forEach(d => {
+                        allCustomersMap[d.id] = { id: d.id, ...d.data() };
+                    });
+                }
+
+                renderCreditList();
+            } catch (err) {
+                console.warn('Credit load notice:', err);
+            }
+        }
+
+        function renderCreditList() {
+            const container = document.getElementById('creditListContainer');
+            const searchQ = document.getElementById('creditSearchInput').value.toLowerCase().trim();
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let totalDue = 0;
+            let overdueAmt = 0;
+            let overdueCount = 0;
+            const uniqueDebtors = new Set();
+
+            allCreditOrders.forEach(ord => {
+                const dueAmt = Number(ord.outstandingAmount !== undefined ? ord.outstandingAmount : ord.total) || 0;
+                if (dueAmt > 0) {
+                    totalDue += dueAmt;
+                    uniqueDebtors.add(ord.customerId || ord.customerName);
+
+                    const dueDt = ord.dueDate ? new Date(ord.dueDate) : null;
+                    if (dueDt && dueDt < today) {
+                        overdueAmt += dueAmt;
+                        overdueCount++;
+                    }
+                }
+            });
+
+            document.getElementById('kpiTotalDue').textContent = `Rs. ${totalDue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('kpiTotalOrders').textContent = `${allCreditOrders.filter(o => (o.outstandingAmount ?? o.total) > 0).length} Invoices Pending`;
+            document.getElementById('kpiOverdue').textContent = `Rs. ${overdueAmt.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('kpiOverdueCount').textContent = `${overdueCount} Overdue Bills`;
+            document.getElementById('kpiCustomerCount').textContent = uniqueDebtors.size;
+
+            // Filter
+            const filtered = allCreditOrders.filter(ord => {
+                const custName = ord.customerName || '';
+                const custPhone = ord.customerPhone || '';
+                const invNo = ord.invoiceNo || '';
+                const dueAmt = Number(ord.outstandingAmount !== undefined ? ord.outstandingAmount : ord.total) || 0;
+
+                const matchQ = !searchQ || custName.toLowerCase().includes(searchQ) || custPhone.includes(searchQ) || invNo.toLowerCase().includes(searchQ);
+                if (!matchQ) return false;
+
+                const dueDt = ord.dueDate ? new Date(ord.dueDate) : null;
+
+                if (currentFilter === 'OVERDUE') {
+                    return dueAmt > 0 && dueDt && dueDt < today;
+                } else if (currentFilter === 'DUE7') {
+                    if (dueAmt <= 0 || !dueDt) return false;
+                    const diffDays = Math.ceil((dueDt - today) / (1000 * 60 * 60 * 24));
+                    return diffDays >= 0 && diffDays <= 7;
+                } else if (currentFilter === 'SETTLED') {
+                    return dueAmt <= 0;
+                }
+                return true;
+            });
+
+            if (!filtered.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size:32px; margin-bottom:6px;">🔍</div>
+                        <div style="font-size:14px; font-weight:800;">ගැලපෙන ණය වාර්තා නොමැත.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(ord => {
+                const dueAmt = Number(ord.outstandingAmount !== undefined ? ord.outstandingAmount : ord.total) || 0;
+                const totalAmt = Number(ord.total) || 0;
+                const paidAmt = Math.max(0, totalAmt - dueAmt);
+                const dueDt = ord.dueDate ? new Date(ord.dueDate) : null;
+
+                let statusPillHtml = '';
+                if (dueAmt <= 0) {
+                    statusPillHtml = '<span class="status-pill settled">✅ සම්පූර්ණයෙන් පියවා ඇත</span>';
+                } else if (dueDt) {
+                    const diffDays = Math.ceil((dueDt - today) / (1000 * 60 * 60 * 24));
+                    if (diffDays < 0) {
+                        statusPillHtml = `<span class="status-pill overdue">🚨 දින ${Math.abs(diffDays)}ක් කල් ඉකුත් වී ඇත</span>`;
+                    } else if (diffDays === 0) {
+                        statusPillHtml = '<span class="status-pill due-today">📅 අද දින ගෙවිය යුතුයි</span>';
+                    } else {
+                        statusPillHtml = `<span class="status-pill upcoming">⏳ තව දින ${diffDays}කින්</span>`;
+                    }
+                } else {
+                    statusPillHtml = '<span class="status-pill due-today">Credit Due</span>';
+                }
+
+                return `
+                    <div class="credit-card">
+                        <div class="credit-card-head">
+                            <div>
+                                <div class="cust-name">${escapeHtml(ord.customerName || 'Customer')}</div>
+                                <div class="cust-meta">📞 ${ord.customerPhone || 'දුරකථන අංකයක් නැත'} | #${ord.invoiceNo}</div>
+                            </div>
+                            <div>${statusPillHtml}</div>
+                        </div>
+
+                        <div style="font-size:11.5px; color:var(--text-muted); font-weight:600;">
+                            📅 දිනය: ${new Date(ord.createdAt).toLocaleDateString()} ${ord.dueDate ? `| ⏰ ගෙවිය යුතු දිනය: ${ord.dueDate}` : ''}
+                        </div>
+
+                        <div class="credit-amounts-row">
+                            <div class="amt-group">
+                                <span class="amt-label">මුළු බිල</span>
+                                <span class="amt-val">Rs. ${totalAmt.toFixed(2)}</span>
+                            </div>
+                            <div class="amt-group">
+                                <span class="amt-label">ගෙවූ මුදල</span>
+                                <span class="amt-val" style="color:#059669;">Rs. ${paidAmt.toFixed(2)}</span>
+                            </div>
+                            <div class="amt-group" style="text-align:right;">
+                                <span class="amt-label">ගෙවිය යුතු ශේෂය</span>
+                                <span class="amt-val due">Rs. ${dueAmt.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        ${dueAmt > 0 ? `
+                            <div class="credit-actions-row">
+                                <button type="button" class="btn-wa-remind" onclick="sendWhatsAppReminder('${ord.id}')">
+                                    📲 WhatsApp Reminder
+                                </button>
+                                <button type="button" class="btn-settle-pay" onclick="openSettleModal('${ord.id}')">
+                                    💵 Settle Payment
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- 1-CLICK WHATSAPP REMINDER ---
+        function sendWhatsAppReminder(orderId) {
+            const ord = allCreditOrders.find(o => o.id === orderId);
+            if (!ord) return;
+
+            let phone = (ord.customerPhone || '').replace(/[^0-9]/g, '');
+            if (phone.startsWith('94')) phone = phone.substring(2);
+            if (phone.startsWith('0')) phone = phone.substring(1);
+
+            const bizName = bizContext?.businessName || 'Our Business';
+            const dueAmt = Number(ord.outstandingAmount !== undefined ? ord.outstandingAmount : ord.total) || 0;
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+
+            let msg = '';
+            if (lang === 'si') {
+                msg = `*ගරු ${ord.customerName || 'පාරිභෝගික'} මහතාණෙනි/මියණියනි,*\n\n`;
+                msg += `*${bizName}* වෙතින් ඔබ ලබාගත් පහත සඳහන් බිල්පතේ මුදල් ගෙවීමට කාරුණික වන්න.\n\n`;
+                msg += `📄 *Invoice #:* ${ord.invoiceNo}\n`;
+                msg += `📅 *බිල්පත් දිනය:* ${new Date(ord.createdAt).toLocaleDateString()}\n`;
+                if (ord.dueDate) {
+                    msg += `⏰ *ගෙවිය යුතු දිනය:* ${ord.dueDate}\n`;
+                }
+                msg += `💰 *මුළු මුදල:* Rs. ${(Number(ord.total) || 0).toFixed(2)}\n`;
+                msg += `💳 *ගෙවිය යුතු ඉතිරි ශේෂය: Rs. ${dueAmt.toFixed(2)}*\n\n`;
+                msg += `ඔබ දැනටමත් මුදල් ගෙවා ඇත්නම් කරුණාකර මෙම පණිවිඩය නොසලකා හරින්න.\n`;
+                msg += `ස්තූතියි!\n`;
+                msg += `*${bizName}*\n`;
+                msg += `--------------------------------\n`;
+                msg += `(Software by DIGIBIZ - 0713446500)`;
+            } else if (lang === 'ta') {
+                msg = `*அன்பான வாடிக்கையாளர் ${ord.customerName || ''},*\n\n`;
+                msg += `*${bizName}* நிறுவனத்திலிருந்து நீங்கள் பெற்றுக்கொண்ட பில் தொகைக்கான கட்டணத்தை செலுத்துமாறு அன்புடன் கேட்டுக்கொள்கிறோம்.\n\n`;
+                msg += `📄 *Invoice #:* ${ord.invoiceNo}\n`;
+                msg += `📅 *பில் தேதி:* ${new Date(ord.createdAt).toLocaleDateString()}\n`;
+                if (ord.dueDate) {
+                    msg += `⏰ *செலுத்த வேண்டிய தேதி:* ${ord.dueDate}\n`;
+                }
+                msg += `💰 *மொத்தத் தொகை:* Rs. ${(Number(ord.total) || 0).toFixed(2)}\n`;
+                msg += `💳 *செலுத்த வேண்டிய மீதித் தொகை: Rs. ${dueAmt.toFixed(2)}*\n\n`;
+                msg += `ஏற்கனவே பணம் செலுத்தியிருந்தால் இந்த குறுஞ்செய்தியை புறக்கணிக்கவும்.\n`;
+                msg += `நன்றி!\n`;
+                msg += `*${bizName}*\n`;
+                msg += `--------------------------------\n`;
+                msg += `(Software by DIGIBIZ - 0713446500)`;
+            } else {
+                msg = `*Dear ${ord.customerName || 'Customer'},*\n\n`;
+                msg += `This is a friendly payment reminder for your invoice with *${bizName}*.\n\n`;
+                msg += `📄 *Invoice #:* ${ord.invoiceNo}\n`;
+                msg += `📅 *Invoice Date:* ${new Date(ord.createdAt).toLocaleDateString()}\n`;
+                if (ord.dueDate) {
+                    msg += `⏰ *Due Date:* ${ord.dueDate}\n`;
+                }
+                msg += `💰 *Total Amount:* Rs. ${(Number(ord.total) || 0).toFixed(2)}\n`;
+                msg += `💳 *Balance Due: Rs. ${dueAmt.toFixed(2)}*\n\n`;
+                msg += `If you have already settled this payment, please disregard this message.\n`;
+                msg += `Thank you for your business!\n`;
+                msg += `*${bizName}*\n`;
+                msg += `--------------------------------\n`;
+                msg += `(Software by DIGIBIZ - 0713446500)`;
+            }
+
+            const encoded = encodeURIComponent(msg);
+            const url = phone.length >= 7 
+                ? `https://wa.me/94${phone}?text=${encoded}`
+                : `https://wa.me/?text=${encoded}`;
+
+            window.open(url, '_blank');
+        }
+
+        // --- SETTLEMENT PAYMENT MODAL ---
+        function openSettleModal(orderId) {
+            const ord = allCreditOrders.find(o => o.id === orderId);
+            if (!ord) return;
+            activeSettleOrder = ord;
+
+            const dueAmt = Number(ord.outstandingAmount !== undefined ? ord.outstandingAmount : ord.total) || 0;
+            document.getElementById('settleCustName').textContent = ord.customerName || 'Customer';
+            document.getElementById('settleInvoiceNo').textContent = `Invoice #${ord.invoiceNo}`;
+            document.getElementById('settleRemainingAmt').textContent = `Rs. ${dueAmt.toFixed(2)}`;
+            document.getElementById('settleAmountInput').value = dueAmt;
+            document.getElementById('settleAmountInput').max = dueAmt;
+
+            document.getElementById('settleModal').classList.add('open');
+        }
+
+        function closeSettleModal() {
+            document.getElementById('settleModal').classList.remove('open');
+            activeSettleOrder = null;
+        }
+
+        async function handleProcessSettlement(e) {
+            e.preventDefault();
+            if (!activeSettleOrder) return;
+
+            const payAmt = Number(document.getElementById('settleAmountInput').value) || 0;
+            const payMethod = document.getElementById('settleMethodSelect').value;
+            const curDue = Number(activeSettleOrder.outstandingAmount !== undefined ? activeSettleOrder.outstandingAmount : activeSettleOrder.total) || 0;
+
+            if (payAmt <= 0) {
+                alert('Please enter a valid amount.');
+                return;
+            }
+
+            const newDue = Math.max(0, curDue - payAmt);
+            const isFull = newDue <= 0;
+
+            // Update in-memory
+            activeSettleOrder.outstandingAmount = newDue;
+            activeSettleOrder.paymentStatus = isFull ? 'PAID' : 'PARTIAL';
+            if (isFull) activeSettleOrder.status = 'completed';
+
+            // Sync to Firestore
+            if (window.firebase && bizContext) {
+                try {
+                    const db = window.firebase.firestore();
+                    const batch = db.batch();
+
+                    const orderRef = db.collection('orders').doc(bizContext.businessId).collection('list').doc(activeSettleOrder.id);
+                    batch.set(orderRef, {
+                        outstandingAmount: newDue,
+                        paymentStatus: activeSettleOrder.paymentStatus,
+                        lastPaidAmount: payAmt,
+                        lastPaidAt: new Date().toISOString()
+                    }, { merge: true });
+
+                    // Customer Balance deduction
+                    if (activeSettleOrder.customerId && activeSettleOrder.customerId !== 'GUEST') {
+                        const custRef = db.collection('customers').doc(bizContext.businessId).collection('list').doc(activeSettleOrder.customerId);
+                        batch.set(custRef, {
+                            balance: window.firebase.firestore.FieldValue.increment(-payAmt)
+                        }, { merge: true });
+                    }
+
+                    await batch.commit();
+                } catch(err) {
+                    console.warn('Settlement sync notice:', err);
+                }
+            }
+
+            closeSettleModal();
+            renderCreditList();
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ගෙවීම සාර්ථකයි!',
+                    text: `රු. ${payAmt.toFixed(2)} ක මුදලක් සාර්ථකව අයකර ගන්නා ලදී. ඉතිරි ශේෂය: රු. ${newDue.toFixed(2)}`,
+                    confirmButtonColor: '#047857'
+                });
+            } else {
+                alert(`✅ Payment of Rs. ${payAmt.toFixed(2)} recorded! Remaining due: Rs. ${newDue.toFixed(2)}`);
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+    </script>
+</body>
+
+</html>

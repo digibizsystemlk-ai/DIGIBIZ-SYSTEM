@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="si">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Customers Directory — DIGIBIZ BILL</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#047857">
+
+    <style>
+        .swal2-container {
+            z-index: 9999999 !important;
+        }
+
+        html.digibiz-sidebar-reserved body {
+            margin-left: 260px;
+        }
+
+        @media (max-width: 768px) {
+            html.digibiz-sidebar-reserved body {
+                margin-left: 0;
+            }
+        }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="/royal_arabian/assets/vendor/sweetalert2.all.min.js"></script>
+
+    <!-- Firebase Compat SDKs -->
+    <script src="/royal_arabian/assets/vendor/firebase-app-compat.js"></script>
+    <script src="/royal_arabian/assets/vendor/firebase-auth-compat.js"></script>
+    <script src="/royal_arabian/assets/vendor/firebase-firestore-compat.js"></script>
+
+    <!-- Core App Config & Sidebar -->
+    <script src="/royal_arabian/core/firebase-init.js?v=200"></script>
+    <script src="/royal_arabian/core/pwa-init.js"></script>
+    <script src="/royal_arabian/scripts/admin-impersonation.js?v=200"></script>
+    <script src="/royal_arabian/core/aggregate-utils.js"></script>
+    <script src="/royal_arabian/core/auth-roles.js?v=2265"></script>
+    <script src="/royal_arabian/core/business-types.js?v=72"></script>
+    <script src="/royal_arabian/core/dashboard-core.js?v=2265"></script>
+    <script src="/royal_arabian/core/subscription-manager.js?v=120"></script>
+    <script src="/royal_arabian/core/sidebar.js?v=2116"></script>
+
+    <style>
+        :root {
+            --primary: #047857;
+            --primary-dark: #064e3b;
+            --primary-light: #ecfdf5;
+            --accent: #10b981;
+            --bg-color: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Sinhala', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding-bottom: 80px;
+        }
+
+        /* Top Header */
+        .app-header {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: #ffffff;
+            padding: 14px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(6, 78, 59, 0.25);
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        .header-sub {
+            font-size: 11.5px;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 840px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .top-action-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 220px;
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #ffffff;
+            color: var(--text-dark);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: #ffffff;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(4, 120, 87, 0.25);
+            transition: transform 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-outline {
+            background: #ffffff;
+            color: var(--primary-dark);
+            border: 1.5px solid var(--primary);
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Customer Grid */
+        .customer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .customer-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .customer-card:hover {
+            border-color: #86efac;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .customer-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .customer-phone {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #0369a1;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+        }
+
+        .customer-area {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .customer-balance-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .customer-balance-box.has-debt {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .balance-amount {
+            font-size: 13.5px;
+            font-weight: 900;
+            color: #15803d;
+        }
+
+        .balance-amount.has-debt {
+            color: #dc2626;
+        }
+
+        .customer-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 8px;
+        }
+
+        .btn-sm-edit {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #86efac;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-sm-del {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-sm-credit {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 9999;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        .btn-close {
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 4px;
+        }
+
+        .stat-pill {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .digibiz-support-fab {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="header-row">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <a href="app.html" class="btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.15); padding:6px 10px; font-size:12px;">
+                    ⚡ Back to POS
+                </a>
+                <div>
+                    <div class="header-title">👥 Customers Directory</div>
+                    <div class="header-sub" id="bizSubtitle">Quick Billing Directory</div>
+                </div>
+            </div>
+            <span class="stat-pill" id="totalCountPill">0 Customers</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Top Action Bar -->
+        <div class="top-action-bar">
+            <div class="search-box">
+                <input type="text" id="searchInput" class="form-input" placeholder="🔍 Search customer name, phone, or area..." oninput="handleSearch(this.value)">
+            </div>
+            <button type="button" class="btn-primary" onclick="openAddCustomerModal()">
+                ➕ Add New Customer (නව පාරිභෝගිකයෙක්)
+            </button>
+        </div>
+
+        <!-- Customer Grid -->
+        <div id="customerGridContainer" class="customer-grid"></div>
+        <div id="emptyNotice" style="display:none; text-align:center; padding:40px 10px; color:#64748b; font-size:14px; font-weight:700;">
+            👥 පාරිභෝගිකයින් කිසිවක් හමු නොවීය. ඉහළින් "Add New Customer" ක්ලික් කර එක් කරන්න.
+        </div>
+    </div>
+
+    <!-- Customer Add / Edit Modal -->
+    <div class="modal-overlay" id="customerModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span id="modalTitle">➕ Add New Customer</span>
+                <button type="button" class="btn-close" onclick="closeCustomerModal()">✕</button>
+            </div>
+            <form id="customerForm" onsubmit="handleSaveCustomer(event)">
+                <input type="hidden" id="editCustomerId">
+                <div class="form-group">
+                    <label class="form-label">Customer Name (නම) *</label>
+                    <input type="text" id="custNameInput" class="form-input" placeholder="e.g. Nimal Perera" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number (දුරකථන අංකය)</label>
+                    <input type="tel" id="custPhoneInput" class="form-input" placeholder="07XXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Area / Town / Address (ප්‍රදේශය / ලිපිනය)</label>
+                    <input type="text" id="custAreaInput" class="form-input" placeholder="e.g. Colombo, Kandy, Store No 4">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Initial Credit Balance (ආරම්භක ණය මුදල - LKR)</label>
+                    <input type="number" id="custBalInput" class="form-input" placeholder="0.00" min="0" step="any">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn-outline" onclick="closeCustomerModal()" style="border-color:#cbd5e1; color:#475569;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary" id="btnSaveCustomer">
+                        💾 Save Customer (සුරකින්න)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let appCtx = null;
+        let allCustomers = [];
+
+        async function resolveAppContext(user) {
+            let bid = localStorage.getItem('currentBusinessId') || localStorage.getItem('activeBusinessId') || (user ? user.uid : null);
+            let bName = localStorage.getItem('currentBusinessName') || localStorage.getItem('digibiz_qb_biz_name') || 'Quick Billing Directory';
+
+            if (user && window.firebase && window.firebase.firestore) {
+                try {
+                    const db = window.firebase.firestore();
+                    const uDoc = await db.collection('users').doc(user.uid).get().catch(() => null);
+                    if (uDoc && uDoc.exists) {
+                        const uData = uDoc.data() || {};
+                        if (uData.businessId) bid = uData.businessId;
+                        if (uData.businessName) bName = uData.businessName;
+                    }
+                    if (bid && (!bName || bName === 'Quick Billing Directory')) {
+                        const bDoc = await db.collection('businesses').doc(bid).get().catch(() => null);
+                        if (bDoc && bDoc.exists) {
+                            const bData = bDoc.data() || {};
+                            bName = bData.name || bData.businessName || bName;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (user && window.dashboardCore) {
+                try {
+                    const coreCtx = await window.dashboardCore.getContext(user);
+                    if (coreCtx) {
+                        if (coreCtx.businessId) bid = coreCtx.businessId;
+                        if (coreCtx.businessName) bName = coreCtx.businessName;
+                    }
+                } catch(e) {}
+            }
+
+            appCtx = {
+                userId: user ? user.uid : (localStorage.getItem('digibiz_qb_uid') || 'local'),
+                businessId: bid || 'local',
+                businessName: bName
+            };
+
+            if (bid && bid !== 'local') {
+                localStorage.setItem('currentBusinessId', bid);
+                localStorage.setItem('digibiz_qb_uid', appCtx.userId);
+                localStorage.setItem('digibiz_qb_biz_name', bName);
+            }
+
+            const subtitleEl = document.getElementById('bizSubtitle');
+            if (subtitleEl && bName && bName !== 'Quick Billing Directory') {
+                subtitleEl.textContent = bName;
+            }
+
+            return appCtx;
+        }
+
+        async function initPage() {
+            await resolveAppContext(null);
+            loadCustomers();
+
+            if (window.firebase && firebase.auth) {
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    await resolveAppContext(user);
+                    loadCustomers();
+                });
+            }
+        }
+
+        function getScopedKey(key) {
+            const bId = (appCtx && appCtx.businessId && appCtx.businessId !== 'local') ? appCtx.businessId : (localStorage.getItem('currentBusinessId') || localStorage.getItem('activeBusinessId') || 'local');
+            return `digibiz_qb_${bId}_${key}`;
+        }
+
+        async function loadCustomers() {
+            const scopedKey = getScopedKey('customers');
+            let raw = localStorage.getItem(scopedKey) || localStorage.getItem('digibiz_qb_customers');
+            try {
+                allCustomers = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                allCustomers = [];
+            }
+
+            renderCustomers(allCustomers);
+
+            const bid = (appCtx && appCtx.businessId && appCtx.businessId !== 'local') ? appCtx.businessId : (localStorage.getItem('currentBusinessId') || localStorage.getItem('activeBusinessId'));
+
+            // Fetch from Firestore in background if online
+            if (navigator.onLine && window.firebase && bid && bid !== 'local') {
+                const db = window.firebase.firestore();
+                try {
+                    const snap = await db.collection('customers').doc(bid).collection('list').get().catch(() => null);
+                    if (snap && !snap.empty) {
+                        const list = [];
+                        snap.forEach(doc => {
+                            const d = doc.data();
+                            if (d.isActive !== false) {
+                                list.push({
+                                    id: doc.id,
+                                    name: d.name || d.customerName || 'Customer',
+                                    phone: d.phone || d.mobile || '',
+                                    area: d.area || d.address || d.city || 'General',
+                                    balance: Number(d.balance || d.outstandingAmount || 0)
+                                });
+                            }
+                        });
+                        allCustomers = list;
+                        localStorage.setItem(scopedKey, JSON.stringify(allCustomers));
+                        localStorage.setItem('digibiz_qb_customers', JSON.stringify(allCustomers));
+                        renderCustomers(allCustomers);
+                    }
+                } catch(e) {}
+            }
+        }
+
+        function renderCustomers(items) {
+            const container = document.getElementById('customerGridContainer');
+            const emptyEl = document.getElementById('emptyNotice');
+            const countPill = document.getElementById('totalCountPill');
+
+            if (countPill) countPill.textContent = `${items.length} Customers`;
+
+            if (!items.length) {
+                container.innerHTML = '';
+                emptyEl.style.display = 'block';
+                return;
+            }
+
+            emptyEl.style.display = 'none';
+            container.innerHTML = items.map(c => {
+                const bal = Number(c.balance || 0);
+                const hasDebt = bal > 0;
+                return `
+                    <div class="customer-card">
+                        <div>
+                            <div class="customer-name">${escapeHtml(c.name)}</div>
+                            ${c.phone ? `<a href="tel:${escapeHtml(c.phone)}" class="customer-phone">📞 ${escapeHtml(c.phone)}</a>` : '<div style="font-size:12px; color:#94a3b8;">No phone number</div>'}
+                            <div class="customer-area">📍 ${escapeHtml(c.area || 'General')}</div>
+                            <div class="customer-balance-box ${hasDebt ? 'has-debt' : ''}">
+                                <span>Credit Balance:</span>
+                                <span class="balance-amount ${hasDebt ? 'has-debt' : ''}">Rs. ${bal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                        </div>
+                        <div class="customer-actions">
+                            <a href="credit.html" class="btn-sm-credit">💳 Credit</a>
+                            <button type="button" class="btn-sm-edit" onclick="openEditCustomerModal('${c.id}')">✏️ Edit</button>
+                            <button type="button" class="btn-sm-del" onclick="handleDeleteCustomer('${c.id}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleSearch(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) {
+                renderCustomers(allCustomers);
+                return;
+            }
+            const filtered = allCustomers.filter(c => 
+                (c.name || '').toLowerCase().includes(q) ||
+                (c.phone || '').toLowerCase().includes(q) ||
+                (c.area || '').toLowerCase().includes(q)
+            );
+            renderCustomers(filtered);
+        }
+
+        function openAddCustomerModal() {
+            document.getElementById('customerForm').reset();
+            document.getElementById('editCustomerId').value = '';
+            document.getElementById('modalTitle').textContent = '➕ Add New Customer';
+            document.getElementById('customerModal').classList.add('open');
+            setTimeout(() => document.getElementById('custNameInput').focus(), 150);
+        }
+
+        function openEditCustomerModal(id) {
+            const c = allCustomers.find(x => x.id === id);
+            if (!c) return;
+            document.getElementById('editCustomerId').value = c.id;
+            document.getElementById('custNameInput').value = c.name || '';
+            document.getElementById('custPhoneInput').value = c.phone || '';
+            document.getElementById('custAreaInput').value = c.area || '';
+            document.getElementById('custBalInput').value = c.balance || 0;
+            document.getElementById('modalTitle').textContent = '✏️ Edit Customer';
+            document.getElementById('customerModal').classList.add('open');
+        }
+
+        function closeCustomerModal() {
+            document.getElementById('customerModal').classList.remove('open');
+        }
+
+        async function handleSaveCustomer(e) {
+            e.preventDefault();
+            const id = document.getElementById('editCustomerId').value;
+            const name = document.getElementById('custNameInput').value.trim();
+            const phone = document.getElementById('custPhoneInput').value.trim();
+            const area = document.getElementById('custAreaInput').value.trim();
+            const balance = Number(document.getElementById('custBalInput').value) || 0;
+
+            if (!name) return;
+
+            let updatedCust;
+            if (id) {
+                const existing = allCustomers.find(x => x.id === id);
+                if (existing) {
+                    existing.name = name;
+                    existing.phone = phone;
+                    existing.area = area;
+                    existing.balance = balance;
+                    updatedCust = existing;
+                }
+            } else {
+                updatedCust = {
+                    id: `CUST_${Date.now().toString().slice(-6)}`,
+                    name,
+                    phone,
+                    area: area || 'General',
+                    balance,
+                    isActive: true,
+                    createdAt: new Date().toISOString()
+                };
+                allCustomers.unshift(updatedCust);
+            }
+
+            const scopedKey = getScopedKey('customers');
+            localStorage.setItem(scopedKey, JSON.stringify(allCustomers));
+            localStorage.setItem('digibiz_qb_customers', JSON.stringify(allCustomers));
+            renderCustomers(allCustomers);
+            closeCustomerModal();
+
+            if (navigator.onLine && window.firebase && appCtx) {
+                try {
+                    const db = window.firebase.firestore();
+                    await db.collection('customers').doc(appCtx.businessId).collection('list').doc(updatedCust.id).set({
+                        name: updatedCust.name,
+                        phone: updatedCust.phone,
+                        area: updatedCust.area,
+                        balance: updatedCust.balance,
+                        isActive: true,
+                        updatedAt: new Date().toISOString()
+                    }, { merge: true });
+                } catch (err) {
+                    console.warn('Sync cust err:', err);
+                }
+            }
+        }
+
+        async function handleDeleteCustomer(id) {
+            if (typeof Swal !== 'undefined') {
+                const res = await Swal.fire({
+                    title: 'පාරිභෝගිකයා ඉවත් කරන්නද?',
+                    text: 'මෙම පාරිභෝගිකයා directory එකෙන් ඉවත් කිරීමට අවශ්‍ය බව තහවුරු කරන්න.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'ඔව්, ඉවත් කරන්න',
+                    cancelButtonText: 'අවලංගු කරන්න'
+                });
+                if (!res.isConfirmed) return;
+            } else {
+                if (!confirm('මෙම පාරිභෝගිකයා ඉවත් කරන්නද?')) return;
+            }
+
+            allCustomers = allCustomers.filter(x => x.id !== id);
+            const scopedKey = getScopedKey('customers');
+            localStorage.setItem(scopedKey, JSON.stringify(allCustomers));
+            localStorage.setItem('digibiz_qb_customers', JSON.stringify(allCustomers));
+            renderCustomers(allCustomers);
+
+            if (navigator.onLine && window.firebase && appCtx) {
+                try {
+                    const db = window.firebase.firestore();
+                    await db.collection('customers').doc(appCtx.businessId).collection('list').doc(id).delete();
+                } catch (err) { console.warn('Delete cust err:', err); }
+            }
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+
+</html>

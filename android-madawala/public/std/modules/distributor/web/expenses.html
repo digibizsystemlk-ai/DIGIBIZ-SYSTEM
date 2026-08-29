@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses Management — DIGIBIZ Distributor</title>
+    <style>
+        html.digibiz-sidebar-reserved body { margin-left: 260px; }
+        @media (max-width: 768px) { html.digibiz-sidebar-reserved body { margin-left: 0; } }
+    </style>
+    <script>document.documentElement.classList.add('digibiz-sidebar-reserved');</script>
+    <script src="/std/core/pwa-init.js?v=100"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="/std/core/firebase-init.js?v=100"></script>
+    <script src="/std/scripts/admin-impersonation.js?v=100"></script>
+    <script src="/std/core/auth-roles.js?v=2265"></script>
+    <script src="/std/core/business-types.js?v=100"></script>
+    <script src="/std/core/aggregate-utils.js"></script>
+    <script src="/std/core/dashboard-core.js?v=2265"></script>
+    <script src="/std/core/sidebar.js?v=2116"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #064e3b;
+            --primary-light: #10b981;
+            --accent: #047857;
+            --text-dark: #0f172a;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --bg-page: #f8fafc;
+            --shadow: 0 4px 14px rgba(6, 78, 59, 0.06);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .page {
+            padding: 24px 20px;
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 0 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        p.desc {
+            font-size: 13px;
+            color: var(--text-light);
+            margin: 0;
+            font-weight: 500;
+        }
+        label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #334155;
+            margin-top: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: var(--text-dark);
+            margin-top: 5px;
+            background: #fff;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+        button.btn-save {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: white;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            margin-top: 20px;
+            width: 100%;
+            transition: all 0.2s;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button.btn-save:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+        button.btn-save:active {
+            transform: scale(0.98);
+        }
+        .btn-outline {
+            background: white;
+            color: var(--text-dark);
+            border: 1.5px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border-left: 4px solid var(--primary-light);
+        }
+        .kpi-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .kpi-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-top: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: left;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            font-size: 10.5px;
+            letter-spacing: 0.05em;
+        }
+        tr.clickable-row {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        tr.clickable-row:hover {
+            background: #f0fdf4 !important;
+        }
+        .num {
+            text-align: right;
+            font-weight: 800;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #064e3b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            display: none;
+            z-index: 10000;
+            font-size: 13.5px;
+            font-weight: 700;
+        }
+        .action-icon-btn {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 12px;
+        }
+        .action-icon-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 15px;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            animation: modalIn 0.2s ease-out;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @media (max-width: 600px) {
+            .mobile-hide { display: none !important; }
+            th, td { padding: 10px 6px; }
+            .kpi-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<div class="page">
+    <!-- Top Bar & Summary KPIs -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+        <div>
+            <h1>💸 Expenses Management Panel</h1>
+            <p class="desc">Log and monitor all distributor operating expenses (Vehicle Fuel, Rep Allowances, Salaries, Warehouse Rent, Transport).</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <a href="/modules/distributor/web/revenue.html" class="btn-outline" style="text-decoration:none;"><i class="fa-solid fa-chart-line" style="color:#10b981;"></i> Revenue & Profit</a>
+            <button type="button" onclick="loadList()" class="btn-outline"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+        <div class="kpi-card" style="border-left-color:#ef4444;">
+            <div class="kpi-title">Today Expenses</div>
+            <div class="kpi-val" id="kpiToday" style="color:#dc2626;">Rs. 0.00</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#d97706;">
+            <div class="kpi-title">This Month (MTD)</div>
+            <div class="kpi-val" id="kpiMonth" style="color:#b45309;">Rs. 0.00</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#3b82f6;">
+            <div class="kpi-title">Total Records</div>
+            <div class="kpi-val" id="kpiCount" style="color:#1d4ed8;">0</div>
+        </div>
+    </div>
+
+    <!-- Add Expense Card -->
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:12px; margin-bottom:14px;">
+            <div style="font-weight:800; font-size:16px; color:#064e3b; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-plus-circle" style="color:#10b981;"></i> Record New Operating Expense
+            </div>
+            <div style="font-size:12px; font-weight:700; color:#64748b;">Distributor GL Integrated</div>
+        </div>
+        
+        <form id="expenseForm" onsubmit="saveExpense(event)">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+                <div>
+                    <label for="expenseDate">Expense Date</label>
+                    <input type="date" id="expenseDate" required>
+                </div>
+                <div>
+                    <label for="expAmount">Amount (LKR)</label>
+                    <input type="number" id="expAmount" step="0.01" min="0.01" placeholder="0.00" required>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+                <div>
+                    <label for="expCategory">Category (වියදම් වර්ගය)</label>
+                    <input id="expCategory" list="categoryList" placeholder="Select or type category..." required>
+                    <datalist id="categoryList">
+                        <option value="Vehicle Fuel & Transport (ඉන්ධන සහ ප්‍රවාහන)">Vehicle Fuel & Transport (ඉන්ධන සහ ප්‍රවාහන)</option>
+                        <option value="Vehicle Maintenance & Repairs (වාහන නඩත්තු)">Vehicle Maintenance & Repairs (වාහන නඩත්තු)</option>
+                        <option value="Rep Daily Allowances / Meals (රෙප් දීමනා)">Rep Daily Allowances / Meals (රෙප් දීමනා)</option>
+                        <option value="Salaries & Staff Wages (වැටුප් සහ වේතන)">Salaries & Staff Wages (වැටුප් සහ වේතන)</option>
+                        <option value="Warehouse Rent & Rates (ගබඩා කුලී)">Warehouse Rent & Rates (ගබඩා කුලී)</option>
+                        <option value="Electricity & Utilities (විදුලිය සහ ජලය)">Electricity & Utilities (විදුලිය සහ ජලය)</option>
+                        <option value="Loading & Unloading Labor (පැටවීම් සහ බෑම)">Loading & Unloading Labor (පැටවීම් සහ බෑම)</option>
+                        <option value="Promotion & Marketing (විකුණුම් ප්‍රවර්ධන)">Promotion & Marketing (විකුණුම් ප්‍රවර්ධන)</option>
+                        <option value="Printing & POS Paper Rolls (ලිපිද්‍රව්‍ය)">Printing & POS Paper Rolls (ලිපිද්‍රව්‍ය)</option>
+                        <option value="Rep Commission Expense (කොමිස් ගෙවීම්)">Rep Commission Expense (කොමිස් ගෙවීම්)</option>
+                        <option value="Telephone & Internet (සන්නිවේදන වියදම්)">Telephone & Internet (සන්නිවේදන වියදම්)</option>
+                        <option value="Bank Charges & Interest (බැංකු ගාස්තු)">Bank Charges & Interest (බැංකු ගාස්තු)</option>
+                        <option value="Miscellaneous Expenses (වෙනත් වියදම්)">Miscellaneous Expenses (වෙනත් වියදම්)</option>
+                    </datalist>
+                </div>
+                <div>
+                    <label for="expPayment">Paid Via (ගෙවූ ආකාරය)</label>
+                    <select id="expPayment">
+                        <option value="CASH">Cash (Cash in Hand / Drawer)</option>
+                        <option value="BANK">Bank Transfer (Commercial / Sampath / etc.)</option>
+                        <option value="CHEQUE">Cheque Payment</option>
+                        <option value="CARD">Card / Online</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="expNote">Description / Reference Note (විස්තරය / රිසිට්පත් අංකය)</label>
+                <textarea id="expNote" rows="2" placeholder="e.g. Fuel for Lorry WP-GA-4520, Rep food allowance for Galle route, etc."></textarea>
+            </div>
+
+            <button type="submit" class="btn-save"><i class="fa-solid fa-check"></i> Save Expense (වියදම සටහන් කරන්න)</button>
+        </form>
+    </div>
+
+    <!-- Expenses History Card -->
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <div style="font-weight:800; font-size:16px; color:#064e3b; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-list" style="color:#10b981;"></i> Operating Expenses History
+            </div>
+            <div style="width:260px;">
+                <input type="text" id="expenseSearch" oninput="filterExpenseTable()" placeholder="🔍 Search expenses..." style="margin-top:0; padding:8px 12px; font-size:13px;">
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description / Note</th>
+                        <th>Method</th>
+                        <th style="text-align:right;">Amount (LKR)</th>
+                        <th style="text-align:center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="historyExpList">
+                    <tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Loading expenses...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Expense Modal -->
+<div id="editExpenseModal" class="modal" style="z-index:10000;">
+    <div class="modal-content" style="max-width:480px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #f1f5f9; padding-bottom:12px; margin-bottom:16px;">
+            <h3 id="editModalTitle" style="margin:0; font-family:'Outfit',sans-serif; font-size:18px; font-weight:800; color:#064e3b;">Edit Expense</h3>
+            <button type="button" onclick="closeEditExpenseModal()" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; font-weight:800; color:#64748b;">✕</button>
+        </div>
+
+        <form id="editExpenseForm" onsubmit="saveEditedExpense(event)">
+            <input type="hidden" id="editExpId">
+            
+            <label for="editExpDate">Expense Date</label>
+            <input type="date" id="editExpDate" required>
+            
+            <label for="editExpAmount">Amount (LKR)</label>
+            <input type="number" id="editExpAmount" step="0.01" min="0.01" required>
+            
+            <label for="editExpCategory">Category</label>
+            <input id="editExpCategory" list="categoryList" required>
+            
+            <label for="editExpPay">Payment Method</label>
+            <select id="editExpPay">
+                <option value="CASH">Cash (Cash in Hand)</option>
+                <option value="BANK">Bank Transfer</option>
+                <option value="CHEQUE">Cheque</option>
+                <option value="CARD">Card / Online</option>
+            </select>
+            
+            <label for="editExpNote">Description / Note</label>
+            <textarea id="editExpNote" rows="2"></textarea>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="button" onclick="closeEditExpenseModal()" class="btn-outline">Cancel</button>
+                <button type="submit" class="btn-save" style="margin-top:0; width:auto; padding:10px 20px;"><i class="fa-solid fa-save"></i> Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div id="detExpenseModal" class="modal" style="z-index:10000;">
+    <div class="modal-content" style="max-width:480px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #f1f5f9; padding-bottom:12px; margin-bottom:16px;">
+            <div>
+                <h3 id="detModalCategory" style="margin:0; font-family:'Outfit',sans-serif; font-size:18px; font-weight:800; color:#064e3b;">Expense Details</h3>
+                <div id="detModalDate" style="font-size:12px; font-weight:600; color:#64748b; margin-top:2px;"></div>
+            </div>
+            <button type="button" onclick="closeDetExpenseModal()" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; font-weight:800; color:#64748b;">✕</button>
+        </div>
+
+        <div id="detModalContent"></div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button type="button" onclick="closeDetExpenseModal()" class="btn-outline">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentBusinessId = '';
+    let allExpensesList = [];
+    const fmt = (v) => `Rs. ${(Number(v) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        if (!t) return;
+        t.textContent = msg;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    function renderRow(r) {
+        return `
+            <tr class="clickable-row" onclick="openExpenseDetailsModal('${r.id}')" title="Click to view expense details">
+                <td><strong style="color:#0f172a;">${r.expenseDate || r.date || '-'}</strong></td>
+                <td><span style="font-weight:700; color:#064e3b;">${r.category || 'General'}</span></td>
+                <td style="color:#475569; max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.note || r.description || '-'}</td>
+                <td><span style="font-size:11px; font-weight:800; background:#f1f5f9; padding:3px 8px; border-radius:6px; border:1px solid #cbd5e1;">${String(r.paymentMethod || 'CASH').toUpperCase()}</span></td>
+                <td class="num" style="color:#dc2626; font-weight:800;">${fmt(r.amount).replace('Rs. ', '')}</td>
+                <td style="text-align:center;" onclick="event.stopPropagation();">
+                    <div style="display:flex; gap:6px; justify-content:center;">
+                        <button type="button" class="action-icon-btn" title="View Details" onclick="openExpenseDetailsModal('${r.id}')" style="color:#0284c7;"><i class="fa-solid fa-eye"></i></button>
+                        <button type="button" class="action-icon-btn" title="Edit Expense" onclick="openEditExpenseModal('${r.id}')" style="color:#d97706;"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button type="button" class="action-icon-btn" title="Delete Expense" onclick="deleteExpense('${r.id}')" style="color:#ef4444;"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    async function loadList() {
+        if (!currentBusinessId) return;
+        
+        let snap;
+        try {
+            const opt = navigator.onLine ? {} : { source: 'cache' };
+            snap = await db.collection('expenses').doc(currentBusinessId).collection('list')
+                .orderBy('expenseDate', 'desc')
+                .limit(300)
+                .get(opt);
+        } catch (e) {
+            console.warn('[Expenses] Fallback fetch without orderBy:', e);
+            snap = await db.collection('expenses').doc(currentBusinessId).collection('list').get().catch(() => ({ docs: [] }));
+        }
+
+        allExpensesList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // Also check top-level expenses collection for fallback
+        if (allExpensesList.length === 0) {
+            try {
+                const topSnap = await db.collection('expenses').where('businessId', '==', currentBusinessId).limit(300).get().catch(() => ({ docs: [] }));
+                if (!topSnap.empty) {
+                    allExpensesList = topSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                }
+            } catch(eTop) {}
+        }
+
+        allExpensesList.sort((a, b) => {
+            const da = a.expenseDate || a.date || '';
+            const dbDate = b.expenseDate || b.date || '';
+            return dbDate.localeCompare(da);
+        });
+
+        calculateKPIs();
+        filterExpenseTable();
+    }
+
+    function calculateKPIs() {
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Colombo' });
+        const curMonth = today.substring(0, 7); // YYYY-MM
+
+        let todaySum = 0;
+        let monthSum = 0;
+        let count = 0;
+
+        allExpensesList.forEach(r => {
+            if (r.isDeleted === true) return;
+            const amt = Number(r.amount) || 0;
+            const dt = String(r.expenseDate || r.date || '');
+            if (dt === today) todaySum += amt;
+            if (dt.startsWith(curMonth)) monthSum += amt;
+            count++;
+        });
+
+        document.getElementById('kpiToday').textContent = fmt(todaySum);
+        document.getElementById('kpiMonth').textContent = fmt(monthSum);
+        document.getElementById('kpiCount').textContent = count;
+    }
+
+    function filterExpenseTable() {
+        const query = (document.getElementById('expenseSearch')?.value || '').trim().toLowerCase();
+
+        const filtered = allExpensesList.filter(r => {
+            if (r.isDeleted === true) return false;
+            if (!query) return true;
+            const cat = String(r.category || '').toLowerCase();
+            const note = String(r.note || r.description || '').toLowerCase();
+            const amt = String(r.amount || '');
+            const pm = String(r.paymentMethod || '').toLowerCase();
+            const dt = String(r.expenseDate || r.date || '');
+            return cat.includes(query) || note.includes(query) || amt.includes(query) || pm.includes(query) || dt.includes(query);
+        });
+
+        const historyBody = document.getElementById('historyExpList');
+        if (historyBody) {
+            historyBody.innerHTML = filtered.map(renderRow).join('') || '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8; font-weight:600;">No operating expenses recorded yet.</td></tr>';
+        }
+    }
+
+    async function saveExpense(e) {
+        e.preventDefault();
+        if (!currentBusinessId) {
+            alert('Business context not loaded yet. Please wait.');
+            return;
+        }
+
+        const date = document.getElementById('expenseDate').value;
+        const amount = Number(document.getElementById('expAmount').value) || 0;
+        const category = document.getElementById('expCategory').value.trim();
+        const paymentMethod = document.getElementById('expPayment').value;
+        const note = document.getElementById('expNote').value.trim();
+
+        if (amount <= 0) {
+            alert('Please enter a valid expense amount.');
+            return;
+        }
+
+        const expenseDoc = {
+            businessId: currentBusinessId,
+            expenseDate: date,
+            date: date,
+            amount: amount,
+            category: category,
+            paymentMethod: paymentMethod,
+            note: note,
+            description: note,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+            const subRef = await db.collection('expenses').doc(currentBusinessId).collection('list').add(expenseDoc);
+            
+            // Post GL Journal Entry for Distributor General Ledger
+            const refId = 'EXP_' + subRef.id;
+            const creditAcc = paymentMethod === 'BANK' ? '1-1020-01' : '1-1010-01';
+            const creditAccName = paymentMethod === 'BANK' ? 'Bank Account' : 'Cash in Drawer';
+
+            await db.collection('journal').doc(currentBusinessId).collection('entries').doc(refId).set({
+                businessId: currentBusinessId,
+                date: firebase.firestore.FieldValue.serverTimestamp(),
+                description: `Operating Expense: ${category} - ${note || 'Paid'}`,
+                ref: `expenses/${subRef.id}`,
+                referenceType: 'EXPENSE',
+                totalDebit: amount,
+                totalCredit: amount,
+                entries: [
+                    { accountCode: '5-5010-01', accountName: `Operating Expense (${category})`, debit: amount, credit: 0 },
+                    { accountCode: creditAcc, accountName: creditAccName, debit: 0, credit: amount }
+                ]
+            }, { merge: true }).catch(err => console.warn('[Expense GL Posting Notice]', err));
+
+            if (window.AggregateUtils) {
+                window.AggregateUtils.bumpAggregates({
+                    businessId: currentBusinessId,
+                    type: 'EXPENSE',
+                    value: amount,
+                    count: 1
+                }).catch(e => console.warn('Aggregates bump error:', e));
+            }
+
+            showToast('✅ Expense Recorded & Posted to General Ledger!');
+            document.getElementById('expenseForm').reset();
+            document.getElementById('expenseDate').value = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Colombo' });
+            loadList();
+        } catch (err) {
+            console.error('Error saving expense:', err);
+            alert('Failed to save expense: ' + err.message);
+        }
+    }
+
+    window.openExpenseDetailsModal = (id) => {
+        const exp = allExpensesList.find(r => r.id === id);
+        if (!exp) return;
+
+        document.getElementById('detModalCategory').textContent = exp.category || 'Operating Expense';
+        document.getElementById('detModalDate').textContent = `Date: ${exp.expenseDate || exp.date || '-'} · Method: ${String(exp.paymentMethod || 'CASH').toUpperCase()}`;
+
+        const body = document.getElementById('detModalContent');
+        if (body) {
+            body.innerHTML = `
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:16px; text-align:center; margin-bottom:16px;">
+                    <div style="font-size:11px; font-weight:800; color:#166534; text-transform:uppercase;">Expense Amount</div>
+                    <div style="font-size:26px; font-weight:900; color:#065f46; font-family:'Outfit',sans-serif; margin-top:2px;">${fmt(exp.amount)}</div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; margin-bottom:14px;">
+                    <div style="background:#f8fafc; padding:10px 12px; border-radius:10px; border:1px solid var(--border);">
+                        <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase;">Category</div>
+                        <div style="font-weight:800; color:#0f172a; margin-top:2px;">${exp.category || '-'}</div>
+                    </div>
+                    <div style="background:#f8fafc; padding:10px 12px; border-radius:10px; border:1px solid var(--border);">
+                        <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase;">Payment Method</div>
+                        <div style="font-weight:800; color:#0f172a; margin-top:2px;">${String(exp.paymentMethod || 'CASH').toUpperCase()}</div>
+                    </div>
+                </div>
+
+                <div style="background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:13px;">
+                    <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase; margin-bottom:4px;">Description / Reference</div>
+                    <div style="font-weight:600; color:#334155;">${exp.note || exp.description || 'No additional note provided.'}</div>
+                </div>
+            `;
+        }
+
+        document.getElementById('detExpenseModal').style.display = 'flex';
+    };
+
+    window.closeDetExpenseModal = () => {
+        document.getElementById('detExpenseModal').style.display = 'none';
+    };
+
+    window.openEditExpenseModal = (id) => {
+        const exp = allExpensesList.find(r => r.id === id);
+        if (!exp) return;
+
+        document.getElementById('editExpId').value = exp.id;
+        document.getElementById('editExpDate').value = exp.expenseDate || exp.date || '';
+        document.getElementById('editExpAmount').value = exp.amount || '';
+        document.getElementById('editExpCategory').value = exp.category || '';
+        document.getElementById('editExpPay').value = exp.paymentMethod || 'CASH';
+        document.getElementById('editExpNote').value = exp.note || exp.description || '';
+
+        document.getElementById('editExpenseModal').style.display = 'flex';
+    };
+
+    window.closeEditExpenseModal = () => {
+        document.getElementById('editExpenseModal').style.display = 'none';
+    };
+
+    async function saveEditedExpense(e) {
+        e.preventDefault();
+        const id = document.getElementById('editExpId').value;
+        if (!id || !currentBusinessId) return;
+
+        const date = document.getElementById('editExpDate').value;
+        const amount = Number(document.getElementById('editExpAmount').value) || 0;
+        const category = document.getElementById('editExpCategory').value.trim();
+        const paymentMethod = document.getElementById('editExpPay').value;
+        const note = document.getElementById('editExpNote').value.trim();
+
+        try {
+            await db.collection('expenses').doc(currentBusinessId).collection('list').doc(id).set({
+                expenseDate: date,
+                date: date,
+                amount: amount,
+                category: category,
+                paymentMethod: paymentMethod,
+                note: note,
+                description: note,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            showToast('✅ Expense Updated Successfully!');
+            closeEditExpenseModal();
+            loadList();
+        } catch (err) {
+            console.error('Error updating expense:', err);
+            alert('Failed to update expense: ' + err.message);
+        }
+    }
+
+    window.deleteExpense = async (id) => {
+        if (!confirm('Are you sure you want to delete this expense record?')) return;
+        if (!id || !currentBusinessId) return;
+
+        try {
+            await db.collection('expenses').doc(currentBusinessId).collection('list').doc(id).delete();
+            showToast('🗑️ Expense Record Deleted');
+            loadList();
+        } catch (err) {
+            console.error('Error deleting expense:', err);
+            alert('Failed to delete expense: ' + err.message);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const dateInput = document.getElementById('expenseDate');
+        if (dateInput) {
+            dateInput.value = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Colombo' });
+        }
+
+        if (window.firebase && firebase.auth) {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentBusinessId = (window.getActiveBusinessId && window.getActiveBusinessId()) ||
+                        localStorage.getItem('currentBusinessId') ||
+                        user.uid;
+                    loadList();
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

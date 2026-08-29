@@ -496,6 +496,8 @@
                         targetWorkspace = '/clients/thusithajayasundara/';
                     } else if (cleanEmail.includes('madawala') || cleanEmail.includes('darshana')) {
                         targetWorkspace = '/clients/madawalateashop/';
+                    } else if (cleanEmail.includes('nadun') || cleanEmail.includes('spiholdings') || cleanEmail.includes('spi_holdings') || cleanEmail.includes('dealwis')) {
+                        targetWorkspace = '/clients/spi_holdings/';
                     }
                 }
 
@@ -503,6 +505,10 @@
                 if (targetWorkspace) {
                     if (targetWorkspace.includes('chisathifamilyproducts') || cleanEmail.includes('shashintha') || cleanEmail.includes('chisathi')) {
                         targetWorkspace = '/clients/chisathifamily/';
+                    } else if (targetWorkspace.includes('darshanamadawala') || targetWorkspace.includes('madawala') || cleanEmail.includes('darshana') || cleanEmail.includes('madawala')) {
+                        targetWorkspace = '/clients/madawalateashop/';
+                    } else if (targetWorkspace.includes('spi_holdings') || targetWorkspace.includes('spiholdings') || cleanEmail.includes('nadun') || cleanEmail.includes('spiholdings') || cleanEmail.includes('dealwis')) {
+                        targetWorkspace = '/clients/spi_holdings/';
                     } else if (targetWorkspace.includes('/modules/')) {
                         const clientMatch = targetWorkspace.match(/\/clients\/([a-zA-Z0-9_-]+)/);
                         if (clientMatch) {
@@ -538,7 +544,11 @@
                 // Smooth instant redirect
                 showRoutingState('Launching Workspace...', 'Redirecting to your isolated workspace');
                 setTimeout(() => {
-                    window.location.href = targetWorkspace;
+                    let dest = targetWorkspace;
+                    if (window.location.pathname.startsWith('/public/') && !dest.startsWith('/public/')) {
+                        dest = '/public' + dest;
+                    }
+                    window.location.href = dest;
                 }, 300);
 
             } catch (routeErr) {

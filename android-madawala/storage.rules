@@ -1,0 +1,64 @@
+rules_version = '2';
+// Deploy: firebase deploy --only storage
+// Business Logos: Public read so invoice/bill viewers can render logo branding;
+// Upload/Update/Delete is secured to authorized business users, owners, and admins across all business models.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function userDoc() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function canActOnBusinessLogo(businessId) {
+      return request.auth != null
+        && businessId is string
+        && businessId.size() > 2
+        && (
+          request.auth.uid == businessId
+          || (
+            firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+            && (
+              userDoc().role in ['SUPER_ADMIN', 'super_admin']
+              || userDoc().businessId == businessId
+              || userDoc().assignedBusiness == businessId
+              || userDoc().companyId == businessId
+              || (
+                userDoc().role in [
+                  'BUSINESS_OWNER', 'DISTRIBUTOR_OWNER', 'ADMIN', 'MANAGER', 'OWNER',
+                  'business_owner', 'distributor_owner', 'admin', 'manager', 'owner'
+                ]
+                && (userDoc().businessId == businessId || request.auth.uid == businessId)
+              )
+            )
+          )
+          || (
+            firestore.exists(/databases/(default)/documents/businesses/$(businessId))
+            && firestore.get(/databases/(default)/documents/businesses/$(businessId)).data.ownerId == request.auth.uid
+          )
+          || (
+            firestore.exists(/databases/(default)/documents/businesses/$(businessId)/users/$(request.auth.uid))
+            && firestore.get(/databases/(default)/documents/businesses/$(businessId)/users/$(request.auth.uid)).data.role in [
+              'BUSINESS_OWNER', 'DISTRIBUTOR_OWNER', 'ADMIN', 'MANAGER', 'OWNER',
+              'business_owner', 'distributor_owner', 'admin', 'manager', 'owner'
+            ]
+          )
+        );
+    }
+
+    match /business-logos/{businessId}/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if canActOnBusinessLogo(businessId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if canActOnBusinessLogo(businessId);
+    }
+
+    match /feedback-attachments/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null;
+    }
+  }
+}

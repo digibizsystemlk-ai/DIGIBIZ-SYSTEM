@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <script src="/core/pwa-init.js?v=1"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DIGIBIZ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap&v=4" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=4">
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-functions-compat.js"></script>
+    <script src="../core/firebase-init.js?v=46"></script>
+    <script src="../core/business-types.js?v=74"></script>
+    <script src="../core/dashboard-core.js?v=2115"></script>
+    <script src="../core/demo-seeder.js?v=1"></script>
+    <script src="../core/finalization-engine.js?v=1"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html,body{width:100%;overflow-x:hidden;}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#10b981 0%,#059669 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px;}
+        .login-card{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:400px;box-shadow:0 20px 40px rgba(0,0,0,0.2);text-align:center;}
+        h1{color:#1a1a2e;margin-bottom:8px;font-size:24px;}
+        .sub{color:#64748b;margin-bottom:24px;font-size:14px;}
+        input{width:100%;padding:12px;margin-bottom:16px;border:1px solid #e9ecef;border-radius:10px;font-size:14px;}
+        button{width:100%;padding:14px;background:#10b981;color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:12px;}
+        button:hover{background:#059669;}
+        button:disabled{opacity:0.75;cursor:not-allowed;}
+        .google-btn{background:#fff;color:#1a1a2e;border:1px solid #e9ecef;display:flex;align-items:center;justify-content:center;gap:10px;}
+        .google-btn:hover{background:#f8f9fa;}
+        .error{color:#ef4444;margin-bottom:16px;font-size:14px;}
+        .register-link{text-align:center;margin-top:20px;font-size:14px;}
+        .forgot-link{display:block;text-align:right;font-size:12px;color:#0f766e;margin-top:-8px;margin-bottom:12px;cursor:pointer;}
+        .reset-box{display:none;background:#f8fafc;border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:12px;text-align:left;}
+        .reset-box.visible{display:block;}
+        .reset-box p{font-size:12px;color:#475569;margin:0 0 8px;}
+        .reset-inline{display:flex;gap:8px;}
+        .reset-inline input{margin:0;}
+        .reset-inline button{width:auto;padding:10px 12px;margin:0;}
+        a{color:#10b981;text-decoration:none;}
+        hr{margin:20px 0;border:1px solid #e9ecef;}
+        @media (max-width:480px){
+            body{padding:12px 10px;}
+            .login-card{padding:24px 16px;border-radius:18px;max-width:100%;}
+            h1{font-size:20px;}
+            .sub{font-size:13px;margin-bottom:18px;}
+            input{padding:11px 12px;font-size:13.5px;margin-bottom:12px;}
+            button{padding:12px;font-size:15px;}
+        }
+    </style>
+</head>
+<body>
+    <div style="position: absolute; top: 16px; left: 16px; z-index: 10;">
+        <a href="/index.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(255, 255, 255, 0.95); color: #059669; text-decoration: none; font-weight: 700; font-size: 13px; border-radius: 20px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); backdrop-filter: blur(8px); transition: transform 0.15s;">
+            <span style="font-size: 15px;">←</span> Back to Home
+        </a>
+    </div>
+    <div class="login-card">
+        <h1>🔐 Welcome Back</h1>
+        <p class="sub">Login to your account</p>
+        <div id="error" style="color: #ef4444; font-size: 13px; margin-bottom: 15px; font-weight: 600; min-height: 18px; text-align: center;"></div>
+        <form id="loginForm" action="#" method="POST" autocomplete="on">
+            <input type="email" id="email" name="email" placeholder="Email Address" autocomplete="username" required>
+            <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required>
+            <a id="forgotPasswordLink" class="forgot-link">Forgot Password?</a>
+            <div id="resetBox" class="reset-box">
+                <p>Enter your email to receive a password reset link.</p>
+                <div class="reset-inline">
+                    <input type="email" id="resetEmail" name="resetEmail" placeholder="you@example.com" autocomplete="email">
+                    <button id="sendResetBtn" type="button">Send Link</button>
+                </div>
+            </div>
+
+            <button type="submit" id="loginBtn">Login</button>
+        </form>
+        
+        <!-- Offline Login UI -->
+        <div id="offlineSection" style="display:none; margin-top:10px; padding:20px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:16px; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.05);">
+            <p style="font-size:12px; font-weight:800; color:#166534; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em;">📶 Offline Mode Access</p>
+            <input type="password" id="offlinePin" placeholder="Enter PIN" maxlength="6" style="text-align:center; font-size:24px; letter-spacing:8px; font-weight:900; background:white; border:2px solid #86efac; color:#166534; margin-bottom:12px;">
+            <button id="offlineLoginBtn" style="background:#15803d; margin-bottom:8px;">Unlock Offline</button>
+            <a href="#" id="backToOnline" style="font-size:12px; color:#166534; font-weight:600;">← Back to Online Login</a>
+        </div>
+        
+        <div class="register-link">Don't have an account? <a href="register.html">Sign up</a></div>
+    </div>
+
+    <script src="../core/auth-utils.js?v=1"></script>
+    <script src="../core/offline-auth.js?v=1"></script>
+    <script type="module">
+        // Use global auth and db from firebase-init.js
+        const { auth, db } = window;
+        const loginBtn = document.getElementById('loginBtn');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const errorDiv = document.getElementById('error');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const resetBox = document.getElementById('resetBox');
+        const sendResetBtn = document.getElementById('sendResetBtn');
+        const loginBtnDefaultText = loginBtn.textContent;
+
+        // Offline UI Elements
+        const offlineToggle = document.getElementById('offlineToggle');
+        const offlineSection = document.getElementById('offlineSection');
+        const showOfflineBtn = document.getElementById('showOfflineBtn');
+        const offlineLoginBtn = document.getElementById('offlineLoginBtn');
+        const offlinePinInput = document.getElementById('offlinePin');
+        const backToOnline = document.getElementById('backToOnline');
+
+        auth.onAuthStateChanged((user) => {
+            if (user && window.AuthUI) {
+                // If logged in online, save session for future offline use
+                window.AuthUI.routeToUniversalDashboard(user).then(() => {
+                    if (window.digibizOfflineAuth) {
+                        window.digibizOfflineAuth.saveSession(user);
+                    }
+                });
+            }
+        });
+
+        // Helper to check if email is a test email and unmask password
+        function updatePasswordVisibility() {
+            const val = String(emailInput.value || '').trim().toLowerCase();
+            // Show password ONLY if the username/email is a test email (starts with test@)
+            if (val.startsWith('test@')) {
+                passwordInput.type = 'text';
+            } else {
+                passwordInput.type = 'password';
+            }
+        }
+
+        emailInput.addEventListener('input', updatePasswordVisibility);
+        emailInput.addEventListener('change', updatePasswordVisibility);
+
+        // URL Param Support
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailParam = urlParams.get('email');
+        const passParam = urlParams.get('password') || urlParams.get('pass');
+        const autoParam = urlParams.get('auto');
+
+        if (emailParam) {
+            emailInput.value = emailParam;
+        }
+        if (passParam) {
+            passwordInput.value = passParam;
+        }
+        updatePasswordVisibility();
+
+        if (urlParams.get('offline') === 'true') {
+            offlineSection.style.display = 'block';
+            if (offlineToggle) offlineToggle.style.display = 'none';
+            document.querySelectorAll('input:not(#offlinePin), #loginBtn, #googleBtn, hr, .register-link, .sub').forEach(el => {
+                el.style.opacity = '0.3';
+            });
+        }
+
+        if (showOfflineBtn) {
+            showOfflineBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                offlineSection.style.display = 'block';
+                if (offlineToggle) offlineToggle.style.display = 'none';
+                document.querySelectorAll('input:not(#offlinePin), #loginBtn, #googleBtn, hr, .register-link, .sub').forEach(el => {
+                    el.style.opacity = '0.3';
+                });
+            });
+        }
+
+        backToOnline.addEventListener('click', (e) => {
+            e.preventDefault();
+            offlineSection.style.display = 'none';
+            if (offlineToggle) offlineToggle.style.display = 'block';
+            document.querySelectorAll('input, button, hr, .register-link, .sub').forEach(el => {
+                el.style.opacity = '1';
+            });
+        });
+
+        offlineLoginBtn.addEventListener('click', () => {
+            const pin = offlinePinInput.value;
+            if (!pin) {
+                alert('Please enter your PIN');
+                return;
+            }
+            try {
+                const offlineBType = localStorage.getItem('currentBusinessType') || 'retail';
+                alert('Logged in Offline Mode.');
+                if (offlineBType === 'scrap_collection_center') {
+                    window.location.href = '/modules/admin/scrap-master.html';
+                } else {
+                    const targetDash = (window.dashboardCore && window.dashboardCore.getVerticalDashboardUrl) ? window.dashboardCore.getVerticalDashboardUrl(offlineBType) : (offlineBType === 'distributor' ? '/modules/distributor/web/dashboard.html' : `/modules/${offlineBType}/dashboard.html`);
+                    window.location.href = targetDash;
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+        
+        const loginForm = document.getElementById('loginForm');
+        const handleLoginSubmit = async (e) => {
+            if (e) e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                errorDiv.style.color = '#ef4444';
+                errorDiv.textContent = 'Please enter email and password';
+                return;
+            }
+            
+            try {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '⏳ Logging in...';
+                errorDiv.style.color = '#3b82f6';
+                errorDiv.textContent = 'Login, Please wait...';
+                
+                await auth.signInWithEmailAndPassword(email, password);
+                
+                const isDemoEmail = email.toLowerCase().startsWith('test@') || email.toLowerCase().includes('demo');
+                if (isDemoEmail) {
+                    try {
+                        const user = auth.currentUser;
+                        if (user) {
+                            const uDoc = await db.collection('users').doc(user.uid).get();
+                            const bId = uDoc.exists ? (uDoc.data().businessId || user.uid) : user.uid;
+                            const bDoc = await db.collection('businesses').doc(bId).get();
+                            const bType = bDoc.exists ? (bDoc.data().businessType || 'retail') : 'retail';
+                            if (window.DemoSeeder && typeof window.DemoSeeder.seedDemoDataForBusiness === 'function') {
+                                await window.DemoSeeder.seedDemoDataForBusiness(db, bId, bType, email);
+                            }
+                        }
+                    } catch (eSeed) { console.warn('[Demo Auto-Seed on Login] skipped:', eSeed); }
+
+                    try {
+                        const functionsSvc = firebase.app().functions('us-central1');
+                        const notifyDemo = functionsSvc.httpsCallable('sendDemoLoginNotification');
+                        notifyDemo({
+                            demoEmail: email,
+                            businessTypeName: 'Interactive Demo (' + email + ')',
+                            userAgent: navigator.userAgent
+                        }).catch(() => {});
+                    } catch (e) {
+                        console.warn('[Demo Notify] skipped:', e);
+                    }
+                }
+                
+                errorDiv.style.color = '#10b981';
+                errorDiv.textContent = 'Login successful! Redirecting...';
+                loginBtn.innerHTML = '⚡ Redirecting...';
+                
+                if (window.AuthUI) {
+                    const user = auth.currentUser;
+                    if (window.digibizOfflineAuth) window.digibizOfflineAuth.saveSession(user);
+                    await window.AuthUI.routeToUniversalDashboard(user);
+                }
+            } catch (error) {
+                const isDemo = String(email || '').toLowerCase().startsWith('test@') || String(email || '').toLowerCase().includes('demo');
+                if (isDemo) {
+                    const demoCreated = await tryAutoCreateDemoUser(email, password);
+                    if (demoCreated) {
+                        errorDiv.style.color = '#10b981';
+                        errorDiv.textContent = 'Demo workspace ready! Redirecting...';
+                        loginBtn.innerHTML = '⚡ Redirecting...';
+                        const user = auth.currentUser;
+                        if (window.digibizOfflineAuth) window.digibizOfflineAuth.saveSession(user);
+                        await window.AuthUI.routeToUniversalDashboard(user);
+                        return;
+                    }
+                }
+
+                if (password === '123456789') {
+                    const created = await tryAutoCreateStaffUser(email, password);
+                    if (created) {
+                        errorDiv.style.color = '#10b981';
+                        errorDiv.textContent = 'Staff account activated! Redirecting...';
+                        loginBtn.innerHTML = '⚡ Redirecting...';
+                        const user = auth.currentUser;
+                        if (window.digibizOfflineAuth) window.digibizOfflineAuth.saveSession(user);
+                        await window.AuthUI.routeToUniversalDashboard(user);
+                        return;
+                    }
+                }
+                loginBtn.disabled = false;
+                loginBtn.textContent = loginBtnDefaultText;
+                errorDiv.style.color = '#ef4444';
+                if (error.code === 'auth/user-not-found') {
+                    errorDiv.textContent = 'No account found. Please register first.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorDiv.textContent = 'Incorrect password';
+                } else {
+                    errorDiv.textContent = error.message;
+                }
+            }
+        };
+
+        async function tryAutoCreateDemoUser(email, password) {
+            const emailNorm = String(email || '').trim().toLowerCase();
+            if (!emailNorm) return false;
+
+            try {
+                errorDiv.style.color = '#3b82f6';
+                errorDiv.textContent = 'Setting up demo workspace, please wait...';
+
+                let userCred = null;
+                try {
+                    userCred = await auth.createUserWithEmailAndPassword(emailNorm, password || '123456');
+                } catch (eAuth) {
+                    if (eAuth.code === 'auth/email-already-in-use') {
+                        try {
+                            if (window.firebase && window.firebase.functions) {
+                                const wipeFn = window.firebase.functions().httpsCallable('wipeStaleAuthOnRegister');
+                                const wipeRes = await wipeFn({ targetEmail: emailNorm });
+                                if (wipeRes && wipeRes.data && wipeRes.data.deletedAuth) {
+                                    userCred = await auth.createUserWithEmailAndPassword(emailNorm, password || '123456');
+                                }
+                            }
+                        } catch (eWipe) {
+                            console.warn('[Demo Auto-Create] wipe notice:', eWipe);
+                        }
+                    }
+                    if (!userCred) {
+                        try {
+                            userCred = await auth.signInWithEmailAndPassword(emailNorm, password || '123456');
+                        } catch (e2) {
+                            console.warn('[Demo Auto-Create] sign in retry notice:', e2);
+                        }
+                    }
+                }
+
+                const user = userCred ? userCred.user : auth.currentUser;
+                if (!user) return false;
+
+                const userId = user.uid;
+                const businessId = userId;
+
+                // Resolve business type & name
+                let bType = 'retail';
+                let bName = 'Demo Enterprise';
+                const btMap = window.BUSINESS_TYPES || {};
+                for (const key in btMap) {
+                    const item = btMap[key];
+                    if (!item) continue;
+                    if (item.demoEmail && item.demoEmail.toLowerCase() === emailNorm) {
+                        bType = item.id || key;
+                        bName = item.name ? `Demo ${item.name}` : 'Demo Enterprise';
+                        break;
+                    }
+                    const cleanId = String(item.id || key).replace(/_/g, '').toLowerCase();
+                    if (emailNorm === `test@${cleanId}.com`) {
+                        bType = item.id || key;
+                        bName = item.name ? `Demo ${item.name}` : 'Demo Enterprise';
+                        break;
+                    }
+                }
+
+                const db = window.db || firebase.firestore();
+
+                await db.collection('businesses').doc(businessId).set({
+                    name: bName,
+                    businessName: bName,
+                    ownerId: userId,
+                    ownerEmail: emailNorm,
+                    ownerName: 'Demo User',
+                    businessType: bType,
+                    status: 'DEMO',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }, { merge: true });
+
+                await db.collection('users').doc(userId).set({
+                    name: 'Demo User',
+                    email: emailNorm,
+                    role: 'BUSINESS_OWNER',
+                    businessId: businessId,
+                    businessType: bType,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }, { merge: true });
+
+                await db.collection('businesses').doc(businessId).collection('users').doc(userId).set({
+                    email: emailNorm,
+                    name: 'Demo User',
+                    role: 'BUSINESS_OWNER',
+                    isActive: true,
+                    createdAt: new Date()
+                }, { merge: true });
+
+                if (window.DemoSeeder && typeof window.DemoSeeder.seedDemoDataForBusiness === 'function') {
+                    await window.DemoSeeder.seedDemoDataForBusiness(db, businessId, bType, emailNorm);
+                }
+
+                localStorage.setItem('currentBusinessId', businessId);
+                sessionStorage.setItem('currentBusinessId', businessId);
+                localStorage.setItem('currentBusinessType', bType);
+                sessionStorage.setItem('currentBusinessType', bType);
+
+                return true;
+            } catch (err) {
+                console.error('[Auth] tryAutoCreateDemoUser failed:', err);
+                return false;
+            }
+        }
+
+        async function seedCoconutDemoData(db, bid) {
+            try {
+                const batch = db.batch();
+
+                // Raw Coconut categories
+                const catRef1 = db.collection('coconut_raw_coconuts').doc(bid).collection('items').doc('GOOD');
+                batch.set(catRef1, { businessId: bid, category: 'GOOD', stockQty: 4500, avgCostPerUnit: 85.00, lastUnitCost: 85.00, updatedAt: new Date() }, { merge: true });
+
+                const catRef2 = db.collection('coconut_raw_coconuts').doc(bid).collection('items').doc('MEDIUM');
+                batch.set(catRef2, { businessId: bid, category: 'MEDIUM', stockQty: 2800, avgCostPerUnit: 75.00, lastUnitCost: 75.00, updatedAt: new Date() }, { merge: true });
+
+                const catRef3 = db.collection('coconut_raw_coconuts').doc(bid).collection('items').doc('LOW');
+                batch.set(catRef3, { businessId: bid, category: 'LOW', stockQty: 1200, avgCostPerUnit: 60.00, lastUnitCost: 60.00, updatedAt: new Date() }, { merge: true });
+
+                const catRef4 = db.collection('coconut_raw_coconuts').doc(bid).collection('items').doc('UNGRADED');
+                batch.set(catRef4, { businessId: bid, category: 'UNGRADED', stockQty: 6000, avgCostPerUnit: 80.00, lastUnitCost: 80.00, updatedAt: new Date() }, { merge: true });
+
+                // Raw Husk Stock
+                const huskRef = db.collection('coconut_husk_raw').doc(bid).collection('items').doc('current');
+                batch.set(huskRef, { businessId: bid, stockKg: 8500, avgCostPerKg: 14.50, lastCostPerKg: 14.50, updatedAt: new Date() }, { merge: true });
+
+                // Finished Products
+                const prodRef1 = db.collection('coconut_finished_products').doc(bid).collection('items').doc('FP_CHIPS_5KG');
+                batch.set(prodRef1, { businessId: bid, productId: 'FP_CHIPS_5KG', name: '5kg Washed Husk Chips Block', sku: 'HC-5KG-01', unitName: 'Block', unitPrice: 650, unitCost: 420, stockQty: 180, lowStockLevel: 25, isActive: true, updatedAt: new Date() }, { merge: true });
+
+                const prodRef2 = db.collection('coconut_finished_products').doc(bid).collection('items').doc('FP_COIR_BALE');
+                batch.set(prodRef2, { businessId: bid, productId: 'FP_COIR_BALE', name: 'Coir Fibre Bale (30kg)', sku: 'CF-30KG-01', unitName: 'Bale', unitPrice: 3200, unitCost: 2100, stockQty: 65, lowStockLevel: 15, isActive: true, updatedAt: new Date() }, { merge: true });
+
+                const prodRef3 = db.collection('coconut_finished_products').doc(bid).collection('items').doc('FP_GROW_BAG');
+                batch.set(prodRef3, { businessId: bid, productId: 'FP_GROW_BAG', name: 'Coir Pith Grow Bag (1m)', sku: 'GB-1M-01', unitName: 'Piece', unitPrice: 850, unitCost: 540, stockQty: 240, lowStockLevel: 30, isActive: true, updatedAt: new Date() }, { merge: true });
+
+                // Suppliers
+                const supRef1 = db.collection('coconut_suppliers').doc(`SUP_${bid}_1`);
+                batch.set(supRef1, { businessId: bid, name: 'Sunil Bandara (Kurunegala Estate)', phone: '077 123 4567', area: 'Kurunegala', address: 'Dambulla Road, Kurunegala', balance: 0, isActive: true, createdAt: new Date() }, { merge: true });
+
+                const supRef2 = db.collection('coconut_suppliers').doc(`SUP_${bid}_2`);
+                batch.set(supRef2, { businessId: bid, name: 'Perera & Sons Husk Suppliers', phone: '071 987 6543', area: 'Kuliyapitiya', address: 'Madampe Road, Kuliyapitiya', balance: 0, isActive: true, createdAt: new Date() }, { merge: true });
+
+                // Customers
+                const custRef1 = db.collection('coconut_customers').doc(`CUST_${bid}_1`);
+                batch.set(custRef1, { businessId: bid, name: 'Lanka Bio-Agri Exports', phone: '011 234 5678', area: 'Colombo Port', address: 'Marine Drive, Colombo 03', balance: 0, isActive: true, createdAt: new Date() }, { merge: true });
+
+                const custRef2 = db.collection('coconut_customers').doc(`CUST_${bid}_2`);
+                batch.set(custRef2, { businessId: bid, name: 'City Retail Supermarket Chain', phone: '076 543 2109', area: 'Gampaha', address: 'Kandy Road, Yakkala', balance: 0, isActive: true, createdAt: new Date() }, { merge: true });
+
+                // Transformation Recipes
+                const recRef1 = db.collection('coconut_transformations').doc(`REC_${bid}_1`);
+                batch.set(recRef1, { businessId: bid, name: 'Husk Chips Block Conversion', inputType: 'HUSK_KG', inputQty: 15, productId: 'FP_CHIPS_5KG', processingCost: 45, isActive: true, createdAt: new Date() }, { merge: true });
+
+                const recRef2 = db.collection('coconut_transformations').doc(`REC_${bid}_2`);
+                batch.set(recRef2, { businessId: bid, name: 'Coir Fibre Bale Extraction', inputType: 'HUSK_KG', inputQty: 80, productId: 'FP_COIR_BALE', processingCost: 350, isActive: true, createdAt: new Date() }, { merge: true });
+
+                // Opening Balanced GL Journal Entry
+                const jRef = db.collection('journal').doc(bid).collection('entries').doc(`JE_OPENING_${bid}`);
+                const totalInvVal = (4500 * 85) + (2800 * 75) + (1200 * 60) + (6000 * 80) + (8500 * 14.5) + (180 * 420) + (65 * 2100) + (240 * 540);
+                batch.set(jRef, {
+                    businessId: bid,
+                    date: new Date(),
+                    description: 'Opening Balances — Coconut Inventory & Working Capital',
+                    referenceType: 'OPENING_BALANCE',
+                    ref: 'demo_init',
+                    totalDebit: totalInvVal + 150000,
+                    totalCredit: totalInvVal + 150000,
+                    entries: [
+                        { accountCode: '1-1040-01', accountName: 'Inventory (Coconut & Husk Products)', debit: totalInvVal, credit: 0 },
+                        { accountCode: '1-1010-01', accountName: 'Cash in Drawer', debit: 75000, credit: 0 },
+                        { accountCode: '1-1020-01', accountName: 'Bank Account', debit: 75000, credit: 0 },
+                        { accountCode: '3-3010-01', accountName: "Owner's Capital", debit: 0, credit: totalInvVal + 150000 }
+                    ],
+                    createdAt: new Date()
+                }, { merge: true });
+
+                await batch.commit();
+                console.log('[Demo] Coconut sample data initialized successfully for:', bid);
+            } catch (e) {
+                console.warn('[Demo] Coconut seeding notice:', e);
+            }
+        }
+
+        async function tryAutoCreateStaffUser(email, password) {
+            const emailNorm = String(email || '').trim().toLowerCase();
+            if (!emailNorm || password !== '123456789') return false;
+
+            try {
+                const db = firebase.firestore();
+                const registrySnap = await db.collection('staff_registry').doc(emailNorm).get().catch(() => null);
+                
+                let isStaff = false;
+                if (registrySnap && registrySnap.exists) {
+                    isStaff = true;
+                } else {
+                    const bizUsersSnap = await db.collectionGroup('users').where('email', '==', emailNorm).get().catch(() => null);
+                    if (bizUsersSnap && !bizUsersSnap.empty) {
+                        isStaff = true;
+                    }
+                }
+
+                if (isStaff) {
+                    console.log('[Auth] Staff registry match. Activating Auth account for:', emailNorm);
+                    await auth.createUserWithEmailAndPassword(emailNorm, password);
+                    return true;
+                }
+            } catch (e) {
+                console.warn('[Auth] Auto-create staff user note:', e);
+            }
+            return false;
+        }
+
+        if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
+
+        if (emailParam && passParam && autoParam === 'true') {
+            setTimeout(() => {
+                handleLoginSubmit();
+            }, 400);
+        }
+        
+
+
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetBox.classList.toggle('visible');
+            document.getElementById('resetEmail').value = document.getElementById('email').value || '';
+        });
+
+        sendResetBtn.addEventListener('click', async () => {
+            const email = String(document.getElementById('resetEmail').value || '').trim();
+            if (!email) {
+                errorDiv.textContent = 'Please enter your email for password reset.';
+                return;
+            }
+            try {
+                sendResetBtn.disabled = true;
+                sendResetBtn.textContent = 'Sending...';
+                await auth.sendPasswordResetEmail(email);
+                errorDiv.style.color = '#059669';
+                errorDiv.textContent = 'Password reset link sent. Check your inbox.';
+            } catch (error) {
+                errorDiv.style.color = '#ef4444';
+                errorDiv.textContent = error.message || 'Failed to send reset link.';
+            } finally {
+                sendResetBtn.disabled = false;
+                sendResetBtn.textContent = 'Send Link';
+            }
+        });
+
+        // Auto-route if already logged in
+        auth.onAuthStateChanged(async (user) => {
+            if (user && window.AuthUI) {
+                await window.AuthUI.routeToUniversalDashboard(user);
+            }
+        });
+    </script>
+</body>
+</html>

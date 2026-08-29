@@ -175,7 +175,7 @@ window.getEffectiveBusinessType = function() {
             } else if (bId === 'ndhxszkwhahf3pnbtsqgkphmwer1' || bId === 'ozcln4szrvtmqbvveqqso7abdq42' || eMail.includes('sathityre')) {
                 clientPrefix = '/clients/sathityrecentre';
             } else if (eMail.includes('darshanamadawala') || eMail.includes('darshana')) {
-                clientPrefix = '/clients/darshanamadawala';
+                clientPrefix = '/clients/madawalateashop';
             } else if (eMail.includes('royalarabian') || eMail.includes('asminmoho')) {
                 clientPrefix = '/clients/royalarabian';
             }
@@ -184,7 +184,7 @@ window.getEffectiveBusinessType = function() {
         let targetModulePath = clientPrefix + '/modules/retail/dashboard.html';
         if (clientPrefix === '/clients/chisathifamilyproducts') {
             targetModulePath = clientPrefix + '/modules/retail/pos.html';
-        } else if (clientPrefix === '/clients/darshanamadawala') {
+        } else if (clientPrefix === '/clients/madawalateashop') {
             targetModulePath = clientPrefix + '/modules/credit/dashboard.html';
         } else if (clientPrefix === '/clients/spiholdings') {
             targetModulePath = clientPrefix + '/modules/distributor/web/dashboard.html';

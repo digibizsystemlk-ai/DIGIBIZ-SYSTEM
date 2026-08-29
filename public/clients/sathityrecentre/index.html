@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>SATHI TYRE CENTRE — Business Management System</title>
+    <title>SATHI TYRE HOUSE — Business Management System</title>
 
     <meta name="theme-color" content="#131921" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -1203,7 +1203,7 @@
             DIGIBIZ<span>PRO</span>
         </div>
         <div class="login-box">
-            <h2>SATHI TYRE CENTRE</h2>
+            <h2>SATHI TYRE HOUSE</h2>
             <p>Business Management System — Secure Sign In</p>
             <div class="error" id="authError">Invalid email or password</div>
             <input type="email" id="loginEmail" placeholder="Owner / Staff Email" value="sathityre05@gmail.com" autocomplete="username" />
@@ -1228,7 +1228,7 @@
             </button>
 
             <!-- Top Navigation - Logo -->
-            <div class="top-nav-logo" onclick="navigateTo('dashboard')" title="DIGIBIZ + SATHI TYRE CENTRE">
+            <div class="top-nav-logo" onclick="navigateTo('dashboard')" title="DIGIBIZ + SATHI TYRE HOUSE">
                 <div class="logo-icon-wrap">
                     <i class="fas fa-bolt"></i>
                 </div>
@@ -1402,7 +1402,7 @@
         </a>
 
         <div style="padding:14px 20px; border-top:1px solid #e7e7e7; margin-top:8px; font-size:11px; color:#888;">
-            <div style="font-weight:700; color:#131921;">SATHI TYRE CENTRE</div>
+            <div style="font-weight:700; color:#131921;">SATHI TYRE HOUSE</div>
             <div style="font-size:10px; color:#067d62;"><i class="fas fa-circle" style="font-size:7px;"></i> <span data-key="seller_central_active">Business Management System Active</span></div>
         </div>
     </nav>
@@ -1419,7 +1419,7 @@
         <div class="page active" id="page-dashboard">
             <div class="page-header">
                 <div>
-                    <h1>Executive Dashboard <span class="sub">| Business Management System · SATHI TYRE CENTRE</span></h1>
+                    <h1>Executive Dashboard <span class="sub">| Business Management System · SATHI TYRE HOUSE</span></h1>
                 </div>
                 <div class="actions">
                     <button class="btn btn-secondary" onclick="refreshAll()"><i class="fas fa-sync"></i> Refresh</button>
@@ -1817,7 +1817,7 @@
                 </div>
                 <div class="actions">
                     <button class="btn btn-secondary" onclick="openCategoryManager('service')"><i class="fas fa-tags"></i> Service Categories</button>
-                    <button class="btn btn-primary" onclick="openModal('printModal')"><i class="fas fa-plus"></i> New Service Order</button>
+                    <button class="btn btn-primary" onclick="openPrintModal()"><i class="fas fa-plus"></i> New Service Order</button>
                 </div>
             </div>
 
@@ -2168,7 +2168,7 @@
                     <button class="btn btn-secondary" onclick="openModal('addBankModal')"><i class="fas fa-plus"></i> Add Bank</button>
                     <button class="btn btn-secondary" onclick="openModal('bankDepositModal')"><i class="fas fa-arrow-down-to-bracket"></i> Deposit</button>
                     <button class="btn btn-secondary" onclick="openModal('bankWithdrawModal')"><i class="fas fa-arrow-up-from-bracket"></i> Withdraw</button>
-                    <button class="btn btn-primary" onclick="openModal('expenseModal')"><i class="fas fa-receipt"></i> Expense</button>
+                    <button class="btn btn-primary" onclick="openExpenseModal()"><i class="fas fa-receipt"></i> Expense</button>
                 </div>
             </div>
 
@@ -2267,8 +2267,8 @@
                     <h1>Expenses <span class="sub">| Shop Operating Costs & Analysis</span></h1>
                 </div>
                 <div class="actions">
-                    <button class="btn btn-primary" onclick="openModal('expenseModal')"><i class="fas fa-plus"></i> Record Expense</button>
-                    <button class="btn btn-secondary" onclick="openModal('expenseCategoryModal')"><i class="fas fa-tags"></i> Manage Categories</button>
+                    <button class="btn btn-primary" onclick="openExpenseModal()"><i class="fas fa-plus"></i> Record Expense</button>
+                    <button class="btn btn-secondary" onclick="openExpenseCategoryManager()"><i class="fas fa-tags"></i> Manage Categories</button>
                 </div>
             </div>
 
@@ -2819,7 +2819,7 @@
                 <!-- Report Header -->
                 <div style="border-bottom:2px solid #131921; padding-bottom:14px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
                     <div>
-                        <h2 style="margin:0; font-size:20px; color:#131921; font-weight:900;" id="printShopName">SATHI TYRE CENTRE</h2>
+                        <h2 style="margin:0; font-size:20px; color:#131921; font-weight:900;" id="printShopName">SATHI TYRE HOUSE</h2>
                         <div style="font-size:12px; color:#666;" id="printShopAddress">Kandy Road, Kurunegala | Tel: 0771234567</div>
                         <div style="font-size:14px; font-weight:700; color:#ff9900; margin-top:6px;" id="printReportHeading">EXECUTIVE SALES SUMMARY</div>
                     </div>
@@ -2875,7 +2875,7 @@
                     <div style="text-align:right;">
                         <div>_____________________________</div>
                         <div style="margin-top:4px; font-weight:700;"><span data-key="authorized_signatory">Authorized Signatory</span></div>
-                        <div style="font-size:10px; color:#888;">SATHI TYRE CENTRE</div>
+                        <div style="font-size:10px; color:#888;">SATHI TYRE HOUSE</div>
                     </div>
                 </div>
             </div>
@@ -2978,7 +2978,7 @@
                             <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">
                                 <i class="fas fa-store"></i> <span data-key="store_name">Store Name</span> *
                             </label>
-                            <input type="text" class="form-control" id="settingsStoreName" value="SATHI TYRE CENTRE" style="font-weight:700; font-size:14px; padding:10px 14px;">
+                            <input type="text" class="form-control" id="settingsStoreName" value="SATHI TYRE HOUSE" style="font-weight:700; font-size:14px; padding:10px 14px;">
                         </div>
                         <div class="form-group">
                             <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">
@@ -3122,7 +3122,7 @@
                             <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">
                                 <i class="fas fa-store"></i> <span data-key="business_name">Business Name</span> *
                             </label>
-                            <input type="text" class="form-control" id="settingsName" value="SATHI TYRE CENTRE" style="font-weight:700; font-size:14px; padding:10px 14px;">
+                            <input type="text" class="form-control" id="settingsName" value="SATHI TYRE HOUSE" style="font-weight:700; font-size:14px; padding:10px 14px;">
                         </div>
                         <div class="form-group">
                             <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">
@@ -3749,12 +3749,14 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Category</label>
-                    <select class="form-control" id="expCat">
+                    <input type="text" class="form-control" id="expCat" list="expenseCategorySuggestions" value="Shop" placeholder="Type or select a category" autocomplete="off">
+                    <datalist id="expenseCategorySuggestions">
                         <option value="Shop">Shop Utility & Tea</option>
                         <option value="Rent">Rent & Power</option>
                         <option value="Transport">Transport</option>
                         <option value="Other">Other</option>
-                    </select>
+                    </datalist>
+                    <div style="font-size:11px; color:#64748b; margin-top:4px;"><i class="fas fa-lightbulb" style="color:#ff9900;"></i> Choose a saved category or type a new one.</div>
                 </div>
                 <div class="form-group">
                     <label>Description *</label>
@@ -3768,6 +3770,26 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
                 <button class="btn btn-danger" onclick="submitExpense()">Post Expense</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Category Manager -->
+    <div class="modal-overlay" id="expenseCategoryModal">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-tags" style="color:#ff9900;"></i> Manage Expense Categories</h3>
+                <button class="modal-close" onclick="closeModal('expenseCategoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; gap:8px; margin-bottom:14px;">
+                    <input type="text" class="form-control" id="expenseCategoryName" placeholder="New category name" autocomplete="off">
+                    <button class="btn btn-primary" onclick="addExpenseCategory()"><i class="fas fa-plus"></i> Add</button>
+                </div>
+                <div id="expenseCategoryList" style="max-height:280px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('expenseCategoryModal')">Close</button>
             </div>
         </div>
     </div>
@@ -3863,21 +3885,51 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label><span data-key="customer_name">Customer Name</span> *</label>
-                    <input type="text" class="form-control" id="printCustomer" placeholder="e.g. Sunil Perera">
+                    <input type="text" class="form-control" id="printCustomer" value="Walk-in Customer" placeholder="e.g. Sunil Perera">
                 </div>
                 <div class="form-group">
-                    <label><span data-key="service_type">Service Type</span> * <button type="button" class="btn btn-secondary btn-sm" onclick="openCategoryManager('service')">Manage</button></label>
-                    <select class="form-control" id="printService">
-                    </select>
+                    <label><span data-key="service_type">Service Type</span> *</label>
+                    <div class="form-row">
+                        <div class="form-group" style="flex:1; margin-bottom:0;">
+                            <select class="form-control" id="printService"></select>
+                        </div>
+                        <div class="form-group" style="flex:1; margin-bottom:0;">
+                            <input type="text" class="form-control" id="printServiceType" placeholder="Type a new service">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Inventory Used</label>
+                    <div class="form-row">
+                        <div class="form-group" style="flex:2; margin-bottom:0;">
+                            <select class="form-control" id="printInventoryItem"></select>
+                        </div>
+                        <div class="form-group" style="flex:1; margin-bottom:0;">
+                            <input type="number" class="form-control" id="printInventoryQty" min="1" value="1">
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="addPrintMaterial()" style="align-self:flex-start;">Add</button>
+                    </div>
+                    <div id="printMaterials" style="margin-top:8px;"></div>
+                    <div style="text-align:right; margin-top:6px; font-size:12px; font-weight:700; color:#0066c0;">Inventory Total: LKR <span id="printMaterialsTotal">0.00</span></div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label><span data-key="total_amount">Total Amount</span> (LKR) *</label>
-                        <input type="number" class="form-control" id="printTotal" placeholder="0.00">
+                        <label>Service Charge (LKR)</label>
+                        <input type="number" class="form-control" id="printServiceCharge" value="0" min="0" oninput="updatePrintOrderTotal()">
                     </div>
                     <div class="form-group">
+                        <label><span data-key="total_amount">Total Amount</span> (LKR) *</label>
+                        <input type="number" class="form-control" id="printTotal" value="0" readonly style="font-weight:800; color:#131921;">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
                         <label><span data-key="advance_paid">Advance Paid</span> (LKR)</label>
-                        <input type="number" class="form-control" id="printAdvance" value="0">
+                        <input type="number" class="form-control" id="printAdvance" value="0" min="0" oninput="updatePrintOrderBalance()">
+                    </div>
+                    <div class="form-group">
+                        <label>Balance Due (LKR)</label>
+                        <input type="number" class="form-control" id="printBalance" value="0" readonly style="font-weight:800; color:#dc2626;">
                     </div>
                 </div>
             </div>
@@ -4372,7 +4424,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Account Holder Name</label>
-                        <input type="text" class="form-control" id="newBankHolder" value="Sathi Tyre Centre">
+                        <input type="text" class="form-control" id="newBankHolder" value="SATHI TYRE HOUSE">
                     </div>
                     <div class="form-group">
                         <label>Opening Balance (LKR)</label>
@@ -4476,7 +4528,7 @@
                 showAuthGate();
                 const err = document.getElementById('authError');
                 if (err) {
-                    err.innerHTML = '<b>ACCESS DENIED:</b> Account <code>' + userEmail + '</code> is not authorized for Sathi Tyre Centre.';
+                    err.innerHTML = '<b>ACCESS DENIED:</b> Account <code>' + userEmail + '</code> is not authorized for SATHI TYRE HOUSE.';
                     err.style.display = 'block';
                 }
                 return;
@@ -4535,7 +4587,7 @@
                 updateSidebarByRole();
             }
             syncLiveSubscriptionAndCloudData();
-            showToast('Welcome, Sathi Tyre Centre!');
+            showToast('Welcome, SATHI TYRE HOUSE!');
         } catch (err) {
             if (loader) loader.style.display = 'none';
             if (errEl) {
@@ -4572,14 +4624,15 @@
         inventory: [],
         productCategories: ['Memory Cards', 'Accessories', 'Spares', 'Paper'],
         serviceCategories: ['Photocopy', 'Color Print', 'Lamination', 'Binding', 'Other'],
+        expenseCategories: ['Shop', 'Rent', 'Transport', 'Other'],
         customers: [],
         suppliers: [],
         repairs: [],
         prints: [],
         expenses: [],
         bankAccounts: [
-            { id: 'b_comb', name: 'Commercial Bank', num: '8001234567', branch: 'Kurunegala', holder: 'Sathi Tyre Centre', balance: 0 },
-            { id: 'b_boc', name: 'Bank of Ceylon', num: '0023456789', branch: 'Kurunegala', holder: 'Sathi Tyre Centre', balance: 0 }
+            { id: 'b_comb', name: 'Commercial Bank', num: '8001234567', branch: 'Kurunegala', holder: 'SATHI TYRE HOUSE', balance: 0 },
+            { id: 'b_boc', name: 'Bank of Ceylon', num: '0023456789', branch: 'Kurunegala', holder: 'SATHI TYRE HOUSE', balance: 0 }
         ],
         bankTx: [],
         posBills: [],
@@ -4611,6 +4664,17 @@
     };
     data.productCategories = Array.from(new Set((data.productCategories || ['Memory Cards', 'Accessories', 'Spares', 'Paper']).filter(Boolean)));
     data.serviceCategories = Array.from(new Set((data.serviceCategories || ['Photocopy', 'Color Print', 'Lamination', 'Binding', 'Other']).filter(Boolean)));
+    data.expenseCategories = Array.from(new Set((data.expenseCategories || ['Shop', 'Rent', 'Transport', 'Other']).filter(Boolean)));
+
+    function normalizeBusinessName() {
+        if (!data.settings) data.settings = {};
+        if (['SATHI TYRE CENTRE', 'Sathi Tyre Centre'].includes(data.settings.name)) data.settings.name = 'SATHI TYRE HOUSE';
+        if (['SATHI TYRE CENTRE', 'Sathi Tyre Centre'].includes(data.settings.storeName)) data.settings.storeName = 'SATHI TYRE HOUSE';
+        (data.bankAccounts || []).forEach(function(account) {
+            if (['SATHI TYRE CENTRE', 'Sathi Tyre Centre'].includes(account.holder)) account.holder = 'SATHI TYRE HOUSE';
+        });
+    }
+    normalizeBusinessName();
 
     let _cloudSyncTimeout = null;
     let _isRemoteUpdate = false;
@@ -6102,7 +6166,7 @@
                     isPWAInstalled = true;
                     localStorage.setItem('pwa_installed', 'true');
                     closePWAInstallBanner();
-                    showToast('✅ SATHI TYRE CENTRE App Installed!');
+                    showToast('✅ SATHI TYRE HOUSE App Installed!');
                 }
                 deferredPrompt = null;
             });
@@ -6121,7 +6185,7 @@
         isPWAInstalled = true;
         localStorage.setItem('pwa_installed', 'true');
         closePWAInstallBanner();
-        showToast('✅ SATHI TYRE CENTRE App installed successfully!');
+        showToast('✅ SATHI TYRE HOUSE App installed successfully!');
     });
 
     function getDrawerCash() {
@@ -6264,7 +6328,7 @@
             navigateTo('dashboard');
         }
         updateBadges();
-        console.log('SATHI TYRE CENTRE — Business Management System loaded!');
+        console.log('SATHI TYRE HOUSE — Business Management System loaded!');
     });
 
     window.addEventListener('hashchange', function() {
@@ -6787,7 +6851,7 @@ function renderDashboard() {
 
         content.innerHTML =
         '<div class="center">' +
-          '<strong>SATHI TYRE CENTRE</strong><br>' +
+          '<strong>SATHI TYRE HOUSE</strong><br>' +
           '<span style="font-size:10px; color:#666;">' + (data.settings.address || 'Kandy Road, Kurunegala') + '</span><br>' +
           '<span style="font-size:10px; color:#888;">Tel: ' + (data.settings.phone || '0771234567') + '</span>' +
         '</div>' +
@@ -6966,15 +7030,84 @@ function renderDashboard() {
     //  SERVICES (PRINT STUDIO) FUNCTIONS
     // ================================================================
 
+    var printMaterials = [];
+
     // Open Print Modal
     function openPrintModal() {
+        var customerInput = document.getElementById('printCustomer');
+        if (customerInput) customerInput.value = 'Walk-in Customer';
+        printMaterials = [];
+        renderPrintMaterials();
         openModal('printModal');
+    }
+
+    function renderPrintMaterials() {
+        var container = document.getElementById('printMaterials');
+        if (!container) return;
+        container.innerHTML = printMaterials.length ? printMaterials.map(function(material, index) {
+            return '<div style="display:flex; justify-content:space-between; align-items:center; padding:5px 8px; background:#f8f9fa; border:1px solid #e2e8f0; margin-top:4px; font-size:12px;">' +
+                '<span><strong>' + material.name + '</strong> x' + material.qty + ' <span style="color:#888;">@ LKR ' + material.price.toFixed(2) + ' = LKR ' + (material.price * material.qty).toFixed(2) + ' (Stock: ' + material.stock + ')</span></span>' +
+                '<button type="button" class="btn btn-secondary btn-sm" onclick="removePrintMaterial(' + index + ')" style="color:#dc2626;">Remove</button>' +
+            '</div>';
+        }).join('') : '<div style="font-size:11px; color:#888;">No inventory items added</div>';
+        var materialsTotal = printMaterials.reduce(function(total, material) { return total + (material.price * material.qty); }, 0);
+        var materialsTotalElement = document.getElementById('printMaterialsTotal');
+        if (materialsTotalElement) materialsTotalElement.textContent = materialsTotal.toFixed(2);
+        updatePrintOrderTotal();
+    }
+
+    function updatePrintOrderTotal() {
+        var serviceCharge = parseFloat(document.getElementById('printServiceCharge')?.value) || 0;
+        var materialsTotal = printMaterials.reduce(function(total, material) { return total + (material.price * material.qty); }, 0);
+        var total = serviceCharge + materialsTotal;
+        var totalInput = document.getElementById('printTotal');
+        if (totalInput) totalInput.value = total.toFixed(2);
+        updatePrintOrderBalance();
+    }
+
+    function updatePrintOrderBalance() {
+        var total = parseFloat(document.getElementById('printTotal')?.value) || 0;
+        var advance = parseFloat(document.getElementById('printAdvance')?.value) || 0;
+        var balanceInput = document.getElementById('printBalance');
+        if (balanceInput) balanceInput.value = Math.max(0, total - advance).toFixed(2);
+    }
+
+    function addPrintMaterial() {
+        var itemId = document.getElementById('printInventoryItem').value;
+        var qty = parseInt(document.getElementById('printInventoryQty').value, 10) || 0;
+        var item = (data.inventory || []).find(function(inventoryItem) { return inventoryItem.id === itemId; });
+        if (!item || qty <= 0) {
+            showToast('Please select an inventory item and quantity');
+            return;
+        }
+        var existing = printMaterials.find(function(material) { return material.id === item.id; });
+        var requestedQty = (existing ? existing.qty : 0) + qty;
+        if (requestedQty > (item.stock || 0)) {
+            showToast('Not enough stock for ' + item.name);
+            return;
+        }
+        if (existing) {
+            existing.qty = requestedQty;
+            existing.stock = item.stock;
+            existing.price = item.price || 0;
+            existing.cost = item.cost || 0;
+        } else {
+            printMaterials.push({ id: item.id, name: item.name, qty: qty, stock: item.stock || 0, price: item.price || 0, cost: item.cost || 0 });
+        }
+        document.getElementById('printInventoryQty').value = '1';
+        renderPrintMaterials();
+    }
+
+    function removePrintMaterial(index) {
+        printMaterials.splice(index, 1);
+        renderPrintMaterials();
     }
 
     // Submit Print Order
     function submitPrintOrder() {
         var customer = document.getElementById('printCustomer').value.trim();
-        var service = document.getElementById('printService').value;
+        var typedService = document.getElementById('printServiceType').value.trim();
+        var service = typedService || document.getElementById('printService').value;
         var total = parseFloat(document.getElementById('printTotal').value) || 0;
         var advance = parseFloat(document.getElementById('printAdvance').value) || 0;
 
@@ -6983,18 +7116,71 @@ function renderDashboard() {
             return;
         }
 
+        if (!service) {
+            showToast('Please select or type a service');
+            return;
+        }
+
+        var insufficientMaterial = printMaterials.find(function(material) {
+            var inventoryItem = (data.inventory || []).find(function(item) { return item.id === material.id; });
+            return !inventoryItem || (inventoryItem.stock || 0) < material.qty;
+        });
+        if (insufficientMaterial) {
+            showToast('Not enough stock for ' + insufficientMaterial.name);
+            return;
+        }
+
+        if (typedService && !(data.serviceCategories || []).some(function(category) {
+            return category.toLowerCase() === typedService.toLowerCase();
+        })) {
+            data.serviceCategories = data.serviceCategories || [];
+            data.serviceCategories.push(typedService);
+        }
+
+        var registeredCustomer = null;
+        if (customer.toLowerCase() !== 'walk-in customer' && customer.toLowerCase() !== 'walk-in') {
+            data.customers = data.customers || [];
+            registeredCustomer = data.customers.find(function(item) {
+                return item.name.toLowerCase() === customer.toLowerCase();
+            });
+            if (!registeredCustomer) {
+                data.customers.push({
+                    id: 'c_' + Date.now(),
+                    name: customer,
+                    phone: '-',
+                    address: '-',
+                    visits: 1,
+                    points: 0,
+                    openingBalance: 0,
+                    balance: 0
+                });
+            }
+        }
+
         if (!data.prints) data.prints = [];
 
         var printOrder = {
             id: 'PRT-' + String((data.prints || []).length + 101),
             customer: customer,
             service: service,
+            materials: printMaterials.map(function(material) {
+                return { id: material.id, name: material.name, qty: material.qty, price: material.price, cost: material.cost };
+            }),
             total: total,
             advance: advance,
+            balance: Math.max(0, total - advance),
             date: new Date().toISOString().split('T')[0]
         };
 
         data.prints.push(printOrder);
+        if (registeredCustomer) {
+            registeredCustomer.visits = (registeredCustomer.visits || 0) + 1;
+            registeredCustomer.balance = (registeredCustomer.balance || 0) + printOrder.balance;
+        }
+        printMaterials.forEach(function(material) {
+            var inventoryItem = data.inventory.find(function(item) { return item.id === material.id; });
+            inventoryItem.stock -= material.qty;
+        });
 
         // Journal Entry for Print Revenue
         if (!data.journalEntries) data.journalEntries = [];
@@ -7008,13 +7194,33 @@ function renderDashboard() {
             creditAmt: total
         });
 
+        var materialCost = printMaterials.reduce(function(sum, material) { return sum + (material.cost * material.qty); }, 0);
+        if (materialCost > 0) {
+            data.journalEntries.push({
+                id: 'J-' + String((data.journalEntries || []).length + 1),
+                date: new Date().toISOString().split('T')[0],
+                desc: 'Service Materials Used: ' + customer + ' (' + printOrder.id + ')',
+                debit: 'Cost of Goods Sold (5001)',
+                debitAmt: materialCost,
+                credit: 'Inventory Asset (1201)',
+                creditAmt: materialCost
+            });
+        }
+
         closeModal('printModal');
-        document.getElementById('printCustomer').value = '';
+        document.getElementById('printCustomer').value = 'Walk-in Customer';
+        document.getElementById('printServiceType').value = '';
+        printMaterials = [];
+        renderPrintMaterials();
+        document.getElementById('printServiceCharge').value = '0';
         document.getElementById('printTotal').value = '';
         document.getElementById('printAdvance').value = '0';
+        document.getElementById('printBalance').value = '0';
         
         saveData();
         renderPrints();
+        renderInventory();
+        renderCustomers();
         renderDashboard();
         renderAccounting();
         updateBadges();
@@ -8012,6 +8218,12 @@ function renderDashboard() {
             if (select) select.innerHTML = serviceOptions;
         });
 
+        var inventoryOptions = '<option value="">Select inventory item</option>' + (data.inventory || []).map(function(item) {
+            return '<option value="' + item.id + '"' + ((item.stock || 0) <= 0 ? ' disabled' : '') + '>' + item.name + ' (Stock: ' + (item.stock || 0) + ')</option>';
+        }).join('');
+        var inventorySelect = document.getElementById('printInventoryItem');
+        if (inventorySelect) inventorySelect.innerHTML = inventoryOptions;
+
         var filters = document.getElementById('posCategoryFilters');
         if (filters) {
             filters.innerHTML = (data.productCategories || []).concat(['SERVICES']).map(function(category) {
@@ -8592,7 +8804,7 @@ function deleteInventoryItem(id) {
         var name = document.getElementById('newBankName').value;
         var num = document.getElementById('newBankAccNum').value.trim();
         var branch = document.getElementById('newBankBranch').value.trim() || 'Main Branch';
-        var holder = document.getElementById('newBankHolder').value.trim() || 'Sathi Tyre Centre';
+        var holder = document.getElementById('newBankHolder').value.trim() || 'SATHI TYRE HOUSE';
         var balance = parseFloat(document.getElementById('newBankBalance').value) || 0;
 
         if (!num) {
@@ -8745,7 +8957,7 @@ function deleteInventoryItem(id) {
         bank.name = name;
         bank.num = num;
         bank.branch = document.getElementById('editBankBranch').value.trim() || 'Main Branch';
-        bank.holder = document.getElementById('editBankHolder').value.trim() || 'Sathi Tyre Centre';
+        bank.holder = document.getElementById('editBankHolder').value.trim() || 'SATHI TYRE HOUSE';
         bank.balance = Math.max(0, parseFloat(document.getElementById('editBankBalance').value) || 0);
         closeModal('editBankModal');
         saveData();
@@ -8796,6 +9008,94 @@ function deleteInventoryItem(id) {
     // ================================================================
     //  EXPENSES (FULL PAGE)
     // ================================================================
+
+    function openExpenseModal() {
+        var suggestions = document.getElementById('expenseCategorySuggestions');
+        if (suggestions) {
+            var categories = data.expenseCategories || ['Shop', 'Rent', 'Transport', 'Other'];
+            suggestions.innerHTML = categories.map(function(category) {
+                return '<option value="' + category + '"></option>';
+            }).join('');
+        }
+        document.getElementById('expCat').value = 'Shop';
+        openModal('expenseModal');
+    }
+
+    function refreshExpenseCategorySuggestions() {
+        var suggestions = document.getElementById('expenseCategorySuggestions');
+        if (!suggestions) return;
+        suggestions.innerHTML = (data.expenseCategories || []).map(function(category) {
+            return '<option value="' + category.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"></option>';
+        }).join('');
+    }
+
+    function openExpenseCategoryManager() {
+        renderExpenseCategoryManager();
+        openModal('expenseCategoryModal');
+    }
+
+    function renderExpenseCategoryManager() {
+        var list = document.getElementById('expenseCategoryList');
+        if (!list) return;
+        var categories = data.expenseCategories || [];
+        list.innerHTML = categories.length ? categories.map(function(category, index) {
+            var usageCount = (data.expenses || []).filter(function(expense) { return expense.category === category; }).length;
+            return '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 10px; border-bottom:1px solid #f0f2f5;">' +
+                '<div><strong>' + category + '</strong><div style="font-size:10px; color:#888;">Used in ' + usageCount + ' expense' + (usageCount === 1 ? '' : 's') + '</div></div>' +
+                '<div style="display:flex; gap:4px;"><button type="button" class="btn btn-secondary btn-sm" onclick="renameExpenseCategory(' + index + ')" title="Rename"><i class="fas fa-pen"></i></button>' +
+                '<button type="button" class="btn btn-secondary btn-sm" onclick="deleteExpenseCategory(' + index + ')" style="color:#dc2626;" title="Delete"><i class="fas fa-trash"></i></button></div>' +
+            '</div>';
+        }).join('') : '<div style="text-align:center; color:#999; padding:20px;">No categories saved yet.</div>';
+    }
+
+    function addExpenseCategory() {
+        var input = document.getElementById('expenseCategoryName');
+        var name = input ? input.value.trim() : '';
+        if (!name) { showToast('Please enter a category name'); return; }
+        if ((data.expenseCategories || []).some(function(category) { return category.toLowerCase() === name.toLowerCase(); })) {
+            showToast('That category already exists');
+            return;
+        }
+        data.expenseCategories = data.expenseCategories || [];
+        data.expenseCategories.push(name);
+        if (input) input.value = '';
+        saveData();
+        refreshExpenseCategorySuggestions();
+        renderExpenseCategoryManager();
+        showToast('Category added: ' + name);
+    }
+
+    function renameExpenseCategory(index) {
+        var oldName = (data.expenseCategories || [])[index];
+        if (!oldName) return;
+        var newName = prompt('Rename category:', oldName);
+        if (!newName || !newName.trim()) return;
+        newName = newName.trim();
+        if ((data.expenseCategories || []).some(function(category, categoryIndex) {
+            return categoryIndex !== index && category.toLowerCase() === newName.toLowerCase();
+        })) { showToast('That category already exists'); return; }
+        (data.expenses || []).forEach(function(expense) {
+            if (expense.category === oldName) expense.category = newName;
+        });
+        data.expenseCategories[index] = newName;
+        saveData();
+        refreshExpenseCategorySuggestions();
+        renderExpenseCategoryManager();
+        renderExpenses();
+        showToast('Category renamed');
+    }
+
+    function deleteExpenseCategory(index) {
+        var category = (data.expenseCategories || [])[index];
+        if (!category) return;
+        var usageCount = (data.expenses || []).filter(function(expense) { return expense.category === category; }).length;
+        if (usageCount && !confirm(category + ' is used in ' + usageCount + ' expense' + (usageCount === 1 ? '' : 's') + '. Delete it?')) return;
+        data.expenseCategories.splice(index, 1);
+        saveData();
+        refreshExpenseCategorySuggestions();
+        renderExpenseCategoryManager();
+        showToast('Category deleted');
+    }
 
     function renderExpenses() {
         const expenses = data.expenses || [];
@@ -8891,11 +9191,22 @@ function deleteInventoryItem(id) {
     }
 
     function submitExpense() {
-        const cat = document.getElementById('expCat').value;
+        const cat = document.getElementById('expCat').value.trim();
         const desc = document.getElementById('expDesc').value.trim();
         const amount = parseFloat(document.getElementById('expAmount').value) || 0;
 
-        if (!desc || amount <= 0) { showToast('Please fill description and amount'); return; }
+        if (!cat || !desc || amount <= 0) { showToast('Please fill category, description and amount'); return; }
+
+        data.expenseCategories = data.expenseCategories || ['Shop', 'Rent', 'Transport', 'Other'];
+        if (!data.expenseCategories.some(function(category) { return category.toLowerCase() === cat.toLowerCase(); })) {
+            data.expenseCategories.push(cat);
+        }
+        var categorySuggestions = document.getElementById('expenseCategorySuggestions');
+        if (categorySuggestions) {
+            categorySuggestions.innerHTML = data.expenseCategories.map(function(category) {
+                return '<option value="' + category + '"></option>';
+            }).join('');
+        }
 
         data.expenses.push({
             id: 'e_' + Date.now(),
@@ -8917,6 +9228,7 @@ function deleteInventoryItem(id) {
         });
 
         closeModal('expenseModal');
+        document.getElementById('expCat').value = 'Shop';
         document.getElementById('expDesc').value = '';
         document.getElementById('expAmount').value = '';
         saveData();
@@ -9774,7 +10086,7 @@ function renderAccounting() {
         if (!data.settings) data.settings = {};
 
         // Business Profile
-        data.settings.name = document.getElementById('settingsName').value.trim() || 'SATHI TYRE CENTRE';
+        data.settings.name = document.getElementById('settingsName').value.trim() || 'SATHI TYRE HOUSE';
         data.settings.owner = document.getElementById('settingsOwner').value.trim() || 'Sathi Tyre House';
         data.settings.phone = document.getElementById('settingsPhone').value.trim() || '0771234567';
         data.settings.address = document.getElementById('settingsAddress').value.trim() || 'Kandy Road, Kurunegala';
@@ -9783,7 +10095,7 @@ function renderAccounting() {
         data.settings.email = 'sathityre05@gmail.com';
 
         // General Settings
-        data.settings.storeName = document.getElementById('settingsStoreName')?.value.trim() || 'SATHI TYRE CENTRE';
+        data.settings.storeName = document.getElementById('settingsStoreName')?.value.trim() || 'SATHI TYRE HOUSE';
         data.settings.tagline = document.getElementById('settingsTagline')?.value.trim() || 'Business Management System';
         data.settings.timezone = document.getElementById('settingsTimezone')?.value || 'Asia/Colombo';
         data.settings.currency = document.getElementById('settingsCurrency')?.value || 'LKR';
@@ -9809,9 +10121,10 @@ function renderAccounting() {
     }
 
     function populateSettingsForm() {
+        normalizeBusinessName();
         var s = data.settings || {};
         
-        if (document.getElementById('settingsName')) document.getElementById('settingsName').value = s.name || 'SATHI TYRE CENTRE';
+        if (document.getElementById('settingsName')) document.getElementById('settingsName').value = s.name || 'SATHI TYRE HOUSE';
         if (document.getElementById('settingsOwner')) document.getElementById('settingsOwner').value = s.owner || 'Sathi Tyre House';
         if (document.getElementById('settingsPhone')) document.getElementById('settingsPhone').value = s.phone || '0771234567';
         if (document.getElementById('settingsEmail')) document.getElementById('settingsEmail').value = 'sathityre05@gmail.com';
@@ -9819,7 +10132,7 @@ function renderAccounting() {
         if (document.getElementById('settingsBrNo')) document.getElementById('settingsBrNo').value = s.brNo || '';
         if (document.getElementById('settingsWebsite')) document.getElementById('settingsWebsite').value = s.website || '';
         
-        if (document.getElementById('settingsStoreName')) document.getElementById('settingsStoreName').value = s.storeName || 'SATHI TYRE CENTRE';
+        if (document.getElementById('settingsStoreName')) document.getElementById('settingsStoreName').value = s.storeName || 'SATHI TYRE HOUSE';
         if (document.getElementById('settingsTagline')) document.getElementById('settingsTagline').value = s.tagline || 'Business Management System';
         if (document.getElementById('settingsTimezone')) document.getElementById('settingsTimezone').value = s.timezone || 'Asia/Colombo';
         if (document.getElementById('settingsCurrency')) document.getElementById('settingsCurrency').value = s.currency || 'LKR';
@@ -9849,7 +10162,7 @@ function renderAccounting() {
         var showDetails = document.getElementById('showDetails')?.checked ?? true;
 
         // Update report header
-        var shopName = (data.settings && data.settings.name) || 'SATHI TYRE CENTRE';
+        var shopName = (data.settings && data.settings.name) || 'SATHI TYRE HOUSE';
         var shopAddress = (data.settings && data.settings.address) || 'Kandy Road, Kurunegala';
         var shopPhone = (data.settings && data.settings.phone) || '0771234567';
         
@@ -10146,7 +10459,7 @@ function renderAccounting() {
     function downloadReportPdf() { window.print(); }
 
     function shareReportWhatsApp() {
-        var text = '*SATHI TYRE CENTRE*\n';
+        var text = '*SATHI TYRE HOUSE*\n';
         text += '*' + (document.getElementById('printReportHeading')?.textContent || 'REPORT') + '*\n';
         text += 'Period: ' + (document.getElementById('printReportPeriod')?.textContent || 'All Time') + '\n';
         text += '------------------------------------\n';
@@ -10163,7 +10476,7 @@ function renderAccounting() {
 
     function exportReportCsv() {
         var contentArea = document.getElementById('reportContentArea');
-        var text = 'SATHI TYRE CENTRE Report\n';
+        var text = 'SATHI TYRE HOUSE Report\n';
         text += new Date().toLocaleString() + '\n\n';
         text += contentArea ? contentArea.innerText : '';
         

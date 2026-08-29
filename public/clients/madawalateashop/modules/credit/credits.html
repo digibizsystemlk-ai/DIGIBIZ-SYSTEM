@@ -1330,10 +1330,7 @@
                     localStorage.setItem('currentBusinessName', 'DARSHANA MADAWALA');
 
                     const DM_DEFAULT_BID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
-                    let storedBid = localStorage.getItem('currentBusinessId') || sessionStorage.getItem('currentBusinessId');
-                    if (!storedBid || storedBid === 'DarshanaMadawala' || storedBid.toLowerCase() === 'qxl4jrgfbztzofmoqyhocfr2pfp2') {
-                        storedBid = DM_DEFAULT_BID;
-                    }
+                    const storedBid = DM_DEFAULT_BID;
                     currentBusinessId = storedBid;
                     localStorage.setItem('currentBusinessId', currentBusinessId);
                     sessionStorage.setItem('currentBusinessId', currentBusinessId);
@@ -1350,7 +1347,7 @@
         function listenToBusinessProfile() {
             if (!window.db || !currentBusinessId) return;
             dbgLog(`Fetching business profile for: ${currentBusinessId}...`);
-            window.db.collection('businesses').doc(currentBusinessId).get().then(doc => {
+            window.db.collection('businesses').doc(currentBusinessId).onSnapshot(doc => {
                 if (doc.exists && (doc.data().businessName || doc.data().name)) {
                     const name = doc.data().businessName || doc.data().name || 'DARSHANA MADAWALA';
                     const el = document.getElementById('topOwnerName');
@@ -1369,7 +1366,7 @@
             if (!window.db || !currentBusinessId) return;
             dbgLog(`Fetching bank accounts from businesses/${currentBusinessId}/bank_accounts...`);
             window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts')
-                .get().then(snapshot => {
+                .onSnapshot(snapshot => {
                     allBankAccounts = [];
                     const select = document.getElementById('settleBankSelect');
                     if (select) select.innerHTML = '<option value="">-- Select Bank Account --</option>';
@@ -1401,7 +1398,7 @@
             }
             dbgLog(`Querying credits from businesses/${currentBusinessId}/credits...`);
             window.db.collection('businesses').doc(currentBusinessId).collection('credits')
-                .get().then(snapshot => {
+                .onSnapshot(snapshot => {
                     allCredits = [];
                     snapshot.forEach(doc => {
                         const d = doc.data();

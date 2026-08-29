@@ -10,7 +10,7 @@
         if (document.querySelector('link[rel="manifest"]')) return;
         var l = document.createElement('link');
         l.rel = 'manifest';
-        l.href = '/clients/darshanamadawala/manifest.json';
+        l.href = '/clients/madawalateashop/manifest.json';
         appendHead(l);
     }
 
@@ -67,13 +67,13 @@
     ensureMeta('apple-mobile-web-app-status-bar-style', 'black-translucent');
     ensureMeta('apple-mobile-web-app-title', 'Madawala Tea');
 
-    ensureLink('apple-touch-icon', '/clients/darshanamadawala/assets/icon-192.png');
-    ensureLink('icon', '/clients/darshanamadawala/assets/icon-192.svg', { type: 'image/svg+xml', sizes: '192x192' });
-    ensureLink('icon', '/clients/darshanamadawala/assets/icon-512.svg', { type: 'image/svg+xml', sizes: '512x512' });
+    ensureLink('apple-touch-icon', '/clients/madawalateashop/assets/icon-192.png');
+    ensureLink('icon', '/clients/madawalateashop/assets/icon-192.svg', { type: 'image/svg+xml', sizes: '192x192' });
+    ensureLink('icon', '/clients/madawalateashop/assets/icon-512.svg', { type: 'image/svg+xml', sizes: '512x512' });
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-            navigator.serviceWorker.register('/clients/darshanamadawala/sw.js?v=20260824_v3_seamless_nav', { scope: '/clients/darshanamadawala/' }).then(function(reg) {
+            navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260824_v3_seamless_nav', { scope: '/clients/madawalateashop/' }).then(function(reg) {
                 if (reg && reg.update) reg.update();
 
                 // PWA update notification awareness

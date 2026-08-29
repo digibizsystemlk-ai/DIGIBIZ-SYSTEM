@@ -163,7 +163,7 @@
     });
 
     document.getElementById('btnConfirmGoHome').addEventListener('click', () => {
-        window.location.href = '/clients/darshanamadawala/modules/credit/dashboard.html';
+        window.location.href = '/clients/madawalateashop/modules/credit/dashboard.html';
     });
 
     // Touch Event Listeners for Pull to Home

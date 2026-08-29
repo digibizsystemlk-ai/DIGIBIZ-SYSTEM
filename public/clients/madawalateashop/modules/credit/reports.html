@@ -705,10 +705,7 @@
                     localStorage.setItem('currentBusinessName', 'DARSHANA MADAWALA');
 
                     const DM_DEFAULT_BID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
-                    let storedBid = localStorage.getItem('currentBusinessId') || sessionStorage.getItem('currentBusinessId');
-                    if (!storedBid || storedBid === 'DarshanaMadawala' || storedBid.toLowerCase() === 'qxl4jrgfbztzofmoqyhocfr2pfp2') {
-                        storedBid = DM_DEFAULT_BID;
-                    }
+                    const storedBid = DM_DEFAULT_BID;
                     currentBusinessId = storedBid;
                     localStorage.setItem('currentBusinessId', currentBusinessId);
                     sessionStorage.setItem('currentBusinessId', currentBusinessId);
@@ -720,7 +717,7 @@
 
         function listenToBusinessProfile() {
             if (!window.db || !currentBusinessId) return;
-            window.db.collection('businesses').doc(currentBusinessId).get().then(doc => {
+            window.db.collection('businesses').doc(currentBusinessId).onSnapshot(doc => {
                 if (doc.exists && (doc.data().businessName || doc.data().name)) {
                     const name = doc.data().businessName || doc.data().name || 'DARSHANA MADAWALA';
                     document.getElementById('topOwnerName').textContent = name;
@@ -737,7 +734,7 @@
 
             // 1. Customers
             window.db.collection('businesses').doc(currentBusinessId).collection('customers')
-                .get().then(snap => {
+                .onSnapshot(snap => {
                     allCustomers = [];
                     const select = document.getElementById('filterCustomer');
                     select.innerHTML = '<option value="ALL">All Customers</option>';
@@ -760,7 +757,7 @@
 
             // 2. Credits
             window.db.collection('businesses').doc(currentBusinessId).collection('credits')
-                .get().then(snap => {
+                .onSnapshot(snap => {
                     allCredits = [];
                     snap.forEach(doc => {
                         const d = doc.data();
@@ -776,7 +773,7 @@
 
             // 3. Settlements
             window.db.collection('businesses').doc(currentBusinessId).collection('settlements')
-                .get().then(snap => {
+                .onSnapshot(snap => {
                     allSettlements = [];
                     snap.forEach(doc => {
                         const d = doc.data();
@@ -792,7 +789,7 @@
 
             // 4. Bank Transactions
             window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions')
-                .get().then(snap => {
+                .onSnapshot(snap => {
                     allBankTransactions = [];
                     snap.forEach(doc => {
                         const d = doc.data();

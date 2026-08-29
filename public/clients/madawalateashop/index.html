@@ -2665,7 +2665,7 @@
 
         // 2. GLOBAL STATE
         let currentUid = '';
-        let currentBusinessId = 'DarshanaMadawala';
+        let currentBusinessId = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
         let allCredits = [];
         let allCustomers = [];
         let allBankAccounts = [];
@@ -5517,30 +5517,17 @@
 
                 if (!verifyDarshanaAccess(user)) return;
 
-                hideAuthGate();
-                localStorage.setItem('madawala_auth_active', 'true');
-                sessionStorage.setItem('madawala_auth_active', 'true');
-
-                currentUid = user.uid;
+                // LEGACY STANDALONE APP RETIRED: never read/write Firestore from this page again.
+                // Every login is funneled to the single canonical cloud dashboard so all devices share one Business ID.
+                const CANONICAL_BUSINESS_ID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
                 localStorage.setItem('dm_auth_verified_email', user.email);
                 localStorage.setItem('currentUserRole', 'BUSINESS_OWNER');
                 localStorage.setItem('currentBusinessNavRole', 'BUSINESS_OWNER');
                 localStorage.setItem('currentBusinessType', 'credit_ledger');
                 localStorage.setItem('currentBusinessName', 'MADAWALA TEA SHOP');
-
-                currentBusinessId = 'DarshanaMadawala';
-
-                await syncLiveSubscription();
-                await loadAllBusinessData();
-
-                // Restore saved tab after data loads
-                const savedTabAfterLogin = sessionStorage.getItem('madawala_active_tab');
-                if (savedTabAfterLogin && savedTabAfterLogin !== 'dashboard') {
-                    setTimeout(() => {
-                        switchTab(savedTabAfterLogin);
-                    }, 300);
-                }
-
+                localStorage.setItem('currentBusinessId', CANONICAL_BUSINESS_ID);
+                sessionStorage.setItem('currentBusinessId', CANONICAL_BUSINESS_ID);
+                window.location.replace('/clients/madawalateashop/modules/credit/dashboard.html');
             });
 
         });

@@ -2072,11 +2072,31 @@
                             </div>
                             <div class="form-group">
                                 <label>Payment Method</label>
-                                <select id="orderPayment" class="form-control">
+                                <select id="orderPayment" class="form-control" onchange="document.getElementById('chequeDetailsSection').style.display = this.value === 'CHEQUE' ? 'block' : 'none';">
                                     <option value="CASH">Cash</option>
                                     <option value="CREDIT">Credit</option>
                                     <option value="CHEQUE">Cheque</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div id="chequeDetailsSection" style="display:none; margin-top:10px; padding:12px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0;">
+                            <div class="form-group">
+                                <label>Cheque Number *</label>
+                                <input type="text" id="orderChequeNumber" class="form-control" placeholder="Enter cheque number">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Bank Name</label>
+                                    <input type="text" id="orderChequeBank" class="form-control" placeholder="Bank name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Cheque Date</label>
+                                    <input type="date" id="orderChequeDate" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Due Date</label>
+                                <input type="date" id="orderChequeDueDate" class="form-control">
                             </div>
                         </div>
                     </div>
@@ -3194,6 +3214,31 @@
     <!-- ============================================================ -->
     <script>
         // ================================================================
+        //  GLOBAL ERROR HANDLER
+        // ================================================================
+
+        window.addEventListener('error', function(e) {
+            console.error('Error caught:', e.message);
+            showToast('⚠️ An error occurred. Please try again.');
+        });
+
+        function validateOrder(order) {
+            if (!order.shopId) { showToast('Shop is required'); return false; }
+            if (!order.repId) { showToast('Rep is required'); return false; }
+            if (!order.items || order.items.length === 0) { showToast('At least one item is required'); return false; }
+            if (order.total <= 0) { showToast('Order total must be greater than 0'); return false; }
+            return true;
+        }
+
+        function validateProduct(product) {
+            if (!product.name || product.name.trim() === '') { showToast('Product name is required'); return false; }
+            if (product.price <= 0) { showToast('Price must be greater than 0'); return false; }
+            if (product.cost <= 0) { showToast('Cost must be greater than 0'); return false; }
+            if (product.stock < 0) { showToast('Stock cannot be negative'); return false; }
+            return true;
+        }
+
+        // ================================================================
         //  DATA STORE
         // ================================================================
 
@@ -3319,6 +3364,19 @@
         function getMonthStart() {
             const d = new Date();
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-01';
+        }
+
+        function getWeekStart() {
+            const d = new Date();
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff);
+            d.setHours(0, 0, 0, 0);
+            return d.toISOString().split('T')[0];
+        }
+
+        function getYearStart() {
+            return new Date().getFullYear() + '-01-01';
         }
 
         // ================================================================
@@ -3463,15 +3521,32 @@
             const cashFlow = todaySales - todayExpenses;
 
             // Profit
-            const profit = orders
-                .filter(o => o.date === today && o.status !== 'rejected')
+            const weekStart = getWeekStart();
+            const yearStart = getYearStart();
+
+            const todayProfit = orders
+                .filter(o => o.date === today && o.status !== 'rejected' && o.status !== 'pending')
                 .reduce((sum, o) => sum + ((o.total || 0) - (o.cost || 0)), 0);
 
+            const weekProfit = orders
+                .filter(o => o.date && o.date >= weekStart && o.status !== 'rejected' && o.status !== 'pending')
+                .reduce((sum, o) => sum + ((o.total || 0) - (o.cost || 0)), 0);
+
+            const monthProfit = orders
+                .filter(o => o.date && o.date >= monthStart && o.status !== 'rejected' && o.status !== 'pending')
+                .reduce((sum, o) => sum + ((o.total || 0) - (o.cost || 0)), 0);
+
+            const yearProfit = orders
+                .filter(o => o.date && o.date >= yearStart && o.status !== 'rejected' && o.status !== 'pending')
+                .reduce((sum, o) => sum + ((o.total || 0) - (o.cost || 0)), 0);
+
+            const profit = todayProfit;
+
             // Update DOM
-            document.getElementById('statTodayProfit').textContent = 'Rs. ' + profit.toFixed(2);
-            document.getElementById('statWeekProfit').textContent = 'Rs. 0.00';
-            document.getElementById('statMonthProfit').textContent = 'Rs. 0.00';
-            document.getElementById('statYearProfit').textContent = 'Rs. 0.00';
+            document.getElementById('statTodayProfit').textContent = 'Rs. ' + todayProfit.toFixed(2);
+            document.getElementById('statWeekProfit').textContent = 'Rs. ' + weekProfit.toFixed(2);
+            document.getElementById('statMonthProfit').textContent = 'Rs. ' + monthProfit.toFixed(2);
+            document.getElementById('statYearProfit').textContent = 'Rs. ' + yearProfit.toFixed(2);
 
             document.getElementById('kpiPendingQueue').textContent = pending.length;
             document.getElementById('kpiTodaySales').textContent = 'LKR ' + todaySales.toFixed(2);
@@ -3498,10 +3573,23 @@
             document.getElementById('reminderPending').textContent = pending.length;
             document.getElementById('reminderCashFlow').textContent = 'LKR ' + cashFlow.toFixed(2);
 
-            document.getElementById('accTotalPurchases').textContent = 'Rs 0.00';
-            document.getElementById('accSupplierOutstanding').textContent = 'Rs 0.00';
+            // Accounting Summary
+            const grnRecords = data.grnRecords || [];
+            const supplierLedger = data.supplierLedger || [];
+
+            const totalPurchases = grnRecords.reduce((sum, g) => sum + (g.total || 0), 0);
+            const supplierOutstanding = supplierLedger.reduce((sum, s) => sum + (s.balance || 0), 0);
+
+            const totalRevenue = orders
+                .filter(o => o.status !== 'rejected' && o.status !== 'pending')
+                .reduce((sum, o) => sum + (o.total || 0), 0);
+            const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+            const netProfit = totalRevenue - totalExpenses - totalPurchases;
+
+            document.getElementById('accTotalPurchases').textContent = 'Rs ' + totalPurchases.toFixed(2);
+            document.getElementById('accSupplierOutstanding').textContent = 'Rs ' + supplierOutstanding.toFixed(2);
             document.getElementById('accStockValue').textContent = 'Rs ' + stockValue.toFixed(2);
-            document.getElementById('accNetProfit').textContent = 'Rs ' + profit.toFixed(2);
+            document.getElementById('accNetProfit').textContent = 'Rs ' + netProfit.toFixed(2);
 
             renderRepSummary();
             renderLowStockTable();
@@ -3658,19 +3746,35 @@
 
         function renderDashboardCharts() {
             const orders = data.orders || [];
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const expenses = data.expenses || [];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            // Build last 7 days labels/dates once
+            const last7Dates = [];
+            const last7Labels = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                last7Dates.push(d.toISOString().split('T')[0]);
+                last7Labels.push(dayNames[d.getDay()]);
+            }
 
             // Revenue Chart
             const revCtx = document.getElementById('revenueChart');
             if (revCtx) {
                 if (chartInstances.revenue) chartInstances.revenue.destroy();
+                const revenueData = last7Dates.map(dateStr =>
+                    orders
+                        .filter(o => o.date === dateStr && o.status !== 'rejected')
+                        .reduce((sum, o) => sum + (o.total || 0), 0)
+                );
                 chartInstances.revenue = new Chart(revCtx, {
                     type: 'line',
                     data: {
-                        labels: days,
+                        labels: last7Labels,
                         datasets: [{
                             label: 'Revenue',
-                            data: [0, 0, 0, 0, 0, 0, 0],
+                            data: revenueData,
                             borderColor: '#ff9900',
                             backgroundColor: 'rgba(255,153,0,0.1)',
                             fill: true,
@@ -3714,21 +3818,31 @@
             const cfCtx = document.getElementById('cashFlowChart');
             if (cfCtx) {
                 if (chartInstances.cashflow) chartInstances.cashflow.destroy();
+                const cashFlowData = last7Dates.map(dateStr => {
+                    const dayRevenue = orders
+                        .filter(o => o.date === dateStr && o.status !== 'rejected')
+                        .reduce((sum, o) => sum + (o.total || 0), 0);
+                    const dayExpenses = expenses
+                        .filter(e => e.date === dateStr)
+                        .reduce((sum, e) => sum + (e.amount || 0), 0);
+                    return dayRevenue - dayExpenses;
+                });
                 chartInstances.cashflow = new Chart(cfCtx, {
                     type: 'bar',
                     data: {
-                        labels: days,
+                        labels: last7Labels,
                         datasets: [{
                             label: 'Cash Flow',
-                            data: [0, 0, 0, 0, 0, 0, 0],
-                            backgroundColor: '#059669',
+                            data: cashFlowData,
+                            backgroundColor: cashFlowData.map(v => v >= 0 ? '#059669' : '#dc2626'),
                             borderRadius: 4
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } }
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
                     }
                 });
             }
@@ -3737,13 +3851,18 @@
             const trendCtx = document.getElementById('trendChart');
             if (trendCtx) {
                 if (chartInstances.trend) chartInstances.trend.destroy();
+                const trendData = last7Dates.map(dateStr => {
+                    const dayOrders = orders.filter(o => o.date === dateStr && o.status !== 'rejected');
+                    const dayTotal = dayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+                    return dayOrders.length > 0 ? dayTotal / dayOrders.length : 0;
+                });
                 chartInstances.trend = new Chart(trendCtx, {
                     type: 'line',
                     data: {
-                        labels: days,
+                        labels: last7Labels,
                         datasets: [{
-                            label: 'Sales',
-                            data: [0, 0, 0, 0, 0, 0, 0],
+                            label: 'Average Sales',
+                            data: trendData,
                             borderColor: '#0ea5e9',
                             backgroundColor: 'rgba(14,165,233,0.1)',
                             fill: true,
@@ -3931,15 +4050,36 @@
             }
             if (!confirm('Reject order #' + id + '?')) return;
 
+            // Restore stock
+            (order.items || []).forEach(item => {
+                const product = (data.products || []).find(p => p.id === item.productId);
+                if (product) {
+                    product.stock = (product.stock || 0) + item.qty;
+                }
+            });
+
             data.pendingOrders = (data.pendingOrders || []).filter(o => o.id !== id);
             order.status = 'rejected';
             order.rejectedDate = getToday();
             if (!data.orders) data.orders = [];
             data.orders.push(order);
 
+            // Journal entry for rejection
+            if (!data.journalEntries) data.journalEntries = [];
+            data.journalEntries.push({
+                id: generateId(),
+                date: getToday(),
+                description: 'Order rejected: #' + id + ' (Stock restored)',
+                account: 'Inventory Adjustment',
+                debit: 0,
+                credit: order.total || 0,
+                amount: order.total || 0
+            });
+
             saveData();
             renderOrders();
-            showToast('Order #' + id + ' rejected');
+            renderDashboard();
+            showToast('Order #' + id + ' rejected. Stock restored.');
         }
 
         // ================================================================
@@ -4115,6 +4255,18 @@
             const rep = (data.reps || []).find(r => r.id === repId);
 
             const total = orderCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const totalCost = orderCart.reduce((sum, item) => {
+                const product = (data.products || []).find(p => p.id === item.productId);
+                return sum + ((product?.cost || item.price * 0.7) * item.qty);
+            }, 0);
+
+            if (paymentMethod === 'CHEQUE') {
+                const chequeNumber = document.getElementById('orderChequeNumber')?.value || '';
+                if (!chequeNumber) {
+                    showToast('Please enter cheque number');
+                    return;
+                }
+            }
 
             const order = {
                 id: 'ORD-' + Date.now().toString().slice(-6),
@@ -4125,13 +4277,34 @@
                 repName: rep ? rep.name : 'Unknown',
                 items: orderCart.map(item => ({ ...item })),
                 total: total,
-                cost: total * 0.7, // Estimated cost
+                cost: totalCost,
                 paymentMethod: paymentMethod,
                 status: 'pending',
                 freeIssues: 0,
                 collected: 0,
                 balance: paymentMethod === 'CREDIT' ? total : 0
             };
+
+            if (paymentMethod === 'CHEQUE') {
+                order.chequeNumber = document.getElementById('orderChequeNumber')?.value || '';
+                order.chequeBank = document.getElementById('orderChequeBank')?.value || '';
+                order.chequeDate = document.getElementById('orderChequeDate')?.value || getToday();
+                order.chequeDueDate = document.getElementById('orderChequeDueDate')?.value || getToday();
+
+                if (!data.cheques) data.cheques = [];
+                data.cheques.push({
+                    id: generateId(),
+                    chequeNumber: order.chequeNumber,
+                    bank: order.chequeBank,
+                    customerName: order.shopName,
+                    amount: total,
+                    dueDate: order.chequeDueDate,
+                    status: 'pending',
+                    orderId: order.id
+                });
+            }
+
+            if (!validateOrder(order)) return;
 
             if (!data.pendingOrders) data.pendingOrders = [];
             data.pendingOrders.push(order);
@@ -4239,19 +4412,28 @@
                 showToast('Invalid price');
                 return;
             }
+            const cost = parseFloat(prompt('Enter cost price (LKR):') || (price * 0.7).toFixed(2));
+            if (isNaN(cost) || cost <= 0) {
+                showToast('Invalid cost');
+                return;
+            }
             const stock = parseInt(prompt('Enter stock quantity:') || '0');
             const minStock = parseInt(prompt('Enter minimum stock level:') || '5');
 
-            if (!data.products) data.products = [];
-            data.products.push({
+            const newProduct = {
                 id: generateId(),
                 name: name,
                 brand: brand,
                 category: category,
                 price: price,
+                cost: cost,
                 stock: stock || 0,
                 minStock: minStock || 5
-            });
+            };
+            if (!validateProduct(newProduct)) return;
+
+            if (!data.products) data.products = [];
+            data.products.push(newProduct);
 
             saveData();
             renderProducts();
@@ -4269,10 +4451,16 @@
             if (!name) return;
             const price = parseFloat(prompt('Price (LKR):', product.price));
             if (isNaN(price) || price <= 0) return;
+            const cost = parseFloat(prompt('Cost price (LKR):', product.cost || (price * 0.7).toFixed(2)));
+            if (isNaN(cost) || cost <= 0) return;
             const stock = parseInt(prompt('Stock quantity:', product.stock) || '0');
+
+            const updated = { ...product, name, price, cost, stock: stock || 0 };
+            if (!validateProduct(updated)) return;
 
             product.name = name;
             product.price = price;
+            product.cost = cost;
             product.stock = stock || 0;
 
             saveData();
@@ -4578,9 +4766,22 @@
                 reason: reason
             });
 
+            // Journal entry for return
+            if (!data.journalEntries) data.journalEntries = [];
+            const categoryLabel = category === 'CAT1' ? 'Company Return' : category === 'CAT2' ? 'Resellable Return' : 'Loss Return';
+            data.journalEntries.push({
+                id: generateId(),
+                date: getToday(),
+                description: 'Return: ' + categoryLabel + ' - ' + productName + ' x' + qty,
+                account: category === 'CAT1' ? 'Returns (Company)' : category === 'CAT2' ? 'Returns (Resellable)' : 'Returns (Loss)',
+                debit: 0,
+                credit: 0,
+                amount: 0
+            });
+
             saveData();
             renderReturns();
-            showToast('Return recorded');
+            showToast('Return recorded with journal entry');
         }
 
         function deleteReturn(id) {
@@ -5127,7 +5328,10 @@
 
             // Update stock
             items.forEach(item => {
-                const product = (data.products || []).find(p => p.name.toLowerCase() === item.productName.toLowerCase());
+                const product = (data.products || []).find(p =>
+                    p.name.toLowerCase().trim() === item.productName.toLowerCase().trim() ||
+                    p.name.toLowerCase().includes(item.productName.toLowerCase().trim())
+                );
                 if (product) {
                     product.stock = (product.stock || 0) + item.qty;
                 } else {
@@ -5136,6 +5340,7 @@
                         id: generateId(),
                         name: item.productName,
                         price: item.price * 1.2,
+                        cost: item.price,
                         stock: item.qty,
                         minStock: 5,
                         category: 'General',

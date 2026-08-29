@@ -750,10 +750,7 @@
                     localStorage.setItem('currentBusinessName', 'DARSHANA MADAWALA');
 
                     const DM_DEFAULT_BID = 'Qxl4JRGfBZTZOFMoQYhocFR2pfp2';
-                    let storedBid = localStorage.getItem('currentBusinessId') || sessionStorage.getItem('currentBusinessId');
-                    if (!storedBid || storedBid === 'DarshanaMadawala' || storedBid.toLowerCase() === 'qxl4jrgfbztzofmoqyhocfr2pfp2') {
-                        storedBid = DM_DEFAULT_BID;
-                    }
+                    const storedBid = DM_DEFAULT_BID;
                     currentBusinessId = storedBid;
                     localStorage.setItem('currentBusinessId', currentBusinessId);
                     sessionStorage.setItem('currentBusinessId', currentBusinessId);
@@ -766,7 +763,7 @@
 
         function listenToBusinessProfile() {
             if (!window.db || !currentBusinessId) return;
-            window.db.collection('businesses').doc(currentBusinessId).get().then(doc => {
+            window.db.collection('businesses').doc(currentBusinessId).onSnapshot(doc => {
                 if (doc.exists && (doc.data().businessName || doc.data().name)) {
                     const name = doc.data().businessName || doc.data().name || 'DARSHANA MADAWALA';
                     document.getElementById('topOwnerName').textContent = name;
@@ -780,7 +777,7 @@
         function listenToBankAccounts() {
             if (!window.db || !currentBusinessId) return;
             window.db.collection('businesses').doc(currentBusinessId).collection('bank_accounts')
-                .get().then(snapshot => {
+                .onSnapshot(snapshot => {
                     allBankAccounts = [];
                     snapshot.forEach(doc => {
                         const d = doc.data();
@@ -799,7 +796,7 @@
             if (!window.db || !currentBusinessId) return;
             window.db.collection('businesses').doc(currentBusinessId).collection('bank_transactions')
                 .orderBy('createdAt', 'desc')
-                .get().then(snapshot => {
+                .onSnapshot(snapshot => {
                     allBankTransactions = [];
                     snapshot.forEach(doc => {
                         const d = doc.data();

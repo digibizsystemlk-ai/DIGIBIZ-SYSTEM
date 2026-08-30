@@ -3693,7 +3693,7 @@
                           onmousedown="selectSearchableOption('${containerId}', '${inputId}', '${opt.id}', '${opt.name.replace(/'/g, "\\'")}', '${opt.phone || ''}')"
                           ontouchstart="selectSearchableOption('${containerId}', '${inputId}', '${opt.id}', '${opt.name.replace(/'/g, "\\'")}', '${opt.phone || ''}')">
                         <div style="font-weight: 700; color: #0f172a;">${opt.name}</div>
-                        <div class="sub-info" style="font-size: 11px; color: #64748b;">${opt.phone || 'No phone'} • Due: ${formatRs(opt.totalDue || 0)}</div>
+                        <div class="sub-info" style="font-size: 11px; color: #64748b;">${opt.phone || 'No phone'} • Due: ${formatRs(opt.totalDue || 0)}${(opt.advanceBalance || 0) > 0 ? ` • <span style="color:#059669; font-weight:800;">Advance: ${formatRs(opt.advanceBalance)}</span>` : ''}</div>
                     </div>`
                 ).join('');
             };
@@ -4065,16 +4065,37 @@
             const dueText = document.getElementById('wzCdDueText');
             const amountInput = document.getElementById('wzCdAmount');
 
+            // Collect Debt Wizard
             if (cust && badgeRow && dueText) {
                 const due = getCustomerCalculatedDue(cust);
-                dueText.textContent = formatRs(due);
+                const advance = Number(cust.advanceBalance || 0);
+                if (advance > 0) {
+                    dueText.innerHTML = `${formatRs(due)} <span style="color:#059669; font-weight:800; margin-left:6px; font-size:12px; background:#ecfdf5; padding:2px 6px; border-radius:4px;">(Advance: +${formatRs(advance)})</span>`;
+                } else {
+                    dueText.textContent = formatRs(due);
+                }
                 badgeRow.style.display = 'block';
-                if (due > 0 && amountInput) {
-                    amountInput.placeholder = `Due: ${formatRs(due)}`;
-                    amountInput.max = due;
+                if (amountInput) {
+                    amountInput.placeholder = due > 0 ? `Due: ${formatRs(due)}` : 'Enter repayment amount';
+                    amountInput.removeAttribute('max');
                 }
             } else if (badgeRow) {
                 badgeRow.style.display = 'none';
+            }
+
+            // Give Credit Wizard Advance Badge
+            const gcAdvanceRow = document.getElementById('wzGcAdvanceBadgeRow');
+            const gcAdvanceText = document.getElementById('wzGcAdvanceText');
+            if (cust && gcAdvanceRow && gcAdvanceText) {
+                const advance = Number(cust.advanceBalance || 0);
+                if (advance > 0) {
+                    gcAdvanceText.textContent = formatRs(advance);
+                    gcAdvanceRow.style.display = 'block';
+                } else {
+                    gcAdvanceRow.style.display = 'none';
+                }
+            } else if (gcAdvanceRow) {
+                gcAdvanceRow.style.display = 'none';
             }
         }
 
@@ -5339,16 +5360,17 @@
 
             tbody.innerHTML = allCustomers.map(c => {
                 const finalDue = getCustomerCalculatedDue(c);
+                const advance = Number(c.advanceBalance || 0);
 
                 return `
                         <tr>
                             <td class="sticky-name-col" onclick="viewCustomerHistory('${c.id}', true)" style="cursor: pointer;" title="Click to view customer statement">
                                 <div style="font-weight: 800; font-size: 13.5px; color: #064e3b; text-decoration: underline; line-height: 1.2;">${c.name}</div>
-                                ${finalDue > 0 ? `<div style="font-size: 11px; font-weight: 800; color: #dc2626; margin-top: 2px;">Due: ${formatRs(finalDue)}</div>` : `<div style="font-size: 10.5px; font-weight: 700; color: #16a34a; margin-top: 2px;">Settled</div>`}
+                                ${finalDue > 0 ? `<div style="font-size: 11px; font-weight: 800; color: #dc2626; margin-top: 2px;">Due: ${formatRs(finalDue)}</div>` : (advance > 0 ? `<div style="font-size: 10.5px; font-weight: 800; color: #059669; margin-top: 2px; background: #ecfdf5; padding: 1px 6px; border-radius: 4px; display: inline-block;">+Advance: ${formatRs(advance)}</div>` : `<div style="font-size: 10.5px; font-weight: 700; color: #16a34a; margin-top: 2px;">Settled</div>`)}
                             </td>
                             <td><a href="tel:${c.phone}" style="color: var(--tea-primary); font-weight: 600; text-decoration: none; font-size: 12.5px;">${c.phone || '-'}</a></td>
-                            <td style="color: ${finalDue > 0 ? 'var(--red-text)' : 'var(--green-text)'}; font-weight: 900; font-size: 13.5px;">
-                                ${formatRs(finalDue)}
+                            <td style="color: ${finalDue > 0 ? 'var(--red-text)' : (advance > 0 ? '#059669' : 'var(--green-text)')}; font-weight: 900; font-size: 13.5px;">
+                                ${finalDue > 0 ? formatRs(finalDue) : (advance > 0 ? `+${formatRs(advance)}` : 'Rs. 0.00')}
                             </td>
                             <td>
                                 <div style="display: flex; gap: 4px; flex-wrap: nowrap;">
@@ -5381,14 +5403,15 @@
 
             tbody.innerHTML = filtered.map(c => {
                 const finalDue = getCustomerCalculatedDue(c);
+                const advance = Number(c.advanceBalance || 0);
                 return `
                         <tr>
                             <td class="sticky-name-col" onclick="viewCustomerHistory('${c.id}', true)" style="cursor: pointer;" title="Click to view customer statement">
                                 <div style="font-weight: 800; font-size: 13.5px; color: #064e3b; text-decoration: underline; line-height: 1.2;">${c.name}</div>
-                                ${finalDue > 0 ? `<div style="font-size: 11px; font-weight: 800; color: #dc2626; margin-top: 2px;">Due: ${formatRs(finalDue)}</div>` : `<div style="font-size: 10.5px; font-weight: 700; color: #16a34a; margin-top: 2px;">Settled</div>`}
+                                ${finalDue > 0 ? `<div style="font-size: 11px; font-weight: 800; color: #dc2626; margin-top: 2px;">Due: ${formatRs(finalDue)}</div>` : (advance > 0 ? `<div style="font-size: 10.5px; font-weight: 800; color: #059669; margin-top: 2px; background: #ecfdf5; padding: 1px 6px; border-radius: 4px; display: inline-block;">+Advance: ${formatRs(advance)}</div>` : `<div style="font-size: 10.5px; font-weight: 700; color: #16a34a; margin-top: 2px;">Settled</div>`)}
                             </td>
                             <td><a href="tel:${c.phone}" style="color: var(--tea-primary); font-weight: 600; text-decoration: none; font-size: 12.5px;">${c.phone || '-'}</a></td>
-                            <td style="color: ${finalDue > 0 ? 'var(--red-text)' : 'var(--green-text)'}; font-weight: 900; font-size: 13.5px;">${formatRs(finalDue)}</td>
+                            <td style="color: ${finalDue > 0 ? 'var(--red-text)' : (advance > 0 ? '#059669' : 'var(--green-text)')}; font-weight: 900; font-size: 13.5px;">${finalDue > 0 ? formatRs(finalDue) : (advance > 0 ? `+${formatRs(advance)}` : 'Rs. 0.00')}</td>
                             <td>
                                 <div style="display: flex; gap: 4px; flex-wrap: nowrap;">
                                     <button class="btn-table-action" onclick="openEditCustomerModal('${c.id}')" title="Edit Customer"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
@@ -6851,7 +6874,8 @@
 
             if (nameEl) nameEl.textContent = cust.name;
             if (sumEl) {
-                sumEl.innerHTML = `Phone: <strong>${cust.phone || '-'}</strong> | Total Outstanding Due: <strong style="color:${currentDue > 0 ? '#dc2626' : '#16a34a'}; font-size:13.5px;">${formatRs(currentDue)}</strong>`;
+                const advanceBal = Number(cust.advanceBalance || 0);
+            sumEl.innerHTML = `Phone: <strong>${cust.phone || '-'}</strong> | Total Due: <strong style="color:${currentDue > 0 ? '#dc2626' : '#16a34a'}; font-size:13.5px;">${formatRs(currentDue)}</strong>${advanceBal > 0 ? ` | Advance Balance: <strong style="color:#059669; background:#ecfdf5; padding:2px 8px; border-radius:4px; font-size:13.5px;">+${formatRs(advanceBal)}</strong>` : ''}`;
             }
 
             if (btnActive && btnFull) {
@@ -6950,7 +6974,8 @@
             }
 
             if (dueDisplay) {
-                dueDisplay.innerHTML = `Active Outstanding: <span style="color: ${currentDue > 0 ? '#dc2626' : '#16a34a'};">${formatRs(currentDue)}</span>`;
+                const advanceBal = Number(cust.advanceBalance || 0);
+                dueDisplay.innerHTML = `Active Outstanding: <span style="color: ${currentDue > 0 ? '#dc2626' : '#16a34a'};">${formatRs(currentDue)}</span>${advanceBal > 0 ? ` <span style="color:#059669; font-weight:800; margin-left:8px;">(Advance Balance: +${formatRs(advanceBal)})</span>` : ''}`;
             }
 
             if (actionBtns) {
@@ -7291,7 +7316,7 @@
         // ==========================================
         // 10. IN-APP UPDATE ENGINE (DIGIBIZ STORE Style) & PULL-TO-REFRESH
         // ==========================================
-        const CURRENT_APP_BUILD = '2026.08.30.01';
+        const CURRENT_APP_BUILD = '2026.08.30.02';
         let swRegistration = null;
         let updateWaitingWorker = null;
 
@@ -7490,7 +7515,7 @@
         // 12. APP STARTUP & SERVICE WORKER
         // ==========================================
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260830_pwa_v32', {
+            navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260830_pwa_v33', {
                 scope: '/clients/madawalateashop/',
                 updateViaCache: 'none'
             })

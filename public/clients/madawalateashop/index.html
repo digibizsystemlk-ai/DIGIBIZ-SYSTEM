@@ -2293,11 +2293,12 @@
                                     <th>Type</th>
                                     <th>Amount (Rs.)</th>
                                     <th>Reference / Notes</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="bankTxTableBody">
                                 <tr>
-                                    <td colspan="5"
+                                    <td colspan="6"
                                         style="text-align: center; padding: 20px; color: var(--text-muted);">No
                                         transactions recorded.</td>
                                 </tr>
@@ -3288,6 +3289,9 @@
         </div>
     </div>
 
+            </div>
+    </div>
+
     <!-- Receipt / WhatsApp Modal -->
     <div class="modal-overlay" id="modalPrintReceipt">
         <div class="modal-card" style="max-width: 420px;">
@@ -3307,6 +3311,58 @@
                     <i class="fa-brands fa-whatsapp"></i> <span>WhatsApp</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Edit Bank Transaction Modal -->
+    <div class="modal-overlay" id="modalEditBankTransaction">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square" style="color: #2563eb;"></i> Edit Banking Transaction</h3>
+                <button class="btn-close-modal" onclick="closeModal('modalEditBankTransaction')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="formEditBankTransaction" onsubmit="handleEditBankTransactionSubmit(event)">
+                <input type="hidden" id="editBankTxId">
+                
+                <div class="form-group-large">
+                    <label>Transaction Type *</label>
+                    <select class="form-control-large" id="editBankTxType" required>
+                        <option value="DEPOSIT">📥 Cash Deposit to Bank</option>
+                        <option value="WITHDRAWAL">📤 Cash Withdrawal from Bank</option>
+                    </select>
+                </div>
+
+                <div class="form-group-large">
+                    <label>Bank Account *</label>
+                    <select class="form-control-large" id="editBankTxBankSelect" required>
+                        <option value="">-- Select Bank Account --</option>
+                    </select>
+                </div>
+
+                <div class="form-group-large">
+                    <label>Amount (Rs.) *</label>
+                    <div class="currency-input-wrap">
+                        <span class="currency-prefix">Rs.</span>
+                        <input type="number" step="0.01" class="form-control-large" id="editBankTxAmount" required placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="form-group-large">
+                    <label>Date *</label>
+                    <input type="date" class="form-control-large" id="editBankTxDate" required>
+                </div>
+
+                <div class="form-group-large">
+                    <label>Reference / Notes</label>
+                    <input type="text" class="form-control-large" id="editBankTxNotes" placeholder="e.g. Deposit Slip #12345">
+                </div>
+
+                <button type="submit" class="btn-wizard-submit btn-blue" id="btnSubmitEditBankTx">
+                    <i class="fa-solid fa-floppy-disk"></i> <span>Update Record</span>
+                </button>
+            </form>
         </div>
     </div>
 
@@ -3528,6 +3584,7 @@
                     phone: phone,
                     address: address,
                     totalDue: due,
+                    advanceBalance: 0,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
@@ -4975,6 +5032,7 @@
                 custSnap.forEach(d => {
                     const data = d.data() || {};
                     data.totalDue = Number(data.totalDue) || 0;
+                    data.advanceBalance = Number(data.advanceBalance) || 0;
                     allCustomers.push({ id: d.id, ...data });
                 });
 
@@ -5408,7 +5466,8 @@
                             type: 'DEPOSIT',
                             amount: Number(c.paidAmount || c.amount || 0),
                             notes: `Debt Repayment (${c.customerName || 'Customer'})`,
-                            createdAt: c.createdAt
+                            createdAt: c.createdAt,
+                            bankId: c.bankAccountId || (bank ? bank.id : null)
                         });
                     }
                 }
@@ -5420,13 +5479,14 @@
             if (badge) badge.textContent = `${list.length} Records`;
 
             if (!list.length) {
-                tbody.innerHTML =
-                    '<tr><td colspan="5" style="text-align: center; padding: 25px; color: var(--text-muted);">No banking transactions recorded yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 25px; color: var(--text-muted);">No banking transactions recorded yet.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = list.map(tx => {
                 const isDeposit = (tx.type || '').toUpperCase() === 'DEPOSIT';
+                const isDebtRepayment = (tx.id || '').startsWith('rep_');
+                
                 return `
                     <tr>
                         <td>${tx.date || '-'}</td>
@@ -5438,9 +5498,213 @@
                         </td>
                         <td style="font-weight: 800; color: ${isDeposit ? 'var(--green-text)' : 'var(--red-text)'};">${formatRs(tx.amount)}</td>
                         <td>${tx.notes || '-'}</td>
+                        <td>
+                            <div style="display: flex; gap: 4px;">
+                                ${!isDebtRepayment ? `
+                                    <button class="btn-table-action" onclick="openEditBankTransactionModal('${tx.id}')" title="Edit Transaction">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button class="btn-table-action btn-action-danger" onclick="deleteBankTransactionRecord('${tx.id}')" title="Delete Transaction">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                ` : `
+                                    <span style="font-size: 10px; color: #94a3b8; font-weight: 700;">(From Debt)</span>
+                                `}
+                            </div>
+                        </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function openEditBankTransactionModal(txId) {
+            const transaction = allBankTransactions.find(tx => tx.id === txId);
+            if (!transaction) {
+                showToast('Transaction not found!');
+                return;
+            }
+
+            // Populate bank dropdown
+            const bankSelect = document.getElementById('editBankTxBankSelect');
+            if (bankSelect) {
+                bankSelect.innerHTML = '<option value="">-- Select Bank Account --</option>' +
+                    allBankAccounts.map(b => 
+                        `<option value="${b.id}" ${(b.id === transaction.bankId || b.id === transaction.bankAccountId) ? 'selected' : ''}>
+                            ${b.bankName} - ${b.accountNumber}
+                        </option>`
+                    ).join('');
+            }
+
+            document.getElementById('editBankTxId').value = txId;
+            document.getElementById('editBankTxDate').value = transaction.date || '';
+            document.getElementById('editBankTxAmount').value = transaction.amount || '';
+            document.getElementById('editBankTxNotes').value = transaction.notes || '';
+            document.getElementById('editBankTxType').value = transaction.type || 'DEPOSIT';
+            
+            openModal('modalEditBankTransaction');
+        }
+
+        async function handleEditBankTransactionSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitEditBankTx');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+            const txId = document.getElementById('editBankTxId').value;
+            const date = document.getElementById('editBankTxDate').value;
+            const amount = parseFloat(document.getElementById('editBankTxAmount').value) || 0;
+            const type = document.getElementById('editBankTxType').value;
+            const bankId = document.getElementById('editBankTxBankSelect').value;
+            const notes = document.getElementById('editBankTxNotes').value.trim();
+
+            if (!bankId) {
+                alert('Please select a bank account.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>Update Record</span>';
+                return;
+            }
+
+            if (amount <= 0) {
+                alert('Please enter a valid amount greater than 0.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>Update Record</span>';
+                return;
+            }
+
+            try {
+                // 1. Find the original transaction
+                const oldTx = allBankTransactions.find(tx => tx.id === txId);
+                if (!oldTx) {
+                    alert('Transaction not found!');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>Update Record</span>';
+                    return;
+                }
+
+                // 2. Reverse the old transaction effect from the old bank account
+                const oldBank = allBankAccounts.find(b => b.id === (oldTx.bankId || oldTx.bankAccountId));
+                if (oldBank) {
+                    let oldBalance = Number(oldBank.currentBalance || 0);
+                    if (oldTx.type === 'DEPOSIT') {
+                        oldBalance -= Number(oldTx.amount || 0);
+                    } else if (oldTx.type === 'WITHDRAWAL') {
+                        oldBalance += Number(oldTx.amount || 0);
+                    }
+                    oldBank.currentBalance = oldBalance;
+                    
+                    await db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(oldBank.id).update({
+                        currentBalance: oldBalance,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // 3. Apply the new transaction effect
+                const newBank = allBankAccounts.find(b => b.id === bankId);
+                if (!newBank) {
+                    alert('Selected bank account not found!');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>Update Record</span>';
+                    return;
+                }
+
+                let newBalance = Number(newBank.currentBalance || 0);
+                if (type === 'DEPOSIT') {
+                    newBalance += amount;
+                } else if (type === 'WITHDRAWAL') {
+                    newBalance -= amount;
+                }
+                newBank.currentBalance = newBalance;
+
+                await db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bankId).update({
+                    currentBalance: newBalance,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 4. Update the transaction in Firestore
+                const updateData = {
+                    date: date,
+                    amount: amount,
+                    type: type,
+                    bankId: bankId,
+                    bankName: newBank.bankName,
+                    accountNumber: newBank.accountNumber,
+                    notes: notes,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc(txId).update(updateData);
+
+                // 5. Update local cache
+                const localIdx = allBankTransactions.findIndex(tx => tx.id === txId);
+                if (localIdx !== -1) {
+                    allBankTransactions[localIdx] = {
+                        ...allBankTransactions[localIdx],
+                        ...updateData
+                    };
+                }
+
+                saveLocalCache();
+                closeModal('modalEditBankTransaction');
+                showToast('✅ Banking transaction updated successfully!');
+
+                // 6. Refresh UI
+                renderBankCards();
+                renderBankTransactionsTable();
+                if (currentActiveTab === 'credits') renderCreditsTable();
+                if (currentActiveTab === 'reports') generateReports();
+
+            } catch (err) {
+                console.error('[Edit Bank Error]', err);
+                alert('Failed to update transaction: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>Update Record</span>';
+            }
+        }
+
+        async function deleteBankTransactionRecord(txId) {
+            if (!confirm('⚠️ Are you sure you want to delete this banking transaction?\n\nThis action cannot be undone.')) return;
+
+            try {
+                const transaction = allBankTransactions.find(tx => tx.id === txId);
+                if (!transaction) {
+                    showToast('Transaction not found!');
+                    return;
+                }
+
+                // 1. Reverse the transaction effect from bank account
+                const bank = allBankAccounts.find(b => b.id === (transaction.bankId || transaction.bankAccountId));
+                if (bank) {
+                    let balance = Number(bank.currentBalance || 0);
+                    if (transaction.type === 'DEPOSIT') {
+                        balance -= Number(transaction.amount || 0);
+                    } else if (transaction.type === 'WITHDRAWAL') {
+                        balance += Number(transaction.amount || 0);
+                    }
+                    bank.currentBalance = balance;
+
+                    await db.collection('businesses').doc(currentBusinessId).collection('bank_accounts').doc(bank.id).update({
+                        currentBalance: balance,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // 2. Delete from Firestore
+                await db.collection('businesses').doc(currentBusinessId).collection('bank_transactions').doc(txId).delete();
+
+                // 3. Delete from local cache
+                allBankTransactions = allBankTransactions.filter(tx => tx.id !== txId);
+                saveLocalCache();
+
+                // 4. Refresh UI
+                renderBankCards();
+                renderBankTransactionsTable();
+                showToast('✅ Banking transaction deleted successfully!');
+
+            } catch (err) {
+                console.error('[Delete Bank Error]', err);
+                alert('Failed to delete transaction: ' + err.message);
+            }
         }
 
         let currentReportPeriod = 'ALL';
@@ -5781,7 +6045,6 @@
             const searchInput = document.getElementById('wzGcCustomerSearch');
             const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
-            // Auto match if custId is missing
             if (!custId && searchVal) {
                 let match = allCustomers.find(c => c.name.toLowerCase() === searchVal) ||
                             allCustomers.find(c => c.name.toLowerCase().startsWith(searchVal)) ||
@@ -5814,38 +6077,101 @@
                 return;
             }
 
+            if (amount <= 0) {
+                alert('Please enter a valid credit amount greater than 0.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm & Issue Credit</span>';
+                return;
+            }
+
             try {
-                const creditData = {
-                    businessId: currentBusinessId,
-                    customerId: custId,
-                    customerName: cust.name,
-                    customerPhone: cust.phone || '',
-                    category: category,
-                    amount: amount,
-                    paidAmount: 0,
-                    balance: amount,
-                    status: 'UNPAID',
-                    date: date,
-                    notes: notes,
-                    type: 'CREDIT',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
+                const custRef = db.collection('businesses').doc(currentBusinessId).collection('customers').doc(custId);
+                let amountToCredit = amount;
+                let advanceUsed = 0;
+                const currentAdvance = Number(cust.advanceBalance || 0);
 
-                const docRef = await db.collection('businesses')
-                    .doc(currentBusinessId)
-                    .collection('credits')
-                    .add(creditData);
+                // --- NEW LOGIC: Check and use advance balance first ---
+                if (currentAdvance > 0) {
+                    if (currentAdvance >= amount) {
+                        // Full amount covered by advance balance
+                        advanceUsed = amount;
+                        amountToCredit = 0;
+                        
+                        await custRef.update({
+                            advanceBalance: firebase.firestore.FieldValue.increment(-advanceUsed),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
 
-                const newCredit = { id: docRef.id, ...creditData };
-                allCredits.unshift(newCredit);
+                        // Update local cache
+                        const localCust = allCustomers.find(c => c.id === custId);
+                        if (localCust) {
+                            localCust.advanceBalance = Math.max(0, (localCust.advanceBalance || 0) - advanceUsed);
+                        }
 
-                await recalculateCustomerBalance(custId);
+                        showToast(`✅ Rs. ${advanceUsed.toFixed(2)} deducted from advance balance. No new credit recorded.`);
+                        
+                        // Still need to update customer total due to reflect usage
+                        // Advance balance usage doesn't affect totalDue (it's a prepayment)
+                        saveLocalCache();
+                        
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm & Issue Credit</span>';
+                        closeWizard();
+                        return;
+                    } else {
+                        // Partial coverage by advance balance
+                        advanceUsed = currentAdvance;
+                        amountToCredit = amount - currentAdvance;
+                        
+                        await custRef.update({
+                            advanceBalance: 0,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+
+                        // Update local cache
+                        const localCust = allCustomers.find(c => c.id === custId);
+                        if (localCust) {
+                            localCust.advanceBalance = 0;
+                        }
+
+                        showToast(`✅ Rs. ${advanceUsed.toFixed(2)} used from advance balance. Remaining Rs. ${amountToCredit.toFixed(2)} recorded as new credit.`);
+                    }
+                }
+
+                // Create credit record only if amountToCredit > 0
+                if (amountToCredit > 0) {
+                    const creditData = {
+                        businessId: currentBusinessId,
+                        customerId: custId,
+                        customerName: cust.name,
+                        customerPhone: cust.phone || '',
+                        category: category,
+                        amount: amountToCredit,
+                        paidAmount: 0,
+                        balance: amountToCredit,
+                        status: 'UNPAID',
+                        date: date,
+                        notes: notes + (advanceUsed > 0 ? ` (Advance used: Rs. ${advanceUsed.toFixed(2)})` : ''),
+                        type: 'CREDIT',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    const docRef = await db.collection('businesses')
+                        .doc(currentBusinessId)
+                        .collection('credits')
+                        .add(creditData);
+
+                    const newCredit = { id: docRef.id, ...creditData };
+                    allCredits.unshift(newCredit);
+
+                    // Update customer total due with the new credit amount
+                    await recalculateCustomerBalance(custId);
+                }
 
                 saveLocalCache();
-
                 closeWizard();
-                showToast(`✅ Credit of ${formatRs(amount)} issued to ${cust.name}`);
+                showToast(advanceUsed > 0 ? `✅ Credit of ${formatRs(amountToCredit)} issued to ${cust.name} (Used ${formatRs(advanceUsed)} from advance)` : `✅ Credit of ${formatRs(amount)} issued to ${cust.name}`);
 
                 await refreshAllData();
 
@@ -5862,15 +6188,13 @@
             e.preventDefault();
             const btn = document.getElementById('btnSubmitWzCD');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
 
-            // Get customer from hidden select in searchable dropdown
+            // Get customer from hidden select
             const hiddenSelect = document.getElementById('wzCdCustomerSearch_hidden');
             let custId = hiddenSelect ? hiddenSelect.value : '';
 
-            // Fallback to direct if hidden not found
             if (!custId) {
-                // Try to find by matching name in the search input
                 const searchInput = document.getElementById('wzCdCustomerSearch');
                 if (searchInput) {
                     const searchVal = searchInput.value.trim();
@@ -5892,15 +6216,16 @@
             const date = document.getElementById('wzCdDate').value;
             const notes = document.getElementById('wzCdNotes').value.trim();
 
+            // Bank validation
             if (method === 'BANK') {
                 if (!allBankAccounts || allBankAccounts.length === 0) {
-                    alert('⚠️ Bank Account Required: No bank accounts are registered in your system. Please add a Bank Account in the "Banking & Cash" tab before recording bank payments.');
+                    alert('⚠️ Bank Account Required: Please add a Bank Account in the "Banking & Cash" tab.');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm & Record Repayment</span>';
                     return;
                 }
                 if (!bankId) {
-                    alert('⚠️ Bank Account Required: Please select a destination Bank Account from the list.');
+                    alert('⚠️ Bank Account Required: Please select a destination Bank Account.');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm & Record Repayment</span>';
                     return;
@@ -5915,9 +6240,10 @@
                 return;
             }
 
-            const custName = cust ? cust.name : 'Unknown';
-            const custPhone = cust ? cust.phone : '';
-            const dueBefore = getCustomerCalculatedDue(cust);
+            const custName = cust.name || 'Unknown';
+            const custPhone = cust.phone || '';
+            const totalDue = getCustomerCalculatedDue(cust);
+            const currentAdvance = Number(cust.advanceBalance || 0);
 
             if (amount <= 0) {
                 alert('Please enter a valid repayment amount greater than 0.');
@@ -5926,22 +6252,25 @@
                 return;
             }
 
-            if (amount > dueBefore) {
-                alert(
-                    `Repayment amount (${formatRs(amount)}) exceeds the outstanding due (${formatRs(dueBefore)}). Please adjust.`
-                    );
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Confirm & Record Repayment</span>';
-                return;
-            }
-
             try {
-                const cust = allCustomers.find(c => c.id === custId);
-                const totalDue = cust ? getCustomerCalculatedDue(cust) : 0;
-                const actualPayment = (totalDue > 0 && amount > totalDue) ? totalDue : amount;
-                const changeToReturn = (totalDue > 0 && amount > totalDue) ? (amount - totalDue) : 0;
+                let paymentToRecord = 0;
+                let advanceAmount = 0;
 
-                // 1. Create REPAYMENT record
+                // --- NEW LOGIC: Split payment if amount > total due ---
+                if (amount > totalDue) {
+                    // Record only the amount needed to settle the debt
+                    paymentToRecord = totalDue;
+                    // The remainder becomes advance balance
+                    advanceAmount = amount - totalDue;
+                    
+                    showToast(`✅ Debt fully settled (${formatRs(totalDue)}). Advance balance increased by ${formatRs(advanceAmount)}.`);
+                } else {
+                    // Normal payment - full amount goes to debt settlement
+                    paymentToRecord = amount;
+                    advanceAmount = 0;
+                }
+
+                // 1. Create REPAYMENT record with paymentToRecord (not the full amount)
                 const repaymentData = {
                     businessId: currentBusinessId,
                     customerId: custId,
@@ -5949,13 +6278,13 @@
                     customerPhone: custPhone,
                     category: 'REPAYMENT',
                     amount: 0,
-                    paidAmount: actualPayment,
+                    paidAmount: paymentToRecord,
                     balance: 0,
                     status: 'PAID',
                     paymentMethod: method,
                     bankAccountId: bankId,
                     date: date,
-                    notes: notes,
+                    notes: notes + (advanceAmount > 0 ? ` (Overpayment: ${formatRs(advanceAmount)} added to advance balance)` : ''),
                     type: 'REPAYMENT',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -5969,60 +6298,68 @@
                 const newRepayment = { id: repDoc.id, ...repaymentData };
                 allCredits.unshift(newRepayment);
 
-                // 2. Find all unpaid credits for this customer and distribute payment
-                const unpaidCredits = getCreditsForCustomer(cust).filter(c =>
-                    getCreditOutstanding(c) > 0 && String(c.status || '').toUpperCase() !== 'PAID'
-                );
+                // 2. Update customer's advance balance in Firestore
+                const custRef = db.collection('businesses').doc(currentBusinessId).collection('customers').doc(custId);
+                
+                // Calculate new advance balance
+                const newAdvance = currentAdvance + advanceAmount;
+                const newTotalDue = Math.max(0, totalDue - paymentToRecord);
 
-                let remainingAmount = actualPayment;
-
-                // Sort by oldest first (FIFO)
-                unpaidCredits.sort((a, b) => {
-                    return (a.date || '').localeCompare(b.date || '');
+                await custRef.update({
+                    totalDue: newTotalDue,
+                    advanceBalance: newAdvance,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Update each credit record
-                for (const credit of unpaidCredits) {
-                    if (remainingAmount <= 0) break;
-
-                    const currentBal = getCreditOutstanding(credit);
-                    const paymentToApply = Math.min(remainingAmount, currentBal);
-
-                    const newPaid = Number(credit.paidAmount || 0) + paymentToApply;
-                    const newBal = Math.max(0, Number(credit.amount || 0) - newPaid);
-                    const newStatus = newBal <= 0 ? 'PAID' : 'PARTIAL';
-
-                    // Update in Firestore
-                    await db.collection('businesses')
-                        .doc(currentBusinessId)
-                        .collection('credits')
-                        .doc(credit.id)
-                        .update({
-                            paidAmount: newPaid,
-                            balance: newBal,
-                            status: newStatus,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-
-                    // Update local copy
-                    const localIdx = allCredits.findIndex(c => c.id === credit.id);
-                    if (localIdx !== -1) {
-                        allCredits[localIdx].paidAmount = newPaid;
-                        allCredits[localIdx].balance = newBal;
-                        allCredits[localIdx].status = newStatus;
-                    }
-
-                    remainingAmount -= paymentToApply;
+                // 3. Update local cache
+                const localCust = allCustomers.find(c => c.id === custId);
+                if (localCust) {
+                    localCust.totalDue = newTotalDue;
+                    localCust.advanceBalance = newAdvance;
                 }
 
-                // 3. Recalculate customer total due
-                await recalculateCustomerBalance(custId);
+                // 4. If paymentToRecord > 0, apply to unpaid credits (FIFO)
+                if (paymentToRecord > 0) {
+                    const unpaidCredits = getCreditsForCustomer(cust).filter(c =>
+                        getCreditOutstanding(c) > 0 && String(c.status || '').toUpperCase() !== 'PAID'
+                    );
+                    unpaidCredits.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
-                // 4. Bank account update and transaction record if needed
-                if (method === 'BANK' && bankId) {
+                    let remainingAmount = paymentToRecord;
+                    for (const credit of unpaidCredits) {
+                        if (remainingAmount <= 0) break;
+                        const currentBal = getCreditOutstanding(credit);
+                        const paymentToApply = Math.min(remainingAmount, currentBal);
+                        const newPaid = Number(credit.paidAmount || 0) + paymentToApply;
+                        const newBal = Math.max(0, Number(credit.amount || 0) - newPaid);
+                        const newStatus = newBal <= 0 ? 'PAID' : 'PARTIAL';
+
+                        await db.collection('businesses')
+                            .doc(currentBusinessId)
+                            .collection('credits')
+                            .doc(credit.id)
+                            .update({
+                                paidAmount: newPaid,
+                                balance: newBal,
+                                status: newStatus,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+
+                        const localIdx = allCredits.findIndex(c => c.id === credit.id);
+                        if (localIdx !== -1) {
+                            allCredits[localIdx].paidAmount = newPaid;
+                            allCredits[localIdx].balance = newBal;
+                            allCredits[localIdx].status = newStatus;
+                        }
+                        remainingAmount -= paymentToApply;
+                    }
+                }
+
+                // 5. Bank transaction if method is BANK
+                if (method === 'BANK' && bankId && paymentToRecord > 0) {
                     const bank = allBankAccounts.find(b => b.id === bankId);
                     if (bank) {
-                        const newBankBal = (Number(bank.currentBalance || 0) + actualPayment);
+                        const newBankBal = (Number(bank.currentBalance || 0) + paymentToRecord);
                         bank.currentBalance = newBankBal;
                         await db.collection('businesses')
                             .doc(currentBusinessId)
@@ -6039,7 +6376,7 @@
                             bankName: bank.bankName,
                             accountNumber: bank.accountNumber,
                             type: 'DEPOSIT',
-                            amount: actualPayment,
+                            amount: paymentToRecord,
                             date: date,
                             notes: `Debt Repayment from ${custName}`,
                             creditId: repDoc.id,
@@ -6054,9 +6391,12 @@
 
                 saveLocalCache();
                 closeWizard();
-                showToast(changeToReturn > 0 ? `Repayment of ${formatRs(actualPayment)} received from ${custName}. Return change: ${formatRs(changeToReturn)}` : `Repayment of ${formatRs(actualPayment)} received from ${custName}`);
 
-                // Re-render all views
+                const successMsg = advanceAmount > 0 
+                    ? `✅ ${formatRs(paymentToRecord)} debt settled. ${formatRs(advanceAmount)} added to advance balance.`
+                    : `✅ ${formatRs(paymentToRecord)} recorded as repayment.`;
+                showToast(successMsg);
+
                 updateCreditSummaryCards();
                 if (currentActiveTab === 'credits') renderCreditsTable();
                 if (currentActiveTab === 'customers') renderCustomersTable();
@@ -6446,6 +6786,7 @@
                     }
                     showToast('✅ Customer profile updated!');
                 } else {
+                    payload.advanceBalance = 0;
                     payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     const docRef = await db.collection('businesses').doc(currentBusinessId).collection('customers').add(
                         payload);

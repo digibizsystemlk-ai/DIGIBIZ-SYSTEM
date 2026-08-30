@@ -5377,6 +5377,7 @@
                                     <button class="btn-table-action" onclick="openEditCustomerModal('${c.id}')" title="Edit Customer"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                                     ${c.phone ? `<a href="https://wa.me/${c.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn-table-action btn-action-wa" style="text-decoration:none;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
                                     ${finalDue > 0 ? `<button class="btn-table-action btn-action-green" onclick="openSettleModalForCustomer('${c.id}')" title="Settle"><i class="fa-solid fa-hand-holding-dollar"></i> Settle</button>` : ''}
+                                    <button class="btn-table-action btn-action-danger" onclick="deleteCustomerRecord('${c.id}')" title="Delete Customer"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -5417,6 +5418,7 @@
                                     <button class="btn-table-action" onclick="openEditCustomerModal('${c.id}')" title="Edit Customer"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                                     ${c.phone ? `<a href="https://wa.me/${c.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn-table-action btn-action-wa" style="text-decoration:none;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
                                     ${finalDue > 0 ? `<button class="btn-table-action btn-action-green" onclick="openSettleModalForCustomer('${c.id}')" title="Settle"><i class="fa-solid fa-hand-holding-dollar"></i> Settle</button>` : ''}
+                                    <button class="btn-table-action btn-action-danger" onclick="deleteCustomerRecord('${c.id}')" title="Delete Customer"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -7195,10 +7197,11 @@
             }
         }
 
-        async function requestPasswordConfirmation(actionDesc) {
+        async function requestPasswordConfirmation(customPromptText) {
             return new Promise((resolve) => {
                 const user = auth.currentUser;
-                const entered = prompt(`🔒 Security Confirmation\n\nTo ${actionDesc || 'delete this transaction permanently'},\nplease enter your account password to confirm:`);
+                const promptMessage = customPromptText || 'Enter your password for confirmation:';
+                const entered = prompt(promptMessage);
                 if (!entered) {
                     resolve(false);
                     return;
@@ -7225,6 +7228,33 @@
                         resolve(false);
                     });
             });
+        }
+
+        async function deleteCustomerRecord(custId) {
+            const cust = allCustomers.find(c => c.id === custId);
+            if (!cust) return;
+
+            const confirmed = await requestPasswordConfirmation('Enter your password for confirmation:');
+            if (!confirmed) return;
+
+            try {
+                // Delete from Firestore
+                await db.collection('businesses').doc(currentBusinessId).collection('customers').doc(custId).delete();
+
+                // Delete from local cache
+                allCustomers = allCustomers.filter(c => c.id !== custId);
+                saveLocalCache();
+
+                showToast(`🗑️ Customer ${cust.name || ''} deleted successfully`);
+                renderCustomersTable();
+                updateCreditSummaryCards();
+                populateBankAndCustomerSelects();
+
+                await refreshAllData();
+            } catch (err) {
+                console.error(err);
+                alert('Delete failed: ' + err.message);
+            }
         }
 
         async function deleteCreditRecord(creditId) {
@@ -7316,7 +7346,7 @@
         // ==========================================
         // 10. IN-APP UPDATE ENGINE (DIGIBIZ STORE Style) & PULL-TO-REFRESH
         // ==========================================
-        const CURRENT_APP_BUILD = '2026.08.30.02';
+        const CURRENT_APP_BUILD = '2026.08.30.03';
         let swRegistration = null;
         let updateWaitingWorker = null;
 
@@ -7515,7 +7545,7 @@
         // 12. APP STARTUP & SERVICE WORKER
         // ==========================================
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260830_pwa_v33', {
+            navigator.serviceWorker.register('/clients/madawalateashop/sw.js?v=20260830_pwa_v34', {
                 scope: '/clients/madawalateashop/',
                 updateViaCache: 'none'
             })

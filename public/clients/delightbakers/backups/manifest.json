@@ -1,26 +1,26 @@
 {
-  "clientId": "spi_holdings",
+  "clientId": "delightbakers",
   "maxRetention": 3,
-  "lastBackupAt": "2026-08-29T17:07:03.814Z",
+  "lastBackupAt": "2026-08-29T17:07:03.335Z",
   "activeBackupsCount": 3,
   "backups": [
     {
       "slot": 1,
       "fileName": "index.backup_2026-08-29_22-37-03.html",
       "createdAt": "8/29/2026, 10:37:03 PM",
-      "hash": "4762515c7b7f39a2ac2cc696cc9fcf671ea15e6a7ac5c99d10ce201c8ae12457"
+      "hash": "871a04796320ae4e989895dd7c2e957d04f3d066a22c702d621e8769ed7f9430"
     },
     {
       "slot": 2,
       "fileName": "index.backup_2026-08-29_22-28-01.html",
       "createdAt": "8/29/2026, 10:28:01 PM",
-      "hash": "371cac986e51f46f0931f522adcd23eb5452f8ed8ecd9f8bb0d18107fe109224"
+      "hash": "693696388b8580a1ee029c746f979b133903655820c1a4e3af6e41d17696c6ad"
     },
     {
       "slot": 3,
       "fileName": "index.backup_2026-08-29_22-21-34.html",
       "createdAt": "8/29/2026, 10:21:34 PM",
-      "hash": "67e0c06747951df7011559efd31802b79a1bb99d52fb3e757f551a90535cce6a"
+      "hash": "cd1e3f87aecc921fd84efab5043689d744595c700bc13c2f2f89faacd0d172c4"
     }
   ]
 }

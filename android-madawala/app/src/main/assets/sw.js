@@ -1,5 +1,5 @@
 // Madawala Tea Shop - Service Worker (PWA)
-const CACHE_NAME = 'madawala-pwa-v30';
+const CACHE_NAME = 'madawala-pwa-v31';
 const ASSETS = [
     '/clients/madawalateashop/',
     '/clients/madawalateashop/index.html',

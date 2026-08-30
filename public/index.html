@@ -498,6 +498,8 @@
                         targetWorkspace = '/clients/madawalateashop/';
                     } else if (cleanEmail.includes('nadun') || cleanEmail.includes('spiholdings') || cleanEmail.includes('spi_holdings') || cleanEmail.includes('dealwis')) {
                         targetWorkspace = '/clients/spi_holdings/';
+                    } else if (cleanEmail.includes('delight') || cleanEmail.includes('kukule') || cleanEmail.includes('deshapriya')) {
+                        targetWorkspace = '/clients/delightbakers/';
                     }
                 }
 
@@ -509,6 +511,8 @@
                         targetWorkspace = '/clients/madawalateashop/';
                     } else if (targetWorkspace.includes('spi_holdings') || targetWorkspace.includes('spiholdings') || cleanEmail.includes('nadun') || cleanEmail.includes('spiholdings') || cleanEmail.includes('dealwis')) {
                         targetWorkspace = '/clients/spi_holdings/';
+                    } else if (targetWorkspace.includes('delight') || cleanEmail.includes('delight') || cleanEmail.includes('kukule') || cleanEmail.includes('deshapriya')) {
+                        targetWorkspace = '/clients/delightbakers/';
                     } else if (targetWorkspace.includes('/modules/')) {
                         const clientMatch = targetWorkspace.match(/\/clients\/([a-zA-Z0-9_-]+)/);
                         if (clientMatch) {

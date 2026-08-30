@@ -1,0 +1,39 @@
+{
+    "system_clients": {
+        "delightbakers": {
+            "clientId": "delightbakers",
+            "businessName": "Delight Bakers",
+            "type": "DISTRIBUTOR",
+            "ownerName": "T.A.S.P Deshapriya",
+            "ownerEmail": "delightkukule@gmail.com",
+            "phone": "",
+            "package": "ENTERPRISE PRO",
+            "monthlyFee": 1500,
+            "expiryDate": "2027-08-29",
+            "status": "active",
+            "smsCredits": 500,
+            "allowedEmails": [
+                "delightkukule@gmail.com"
+            ],
+            "workspacePath": "/clients/delightbakers/",
+            "createdAt": "2026-08-29T00:00:00Z",
+            "subscription": {
+                "plan": "PRO",
+                "status": "ACTIVE",
+                "expireDate": "2027-08-29",
+                "monthlyFee": 1500
+            }
+        }
+    },
+    "system_users": {
+        "delightkukule@gmail.com": {
+            "email": "delightkukule@gmail.com",
+            "displayName": "T.A.S.P Deshapriya",
+            "clientId": "delightbakers",
+            "workspacePath": "/clients/delightbakers/",
+            "role": "BUSINESS_OWNER",
+            "status": "active",
+            "createdAt": "2026-08-29T00:00:00Z"
+        }
+    }
+}

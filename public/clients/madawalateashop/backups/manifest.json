@@ -1,0 +1,26 @@
+{
+  "clientId": "madawalateashop",
+  "maxRetention": 3,
+  "lastBackupAt": "2026-08-29T17:07:03.487Z",
+  "activeBackupsCount": 3,
+  "backups": [
+    {
+      "slot": 1,
+      "fileName": "index.backup_2026-08-29_22-37-03.html",
+      "createdAt": "8/29/2026, 10:37:03 PM",
+      "hash": "a17454672481b243c2c2bdbce5444132107430cc9a1652451edb6235ce89b709"
+    },
+    {
+      "slot": 2,
+      "fileName": "index.backup_2026-08-29_22-21-34.html",
+      "createdAt": "8/29/2026, 10:21:34 PM",
+      "hash": "faaede6efb53896b736ba2aa49b1a505978842df69b774999ff1cd31662f8dac"
+    },
+    {
+      "slot": 3,
+      "fileName": "index.backup_truncated_pre_restore.html",
+      "createdAt": "8/29/2026, 10:06:18 PM",
+      "hash": "129e62792acd42dca58ce0b93851bd69d73bc89104edcdd63a597e40a20c140f"
+    }
+  ]
+}

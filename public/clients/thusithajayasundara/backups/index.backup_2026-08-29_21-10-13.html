@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <!-- Zero-Flash Instant Auth Guard -->
-    <script>
-        (function() {
-            var k = 'coconut_auth_active';
-            if (localStorage.getItem(k) === 'true' || sessionStorage.getItem(k) === 'true') {
-                document.documentElement.classList.add('auth-active');
-            }
-        })();
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>THUSITHA JAYASUNDARA COCONUT PRODUCTS — ERP System</title>
@@ -4603,7 +4594,7 @@
             }
         }
 
-        async function handleSignOut() {
+        async async function handleSignOut() {
             if (!confirm('Are you sure you want to sign out?')) return;
             try {
                 document.documentElement.classList.remove('auth-active');

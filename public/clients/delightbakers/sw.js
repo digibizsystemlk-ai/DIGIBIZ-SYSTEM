@@ -1,16 +1,16 @@
-// SPI Holdings - Scoped Service Worker
-const CACHE_NAME = 'spiholdings-v2-upgrade';
+// Delight Bakers - Scoped Service Worker
+const CACHE_NAME = 'delightbakers-v2-upgrade';
 const ASSETS = [
-    '/clients/spi_holdings/',
-    '/clients/spi_holdings/index.html',
-    '/clients/spi_holdings/manifest.json'
+    '/clients/delightbakers/',
+    '/clients/delightbakers/index.html',
+    '/clients/delightbakers/manifest.json'
 ];
 
 self.addEventListener('install', function (event) {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then(function (cache) {
-            return cache.addAll(ASSETS).catch(() => { });
+            return cache.addAll(ASSETS).catch(function () { });
         })
     );
 });
@@ -34,13 +34,13 @@ self.addEventListener('fetch', function (event) {
         fetch(event.request).then(function (response) {
             if (response && response.status === 200) {
                 const resClone = response.clone();
-                caches.open(CACHE_NAME).then(c => c.put(event.request, resClone));
+                caches.open(CACHE_NAME).then(function (c) { c.put(event.request, resClone); });
             }
             return response;
         }).catch(function () {
             return caches.match(event.request).then(function (cached) {
                 if (cached) return cached;
-                if (event.request.mode === 'navigate') return caches.match('/clients/spi_holdings/index.html');
+                if (event.request.mode === 'navigate') return caches.match('/clients/delightbakers/index.html');
                 return new Response('Offline', { status: 503 });
             });
         })

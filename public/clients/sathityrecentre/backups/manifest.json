@@ -1,26 +1,26 @@
 {
   "clientId": "sathityrecentre",
   "maxRetention": 3,
-  "lastBackupAt": "2026-08-27T00:04:41.149Z",
+  "lastBackupAt": "2026-08-29T17:07:03.619Z",
   "activeBackupsCount": 3,
   "backups": [
     {
       "slot": 1,
-      "fileName": "index.backup_2026-08-27_05-34-41.html",
-      "createdAt": "8/27/2026, 5:34:41 AM",
-      "hash": "b17be37836590f2f5c69c58ec2d29774e78d9b63f08ca41ba86e63e232743ef2"
+      "fileName": "index.backup_2026-08-29_22-37-03.html",
+      "createdAt": "8/29/2026, 10:37:03 PM",
+      "hash": "9c1b859eb2cdb89d3590da89a7fa0b577bd8f73befefca1329a28051b9907f9f"
     },
     {
       "slot": 2,
-      "fileName": "index.backup_2026-08-27_05-11-18.html",
-      "createdAt": "8/27/2026, 5:11:18 AM",
-      "hash": "eea2d6b63bee20bb8698280407d90bb8a4407c9d1b7f7dfb8cdcb1ff59f85af5"
+      "fileName": "index.backup_2026-08-29_22-05-05.html",
+      "createdAt": "8/29/2026, 10:05:05 PM",
+      "hash": "5fc1a9fa78b0acfb63fa3d208b51d70873a61637e2e6fe90ff6338576f03143e"
     },
     {
       "slot": 3,
-      "fileName": "index.backup_2026-08-27_05-01-16.html",
-      "createdAt": "8/27/2026, 5:01:16 AM",
-      "hash": "b342000e8609b5288207428c214d38c465b512d93119ba777fd1a94545f81688"
+      "fileName": "index.backup_2026-08-29_22-01-21.html",
+      "createdAt": "8/29/2026, 10:01:21 PM",
+      "hash": "e2ea7020a3007bfd4667696503b377ce02192a26ceb177862db745436d44e0f6"
     }
   ]
 }

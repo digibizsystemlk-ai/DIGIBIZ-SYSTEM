@@ -38,6 +38,41 @@
         "source": "/clients/darshanamadawala/**",
         "destination": "/clients/madawalateashop",
         "type": 301
+      },
+      {
+        "source": "/clients/madawalateashop/modules/**",
+        "destination": "/clients/madawalateashop",
+        "type": 301
+      },
+      {
+        "source": "/clients/madawalateashop/modules",
+        "destination": "/clients/madawalateashop",
+        "type": 301
+      },
+      {
+        "source": "/clients/sathityrecentre/modules/**",
+        "destination": "/clients/sathityrecentre",
+        "type": 301
+      },
+      {
+        "source": "/clients/spi_holdings/modules/**",
+        "destination": "/clients/spi_holdings",
+        "type": 301
+      },
+      {
+        "source": "/clients/thusithajayasundara/modules/**",
+        "destination": "/clients/thusithajayasundara",
+        "type": 301
+      },
+      {
+        "source": "/clients/delightbakers/modules/**",
+        "destination": "/clients/delightbakers",
+        "type": 301
+      },
+      {
+        "source": "/auth/**",
+        "destination": "/",
+        "type": 301
       }
     ],
     "rewrites": [
@@ -80,6 +115,22 @@
       {
         "source": "/clients/spi_holdings/**",
         "destination": "/clients/spi_holdings/index.html"
+      },
+      {
+        "source": "/clients/delightbakers",
+        "destination": "/clients/delightbakers/index.html"
+      },
+      {
+        "source": "/clients/delightbakers/**",
+        "destination": "/clients/delightbakers/index.html"
+      },
+      {
+        "source": "/clients/delight_bakers",
+        "destination": "/clients/delightbakers/index.html"
+      },
+      {
+        "source": "/clients/delight_bakers/**",
+        "destination": "/clients/delightbakers/index.html"
       }
     ],
     "headers": [

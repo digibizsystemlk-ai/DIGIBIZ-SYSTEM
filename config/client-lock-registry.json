@@ -1,0 +1,71 @@
+{
+  "_schema": "digibiz-client-isolation-registry-v1",
+  "description": "Central registry enforcing Production Lock and Independent Isolation for client apps.",
+  "globalPolicy": {
+    "enforceIsolation": true,
+    "disallowBulkMutations": true,
+    "requireExplicitTargetingForUpdates": true
+  },
+  "clients": {
+    "madawalateashop": {
+      "businessName": "MADAWALA TEA SHOP",
+      "owner": "Darshana Madawala",
+      "businessType": "credit_ledger",
+      "status": "PRODUCTION_LOCKED",
+      "allowBulkScripts": false,
+      "workspacePath": "public/clients/madawalateashop",
+      "primaryEntry": "public/clients/madawalateashop/index.html",
+      "lastVerifiedAt": "2026-08-29T17:22:48.002Z"
+    },
+    "chisathifamily": {
+      "businessName": "CHISATHI FAMILY PRODUCTS",
+      "owner": "Chinthaka",
+      "businessType": "retail_distribution",
+      "status": "PRODUCTION_LOCKED",
+      "allowBulkScripts": false,
+      "workspacePath": "public/clients/chisathifamily",
+      "primaryEntry": "public/clients/chisathifamily/index.html",
+      "lastVerifiedAt": "2026-08-29T17:22:48.004Z"
+    },
+    "delightbakers": {
+      "businessName": "DELIGHT BAKERS",
+      "owner": "Delight Bakers Management",
+      "businessType": "distributor_bakery",
+      "status": "PRODUCTION_LOCKED",
+      "allowBulkScripts": false,
+      "workspacePath": "public/clients/delightbakers",
+      "primaryEntry": "public/clients/delightbakers/index.html",
+      "lastVerifiedAt": "2026-08-29T17:22:48.004Z"
+    },
+    "sathityrecentre": {
+      "businessName": "SATHI TYRE HOUSE & MOTORS",
+      "owner": "Sathi Tyre Management",
+      "businessType": "tire_centre",
+      "status": "PRODUCTION_LOCKED",
+      "allowBulkScripts": false,
+      "workspacePath": "public/clients/sathityrecentre",
+      "primaryEntry": "public/clients/sathityrecentre/index.html",
+      "lastVerifiedAt": "2026-08-29T17:22:48.004Z"
+    },
+    "spi_holdings": {
+      "businessName": "SPI HOLDINGS (PVT) LTD",
+      "owner": "SPI Management",
+      "businessType": "distributor",
+      "status": "PRODUCTION_LOCKED",
+      "allowBulkScripts": false,
+      "workspacePath": "public/clients/spi_holdings",
+      "primaryEntry": "public/clients/spi_holdings/index.html",
+      "lastVerifiedAt": "2026-08-29T17:22:48.004Z"
+    },
+    "thusithajayasundara": {
+      "businessName": "THUSITHA JAYASUNDARA COCONUT ESTATE",
+      "owner": "Thusitha Jayasundara",
+      "businessType": "coconut_estate",
+      "status": "PRODUCTION_LOCKED",
+      "allowBulkScripts": false,
+      "workspacePath": "public/clients/thusithajayasundara",
+      "primaryEntry": "public/clients/thusithajayasundara/index.html",
+      "lastVerifiedAt": "2026-08-29T17:22:48.004Z"
+    }
+  }
+}

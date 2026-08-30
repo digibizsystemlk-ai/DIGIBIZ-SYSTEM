@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="backgroundColor">#0f172a</color>
+    <color name="colorPrimary">#ff9900</color>
+    <color name="colorPrimaryDark">#0f172a</color>
+    <color name="shortcut_background">#F5F5F5</color>
+    <string name="appName" translatable="false">Delight Bakers Rep</string>
+    <string name="hostName" translatable="false">digibiz-system.web.app</string>
+    <string name="launchUrl" translatable="false">https://digibiz-system.web.app/clients/delightbakers?platform=apk&amp;app=rep</string>
+    <string name="launcherName" translatable="false">DB Rep</string>
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#ff9900</item>
+        <item name="colorPrimaryDark">#0f172a</item>
+        <item name="colorAccent">#ff9900</item>
+        <item name="android:windowBackground">#0f172a</item>
+    </style>
+</resources>

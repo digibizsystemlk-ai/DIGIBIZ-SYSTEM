@@ -1,0 +1,101 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.digibiz.delightbakers.rep"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:4:5-67
+11-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:5:5-79
+12-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:5:22-76
+13    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+13-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:6:5-79
+13-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:6:22-76
+14    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+14-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:7:5-81
+14-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:7:22-78
+15
+16    <permission
+16-->[androidx.core:core:1.12.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\9ca03a9ef391644dd1dff87f12925ac8\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+17        android:name="com.digibiz.delightbakers.rep.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+17-->[androidx.core:core:1.12.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\9ca03a9ef391644dd1dff87f12925ac8\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+18        android:protectionLevel="signature" />
+18-->[androidx.core:core:1.12.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\9ca03a9ef391644dd1dff87f12925ac8\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+19
+20    <uses-permission android:name="com.digibiz.delightbakers.rep.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+20-->[androidx.core:core:1.12.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\9ca03a9ef391644dd1dff87f12925ac8\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+20-->[androidx.core:core:1.12.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\9ca03a9ef391644dd1dff87f12925ac8\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+21
+22    <application
+22-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:9:5-30:19
+23        android:allowBackup="true"
+23-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:10:9-35
+24        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+24-->[androidx.core:core:1.12.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\9ca03a9ef391644dd1dff87f12925ac8\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+25        android:extractNativeLibs="true"
+26        android:hardwareAccelerated="true"
+26-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:11:9-43
+27        android:icon="@mipmap/ic_launcher"
+27-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:13:9-43
+28        android:label="@string/appName"
+28-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:14:9-40
+29        android:supportsRtl="true"
+29-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:15:9-35
+30        android:theme="@style/Theme.AppCompat.NoActionBar"
+30-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:16:9-59
+31        android:usesCleartextTraffic="true" >
+31-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:12:9-44
+32        <activity
+32-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:18:9-28:20
+33            android:name="com.digibiz.delightbakers.rep.LauncherActivity"
+33-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:19:13-45
+34            android:configChanges="orientation|screenSize|keyboardHidden"
+34-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:20:13-74
+35            android:exported="true"
+35-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:21:13-36
+36            android:theme="@style/Theme.AppCompat.NoActionBar"
+36-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:22:13-63
+37            android:windowSoftInputMode="adjustResize" >
+37-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:23:13-55
+38            <intent-filter>
+38-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:24:13-27:29
+39                <action android:name="android.intent.action.MAIN" />
+39-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:25:17-69
+39-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:25:25-66
+40
+41                <category android:name="android.intent.category.LAUNCHER" />
+41-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:26:17-77
+41-->I:\DIGIBIZ-SYSTEM\android-delightbakers\app\src\main\AndroidManifest.xml:26:27-74
+42            </intent-filter>
+43        </activity>
+44
+45        <provider
+45-->[androidx.emoji2:emoji2:1.2.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\e1179467583d51e3d0300d03f282eb7e\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+46            android:name="androidx.startup.InitializationProvider"
+46-->[androidx.emoji2:emoji2:1.2.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\e1179467583d51e3d0300d03f282eb7e\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
+47            android:authorities="com.digibiz.delightbakers.rep.androidx-startup"
+47-->[androidx.emoji2:emoji2:1.2.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\e1179467583d51e3d0300d03f282eb7e\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
+48            android:exported="false" >
+48-->[androidx.emoji2:emoji2:1.2.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\e1179467583d51e3d0300d03f282eb7e\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
+49            <meta-data
+49-->[androidx.emoji2:emoji2:1.2.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\e1179467583d51e3d0300d03f282eb7e\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+50                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+50-->[androidx.emoji2:emoji2:1.2.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\e1179467583d51e3d0300d03f282eb7e\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
+51                android:value="androidx.startup" />
+51-->[androidx.emoji2:emoji2:1.2.0] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\e1179467583d51e3d0300d03f282eb7e\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
+52            <meta-data
+52-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\6bb5e4f4c6aa049b1832baa86ef86f9a\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:31:13-33:52
+53                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+53-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\6bb5e4f4c6aa049b1832baa86ef86f9a\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:32:17-78
+54                android:value="androidx.startup" />
+54-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\CHINTHAKA-PC\.gradle\caches\8.11.1\transforms\6bb5e4f4c6aa049b1832baa86ef86f9a\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:33:17-49
+55        </provider>
+56    </application>
+57
+58</manifest>

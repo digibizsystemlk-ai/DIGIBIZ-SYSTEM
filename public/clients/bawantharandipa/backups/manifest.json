@@ -1,0 +1,26 @@
+{
+  "clientId": "bawantharandipa",
+  "maxRetention": 3,
+  "lastBackupAt": "2026-08-30T10:53:47.143Z",
+  "activeBackupsCount": 3,
+  "backups": [
+    {
+      "slot": 1,
+      "fileName": "index.backup_2026-08-30_16-23-47.html",
+      "createdAt": "8/30/2026, 4:23:47 PM",
+      "hash": "5a495d624b92500e994dc01fa26f6e38c279c3a7cd7faee90f253bf601fa0903"
+    },
+    {
+      "slot": 2,
+      "fileName": "index.backup_2026-08-30_15-28-38.html",
+      "createdAt": "8/30/2026, 3:28:38 PM",
+      "hash": "4e2e4be7c1f2a404c9bb75abf811f0d26be7e7567a79e84fdff54a1d3b07ca76"
+    },
+    {
+      "slot": 3,
+      "fileName": "index.backup_2026-08-30_16-19-00.html",
+      "createdAt": "8/26/2026, 6:55:46 PM",
+      "hash": "4e2e4be7c1f2a404c9bb75abf811f0d26be7e7567a79e84fdff54a1d3b07ca76"
+    }
+  ]
+}

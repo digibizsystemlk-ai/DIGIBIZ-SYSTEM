@@ -66,6 +66,16 @@
       "workspacePath": "public/clients/thusithajayasundara",
       "primaryEntry": "public/clients/thusithajayasundara/index.html",
       "lastVerifiedAt": "2026-08-29T17:22:48.004Z"
+    },
+    "bawantharandipa": {
+      "businessName": "RANDIPA PRODUCTS (PVT) LTD",
+      "owner": "T A B V Randipa",
+      "businessType": "manufacturer_factory",
+      "status": "PRODUCTION_LOCKED",
+      "allowBulkScripts": false,
+      "workspacePath": "public/clients/bawantharandipa",
+      "primaryEntry": "public/clients/bawantharandipa/index.html",
+      "lastVerifiedAt": "2026-08-30T15:28:38.000Z"
     }
   }
 }

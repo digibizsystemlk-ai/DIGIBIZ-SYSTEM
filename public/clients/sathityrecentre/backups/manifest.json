@@ -1,26 +1,26 @@
 {
   "clientId": "sathityrecentre",
   "maxRetention": 3,
-  "lastBackupAt": "2026-08-29T17:07:03.619Z",
+  "lastBackupAt": "2026-08-30T10:53:47.549Z",
   "activeBackupsCount": 3,
   "backups": [
     {
       "slot": 1,
+      "fileName": "index.backup_2026-08-30_16-23-47.html",
+      "createdAt": "8/30/2026, 4:23:47 PM",
+      "hash": "86689a3623e8d547ed81eff20b342979364d3e22215a77f3105a67c8c654cc84"
+    },
+    {
+      "slot": 2,
       "fileName": "index.backup_2026-08-29_22-37-03.html",
       "createdAt": "8/29/2026, 10:37:03 PM",
       "hash": "9c1b859eb2cdb89d3590da89a7fa0b577bd8f73befefca1329a28051b9907f9f"
     },
     {
-      "slot": 2,
+      "slot": 3,
       "fileName": "index.backup_2026-08-29_22-05-05.html",
       "createdAt": "8/29/2026, 10:05:05 PM",
       "hash": "5fc1a9fa78b0acfb63fa3d208b51d70873a61637e2e6fe90ff6338576f03143e"
-    },
-    {
-      "slot": 3,
-      "fileName": "index.backup_2026-08-29_22-01-21.html",
-      "createdAt": "8/29/2026, 10:01:21 PM",
-      "hash": "e2ea7020a3007bfd4667696503b377ce02192a26ceb177862db745436d44e0f6"
     }
   ]
 }

@@ -1,0 +1,2744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Zero-Flash Instant Auth Guard -->
+    <script>
+        (function() {
+            var authKey = 'randipa_unified_auth_active';
+            var repKey = 'randipa_active_rep_auth';
+            if (localStorage.getItem(authKey) === 'true' || sessionStorage.getItem(authKey) === 'true' ||
+                localStorage.getItem(repKey) || sessionStorage.getItem(repKey)) {
+                document.documentElement.classList.add('auth-active');
+            }
+        })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>RANDIPA PRO — Manufacturing & Distribution Platform</title>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <!-- Isolated Scoped PWA Integration -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz-rTtysyWgt_3PUHG-ar8gS8oN0HTJiI",
+            authDomain: "digibiz-system.firebaseapp.com",
+            projectId: "digibiz-system",
+            storageBucket: "digibiz-system.firebasestorage.app",
+            messagingSenderId: "21839180976",
+            appId: "1:21839180976:web:cbbeda3ebc061285db7775"
+        };
+
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        if (typeof firebase.firestore !== 'undefined') {
+            firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(function() {});
+        }
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js', { scope: './' })
+                    .then(function(reg) { console.log('[PWA] Registered with scope:', reg.scope); })
+                    .catch(function(err) { console.warn('[PWA] Register failed:', err); });
+            });
+        }
+    </script>
+
+    <style>
+        /* ================================================================ */
+        /*  RANDIPA PRO — UNIFIED MANUFACTURING & DISTRIBUTION THEME       */
+        /* ================================================================ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background: #eaeded;
+            min-height: 100vh;
+            display: block;
+        }
+
+        /* ================================================================ */
+        /*  ZERO-LEAK AUTH GATE OVERLAY                                     */
+        /* ================================================================ */
+        #authGateOverlay {
+            position: fixed;
+            inset: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            min-height: 100vh !important;
+            background: linear-gradient(145deg, #0a101d 0%, #131b2c 100%);
+            z-index: 999999 !important;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            flex-direction: column;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            #authGateOverlay {
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        html.auth-active #authGateOverlay {
+            display: none !important;
+        }
+        #authGateOverlay.show {
+            display: flex !important;
+        }
+
+        #authGateOverlay .brand {
+            font-size: 26px;
+            font-weight: 900;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        #authGateOverlay .brand i {
+            color: #ff9900;
+            font-size: 30px;
+        }
+        #authGateOverlay .brand span {
+            font-size: 14px;
+            font-weight: 400;
+            color: #ff9900;
+        }
+
+        #authGateOverlay .login-box {
+            background: #182238;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 36px 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            color: #fff;
+        }
+        #authGateOverlay .login-box h2 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        #authGateOverlay .login-box p {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        #authGateOverlay .login-box input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 15px !important;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 14px;
+            box-sizing: border-box;
+        }
+        #authGateOverlay .login-box input:focus {
+            border-color: #ff9900;
+            box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.25);
+        }
+        #authGateOverlay .login-box .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #ff9900 0%, #e68a00 100%);
+            color: #111827;
+            border: none;
+            border-radius: 8px;
+            font-size: 14.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-sizing: border-box;
+        }
+        #authGateOverlay .login-box .btn-login:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(255, 153, 0, 0.35);
+        }
+        #authGateOverlay .login-box .error {
+            color: #fca5a5;
+            font-size: 12.5px;
+            margin-bottom: 14px;
+            display: none;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 10px 12px;
+            border-radius: 8px;
+        }
+
+        /* Rep Login Box */
+        #repLoginBox {
+            display: none;
+        }
+        #repLoginBox .rep-gate-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #ff9900;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        /* ================================================================ */
+        /*  TOP NAVIGATION                                                  */
+        /* ================================================================ */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #131921;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            border-bottom: 1px solid #232f3e;
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            user-select: none;
+        }
+        .top-nav-logo .logo-icon-wrap {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #ff9900, #e67e00);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(255, 153, 0, 0.4);
+        }
+        .top-nav-logo .logo-icon-wrap i {
+            color: #131921;
+            font-size: 18px;
+        }
+        .top-nav-logo .logo-text-col {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        .top-nav-logo .logo-main-title {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .top-nav-logo .brand-digibiz {
+            font-size: 17px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.2px;
+        }
+        .top-nav-logo .brand-plus {
+            font-size: 14px;
+            font-weight: 900;
+            color: #ff9900;
+            margin: 0 2px;
+        }
+        .top-nav-logo .brand-randipa {
+            font-size: 17px;
+            font-weight: 900;
+            color: #ff9900;
+            letter-spacing: 0.4px;
+        }
+        .top-nav-logo .brand-sub {
+            font-size: 9.5px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.65);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .top-nav-search {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 380px;
+            border: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .top-nav-search:focus-within {
+            border-color: #ff9900;
+            box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.2);
+        }
+        .top-nav-search input {
+            flex: 1;
+            padding: 8px 14px;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            background: transparent;
+        }
+        .top-nav-search button {
+            padding: 8px 16px;
+            background: #ff9900;
+            border: none;
+            color: #131921;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .top-nav-item {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12.5px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+            position: relative;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .top-nav-item:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .top-nav-item .badge {
+            background: #ff9900;
+            color: #131921;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 1px 6px;
+            border-radius: 10px;
+            position: absolute;
+            top: -4px;
+            right: -4px;
+        }
+        .top-nav-item .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ff9900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 12px;
+            color: #131921;
+        }
+        .mobile-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        /* ================================================================ */
+        /*  SIDEBAR                                                         */
+        /* ================================================================ */
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            width: 250px;
+            background: #fff;
+            border-right: 1px solid #d5d9d9;
+            overflow-y: auto;
+            padding: 8px 0;
+            z-index: 999;
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+
+        .sidebar-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 10px 20px 4px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+            color: #444;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+        .sidebar-item:hover {
+            background: #f0f2f5;
+            color: #131921;
+        }
+        .sidebar-item.active {
+            background: #f0f2f5;
+            border-left-color: #ff9900;
+            color: #131921;
+            font-weight: 700;
+        }
+        .sidebar-item i {
+            width: 18px;
+            color: #888;
+            font-size: 14px;
+        }
+        .sidebar-item.active i {
+            color: #ff9900;
+        }
+        .sidebar-item .count {
+            margin-left: auto;
+            background: #e7e7e7;
+            color: #555;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 8px;
+            border-radius: 10px;
+        }
+        .sidebar-item.active .count {
+            background: #ff9900;
+            color: #131921;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 998;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ================================================================ */
+        /*  SIDEBAR SUBSCRIPTION CARD (DELIGHT BAKERS STYLE)               */
+        /* ================================================================ */
+        .sidebar-sticky-top {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .sidebar-subscription-card {
+            margin: 10px 14px 10px;
+            background: linear-gradient(135deg, #131921 0%, #1e2a3a 100%);
+            border: 1.5px solid #ff9900;
+            border-radius: 10px;
+            padding: 12px 14px;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+        .sidebar-subscription-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 153, 0, 0.35);
+            border-color: #ffaa22;
+        }
+
+        .brand-logo-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .digibiz-logo-text {
+            font-size: 16px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff9900, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .digibiz-logo-text sup {
+            font-size: 10px;
+            font-weight: 900;
+            color: #ff9900;
+            -webkit-text-fill-color: #ff9900;
+        }
+
+        /* 3X ZOOM HOVER PREVIEW */
+        .logo-3x-preview {
+            display: none;
+            position: fixed;
+            left: 265px;
+            top: 70px;
+            width: 320px;
+            background: linear-gradient(135deg, #131921 0%, #1e2a3a 100%);
+            border: 2px solid #ff9900;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            pointer-events: none;
+            animation: zoomInPreview 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes zoomInPreview {
+            from {
+                opacity: 0;
+                transform: scale(0.35) translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateX(0);
+            }
+        }
+        .brand-logo-container:hover .logo-3x-preview {
+            display: block;
+        }
+        .preview-inner {
+            text-align: center;
+            color: #fff;
+        }
+        .preview-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 10px;
+            background: linear-gradient(135deg, #ff9900, #e67e00);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #131921;
+            box-shadow: 0 4px 16px rgba(255, 153, 0, 0.45);
+        }
+        .preview-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+        .preview-title sup {
+            color: #ff9900;
+        }
+        .preview-sub {
+            font-size: 11.5px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .preview-badge {
+            display: inline-block;
+            background: rgba(6, 125, 98, 0.25);
+            border: 1px solid #067d62;
+            color: #34d399;
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.6px;
+        }
+
+        /* ================================================================ */
+        /*  MAIN CONTENT                                                    */
+        /* ================================================================ */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            width: calc(100% - 250px);
+            min-height: calc(100vh - 60px);
+            padding: 16px 20px;
+            background: #eaeded;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .page-header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #131921;
+        }
+        .page-header .sub {
+            font-size: 13px;
+            color: #666;
+            font-weight: 400;
+        }
+        .page-header .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ================================================================ */
+        /*  BUTTONS, CARDS, TABLES, BADGES, ETC                            */
+        /* ================================================================ */
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: #ff9900;
+            color: #131921;
+        }
+        .btn-primary:hover {
+            background: #e68a00;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
+        }
+        .btn-secondary {
+            background: #fff;
+            color: #333;
+            border: 1px solid #d5d9d9;
+        }
+        .btn-secondary:hover {
+            background: #f0f2f5;
+            border-color: #999;
+        }
+        .btn-success {
+            background: #067d62;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #055a46;
+        }
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 11px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            border: 1px solid #d5d9d9;
+            margin-bottom: 16px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .card-header h3 {
+            font-size: 15px;
+            font-weight: 800;
+            color: #131921;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-header h3 i {
+            color: #ff9900;
+        }
+
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 1024px) {
+            .dash-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .dash-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dash-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 14px 16px;
+            border: 1px solid #d5d9d9;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .dash-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        .dash-card .label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .dash-card .label i {
+            color: #ff9900;
+        }
+        .dash-card .value {
+            font-size: 24px;
+            font-weight: 900;
+            color: #131921;
+            margin-top: 2px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #666;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #d5d9d9;
+        }
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f2f5;
+            color: #333;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+
+        .badge {
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .badge-good {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .badge-blue {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #131921;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            z-index: 9999;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+        .toast.show {
+            display: block;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 540px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .modal-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid #d5d9d9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #131921;
+            color: #fff;
+            border-radius: 12px 12px 0 0;
+        }
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-header h3 i {
+            color: #ff9900;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            opacity: 0.7;
+            padding: 0 8px;
+        }
+        .modal-close:hover {
+            opacity: 1;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .modal-body .form-group {
+            margin-bottom: 14px;
+        }
+        .modal-body .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .modal-body .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d5d9d9;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-body .form-control:focus {
+            border-color: #ff9900;
+            box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.15);
+        }
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #d5d9d9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* ================================================================ */
+        /*  RESPONSIVE STYLES                                               */
+        /* ================================================================ */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 16px 18px;
+            }
+            .dash-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .top-nav-search {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .top-nav {
+                padding: 0 10px;
+                height: 56px;
+            }
+            .top-nav-search {
+                display: none;
+            }
+            .top-nav-logo .brand-digibiz {
+                font-size: 14px;
+            }
+            .top-nav-logo .brand-randipa {
+                font-size: 14px;
+            }
+            .top-nav-logo .brand-sub {
+                font-size: 8px;
+            }
+            .top-nav-logo .logo-icon-wrap {
+                width: 28px;
+                height: 28px;
+            }
+            .top-nav-logo .logo-icon-wrap i {
+                font-size: 14px;
+            }
+
+            .hide-mobile {
+                display: none !important;
+            }
+            .mobile-toggle {
+                display: inline-flex !important;
+            }
+
+            .sidebar {
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 12px 14px;
+                margin-top: 56px;
+            }
+
+            .dash-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .dash-card .value {
+                font-size: 18px;
+            }
+            .card {
+                padding: 12px 14px;
+            }
+            .page-header h1 {
+                font-size: 17px;
+            }
+
+            .logo-3x-preview {
+                left: 10px;
+                top: 70px;
+                width: 280px;
+            }
+        }
+
+        /* ================================================================ */
+        /*  SUBSCRIPTION PAGE STYLES                                        */
+        /* ================================================================ */
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+        .sub-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .sub-card h2 {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 14px 0;
+        }
+        .sub-card h2 i {
+            color: #ff9900;
+        }
+
+        .progress-ring {
+            width: 95px;
+            height: 95px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: conic-gradient(#2563eb calc(var(--p, 100) * 1%), #e5e7eb 0);
+        }
+        .progress-ring-inner {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: #fff;
+            display: grid;
+            place-items: center;
+            text-align: center;
+        }
+
+        .preset-btn {
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #0f172a;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 12px;
+        }
+        .preset-btn.active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .settings-switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .settings-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .settings-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 26px;
+        }
+        .settings-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .settings-switch input:checked+.settings-slider {
+            background-color: #ea580c;
+        }
+        .settings-switch input:checked+.settings-slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!--  AUTH GATE OVERLAY                                            -->
+    <!-- ============================================================ -->
+    <div id="authGateOverlay">
+        <div class="brand">
+            <i class="fas fa-bolt"></i>
+            <span>RANDIPA PRO</span>
+        </div>
+
+        <!-- Admin Login -->
+        <form class="login-box" id="adminLoginBox" onsubmit="event.preventDefault(); handleSignIn();">
+            <h2>Factory Central Sign In</h2>
+            <p>Manufacturing & Distribution Platform</p>
+            <div class="error" id="authError"></div>
+            <input type="email" id="loginEmail" placeholder="Owner / Authorized Email" value="bawanthavisal12@gmail.com" autocomplete="username" />
+            <input type="password" id="loginPassword" placeholder="Enter Password" autocomplete="current-password" />
+            <button type="submit" class="btn-login" id="signInBtn">
+                <i class="fas fa-lock"></i> Sign In to Workspace
+            </button>
+            <div style="margin-top:14px; text-align:center; font-size:11.5px; color:rgba(255,255,255,0.5);">
+                Protected by DIGIBIZ Single-Tenant Isolation
+            </div>
+        </form>
+
+        <!-- Rep Login -->
+        <form class="login-box" id="repLoginBox" onsubmit="event.preventDefault(); handleRepSignIn();">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <i class="fas fa-bolt" style="color:#ff9900; font-size:16px;"></i>
+                <span style="font-size:12.5px; font-weight:800; color:#ff9900; letter-spacing:0.5px;">RANDIPA PRO</span>
+            </div>
+            <h2>Field Sales Portal</h2>
+            <p style="margin-bottom:14px;">Authorized Representative Sign In</p>
+
+            <div style="background:rgba(255,153,0,0.1); border:1px solid rgba(255,153,0,0.25); border-radius:10px; padding:12px 14px; margin-bottom:16px; display:flex; align-items:center; gap:12px;">
+                <div class="rep-gate-avatar" id="repGateAvatar">RP</div>
+                <div style="overflow:hidden;">
+                    <div style="font-size:10.5px; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:0.5px;">Sales Representative</div>
+                    <div style="font-size:15px; font-weight:800; color:#fff; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;" id="repGateName">Sales Rep</div>
+                </div>
+            </div>
+
+            <div class="error" id="repAuthError" style="display:none;"></div>
+
+            <div style="margin-bottom:12px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:5px;">
+                    <i class="fas fa-envelope" style="color:#ff9900; margin-right:4px;"></i> Registered Email
+                </label>
+                <input type="email" id="repLoginEmail" placeholder="Enter your registered email" autocomplete="email" required />
+            </div>
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:5px;">
+                    <i class="fas fa-phone" style="color:#ff9900; margin-right:4px;"></i> Registered Phone
+                </label>
+                <input type="tel" id="repLoginPhone" placeholder="Enter phone (e.g. 0712345678)" autocomplete="tel" required />
+            </div>
+
+            <button type="submit" class="btn-login" id="repSignInBtn">
+                <i class="fas fa-arrow-right-to-bracket"></i> Sign In to Rep Portal
+            </button>
+
+            <div style="text-align:center; margin-top:16px; border-top:1px solid rgba(255,255,255,0.08); padding-top:12px;">
+                <a href="javascript:void(0)" onclick="switchToAdminLogin()" style="font-size:12px; color:#94a3b8; text-decoration:none;">
+                    <i class="fas fa-user-shield" style="font-size:11px;"></i> Owner / Admin Sign In
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  TOP NAVIGATION                                              -->
+    <!-- ============================================================ -->
+    <nav class="top-nav">
+        <div class="top-nav-left">
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="top-nav-logo" onclick="navigateTo('dashboard')">
+                <div class="logo-icon-wrap">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="logo-text-col">
+                    <div class="logo-main-title">
+                        <span class="brand-digibiz">DIGIBIZ</span>
+                        <span class="brand-plus">✦</span>
+                        <span class="brand-randipa">RANDIPA PRO</span>
+                    </div>
+                    <div class="brand-sub" id="topNavTagline">Manufacturing & Distribution Platform</div>
+                </div>
+            </div>
+
+            <div class="top-nav-search">
+                <input type="text" placeholder="Search products, orders..." id="globalSearch" oninput="handleSearch(this.value)" />
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="top-nav-right">
+            <div class="top-nav-item" onclick="navigateTo('dashboard')">
+                <i class="fas fa-home"></i>
+                <span class="hide-mobile">Home</span>
+            </div>
+            <div class="top-nav-item" onclick="navigateTo('sales')">
+                <i class="fas fa-cash-register"></i>
+                <span class="hide-mobile">POS</span>
+                <span class="badge" id="posBadge">0</span>
+            </div>
+            <div class="top-nav-item" onclick="navigateTo('repapp')">
+                <i class="fas fa-mobile-screen"></i>
+                <span class="hide-mobile">Rep App</span>
+            </div>
+            <div class="top-nav-item" id="userRoleItem">
+                <div class="avatar" id="userAvatarText">RP</div>
+                <div style="display:flex; flex-direction:column; line-height:1.2;">
+                    <span class="hide-mobile" id="navUserName" style="font-weight:700;">T A B V Randipa</span>
+                    <span id="userRoleBadge" style="font-size:9px; color:#ff9900;">Owner</span>
+                </div>
+            </div>
+            <div class="top-nav-item" onclick="handleSignOut()" style="color:#ff9900; font-weight:700;">
+                <i class="fas fa-arrow-right-from-bracket"></i>
+                <span class="hide-mobile">Sign Out</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!--  SIDEBAR                                                     -->
+    <!-- ============================================================ -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <!-- Subscription Hero Card (Sticky Top) -->
+        <div class="sidebar-sticky-top">
+            <div class="sidebar-subscription-card" onclick="navigateTo('subscription')">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.18); padding-bottom:6px;">
+                    <div class="brand-logo-container" id="digibizLogoContainer">
+                        <div class="digibiz-logo-text">
+                            DIGIBIZ<sup>™</sup>
+                        </div>
+                        <div class="logo-3x-preview" id="digibizLogo3xPreview">
+                            <div class="preview-inner">
+                                <div class="preview-icon"><i class="fas fa-bolt"></i></div>
+                                <div class="preview-title">DIGIBIZ<sup>™</sup> PRO</div>
+                                <div class="preview-sub">Manufacturing & Distribution Intelligence</div>
+                                <div class="preview-badge">VERIFIED LICENSED PLATFORM</div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge" id="sidePlanStatusBadge" style="background:#22c55e; color:#fff; font-size:9px; padding:2px 8px; border-radius:4px; font-weight:800;">TRIAL</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span class="plan-badge" style="font-size:10px; font-weight:800; color:#ff9900; letter-spacing:0.5px; text-transform:uppercase;">
+                        <i class="fas fa-crown" style="color:#ff9900;"></i> <span id="sidePlanName">TRIAL</span>
+                    </span>
+                    <div class="days-left" id="sidePlanDaysLeft" style="font-size:16px; font-weight:900; color:#ffffff;">7 Days</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                    <div class="expiry-text" id="sidePlanExpiryDate" style="font-size:10px; color:#aaa;">Expires: 2026-09-05</div>
+                    <div style="font-size:10.5px; color:#ff9900; display:flex; align-items:center; gap:4px; font-weight:700;">
+                        <span>Billing</span> <i class="fas fa-arrow-right" style="font-size:8px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-section-title">FACTORY OPERATIONS</div>
+        <a class="sidebar-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+            <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+        <a class="sidebar-item" data-page="raw-materials" onclick="navigateTo('raw-materials')">
+            <i class="fas fa-cubes-stacked"></i> Raw Materials
+        </a>
+        <a class="sidebar-item" data-page="manufacturing" onclick="navigateTo('manufacturing')">
+            <i class="fas fa-gears"></i> Manufacturing
+        </a>
+        <a class="sidebar-item" data-page="finished-goods" onclick="navigateTo('finished-goods')">
+            <i class="fas fa-boxes-packing"></i> Finished Goods
+        </a>
+        <a class="sidebar-item" data-page="route-plan" onclick="navigateTo('route-plan')">
+            <i class="fas fa-route"></i> Sales Route Plan
+        </a>
+
+        <div class="sidebar-section-title">SALES & DISTRIBUTION</div>
+        <a class="sidebar-item" data-page="sales" onclick="navigateTo('sales')">
+            <i class="fas fa-cash-register"></i> Direct Sales (POS)
+        </a>
+        <a class="sidebar-item" data-page="orders" onclick="navigateTo('orders')">
+            <i class="fas fa-receipt"></i> All Orders
+            <span class="count" id="sideOrderCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="reps" onclick="navigateTo('reps')">
+            <i class="fas fa-users"></i> Sales Reps
+            <span class="count" id="sideRepCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="repapp" onclick="navigateTo('repapp')">
+            <i class="fas fa-mobile-screen"></i> Rep App (Field)
+        </a>
+
+        <div class="sidebar-section-title">FINANCIALS</div>
+        <a class="sidebar-item" data-page="accounting" onclick="navigateTo('accounting')">
+            <i class="fas fa-calculator"></i> Accounting
+        </a>
+        <a class="sidebar-item" data-page="expenses" onclick="navigateTo('expenses')">
+            <i class="fas fa-money-bill-wave"></i> Expenses
+        </a>
+
+        <div class="sidebar-section-title">SYSTEM</div>
+        <a class="sidebar-item" data-page="subscription" onclick="navigateTo('subscription')">
+            <i class="fas fa-crown" style="color:#ff9900;"></i> Billing & Subscription
+        </a>
+        <a class="sidebar-item" data-page="settings" onclick="navigateTo('settings')">
+            <i class="fas fa-cog"></i> Settings
+        </a>
+
+        <div style="padding:14px 20px; border-top:1px solid #e7e7e7; margin-top:8px; font-size:11px; color:#888;">
+            <div style="font-weight:700; color:#131921;" id="sidebarStoreName">RANDIPA PRO</div>
+            <div style="font-size:10px; color:#067d62;"><i class="fas fa-circle" style="font-size:7px;"></i> Manufacturing Platform Active</div>
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!--  MAIN CONTENT                                               -->
+    <!-- ============================================================ -->
+    <div class="main-content">
+
+        <!-- ============================================================ -->
+        <!--  1. DASHBOARD                                               -->
+        <!-- ============================================================ -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <h1>Executive Dashboard <span class="sub">| Manufacturing & Distribution Overview</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="refreshDashboard()"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-primary" onclick="navigateTo('sales')"><i class="fas fa-cash-register"></i> Open POS</button>
+                </div>
+            </div>
+
+            <!-- Asset Summary -->
+            <div style="background:linear-gradient(135deg, #131921 0%, #1e2a3a 100%); color:#fff; padding:16px 20px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; box-shadow:0 4px 14px rgba(0,0,0,0.18);">
+                <div>
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8; font-weight:700;">Raw Material Asset</div>
+                    <div id="dashRmAsset" style="font-size:20px; font-weight:800; color:#38bdf8; margin-top:2px;">Rs. 0.00</div>
+                </div>
+                <div>
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8; font-weight:700;">Finished Goods Asset</div>
+                    <div id="dashFgAsset" style="font-size:20px; font-weight:800; color:#34d399; margin-top:2px;">Rs. 0.00</div>
+                </div>
+                <div>
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8; font-weight:700;">Total Inventory Asset</div>
+                    <div id="dashTotalAsset" style="font-size:20px; font-weight:800; color:#ff9900; margin-top:2px;">Rs. 0.00</div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="dash-grid">
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-cart-shopping"></i> Total Sales</div>
+                    <div class="value" id="dashTotalSales">Rs. 0.00</div>
+                </div>
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-gears"></i> Production Batches</div>
+                    <div class="value" id="dashBatches">0</div>
+                </div>
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-receipt"></i> Expenses</div>
+                    <div class="value" id="dashExpenses">Rs. 0.00</div>
+                </div>
+                <div class="dash-card">
+                    <div class="label"><i class="fas fa-chart-line"></i> Net Profit</div>
+                    <div class="value" id="dashProfit">Rs. 0.00</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Quick Actions</h3>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="navigateTo('raw-materials')"><i class="fas fa-cubes-stacked"></i> Raw Materials</button>
+                    <button class="btn btn-primary" onclick="navigateTo('manufacturing')"><i class="fas fa-gears"></i> Manufacturing</button>
+                    <button class="btn btn-primary" onclick="navigateTo('finished-goods')"><i class="fas fa-boxes-packing"></i> Finished Goods</button>
+                    <button class="btn btn-primary" onclick="navigateTo('route-plan')"><i class="fas fa-route"></i> Route Plan</button>
+                    <button class="btn btn-primary" onclick="navigateTo('sales')"><i class="fas fa-cash-register"></i> POS</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-info-circle"></i> System Status</h3>
+                </div>
+                <div style="font-size:13px; color:#64748b;">
+                    <p><i class="fas fa-check-circle" style="color:#22c55e;"></i> Firebase Connected</p>
+                    <p><i class="fas fa-check-circle" style="color:#22c55e;"></i> Real-time Sync Active</p>
+                    <p><i class="fas fa-check-circle" style="color:#22c55e;"></i> Local Storage Active</p>
+                    <p id="systemUserStatus"><i class="fas fa-user"></i> User: Not signed in</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  2. RAW MATERIALS (Placeholder - Full implementation later)  -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-raw-materials">
+            <div class="page-header">
+                <div>
+                    <h1>Raw Materials <span class="sub">| Inbound Purchases & Stock</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Raw Materials module coming soon...')"><i class="fas fa-plus"></i> Add Purchase</button>
+                    <button class="btn btn-secondary" onclick="showToast('Refreshing...')"><i class="fas fa-sync"></i> Refresh</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-cubes-stacked"></i> Raw Materials Stock</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Stock</th>
+                                <th>Unit Cost</th>
+                                <th>Total Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rawMaterialsBody">
+                            <tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No raw materials yet. Use the form to add.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  3. MANUFACTURING (Placeholder)                              -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-manufacturing">
+            <div class="page-header">
+                <div>
+                    <h1>Manufacturing <span class="sub">| Production & Batch Management</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Manufacturing module coming soon...')"><i class="fas fa-plus"></i> New Batch</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-gears"></i> Production Batches</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Unit Cost</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manufacturingBody">
+                            <tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No production batches yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  4. FINISHED GOODS (Placeholder)                             -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-finished-goods">
+            <div class="page-header">
+                <div>
+                    <h1>Finished Goods <span class="sub">| Inventory & Stock Directory</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Finished Goods module coming soon...')"><i class="fas fa-plus"></i> Add Product</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-boxes-packing"></i> Finished Goods Stock</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Stock</th>
+                                <th>Unit Cost</th>
+                                <th>Total Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finishedGoodsBody">
+                            <tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No finished goods yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  5. ROUTE PLAN (Placeholder)                                 -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-route-plan">
+            <div class="page-header">
+                <div>
+                    <h1>Sales Route Plan <span class="sub">| Shop Revisit Console</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Route Plan module coming soon...')"><i class="fas fa-route"></i> Load Route</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-route"></i> Today's Route</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Shop</th>
+                                <th>Area</th>
+                                <th>Phone</th>
+                                <th>Next Visit</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="routePlanBody">
+                            <tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No route data. Sales will auto-populate this.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  6. SALES (POS) (Placeholder)                                -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-sales">
+            <div class="page-header">
+                <div>
+                    <h1>Direct Sales (POS) <span class="sub">| Point of Sale</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('POS module coming soon...')"><i class="fas fa-cart-plus"></i> New Sale</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-cash-register"></i> POS Terminal</h3>
+                </div>
+                <div style="padding:20px; text-align:center; color:#94a3b8;">
+                    <i class="fas fa-cart-shopping" style="font-size:48px; display:block; margin-bottom:12px; color:#cbd5e1;"></i>
+                    <p style="font-size:16px; font-weight:700;">POS module coming in the next update!</p>
+                    <p style="font-size:13px;">Keyboard shortcuts, thermal printing, and WhatsApp sharing will be included.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  7. ORDERS (Placeholder)                                     -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-orders">
+            <div class="page-header">
+                <div>
+                    <h1>All Orders <span class="sub">| Order Management</span></h1>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-receipt"></i> Orders List</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody">
+                            <tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No orders yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  8. REPS (Placeholder)                                       -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-reps">
+            <div class="page-header">
+                <div>
+                    <h1>Sales Reps <span class="sub">| Representative Management</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Reps module coming soon...')"><i class="fas fa-plus"></i> Add Rep</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-users"></i> Representatives</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Commission</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="repsBody">
+                            <tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No reps yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  9. REP APP (Placeholder)                                    -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-repapp">
+            <div class="page-header">
+                <div>
+                    <h1>📱 Rep App <span class="sub">| Field Sales Order Management</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="showToast('Rep App coming soon...')"><i class="fas fa-sync"></i> Refresh</button>
+                </div>
+            </div>
+            <div class="card">
+                <div style="padding:20px; text-align:center; color:#94a3b8;">
+                    <i class="fas fa-mobile-screen" style="font-size:48px; display:block; margin-bottom:12px; color:#cbd5e1;"></i>
+                    <p style="font-size:16px; font-weight:700;">Rep App module coming in the next update!</p>
+                    <p style="font-size:13px;">Step-by-step ordering, live earnings, and order history will be included.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  10. ACCOUNTING (Placeholder)                                -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-accounting">
+            <div class="page-header">
+                <div>
+                    <h1>Accounting <span class="sub">| Double-Entry Accounting</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Accounting module coming soon...')"><i class="fas fa-plus"></i> Add Entry</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-book"></i> Journal Entries</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Account</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="journalBody">
+                            <tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No journal entries yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  11. EXPENSES (Placeholder)                                  -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-expenses">
+            <div class="page-header">
+                <div>
+                    <h1>Expenses <span class="sub">| Factory Operating Costs</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Expenses module coming soon...')"><i class="fas fa-plus"></i> Record Expense</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-money-bill-wave"></i> Expense Records</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesBody">
+                            <tr><td colspan="4" class="text-center" style="padding:30px; color:#999;">No expenses yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  12. SUBSCRIPTION (Basic - Delight Bakers Style)             -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-subscription">
+            <div class="page-header" style="margin-bottom:18px;">
+                <div>
+                    <h1>Billing & Subscription <span class="sub">| DIGIBIZ PRO Official Charges & Wallet</span></h1>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span id="subStatusBadge" class="badge" style="background:#10b981; color:#fff; font-size:12px; padding:6px 14px; font-weight:800; border-radius:20px;">
+                        <i class="fas fa-circle-check"></i> Trial Active
+                    </span>
+                </div>
+            </div>
+
+            <!-- 3 Core Cards -->
+            <div class="sub-grid">
+                <!-- Card 1: Subscription Package -->
+                <div class="sub-card">
+                    <h2><i class="fas fa-crown" style="color:#ff9900;"></i> Subscription Package</h2>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:14px;">
+                        <div>
+                            <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:0.05em;">Current Plan</div>
+                            <div id="planValue" style="font-size:24px; font-weight:900; color:#0f172a; margin:4px 0;">TRIAL</div>
+                            <div style="font-size:12.5px; color:#64748b;">Monthly Fee: <b style="color:#0f172a;">Rs. 1,000</b></div>
+                            <div style="font-size:12.5px; color:#64748b;">Registered: <b id="regDateValue">2026-08-30</b></div>
+                            <div style="font-size:12.5px; color:#64748b;">Expiry: <span id="expiryValue" style="font-weight:800; color:#0f172a;">2026-09-05</span></div>
+                        </div>
+                        <div class="progress-ring" style="--p:85;">
+                            <div class="progress-ring-inner">
+                                <div>
+                                    <b id="daysRemaining" style="font-size:22px; color:#067d62; display:block; line-height:1;">7</b>
+                                    <span style="font-size:9.5px; color:#64748b; text-transform:uppercase; font-weight:700;">days left</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: SMS Credits Wallet -->
+                <div class="sub-card">
+                    <h2><i class="fas fa-comment-sms" style="color:#2563eb;"></i> SMS Credits Wallet</h2>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <div>
+                            <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700;">Available Credits</div>
+                            <div id="smsBalanceValue" style="font-size:32px; font-weight:900; color:#0f172a; margin:4px 0;">300</div>
+                            <div style="font-size:12px; color:#64748b;">Rate: <b>Rs. 1</b> / SMS</div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                            <button class="btn btn-secondary" style="font-size:11px; padding:6px 10px;" onclick="showToast('Recharge request: +100 SMS')">+100</button>
+                            <button class="btn btn-secondary" style="font-size:11px; padding:6px 10px;" onclick="showToast('Recharge request: +200 SMS')">+200</button>
+                            <button class="btn btn-secondary" style="font-size:11px; padding:6px 10px;" onclick="showToast('Recharge request: +500 SMS')">+500</button>
+                            <button class="btn btn-primary" style="font-size:11px; padding:6px 10px;" onclick="showToast('Recharge request: +1000 SMS')">+1000</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Payment Details -->
+                <div class="sub-card">
+                    <h2><i class="fas fa-building-columns" style="color:#059669;"></i> Sampath Bank Payment</h2>
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; font-size:13px; line-height:1.7;">
+                        <div>Bank: <b>Sampath Bank</b></div>
+                        <div>Account Name: <b>RANDIPA BUSINESS HOUSE</b></div>
+                        <div>Account Number: <b style="font-size:15px; color:#0f172a; font-family:monospace; letter-spacing:0.5px;">1099 5448 6969</b></div>
+                        <div>Branch: <b>Narammala</b></div>
+                    </div>
+                    <div style="margin-top:12px; font-size:12px; color:#64748b;">
+                        After deposit, send receipt via WhatsApp: <b style="color:#059669;">071 344 6500</b>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activation Key -->
+            <div class="card">
+                <h3 style="margin:0 0 8px; font-size:16px; font-weight:800; color:#0f172a;">
+                    <i class="fas fa-key" style="color:#ff9900;"></i> License Activation Key
+                </h3>
+                <p style="font-size:13px; color:#64748b; margin:0 0 14px;">Enter activation code from DIGIBIZ Support to upgrade to PRO Edition:</p>
+                <div style="display:flex; gap:10px; max-width:560px;">
+                    <input type="text" id="activationCode" class="form-control" placeholder="DIGIBIZ-PRO-XXXX" style="text-transform:uppercase; font-weight:800; letter-spacing:1px; font-size:14px;">
+                    <button class="btn btn-primary" onclick="activateCode()" style="padding:10px 24px; font-size:13.5px; font-weight:800;"><i class="fas fa-bolt"></i> Activate Key</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  13. SETTINGS (Placeholder)                                  -->
+        <!-- ============================================================ -->
+        <div class="page" id="page-settings">
+            <div class="page-header">
+                <div>
+                    <h1>Settings <span class="sub">| Business Profile & Preferences</span></h1>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showToast('Settings saved!')"><i class="fas fa-save"></i> Save</button>
+                </div>
+            </div>
+            <div class="card" style="max-width:800px;">
+                <div class="form-group">
+                    <label>Business Legal Name</label>
+                    <input type="text" id="settingsName" value="RANDIPA BUSINESS HOUSE (PVT) LTD" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Owner / Proprietor</label>
+                    <input type="text" id="settingsOwner" value="T A B V Randipa" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Phone / WhatsApp</label>
+                    <input type="text" id="settingsPhone" value="0771234567" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Factory Address</label>
+                    <input type="text" id="settingsAddress" value="Randipa Factory, Padukka Road, Millewa" class="form-control">
+                </div>
+            </div>
+        </div>
+
+    </div><!-- end main-content -->
+
+    <!-- ============================================================ -->
+    <!--  TOAST                                                       -->
+    <!-- ============================================================ -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ============================================================ -->
+    <!--  JAVASCRIPT - CORE ENGINE                                   -->
+    <!-- ============================================================ -->
+    <script>
+        // ================================================================
+        //  DATA STORE & REAL-TIME CLOUD SYNC
+        // ================================================================
+
+        const STORAGE_KEY = 'randipa_unified_data';
+        const CLIENT_ID = 'bawantharandipa';
+
+        // Default data structure (combining both systems)
+        let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+            // Factory Operations
+            rawMaterials: [],
+            finishedGoods: [],
+            productionBatches: [],
+            wastage: [],
+
+            // Sales & Distribution
+            orders: [],
+            sales: [],
+            shops: [],
+            reps: [],
+
+            // Route Plan
+            routePlans: [],
+
+            // Financials
+            journalEntries: [],
+            expenses: [],
+
+            // Settings
+            settings: {
+                storeName: 'RANDIPA PRO',
+                businessName: 'RANDIPA BUSINESS HOUSE (PVT) LTD',
+                ownerName: 'T A B V Randipa',
+                phone: '0771234567',
+                email: 'bawanthavisal12@gmail.com',
+                address: 'Randipa Factory, Padukka Road, Millewa',
+                currency: 'LKR',
+                timezone: 'Asia/Colombo',
+                invoicePrefix: 'RANDIPA-INV-'
+            },
+
+            // Subscription
+            subscription: {
+                plan: 'TRIAL',
+                status: 'TRIAL_ACTIVE',
+                startDate: new Date().toISOString().split('T')[0],
+                expireDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                monthlyFee: 1000,
+                smsBalance: 300,
+                trialSmsBalance: 300,
+                paidSmsBalance: 0,
+                smsHeader: 'RANDIPA'
+            },
+
+            // Users
+            users: []
+        };
+
+        // ================================================================
+        //  SAVE & SYNC FUNCTIONS
+        // ================================================================
+
+        let _saveCloudDebounce = null;
+        let _unsubscribeCloudListener = null;
+        let _isRemoteUpdate = false;
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            updateBadges();
+            updateSidebarSubscription();
+
+            // Cloud synchronization push
+            if (_isRemoteUpdate) return;
+            if (_saveCloudDebounce) clearTimeout(_saveCloudDebounce);
+            _saveCloudDebounce = setTimeout(async () => {
+                try {
+                    if (typeof firebase !== 'undefined' && firebase.firestore) {
+                        await firebase.firestore().collection('clients').doc(CLIENT_ID).set({
+                            payload: JSON.stringify(data),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            lastUpdatedBy: (typeof auth !== 'undefined' && auth && auth.currentUser && auth.currentUser
+                                .email) || 'randipa_owner'
+                        }, { merge: true });
+                        console.log('☁️ [Cloud Push] Data synchronized to Firestore for ' + CLIENT_ID);
+                    }
+                } catch (err) {
+                    console.warn('[Cloud Sync Error]', err.message);
+                }
+            }, 300);
+        }
+
+        function listenToCloudData() {
+            if (_unsubscribeCloudListener) _unsubscribeCloudListener();
+            if (typeof firebase === 'undefined' || !firebase.firestore) return;
+
+            console.log('🔗 [Real-Time Sync] Attaching Firestore listener for ' + CLIENT_ID + '...');
+            _unsubscribeCloudListener = firebase.firestore().collection('clients').doc(CLIENT_ID)
+                .onSnapshot((doc) => {
+                    if (doc.exists && doc.data() && doc.data().payload) {
+                        try {
+                            const remoteData = JSON.parse(doc.data().payload);
+                            if (!remoteData || !remoteData.settings) return;
+
+                            const localStr = JSON.stringify(data);
+                            const remoteStr = JSON.stringify(remoteData);
+
+                            if (localStr !== remoteStr) {
+                                console.log('🔄 [Real-Time Sync] Remote update received. Refreshing UI...');
+                                _isRemoteUpdate = true;
+                                data = remoteData;
+                                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                                refreshAll();
+                                _isRemoteUpdate = false;
+                            }
+                        } catch (e) {
+                            console.warn('[Real-Time Parse Warning]', e);
+                        }
+                    }
+                }, (err) => {
+                    console.warn('[Real-Time Listener Warning]', err.message);
+                });
+        }
+
+        // Start cloud listener
+        try {
+            listenToCloudData();
+        } catch (e) {}
+
+        // ================================================================
+        //  AUTHENTICATION GATE
+        // ================================================================
+
+        const ALLOWED_EMAILS = [
+            'bawanthavisal12@gmail.com',
+            'pulasthigama@gmail.com',
+            'digibiz.pro@gmail.com',
+            'delightkukule@gmail.com'
+        ];
+
+        function getRepFromParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('rep') || urlParams.get('repId') || null;
+        }
+
+        function switchToAdminLogin() {
+            document.getElementById('adminLoginBox').style.display = 'block';
+            document.getElementById('repLoginBox').style.display = 'none';
+        }
+
+        function switchToRepLogin(rep) {
+            document.getElementById('adminLoginBox').style.display = 'none';
+            document.getElementById('repLoginBox').style.display = 'block';
+            if (rep) {
+                document.getElementById('repGateName').textContent = rep.name || 'Sales Rep';
+                const initials = (rep.name || 'RP').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                document.getElementById('repGateAvatar').textContent = initials || 'RP';
+            }
+        }
+
+        function showAuthGate() {
+            const repParam = getRepFromParam();
+            if (repParam) {
+                const rep = (data.reps || []).find(r => r.id === repParam);
+                document.documentElement.classList.remove('auth-active');
+                document.getElementById('authGateOverlay').style.display = 'flex';
+                document.getElementById('authGateOverlay').classList.add('show');
+                switchToRepLogin(rep);
+                return;
+            }
+            document.documentElement.classList.remove('auth-active');
+            document.getElementById('authGateOverlay').style.display = 'flex';
+            document.getElementById('authGateOverlay').classList.add('show');
+            switchToAdminLogin();
+        }
+
+        function hideAuthGate() {
+            document.documentElement.classList.add('auth-active');
+            document.getElementById('authGateOverlay').style.display = 'none';
+            document.getElementById('authGateOverlay').classList.remove('show');
+        }
+
+        // Firebase Auth Listener
+        if (typeof auth !== 'undefined' && auth) {
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    const userEmail = String(user.email || '').trim().toLowerCase();
+                    const isAllowed = ALLOWED_EMAILS.some(e => e.toLowerCase() === userEmail) ||
+                        userEmail.includes('randipa') ||
+                        userEmail.includes('bawanthavisal');
+
+                    if (!isAllowed) {
+                        document.documentElement.classList.remove('auth-active');
+                        showAuthGate();
+                        const err = document.getElementById('authError');
+                        if (err) {
+                            err.innerHTML = '<b>ACCESS DENIED:</b> Account <code>' + userEmail +
+                                '</code> is not authorized for RANDIPA PRO.';
+                            err.style.display = 'block';
+                        }
+                        if (typeof auth !== 'undefined' && auth) auth.signOut();
+                        return;
+                    }
+
+                    hideAuthGate();
+                    localStorage.setItem('randipa_unified_auth_active', 'true');
+                    sessionStorage.setItem('randipa_unified_auth_active', 'true');
+                    document.getElementById('systemUserStatus').innerHTML =
+                        '<i class="fas fa-user-check" style="color:#22c55e;"></i> User: ' + userEmail;
+                } else {
+                    // Check rep session
+                    const repAuth = sessionStorage.getItem('randipa_active_rep_auth') || localStorage.getItem(
+                        'randipa_active_rep_auth');
+                    if (repAuth) {
+                        hideAuthGate();
+                        return;
+                    }
+                    document.documentElement.classList.remove('auth-active');
+                    localStorage.removeItem('randipa_unified_auth_active');
+                    sessionStorage.removeItem('randipa_unified_auth_active');
+                    showAuthGate();
+                }
+            });
+        }
+
+        async function handleSignIn() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            const errEl = document.getElementById('authError');
+
+            if (!email || !pass) {
+                errEl.textContent = 'Please enter both email and password.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                errEl.style.display = 'none';
+                if (typeof auth !== 'undefined' && auth) {
+                    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                    try {
+                        await auth.signInWithEmailAndPassword(email, pass);
+                    } catch (sErr) {
+                        if (sErr.code === 'auth/user-not-found' || sErr.code === 'auth/invalid-credential') {
+                            await auth.createUserWithEmailAndPassword(email, pass);
+                        } else {
+                            throw sErr;
+                        }
+                    }
+                }
+                hideAuthGate();
+                localStorage.setItem('randipa_unified_auth_active', 'true');
+                sessionStorage.setItem('randipa_unified_auth_active', 'true');
+                showToast('Welcome to RANDIPA PRO!');
+            } catch (err) {
+                errEl.textContent = 'Sign in failed: ' + (err.message || 'Please check credentials');
+                errEl.style.display = 'block';
+            }
+        }
+
+        async function handleSignOut() {
+            if (!confirm('Are you sure you want to sign out?')) return;
+            try {
+                document.documentElement.classList.remove('auth-active');
+                localStorage.removeItem('randipa_unified_auth_active');
+                sessionStorage.removeItem('randipa_unified_auth_active');
+                sessionStorage.removeItem('randipa_active_rep_auth');
+                localStorage.removeItem('randipa_active_rep_auth');
+                if (typeof auth !== 'undefined' && auth) {
+                    await auth.signOut();
+                }
+                showAuthGate();
+                showToast('Signed out successfully');
+            } catch (e) {
+                showAuthGate();
+            }
+        }
+
+        async function handleRepSignIn() {
+            const email = document.getElementById('repLoginEmail').value.trim().toLowerCase();
+            const phone = document.getElementById('repLoginPhone').value.trim();
+            const errEl = document.getElementById('repAuthError');
+
+            if (!email || !phone) {
+                errEl.textContent = 'Please enter both email and phone number.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            const rep = (data.reps || []).find(r =>
+                String(r.email || '').toLowerCase() === email &&
+                String(r.phone || '').replace(/[^0-9]/g, '') === phone.replace(/[^0-9]/g, '')
+            );
+
+            if (!rep) {
+                errEl.textContent = 'No matching representative found. Please check credentials.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            sessionStorage.setItem('randipa_active_rep_auth', rep.id);
+            localStorage.setItem('randipa_active_rep_auth', rep.id);
+            sessionStorage.setItem('randipa_unified_auth_active', 'true');
+            localStorage.setItem('randipa_unified_auth_active', 'true');
+
+            hideAuthGate();
+            navigateTo('repapp');
+            showToast('Welcome, ' + rep.name + '!');
+        }
+
+        // Enter key support for login
+        ['loginEmail', 'loginPassword'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') { e.preventDefault();
+                        handleSignIn(); }
+                });
+            }
+        });
+        ['repLoginEmail', 'repLoginPhone'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') { e.preventDefault();
+                        handleRepSignIn(); }
+                });
+            }
+        });
+
+        // ================================================================
+        //  NAVIGATION
+        // ================================================================
+
+        let currentPage = 'dashboard';
+
+        function navigateTo(page) {
+            currentPage = page;
+            window.location.hash = page;
+
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('page-' + page);
+            if (target) target.classList.add('active');
+
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-page') === page) {
+                    item.classList.add('active');
+                }
+            });
+
+            closeSidebar();
+            window.scrollTo(0, 0);
+        }
+
+        // ================================================================
+        //  SIDEBAR TOGGLE
+        // ================================================================
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        // ================================================================
+        //  BADGE UPDATES
+        // ================================================================
+
+        function updateBadges() {
+            const orderCount = (data.orders || []).length;
+            const repCount = (data.reps || []).length;
+
+            const orderBadge = document.getElementById('orderBadge');
+            const sideOrderCount = document.getElementById('sideOrderCount');
+            const sideRepCount = document.getElementById('sideRepCount');
+            const posBadge = document.getElementById('posBadge');
+
+            if (orderBadge) orderBadge.textContent = orderCount;
+            if (sideOrderCount) sideOrderCount.textContent = orderCount;
+            if (sideRepCount) sideRepCount.textContent = repCount;
+            if (posBadge) posBadge.textContent = orderCount;
+        }
+
+        // ================================================================
+        //  SIDEBAR SUBSCRIPTION UPDATE
+        // ================================================================
+
+        function updateSidebarSubscription() {
+            const sub = data.subscription || {};
+            const today = new Date();
+            const expDate = new Date(sub.expireDate || '2026-09-05');
+            const daysLeft = Math.max(0, Math.ceil((expDate - today) / (1000 * 60 * 60 * 24)));
+            const isTrial = (sub.plan === 'TRIAL' || !sub.plan || sub.plan === 'TRIAL_ACTIVE');
+
+            const planNameEl = document.getElementById('sidePlanName');
+            const daysLeftEl = document.getElementById('sidePlanDaysLeft');
+            const expiryDateEl = document.getElementById('sidePlanExpiryDate');
+            const statusBadgeEl = document.getElementById('sidePlanStatusBadge');
+
+            if (planNameEl) planNameEl.textContent = isTrial ? 'TRIAL' : (sub.plan || 'PRO');
+            if (daysLeftEl) daysLeftEl.textContent = daysLeft + ' Days';
+            if (expiryDateEl) expiryDateEl.textContent = 'Expires: ' + (sub.expireDate || '2026-09-05');
+
+            if (statusBadgeEl) {
+                if (isTrial && daysLeft > 0) {
+                    statusBadgeEl.textContent = 'TRIAL';
+                    statusBadgeEl.style.background = '#22c55e';
+                } else if (!isTrial && daysLeft > 0) {
+                    statusBadgeEl.textContent = 'ACTIVE';
+                    statusBadgeEl.style.background = '#067d62';
+                } else {
+                    statusBadgeEl.textContent = 'EXPIRED';
+                    statusBadgeEl.style.background = '#dc2626';
+                }
+            }
+
+            // Subscription page
+            const planValue = document.getElementById('planValue');
+            const expiryValue = document.getElementById('expiryValue');
+            const daysRemaining = document.getElementById('daysRemaining');
+            const statusBadge = document.getElementById('subStatusBadge');
+
+            if (planValue) planValue.textContent = isTrial ? 'TRIAL' : (sub.plan || 'PRO');
+            if (expiryValue) expiryValue.textContent = sub.expireDate || '2026-09-05';
+            if (daysRemaining) daysRemaining.textContent = daysLeft;
+
+            if (statusBadge) {
+                if (isTrial && daysLeft > 0) {
+                    statusBadge.innerHTML = '<i class="fas fa-clock"></i> Trial (' + daysLeft + ' Days Left)';
+                    statusBadge.style.background = '#22c55e';
+                } else if (!isTrial && daysLeft > 0) {
+                    statusBadge.innerHTML = '<i class="fas fa-circle-check"></i> PRO Active (' + daysLeft + ' Days)';
+                    statusBadge.style.background = '#067d62';
+                } else {
+                    statusBadge.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Expired (Activate PRO)';
+                    statusBadge.style.background = '#dc2626';
+                }
+            }
+        }
+
+        // ================================================================
+        //  TOAST NOTIFICATION
+        // ================================================================
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._timeout);
+            t._timeout = setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ================================================================
+        //  SEARCH
+        // ================================================================
+
+        function handleSearch(value) {
+            if (!value || value.length < 2) {
+                document.querySelectorAll('.page').forEach(p => p.style.display = '');
+                return;
+            }
+
+            const query = value.toLowerCase();
+            document.querySelectorAll('.page.active .table-wrap table tbody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        // ================================================================
+        //  REFRESH
+        // ================================================================
+
+        function refreshAll() {
+            updateBadges();
+            updateSidebarSubscription();
+            renderDashboard();
+            renderRawMaterials();
+            renderManufacturing();
+            renderFinishedGoods();
+            renderRoutePlan();
+            renderOrders();
+            renderReps();
+            renderJournal();
+            renderExpenses();
+            showToast('🔄 Data refreshed from cloud');
+        }
+
+        function refreshDashboard() {
+            renderDashboard();
+            showToast('Dashboard refreshed!');
+        }
+
+        // ================================================================
+        //  RENDER FUNCTIONS
+        // ================================================================
+
+        function renderDashboard() {
+            const rmAsset = (data.rawMaterials || []).reduce((sum, m) => sum + ((m.qty || 0) * (m.unitCost || 0)), 0);
+            const fgAsset = (data.finishedGoods || []).reduce((sum, p) => sum + ((p.stock || 0) * (p.unitCost || 0)), 0);
+            const totalAsset = rmAsset + fgAsset;
+
+            const totalSales = (data.sales || []).reduce((sum, s) => sum + (s.amount || 0), 0);
+            const batchCount = (data.productionBatches || []).length;
+            const totalExpenses = (data.expenses || []).reduce((sum, e) => sum + (e.amount || 0), 0);
+            const profit = totalSales - totalExpenses;
+
+            document.getElementById('dashRmAsset').textContent = 'Rs. ' + rmAsset.toFixed(2);
+            document.getElementById('dashFgAsset').textContent = 'Rs. ' + fgAsset.toFixed(2);
+            document.getElementById('dashTotalAsset').textContent = 'Rs. ' + totalAsset.toFixed(2);
+            document.getElementById('dashTotalSales').textContent = 'Rs. ' + totalSales.toFixed(2);
+            document.getElementById('dashBatches').textContent = batchCount;
+            document.getElementById('dashExpenses').textContent = 'Rs. ' + totalExpenses.toFixed(2);
+            document.getElementById('dashProfit').textContent = 'Rs. ' + profit.toFixed(2);
+        }
+
+        function renderRawMaterials() {
+            const tbody = document.getElementById('rawMaterialsBody');
+            const materials = data.rawMaterials || [];
+
+            if (materials.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No raw materials yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = materials.map(m => {
+                const total = (m.qty || 0) * (m.unitCost || 0);
+                let status = '<span class="badge badge-good">IN STOCK</span>';
+                if ((m.qty || 0) <= 0) status = '<span class="badge badge-danger">OUT OF STOCK</span>';
+                else if ((m.qty || 0) <= (m.minStock || 5)) status = '<span class="badge badge-warning">LOW STOCK</span>';
+
+                return '<tr>' +
+                    '<td><strong>' + (m.name || 'Unnamed') + '</strong></td>' +
+                    '<td>' + (m.qty || 0) + ' ' + (m.unit || 'units') + '</td>' +
+                    '<td>Rs. ' + (m.unitCost || 0).toFixed(2) + '</td>' +
+                    '<td><strong>Rs. ' + total.toFixed(2) + '</strong></td>' +
+                    '<td>' + status + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderManufacturing() {
+            const tbody = document.getElementById('manufacturingBody');
+            const batches = data.productionBatches || [];
+
+            if (batches.length === 0) {
+                tbody.innerHTML =
+                '<tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No production batches yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = batches.slice().reverse().map(b => {
+                return '<tr>' +
+                    '<td>' + (b.date || '-') + '</td>' +
+                    '<td><strong>' + (b.productName || 'Unnamed') + '</strong></td>' +
+                    '<td>' + (b.qty || 0) + '</td>' +
+                    '<td>Rs. ' + (b.unitCost || 0).toFixed(2) + '</td>' +
+                    '<td><strong>Rs. ' + (b.totalCost || 0).toFixed(2) + '</strong></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderFinishedGoods() {
+            const tbody = document.getElementById('finishedGoodsBody');
+            const goods = data.finishedGoods || [];
+
+            if (goods.length === 0) {
+                tbody.innerHTML =
+                '<tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No finished goods yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = goods.map(p => {
+                const total = (p.stock || 0) * (p.unitCost || 0);
+                let status = '<span class="badge badge-good">IN STOCK</span>';
+                if ((p.stock || 0) <= 0) status = '<span class="badge badge-danger">OUT OF STOCK</span>';
+                else if ((p.stock || 0) <= 10) status = '<span class="badge badge-warning">LOW STOCK</span>';
+
+                return '<tr>' +
+                    '<td><strong>' + (p.name || 'Unnamed') + '</strong></td>' +
+                    '<td>' + (p.stock || 0) + ' units</td>' +
+                    '<td>Rs. ' + (p.unitCost || 0).toFixed(2) + '</td>' +
+                    '<td><strong>Rs. ' + total.toFixed(2) + '</strong></td>' +
+                    '<td>' + status + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderRoutePlan() {
+            const tbody = document.getElementById('routePlanBody');
+            const plans = data.routePlans || [];
+
+            if (plans.length === 0) {
+                tbody.innerHTML =
+                '<tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No route data. Sales will auto-populate this.</td></tr>';
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+
+            tbody.innerHTML = plans.filter(p => p.nextVisitDate <= today).slice(0, 20).map(p => {
+                let status = '<span class="badge badge-warning">SCHEDULED</span>';
+                if (p.visitStatus === 'COMPLETED') status = '<span class="badge badge-good">COMPLETED</span>';
+                else if (p.visitStatus === 'RESCHEDULED') status = '<span class="badge badge-blue">RESCHEDULED</span>';
+
+                return '<tr>' +
+                    '<td><strong>' + (p.shopName || 'Unknown Shop') + '</strong></td>' +
+                    '<td>' + (p.area || '-') + '</td>' +
+                    '<td>' + (p.phone || '-') + '</td>' +
+                    '<td>' + (p.nextVisitDate || '-') + '</td>' +
+                    '<td>' + status + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderOrders() {
+            const tbody = document.getElementById('ordersBody');
+            const orders = data.orders || [];
+
+            if (orders.length === 0) {
+                tbody.innerHTML =
+                '<tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No orders yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = orders.slice().reverse().slice(0, 20).map(o => {
+                let status = '<span class="badge badge-warning">PENDING</span>';
+                if (o.status === 'approved') status = '<span class="badge badge-good">APPROVED</span>';
+                else if (o.status === 'delivered') status = '<span class="badge badge-blue">DELIVERED</span>';
+                else if (o.status === 'rejected') status = '<span class="badge badge-danger">REJECTED</span>';
+
+                return '<tr>' +
+                    '<td><strong>#' + (o.id || 'N/A') + '</strong></td>' +
+                    '<td>' + (o.date || '-') + '</td>' +
+                    '<td>' + (o.shopName || '-') + '</td>' +
+                    '<td><strong>Rs. ' + (o.total || 0).toFixed(2) + '</strong></td>' +
+                    '<td>' + status + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderReps() {
+            const tbody = document.getElementById('repsBody');
+            const reps = data.reps || [];
+
+            if (reps.length === 0) {
+                tbody.innerHTML =
+                '<tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No reps yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = reps.map(r => {
+                const status = r.isActive !== false ? '<span class="badge badge-good">ACTIVE</span>' :
+                    '<span class="badge badge-danger">INACTIVE</span>';
+                return '<tr>' +
+                    '<td><strong>' + (r.name || 'Unnamed') + '</strong></td>' +
+                    '<td>' + (r.email || '-') + '</td>' +
+                    '<td>' + (r.phone || '-') + '</td>' +
+                    '<td>' + (r.commissionRate || 0) + '%</td>' +
+                    '<td>' + status + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderJournal() {
+            const tbody = document.getElementById('journalBody');
+            const entries = data.journalEntries || [];
+
+            if (entries.length === 0) {
+                tbody.innerHTML =
+                '<tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">No journal entries yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = entries.slice().reverse().slice(0, 20).map(e => {
+                return '<tr>' +
+                    '<td>' + (e.date || '-') + '</td>' +
+                    '<td>' + (e.description || '-') + '</td>' +
+                    '<td>' + (e.account || '-') + '</td>' +
+                    '<td>' + ((e.debit || 0) > 0 ? 'Rs. ' + (e.debit || 0).toFixed(2) : '-') + '</td>' +
+                    '<td>' + ((e.credit || 0) > 0 ? 'Rs. ' + (e.credit || 0).toFixed(2) : '-') + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderExpenses() {
+            const tbody = document.getElementById('expensesBody');
+            const expenses = data.expenses || [];
+
+            if (expenses.length === 0) {
+                tbody.innerHTML =
+                '<tr><td colspan="4" class="text-center" style="padding:30px; color:#999;">No expenses yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = expenses.slice().reverse().slice(0, 20).map(e => {
+                return '<tr>' +
+                    '<td>' + (e.date || '-') + '</td>' +
+                    '<td>' + (e.category || '-') + '</td>' +
+                    '<td>' + (e.description || '-') + '</td>' +
+                    '<td><strong>Rs. ' + (e.amount || 0).toFixed(2) + '</strong></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        // ================================================================
+        //  ACTIVATION CODE
+        // ================================================================
+
+        function activateCode() {
+            const code = (document.getElementById('activationCode')?.value || '').trim().toUpperCase();
+            if (!code) {
+                showToast('Please enter an activation key');
+                return;
+            }
+
+            const validKeys = ['RANDIPA-PRO-2027', 'DIGIBIZ-PRO-2027', 'PRO-ENTERPRISE-2027', 'RANDIPA-2027'];
+            if (validKeys.includes(code)) {
+                if (!data.subscription) data.subscription = {};
+                data.subscription.plan = 'PRO';
+                data.subscription.status = 'ACTIVE';
+                const nextYear = new Date();
+                nextYear.setFullYear(nextYear.getFullYear() + 1);
+                data.subscription.expireDate = nextYear.toISOString().split('T')[0];
+                data.subscription.smsBalance = (data.subscription.smsBalance || 300) + 500;
+                saveData();
+                updateSidebarSubscription();
+                showToast('🎉 License activated! PRO until ' + data.subscription.expireDate);
+                document.getElementById('activationCode').value = '';
+            } else {
+                showToast('❌ Invalid activation key. Contact DIGIBIZ Support.');
+            }
+        }
+
+        // ================================================================
+        //  INIT
+        // ================================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if already authenticated via rep session
+            const repAuth = sessionStorage.getItem('randipa_active_rep_auth') || localStorage.getItem(
+            'randipa_active_rep_auth');
+            if (repAuth) {
+                hideAuthGate();
+                navigateTo('repapp');
+                refreshAll();
+                return;
+            }
+
+            // Check if already authenticated
+            const authFlag = localStorage.getItem('randipa_unified_auth_active') || sessionStorage.getItem(
+                'randipa_unified_auth_active');
+            if (authFlag === 'true') {
+                hideAuthGate();
+            } else {
+                showAuthGate();
+            }
+
+            // Handle hash navigation
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById('page-' + hash)) {
+                navigateTo(hash);
+            } else {
+                navigateTo('dashboard');
+            }
+
+            refreshAll();
+            updateSidebarSubscription();
+
+            // Update user name in nav if available
+            const user = auth.currentUser;
+            if (user) {
+                document.getElementById('navUserName').textContent = user.displayName || user.email?.split('@')[0] ||
+                    'User';
+            }
+
+            console.log('🚀 RANDIPA PRO — Unified Manufacturing & Distribution Platform loaded!');
+        });
+
+        // Hash change listener
+        window.addEventListener('hashchange', function() {
+            const hashPage = window.location.hash.replace('#', '');
+            if (hashPage) navigateTo(hashPage);
+        });
+
+        // Keyboard shortcut: F5 refresh
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F5') {
+                e.preventDefault();
+                refreshAll();
+            }
+        });
+
+        // ================================================================
+        //  EXPOSE FUNCTIONS GLOBALLY
+        // ================================================================
+
+        window.navigateTo = navigateTo;
+        window.toggleSidebar = toggleSidebar;
+        window.closeSidebar = closeSidebar;
+        window.showToast = showToast;
+        window.handleSearch = handleSearch;
+        window.refreshAll = refreshAll;
+        window.refreshDashboard = refreshDashboard;
+        window.handleSignIn = handleSignIn;
+        window.handleSignOut = handleSignOut;
+        window.handleRepSignIn = handleRepSignIn;
+        window.switchToAdminLogin = switchToAdminLogin;
+        window.activateCode = activateCode;
+
+        console.log('✅ All systems ready!');
+    </script>
+
+</body>
+</html>

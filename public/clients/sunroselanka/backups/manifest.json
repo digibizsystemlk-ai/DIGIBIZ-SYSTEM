@@ -1,0 +1,14 @@
+{
+  "clientId": "sunroselanka",
+  "maxRetention": 3,
+  "lastBackupAt": "2026-08-30T09:59:00.529Z",
+  "activeBackupsCount": 1,
+  "backups": [
+    {
+      "slot": 1,
+      "fileName": "index.backup_2026-08-30_15-29-00.html",
+      "createdAt": "8/30/2026, 3:29:00 PM",
+      "hash": "cf2c9546a9ba7d34417a36c8d8bd5df80b08a2ca75288918b637bb7a5cea508c"
+    }
+  ]
+}

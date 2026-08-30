@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <linearGradient id="goldGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="leafGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <filter id="glow512" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Card with Gold Rim -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad512)"/>
+  <rect x="14" y="14" width="484" height="484" rx="100" fill="none" stroke="url(#goldGrad512)" stroke-width="6" opacity="0.6"/>
+
+  <!-- Steaming Tea Cup & Leaves Emblem -->
+  <g transform="translate(256, 226) scale(2.6)">
+    <!-- Steam Curves -->
+    <path d="M-18 -45 C-14 -35, -22 -28, -18 -18" fill="none" stroke="#6ee7b7" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+    <path d="M0 -50 C4 -38, -4 -30, 0 -18" fill="none" stroke="#fde68a" stroke-width="3.5" stroke-linecap="round" opacity="0.9"/>
+    <path d="M18 -45 C22 -35, 14 -28, 18 -18" fill="none" stroke="#6ee7b7" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+
+    <!-- Tea Leaves Behind Cup -->
+    <path d="M0 -15 C-25 -40, -40 -10, 0 0 C40 -10, 25 -40, 0 -15 Z" fill="url(#leafGrad512)" opacity="0.95" filter="url(#glow512)"/>
+    <path d="M0 -15 L0 0" stroke="#047857" stroke-width="2"/>
+
+    <!-- Tea Cup Body -->
+    <path d="M-36 0 C-34 26, 34 26, 36 0 Z" fill="url(#goldGrad512)" />
+    <!-- Tea Cup Rim Inner -->
+    <ellipse cx="0" cy="0" rx="36" ry="8" fill="#78350f" />
+    <ellipse cx="0" cy="0" rx="32" ry="6" fill="#047857" />
+
+    <!-- Cup Handle -->
+    <path d="M34 4 C48 4, 48 18, 30 20" fill="none" stroke="url(#goldGrad512)" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- Cup Saucer -->
+    <ellipse cx="0" cy="27" rx="46" ry="6" fill="url(#goldGrad512)"/>
+    <ellipse cx="0" cy="26" rx="42" ry="4" fill="#064e3b"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="256" y="396" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="36" font-weight="900" fill="#fef3c7" text-anchor="middle" letter-spacing="3">MADAWALA</text>
+  <text x="256" y="442" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="28" font-weight="800" fill="#34d399" text-anchor="middle" letter-spacing="8">TEA SHOP</text>
+</svg>

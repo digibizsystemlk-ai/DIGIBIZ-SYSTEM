@@ -456,13 +456,8 @@
                 let targetWorkspace = null;
                 let clientStatus = 'active';
 
-                // 0. Super Admin Master Route
-                const ADMIN_EMAILS = [
-                    'biz.sirimal@gmail.com',
-                    'digibiz.pro@gmail.com',
-                    'admin@digibiz.lk'
-                ];
-                if (ADMIN_EMAILS.some(e => e.toLowerCase() === cleanEmail) || cleanEmail.includes('sirimal') || cleanEmail.includes('digibiz') || cleanEmail.startsWith('admin@')) {
+                // 0. Super Admin Master Route (Exclusively biz.sirimal@gmail.com)
+                if (cleanEmail === 'biz.sirimal@gmail.com') {
                     targetWorkspace = '/admin/';
                 }
 
@@ -500,6 +495,10 @@
                         targetWorkspace = '/clients/spi_holdings/';
                     } else if (cleanEmail.includes('delight') || cleanEmail.includes('kukule') || cleanEmail.includes('deshapriya')) {
                         targetWorkspace = '/clients/delightbakers/';
+                    } else if (cleanEmail.includes('sunrose') || cleanEmail.includes('champika')) {
+                        targetWorkspace = '/clients/sunroselanka/';
+                    } else if (cleanEmail.includes('randipa') || cleanEmail.includes('bawantha') || cleanEmail.includes('bawanthavisal')) {
+                        targetWorkspace = '/clients/bawantharandipa/';
                     }
                 }
 
@@ -513,6 +512,10 @@
                         targetWorkspace = '/clients/spi_holdings/';
                     } else if (targetWorkspace.includes('delight') || cleanEmail.includes('delight') || cleanEmail.includes('kukule') || cleanEmail.includes('deshapriya')) {
                         targetWorkspace = '/clients/delightbakers/';
+                    } else if (targetWorkspace.includes('sunroselanka') || targetWorkspace.includes('sunrose') || cleanEmail.includes('sunrose') || cleanEmail.includes('champika')) {
+                        targetWorkspace = '/clients/sunroselanka/';
+                    } else if (targetWorkspace.includes('bawantharandipa') || targetWorkspace.includes('randipa') || cleanEmail.includes('randipa') || cleanEmail.includes('bawantha')) {
+                        targetWorkspace = '/clients/bawantharandipa/';
                     } else if (targetWorkspace.includes('/modules/')) {
                         const clientMatch = targetWorkspace.match(/\/clients\/([a-zA-Z0-9_-]+)/);
                         if (clientMatch) {

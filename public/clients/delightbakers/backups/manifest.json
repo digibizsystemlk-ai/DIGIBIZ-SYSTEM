@@ -1,26 +1,26 @@
 {
   "clientId": "delightbakers",
   "maxRetention": 3,
-  "lastBackupAt": "2026-08-29T17:07:03.335Z",
+  "lastBackupAt": "2026-08-30T09:58:59.665Z",
   "activeBackupsCount": 3,
   "backups": [
     {
       "slot": 1,
-      "fileName": "index.backup_2026-08-29_22-37-03.html",
-      "createdAt": "8/29/2026, 10:37:03 PM",
-      "hash": "871a04796320ae4e989895dd7c2e957d04f3d066a22c702d621e8769ed7f9430"
+      "fileName": "index.backup_2026-08-30_15-28-59.html",
+      "createdAt": "8/30/2026, 3:28:59 PM",
+      "hash": "fd4aaf2d8372ad4ff39174695727a3a1b674d2780beca8e0009dea9e144d1c04"
     },
     {
       "slot": 2,
-      "fileName": "index.backup_2026-08-29_22-28-01.html",
-      "createdAt": "8/29/2026, 10:28:01 PM",
-      "hash": "693696388b8580a1ee029c746f979b133903655820c1a4e3af6e41d17696c6ad"
+      "fileName": "index.backup_2026-08-30_13-05-23.html",
+      "createdAt": "8/30/2026, 1:05:23 PM",
+      "hash": "b14b4cac7b0239ee907a3c87d00f75e63d33a971032b2ad562bc3fa803781cee"
     },
     {
       "slot": 3,
-      "fileName": "index.backup_2026-08-29_22-21-34.html",
-      "createdAt": "8/29/2026, 10:21:34 PM",
-      "hash": "cd1e3f87aecc921fd84efab5043689d744595c700bc13c2f2f89faacd0d172c4"
+      "fileName": "index.backup_2026-08-30_12-34-00.html",
+      "createdAt": "8/30/2026, 12:34:00 PM",
+      "hash": "2a54415f32aa47b90f89da9ee071e09a87fbba5ff1b0db3c79dc46016d038b94"
     }
   ]
 }

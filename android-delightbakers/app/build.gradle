@@ -1,0 +1,97 @@
+plugins {
+    id 'com.android.application'
+}
+
+def twaManifest = [
+    applicationId: 'com.digibiz.delightbakers.rep',
+    hostName: 'digibiz-system.web.app',
+    launchUrl: '/clients/delightbakers?platform=apk&app=rep',
+    name: 'Delight Bakers Rep',
+    launcherName: 'DB Rep',
+    themeColor: '#ff9900',
+    themeColorDark: '#0f172a',
+    navigationColor: '#0f172a',
+    navigationColorDark: '#0f172a',
+    navigationDividerColor: '#000000',
+    navigationDividerColorDark: '#000000',
+    backgroundColor: '#0f172a',
+    enableNotifications: true,
+    shortcuts: [],
+    splashScreenFadeOutDuration: 300,
+    generatorApp: 'digibiz-native',
+    fallbackType: 'webview',
+    enableSiteSettingsShortcut: 'false',
+    orientation: 'portrait',
+]
+
+android {
+    compileSdkVersion 34
+    namespace "com.digibiz.delightbakers.rep"
+    
+    defaultConfig {
+        applicationId "com.digibiz.delightbakers.rep"
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0.0"
+
+        resValue "string", "appName", twaManifest.name
+        resValue "string", "launcherName", twaManifest.launcherName
+        resValue "string", "hostName", twaManifest.hostName
+        def launchUrl = "https://" + twaManifest.hostName + twaManifest.launchUrl
+        resValue "string", "launchUrl", launchUrl
+        resValue "color", "colorPrimary", twaManifest.themeColor
+        resValue "color", "colorPrimaryDark", twaManifest.themeColorDark
+        resValue "color", "backgroundColor", twaManifest.backgroundColor
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../digibiz-release-key.jks')
+            storePassword 'digibiz2026'
+            keyAlias 'digibizkey'
+            keyPassword 'digibiz2026'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+    }
+}
+
+dependencies {
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22") {
+            because("kotlin-stdlib-jdk7 is now part of kotlin-stdlib")
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22") {
+            because("kotlin-stdlib-jdk8 is now part of kotlin-stdlib")
+        }
+    }
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core:1.12.0'
+}

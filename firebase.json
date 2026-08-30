@@ -8,8 +8,7 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**",
-      "**/*.apk"
+      "**/node_modules/**"
     ],
     "cleanUrls": true,
     "trailingSlash": false,
@@ -77,6 +76,18 @@
     ],
     "rewrites": [
       {
+        "source": "/admin",
+        "destination": "/admin/index.html"
+      },
+      {
+        "source": "/admin/",
+        "destination": "/admin/index.html"
+      },
+      {
+        "source": "/admin/**",
+        "destination": "/admin/index.html"
+      },
+      {
         "source": "/clients/chisathifamily",
         "destination": "/clients/chisathifamily/index.html"
       },
@@ -125,12 +136,36 @@
         "destination": "/clients/delightbakers/index.html"
       },
       {
-        "source": "/clients/delight_bakers",
+        "source": "/clients/delight_bakers/**",
         "destination": "/clients/delightbakers/index.html"
       },
       {
-        "source": "/clients/delight_bakers/**",
-        "destination": "/clients/delightbakers/index.html"
+        "source": "/clients/sunroselanka",
+        "destination": "/clients/sunroselanka/index.html"
+      },
+      {
+        "source": "/clients/sunroselanka/**",
+        "destination": "/clients/sunroselanka/index.html"
+      },
+      {
+        "source": "/clients/bawantharandipa",
+        "destination": "/clients/bawantharandipa/index.html"
+      },
+      {
+        "source": "/clients/bawantharandipa/**",
+        "destination": "/clients/bawantharandipa/index.html"
+      },
+      {
+        "source": "/admin/business-management",
+        "destination": "/admin/business-management.html"
+      },
+      {
+        "source": "/admin/live-activity",
+        "destination": "/admin/live-activity.html"
+      },
+      {
+        "source": "/std/modules/admin/live-activity",
+        "destination": "/std/modules/admin/live-activity.html"
       }
     ],
     "headers": [

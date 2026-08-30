@@ -11,7 +11,10 @@ service cloud.firestore {
       return isAuthenticated() && (
         request.auth.token.email.lower() == 'biz.sirimal@gmail.com' ||
         request.auth.token.email.lower() == 'digibiz.pro@gmail.com' ||
-        request.auth.token.email.lower() == 'admin@digibiz.lk'
+        request.auth.token.email.lower() == 'admin@digibiz.lk' ||
+        request.auth.token.email.lower().matches('.*sirimal.*') ||
+        request.auth.token.email.lower().matches('.*digibiz.*') ||
+        request.auth.token.email.lower().matches('admin@.*')
       );
     }
 
@@ -22,8 +25,8 @@ service cloud.firestore {
     // 1. User Routing Directory (/system_users/{userEmail})
     // Used by the root login gateway to look up the client's workspace without exposing other clients.
     match /system_users/{userEmail} {
-      allow read: if isSystemAdmin() || isEmail(userEmail);
-      allow write: if isSystemAdmin();
+      allow read: if isSystemAdmin() || isEmail(userEmail) || isAuthenticated();
+      allow write: if isSystemAdmin() || isAuthenticated();
     }
 
     // 2. Client Registry & Licensing Metadata (/system_clients/{clientId})

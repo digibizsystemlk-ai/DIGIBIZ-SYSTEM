@@ -1,0 +1,23 @@
+﻿{
+    "name": "SUNROSE LANKA — Attendance & Payroll System",
+    "short_name": "SUNROSE ERP",
+    "description": "SUNROSE LANKA (PVT) LTD — Enterprise Attendance, Shifts & Sri Lankan Payroll Management Platform",
+    "start_url": "/clients/sunroselanka/index.html",
+    "scope": "/clients/sunroselanka/",
+    "display": "standalone",
+    "background_color": "#0a101d",
+    "theme_color": "#ff9900",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "/clients/sunroselanka/assets/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/clients/sunroselanka/assets/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

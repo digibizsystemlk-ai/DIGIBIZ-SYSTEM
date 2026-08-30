@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Automatically generated file. DO NOT MODIFY -->
+
+    <!-- Value from default config. -->
+    <color name="backgroundColor">#0f172a</color>
+    <!-- Value from default config. -->
+    <color name="colorPrimary">#ff9900</color>
+    <!-- Value from default config. -->
+    <color name="colorPrimaryDark">#0f172a</color>
+    <!-- Value from default config. -->
+    <string name="appName" translatable="false">Delight Bakers Rep</string>
+    <!-- Value from default config. -->
+    <string name="hostName" translatable="false">digibiz-system.web.app</string>
+    <!-- Value from default config. -->
+    <string name="launchUrl" translatable="false">https://digibiz-system.web.app/clients/delightbakers?platform=apk&amp;app=rep</string>
+    <!-- Value from default config. -->
+    <string name="launcherName" translatable="false">DB Rep</string>
+
+</resources>

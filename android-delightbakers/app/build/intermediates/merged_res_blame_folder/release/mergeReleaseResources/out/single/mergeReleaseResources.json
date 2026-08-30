@@ -1,0 +1,118 @@
+[
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\mipmap-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\mipmap-mdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\mipmap-xhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-mdpi_splash.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-mdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_fragment_home.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\fragment_home.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_fragment_pos.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\fragment_pos.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-xxxhdpi_ic_notification_icon.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-xxxhdpi\\ic_notification_icon.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_activity_splash.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\activity_splash.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_fragment_inventory.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\fragment_inventory.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-anydpi_shortcut_legacy_background.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-anydpi\\shortcut_legacy_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-xhdpi_ic_notification_icon.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-xhdpi\\ic_notification_icon.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\menu_bottom_nav_menu.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\menu\\bottom_nav_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_item_stock_alert.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\item_stock_alert.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-xxhdpi_splash.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-xxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\mipmap-xxxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_item_product_card.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\item_product_card.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_activity_subscription.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\activity_subscription.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\mipmap-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\mipmap-hdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\xml_shortcuts.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\xml\\shortcuts.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-xxhdpi_ic_notification_icon.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-xxhdpi\\ic_notification_icon.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\raw_web_app_manifest.json.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\raw\\web_app_manifest.json"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\mipmap-xxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-xhdpi_splash.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-xhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_fragment_more.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\fragment_more.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-mdpi_ic_notification_icon.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-mdpi\\ic_notification_icon.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-hdpi_splash.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-hdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-xxxhdpi_splash.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-xxxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\drawable-hdpi_ic_notification_icon.png.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\drawable-hdpi\\ic_notification_icon.png"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-release-20:\\xml_filepaths.xml.flat",
+        "source": "C:\\Users\\CHINTHAKA-PC\\.gradle\\daemon\\8.11.1\\com.digibiz.delightbakers.rep.app-main-21:\\xml\\filepaths.xml"
+    }
+]

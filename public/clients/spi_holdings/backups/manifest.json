@@ -1,26 +1,26 @@
 {
   "clientId": "spi_holdings",
   "maxRetention": 3,
-  "lastBackupAt": "2026-08-29T17:07:03.814Z",
+  "lastBackupAt": "2026-08-30T09:59:00.312Z",
   "activeBackupsCount": 3,
   "backups": [
     {
       "slot": 1,
+      "fileName": "index.backup_2026-08-30_15-29-00.html",
+      "createdAt": "8/30/2026, 3:29:00 PM",
+      "hash": "8790eacdf4b95f4ef4669078405467c027d0c0e097d73587506aec9c57610bbd"
+    },
+    {
+      "slot": 2,
       "fileName": "index.backup_2026-08-29_22-37-03.html",
       "createdAt": "8/29/2026, 10:37:03 PM",
       "hash": "4762515c7b7f39a2ac2cc696cc9fcf671ea15e6a7ac5c99d10ce201c8ae12457"
     },
     {
-      "slot": 2,
+      "slot": 3,
       "fileName": "index.backup_2026-08-29_22-28-01.html",
       "createdAt": "8/29/2026, 10:28:01 PM",
       "hash": "371cac986e51f46f0931f522adcd23eb5452f8ed8ecd9f8bb0d18107fe109224"
-    },
-    {
-      "slot": 3,
-      "fileName": "index.backup_2026-08-29_22-21-34.html",
-      "createdAt": "8/29/2026, 10:21:34 PM",
-      "hash": "67e0c06747951df7011559efd31802b79a1bb99d52fb3e757f551a90535cce6a"
     }
   ]
 }

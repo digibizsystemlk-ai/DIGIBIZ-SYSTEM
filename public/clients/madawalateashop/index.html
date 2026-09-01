@@ -4349,8 +4349,10 @@
                 subListenerUnsub = db.collection('system_clients').doc('madawalateashop').onSnapshot((doc) => {
                     if (doc && doc.exists) {
                         const data = doc.data() || {};
-                        currentSubscription.plan = data.package || data.plan || 'TRIAL';
-                        currentSubscription.status = data.status || 'trial';
+                        const activePlan = (data.package || data.plan || 'TRIAL').toUpperCase();
+                        const activeStatus = data.status || (activePlan === 'PRO' ? 'active' : 'trial');
+                        currentSubscription.plan = activePlan;
+                        currentSubscription.status = activeStatus;
                         currentSubscription.startDate = data.startDate || '2026-08-24';
                         currentSubscription.expireDate = data.expiryDate || data.expireDate || '2026-08-31';
                         currentSubscription.monthlyFee = data.monthlyFee || 1000;

@@ -3737,8 +3737,8 @@
                         <div style="font-size:10px; color:#64748b; text-transform:uppercase; font-weight:700;">Bank Account</div>
                         <b style="color:#0066c0;">Sampath Bank</b><br>
                         A/C: <b style="font-family:monospace;">1099 5448 6969</b><br>
-                        Name: <b>Chisathi Family</b><br>
-                        Branch: <b>Kurunegala</b>
+                        Name: <b>K A N C Jayawardana</b><br>
+                        Branch: <b>Narammala</b>
                     </div>
                     <a class="btn" target="_blank" href="https://wa.me/94713446500?text=Hi%20DIGIBIZ%2C%20I%20have%20sent%20my%20billing%20receipt." style="background:#22c55e; color:#fff; font-weight:800; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; margin-top:12px; border-radius:8px;">
                         <i class="fab fa-whatsapp"></i> Send Receipt
@@ -5259,16 +5259,44 @@
                 const subData = subDoc.data();
                 const expDateStr = subData.expiryDate || subData.expireDate || data.subscription.expireDate;
                 const regDateStr = subData.registeredAt || subData.startDate || data.subscription.startDate;
+                const activePlan = (subData.package || subData.plan || 'TRIAL').toUpperCase();
+                const activeStatus = subData.status || (activePlan === 'PRO' ? 'active' : 'trial');
 
                 data.subscription = {
                     ...data.subscription,
-                    plan: subData.package || subData.plan || 'TRIAL',
-                    status: subData.status || 'TRIAL',
+                    plan: activePlan,
+                    status: activeStatus,
                     startDate: regDateStr,
                     expireDate: expDateStr,
                     monthlyFee: Number(subData.monthlyFee) || 1000,
-                    smsBalance: Number(subData.smsCredits) || 300
+                    smsBalance: Number(subData.smsCredits !== undefined ? subData.smsCredits : subData.smsBalance) || 300
                 };
+            }
+
+            // Real-time listener for instant admin extensions
+            if (!window._chisathiSubListener) {
+                window._chisathiSubListener = firebase.firestore().collection('system_clients').doc('chisathifamily').onSnapshot((doc) => {
+                    if (doc && doc.exists) {
+                        const subData = doc.data() || {};
+                        const expDateStr = subData.expiryDate || subData.expireDate || data.subscription.expireDate;
+                        const regDateStr = subData.registeredAt || subData.startDate || data.subscription.startDate;
+                        const activePlan = (subData.package || subData.plan || 'TRIAL').toUpperCase();
+                        const activeStatus = subData.status || (activePlan === 'PRO' ? 'active' : 'trial');
+
+                        data.subscription = {
+                            ...data.subscription,
+                            plan: activePlan,
+                            status: activeStatus,
+                            startDate: regDateStr,
+                            expireDate: expDateStr,
+                            monthlyFee: Number(subData.monthlyFee) || 1000,
+                            smsBalance: Number(subData.smsCredits !== undefined ? subData.smsCredits : subData.smsBalance) || 300
+                        };
+                        try { localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+                        renderSubscriptionPage();
+                        updateBadges();
+                    }
+                });
             } else {
                 const startStr = now.toISOString().split('T')[0];
                 const expObj = new Date(now);

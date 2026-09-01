@@ -2071,10 +2071,18 @@
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                const targetIds = Array.from(new Set([c.id, ...(c.rawDocIds || []), (c.id === 'madawalateashop' ? 'DarshanaMadawala' : null)].filter(Boolean)));
+                const targetIds = Array.from(new Set([
+                    c.id,
+                    c.id.toLowerCase(),
+                    ...(c.rawDocIds || []),
+                    (c.id.toLowerCase().includes('madawala') ? 'DarshanaMadawala' : null),
+                    (c.id.toLowerCase().includes('madawala') ? 'madawalateashop' : null)
+                ].filter(Boolean)));
+
                 for (const docId of targetIds) {
                     await db.collection('system_clients').doc(docId).set(payload, { merge: true }).catch(() => {});
                     await db.collection('businesses').doc(docId).set(payload, { merge: true }).catch(() => {});
+                    await db.collection('clients').doc(docId).set({ subscription: payload }, { merge: true }).catch(() => {});
                 }
 
                 for (const em of (c.allowedEmails || [c.ownerEmail])) {

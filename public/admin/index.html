@@ -1259,14 +1259,14 @@
                 ownerName: 'Chisathi Family',
                 ownerEmail: 'chisathifamily@gmail.com',
                 phone: '0771234567',
-                package: 'TRIAL',
-                plan: 'TRIAL',
+                package: 'PRO',
+                plan: 'PRO',
                 businessType: 'retail',
                 monthlyFee: 1000,
-                startDate: '2026-08-25',
-                expiryDate: '2026-09-01',
-                expireDate: '2026-09-01',
-                status: 'trial',
+                startDate: '2026-09-01',
+                expiryDate: '2026-10-01',
+                expireDate: '2026-10-01',
+                status: 'active',
                 smsCredits: 300,
                 allowedEmails: ['chisathifamily@gmail.com', 'shashinthakumara@gmail.com', 'biz.sirimal@gmail.com'],
                 workspacePath: '/clients/chisathifamily/'
@@ -1295,15 +1295,15 @@
                 ownerName: 'DARSHANA MADAWALA',
                 ownerEmail: 'darshanamadawala80@gmail.com',
                 phone: '0778933264',
-                package: 'TRIAL',
-                plan: 'TRIAL',
+                package: 'PRO',
+                plan: 'PRO',
                 businessType: 'credit_ledger',
                 monthlyFee: 1000,
-                startDate: '2026-08-24',
-                expiryDate: '2026-08-31',
-                expireDate: '2026-08-31',
+                startDate: '2026-09-01',
+                expiryDate: '2026-10-01',
+                expireDate: '2026-10-01',
                 expiryTime: '12:00:00',
-                status: 'trial',
+                status: 'active',
                 smsCredits: 300,
                 rawDocIds: ['madawalateashop', 'DarshanaMadawala', 'Mluz2PfHPoNatBlEkvpurJQ9Md83'],
                 allowedEmails: ['darshanamadawala80@gmail.com', 'darshanamadawala@gmail.com', 'biz.sirimal@gmail.com'],
@@ -1697,28 +1697,65 @@
                             existing.package = existing.plan === 'PRO' ? 'PRO' : 'TRIAL';
                         }
                         
-                        // For madawalateashop, ensure correct tomorrow noon expiry date
-                        if (def.id === 'madawalateashop' && (!existing.expiryDate || existing.expiryDate === '2026-08-28' || existing.expireDate === '2026-08-28')) {
-                            existing.expiryDate = '2026-08-31';
-                            existing.expireDate = '2026-08-31';
-                            existing.expiryTime = '12:00:00';
-                            existing.status = 'trial';
-                            existing.plan = 'TRIAL';
-                            existing.package = 'TRIAL';
-                            
-                            const clientRef = db.collection('system_clients').doc(def.id);
-                            syncBatch.set(clientRef, {
-                                expiryDate: '2026-08-31',
-                                expireDate: '2026-08-31',
-                                expiryTime: '12:00:00',
-                                status: 'trial',
-                                plan: 'TRIAL',
-                                package: 'TRIAL',
-                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true });
+                        // For chisathifamily and madawalateashop, ensure active 30-day PRO subscription to 2026-10-01
+                        if (def.id === 'chisathifamily' || def.id === 'madawalateashop') {
+                            existing.plan = 'PRO';
+                            existing.package = 'PRO';
+                            existing.status = 'active';
+                            existing.startDate = '2026-09-01';
+                            existing.expiryDate = '2026-10-01';
+                            existing.expireDate = '2026-10-01';
+
+                            const targetDocs = def.id === 'madawalateashop' ? ['madawalateashop', 'DarshanaMadawala'] : ['chisathifamily'];
+                            for (const dId of targetDocs) {
+                                syncBatch.set(db.collection('system_clients').doc(dId), {
+                                    plan: 'PRO',
+                                    package: 'PRO',
+                                    status: 'active',
+                                    startDate: '2026-09-01',
+                                    expiryDate: '2026-10-01',
+                                    expireDate: '2026-10-01',
+                                    monthlyFee: 1000,
+                                    ownerName: def.ownerName,
+                                    ownerEmail: def.ownerEmail,
+                                    phone: def.phone,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+
+                                syncBatch.set(db.collection('businesses').doc(dId), {
+                                    plan: 'PRO',
+                                    package: 'PRO',
+                                    status: 'active',
+                                    expiryDate: '2026-10-01',
+                                    expireDate: '2026-10-01',
+                                    ownerName: def.ownerName,
+                                    ownerEmail: def.ownerEmail,
+                                    phone: def.phone,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+
+                                syncBatch.set(db.collection('clients').doc(dId), {
+                                    subscription: {
+                                        plan: 'PRO',
+                                        package: 'PRO',
+                                        status: 'active',
+                                        startDate: '2026-09-01',
+                                        expireDate: '2026-10-01',
+                                        expiryDate: '2026-10-01',
+                                        monthlyFee: 1000
+                                    }
+                                }, { merge: true });
+                            }
                             needsSyncCommit = true;
                         }
-                        ALL_CLIENTS.push({ ...def, ...existing });
+
+                        ALL_CLIENTS.push({
+                            ...def,
+                            ...existing,
+                            ownerName: existing.ownerName || def.ownerName || '—',
+                            ownerEmail: existing.ownerEmail || def.ownerEmail || '—',
+                            phone: existing.phone || def.phone || ''
+                        });
                     }
                     dbClientsMap.delete(def.id);
                 }

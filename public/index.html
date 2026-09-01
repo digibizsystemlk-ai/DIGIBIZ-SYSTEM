@@ -499,6 +499,10 @@
                         targetWorkspace = '/clients/sunroselanka/';
                     } else if (cleanEmail.includes('randipa') || cleanEmail.includes('bawantha') || cleanEmail.includes('bawanthavisal')) {
                         targetWorkspace = '/clients/bawantharandipa/';
+                    } else if (cleanEmail.includes('tharindu') || cleanEmail.includes('senanayake') || cleanEmail.includes('courier')) {
+                        targetWorkspace = '/clients/tharindusenanayake/';
+                    } else if (cleanEmail.includes('sithewe')) {
+                        targetWorkspace = '/clients/sithewedistribution/';
                     }
                 }
 
@@ -506,6 +510,10 @@
                 if (targetWorkspace) {
                     if (targetWorkspace.includes('chisathifamilyproducts') || cleanEmail.includes('shashintha') || cleanEmail.includes('chisathi')) {
                         targetWorkspace = '/clients/chisathifamily/';
+                    } else if (targetWorkspace.includes('tharindusenanayake') || cleanEmail.includes('tharindu') || cleanEmail.includes('senanayake')) {
+                        targetWorkspace = '/clients/tharindusenanayake/';
+                    } else if (targetWorkspace.includes('sithewedistribution') || cleanEmail.includes('sithewe')) {
+                        targetWorkspace = '/clients/sithewedistribution/';
                     } else if (targetWorkspace.includes('darshanamadawala') || targetWorkspace.includes('madawala') || cleanEmail.includes('darshana') || cleanEmail.includes('madawala')) {
                         targetWorkspace = '/clients/madawalateashop/';
                     } else if (targetWorkspace.includes('spi_holdings') || targetWorkspace.includes('spiholdings') || cleanEmail.includes('nadun') || cleanEmail.includes('spiholdings') || cleanEmail.includes('dealwis')) {

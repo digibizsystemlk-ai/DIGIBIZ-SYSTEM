@@ -1,0 +1,48 @@
+{
+  "name": "Sithewe Distribution",
+  "short_name": "Sithewe",
+  "description": "Sithewe Distribution — Distributor Management Platform",
+  "start_url": "/clients/sithewedistribution/index.html",
+  "scope": "/clients/sithewedistribution/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#131921",
+  "background_color": "#0a101d",
+  "categories": [
+    "business",
+    "productivity",
+    "sales"
+  ],
+  "icons": [
+    {
+      "src": "/clients/sithewedistribution/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/clients/sithewedistribution/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Order",
+      "short_name": "Order",
+      "description": "Create a new sales order",
+      "url": "/clients/sithewedistribution/?action=new-order"
+    },
+    {
+      "name": "Today's Orders",
+      "short_name": "History",
+      "description": "View today's orders",
+      "url": "/clients/sithewedistribution/?action=history"
+    }
+  ],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ]
+}

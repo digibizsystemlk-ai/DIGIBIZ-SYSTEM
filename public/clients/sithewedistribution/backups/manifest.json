@@ -1,0 +1,26 @@
+{
+  "clientId": "sithewedistribution",
+  "maxRetention": 3,
+  "lastBackupAt": "2026-08-31T15:57:32.201Z",
+  "activeBackupsCount": 3,
+  "backups": [
+    {
+      "slot": 1,
+      "fileName": "index.backup_2026-08-31_21-27-32.html",
+      "createdAt": "8/31/2026, 9:27:32 PM",
+      "hash": "1b3204a4e300c4e17ca48b7f987d0b359489d7edc802406748c49fb6a2f25700"
+    },
+    {
+      "slot": 2,
+      "fileName": "index.backup_2026-08-31_20-59-22.html",
+      "createdAt": "8/31/2026, 8:59:22 PM",
+      "hash": "20466be0cb9996f713bae0f50b6c60f9ccb9c29cabb5099189824dbc194c9cf1"
+    },
+    {
+      "slot": 3,
+      "fileName": "index.backup_2026-08-31_08-54-55.html",
+      "createdAt": "8/31/2026, 8:54:55 AM",
+      "hash": "d3ca649a6a69001e91099a1b8b86a20888e435229082456ac646f839e8f550b3"
+    }
+  ]
+}

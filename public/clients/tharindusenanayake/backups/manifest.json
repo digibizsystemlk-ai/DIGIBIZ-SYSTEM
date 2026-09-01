@@ -1,0 +1,20 @@
+{
+  "clientId": "tharindusenanayake",
+  "maxRetention": 3,
+  "lastBackupAt": "2026-08-31T15:57:32.603Z",
+  "activeBackupsCount": 2,
+  "backups": [
+    {
+      "slot": 1,
+      "fileName": "index.backup_2026-08-31_21-27-32.html",
+      "createdAt": "8/31/2026, 9:27:32 PM",
+      "hash": "981a620afd625b0f30e9095c2cb73cb60ae4c940f64816df8668495c6175be47"
+    },
+    {
+      "slot": 2,
+      "fileName": "index.backup_2026-08-31_20-59-24.html",
+      "createdAt": "8/31/2026, 8:59:24 PM",
+      "hash": "d5e7414a64255a4ce2cb1ef33a912e53c1447b69a202e739d5fe52d1a1ae8e7e"
+    }
+  ]
+}

@@ -27,7 +27,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1341,136 +1340,6 @@
             letter-spacing: 0.6px;
         }
 
-    
-        /* ===== WHATSAPP & ACTION BUTTONS ===== */
-        .btn-wa {
-            background: #25d366 !important;
-            color: #ffffff !important;
-            font-weight: 700 !important;
-            border: none !important;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-wa:hover {
-            background: #20ba5a !important;
-            color: #ffffff !important;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
-        }
-
-        /* ===== DISTINCT PAYMENT & STATUS BADGES ===== */
-        .badge-cash {
-            background: #10b981 !important;
-            color: #ffffff !important;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .badge-credit {
-            background: #ef4444 !important;
-            color: #ffffff !important;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .badge-partial {
-            background: #f59e0b !important;
-            color: #ffffff !important;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .badge-bank {
-            background: #2563eb !important;
-            color: #ffffff !important;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .badge-card {
-            background: #8b5cf6 !important;
-            color: #ffffff !important;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .badge-cheque {
-            background: #ea580c !important;
-            color: #ffffff !important;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-
-        /* ===== SIDEBAR SCROLLBAR & PRESETS ===== */
-        .sidebar {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-            padding-bottom: 90px !important;
-            overflow-y: auto !important;
-        }
-        .sidebar::-webkit-scrollbar {
-            width: 7px;
-        }
-        .sidebar::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: #ff9900;
-        }
-
-        .date-preset-pill {
-            padding: 4px 10px !important;
-            font-size: 11.5px !important;
-            border-radius: 20px !important;
-            border: 1px solid #d5d9d9 !important;
-            background: #fff !important;
-            color: #475569 !important;
-            font-weight: 600 !important;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .date-preset-pill:hover {
-            background: #f1f5f9 !important;
-            border-color: #cbd5e1 !important;
-        }
-        .date-preset-pill.active {
-            background: #ff9900 !important;
-            color: #131921 !important;
-            border-color: #ff9900 !important;
-            font-weight: 800 !important;
-            box-shadow: 0 1px 4px rgba(255, 153, 0, 0.3);
-        }
-
     </style>
     <link rel="manifest" href="./manifest.json" />
 </head>
@@ -1609,14 +1478,14 @@
                         </div>
                     </div>
                 </div>
-                <span class="status-badge" id="sidePlanStatusBadge" style="background:#067d62; color:#fff; font-size:9px; padding:2px 8px; border-radius:4px; font-weight:800;">ACTIVE</span>
+                <span class="status-badge" id="sidePlanStatusBadge" style="background:#22c55e; color:#fff; font-size:9px; padding:2px 8px; border-radius:4px; font-weight:800;">TRIAL</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <span class="plan-badge" style="font-size:10px; font-weight:800; color:#ff9900; letter-spacing:0.5px; text-transform:uppercase;"><i class="fas fa-crown" style="color:#ff9900;"></i> <span id="sidePlanName">PRO</span></span>
-                <div class="days-left" id="sidePlanDaysLeft" style="font-size:16px; font-weight:900; color:#ffffff;">30 Days</div>
+                <span class="plan-badge" style="font-size:10px; font-weight:800; color:#ff9900; letter-spacing:0.5px; text-transform:uppercase;"><i class="fas fa-crown" style="color:#ff9900;"></i> <span id="sidePlanName">TRIAL</span></span>
+                <div class="days-left" id="sidePlanDaysLeft" style="font-size:16px; font-weight:900; color:#ffffff;">7 Days</div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-                <div class="expiry-text" id="sidePlanExpiryDate" style="font-size:10px; color:#aaa;">Expires: 2026-10-01</div>
+                <div class="expiry-text" id="sidePlanExpiryDate" style="font-size:10px; color:#aaa;">Expires: 2026-09-05</div>
                 <div style="font-size:10.5px; color:#ff9900; display:flex; align-items:center; gap:4px; font-weight:700;">
                     <span>Billing</span> <i class="fas fa-arrow-right" style="font-size:8px;"></i>
                 </div>
@@ -1646,10 +1515,6 @@
         <a class="sidebar-item" data-page="inventory" role-page="inventory" onclick="navigateTo('inventory')">
             <i class="fas fa-boxes-stacked"></i> <span data-key="nav_stock">Stock</span>
             <span class="count" id="sideInvCount">0</span>
-        </a>
-        <a class="sidebar-item" data-page="spoilage" role-page="spoilage" onclick="navigateTo('spoilage')">
-            <i class="fas fa-trash-can" style="color:#ef4444;"></i> <span data-key="nav_spoilage">Spoilage & Damage</span>
-            <span class="count" id="sideSpoilageCount">0</span>
         </a>
         <a class="sidebar-item" data-page="services" role-page="services" onclick="navigateTo('services')">
             <i class="fas fa-scissors"></i> <span data-key="nav_services">Services</span>
@@ -1938,32 +1803,6 @@
             </div>
 
             
-            <!-- POS Live Sales Performance Ribbon -->
-            <div id="posLiveSalesBar" style="background:linear-gradient(135deg,#1e293b,#0f172a); color:#fff; border-radius:8px; padding:10px 16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; border-left:4px solid #10b981; box-shadow:0 2px 4px rgba(0,0,0,0.08);">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-chart-line" style="color:#10b981; font-size:16px;"></i>
-                    <span style="font-weight:800; font-size:13px; letter-spacing:0.5px;">TODAY'S POS PERFORMANCE</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-                    <div style="text-align:center;">
-                        <div style="font-size:10px; color:#94a3b8; font-weight:700;">INVOICES</div>
-                        <div style="font-size:15px; font-weight:900; color:#38bdf8;" id="posLiveInvoiceCount">0</div>
-                    </div>
-                    <div style="text-align:center;">
-                        <div style="font-size:10px; color:#94a3b8; font-weight:700;">TOTAL SALES</div>
-                        <div style="font-size:15px; font-weight:900; color:#10b981;" id="posLiveTotalSales">Rs. 0.00</div>
-                    </div>
-                    <div style="text-align:center;">
-                        <div style="font-size:10px; color:#94a3b8; font-weight:700;">CASH SALES</div>
-                        <div style="font-size:15px; font-weight:900; color:#f8fafc;" id="posLiveCashSales">Rs. 0.00</div>
-                    </div>
-                    <div style="text-align:center;">
-                        <div style="font-size:10px; color:#94a3b8; font-weight:700;">CREDIT (DUE)</div>
-                        <div style="font-size:15px; font-weight:900; color:#ef4444;" id="posLiveCreditSales">Rs. 0.00</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- POS Location Bar -->
             <div id="posLocationSelector" style="background:#fff; border:1px solid #d5d9d9; border-radius:8px; padding:8px 14px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
                 <!-- Dynamically rendered -->
@@ -2122,102 +1961,54 @@
         <div class="page" id="page-orders">
             <div class="page-header">
                 <div>
-                    <h1>Orders & Invoices <span class="sub">| Sales History, Invoices & Statements</span></h1>
+                    <h1>Orders & Invoices <span class="sub">| Retail Management System</span></h1>
                 </div>
                 <div class="actions">
-                    <button class="btn btn-secondary" style="background:#107c41; color:#fff; border-color:#107c41; font-weight:700;" onclick="exportOrdersExcel()" title="Export Filtered Invoices to Excel (.xlsx)"><i class="fas fa-file-excel"></i> Export Excel</button>
-                    <button class="btn btn-secondary" onclick="printOrdersStatement()" title="Print Invoices Statement / PDF"><i class="fas fa-print"></i> Print Statement</button>
                     <button class="btn btn-primary" onclick="navigateTo('pos')"><i class="fas fa-plus"></i> New Sale [F4]</button>
                 </div>
             </div>
 
-            <!-- Sales History Date Filters & Presets Suite -->
-            <div style="background:#fff; border:1px solid #d5d9d9; border-radius:8px; padding:10px 14px; margin-bottom:14px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
-                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        <span style="font-size:12px; font-weight:800; color:#555;"><i class="fas fa-filter"></i> Date Preset:</span>
-                        <button class="btn btn-secondary btn-sm date-preset-pill active" id="orderPresetAll" onclick="setOrderDatePreset('ALL')">All History</button>
-                        <button class="btn btn-secondary btn-sm date-preset-pill" id="orderPresetToday" onclick="setOrderDatePreset('TODAY')">Today</button>
-                        <button class="btn btn-secondary btn-sm date-preset-pill" id="orderPresetYesterday" onclick="setOrderDatePreset('YESTERDAY')">Yesterday</button>
-                        <button class="btn btn-secondary btn-sm date-preset-pill" id="orderPresetWeek" onclick="setOrderDatePreset('WEEK')">This Week</button>
-                        <button class="btn btn-secondary btn-sm date-preset-pill" id="orderPresetMonth" onclick="setOrderDatePreset('MONTH')">This Month</button>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <span style="font-size:11px; font-weight:700; color:#666;">From:</span>
-                            <input type="date" id="ordersFromDate" class="form-control" style="font-size:12px; padding:4px 8px; width:auto;" onchange="renderOrders()">
-                        </div>
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <span style="font-size:11px; font-weight:700; color:#666;">To:</span>
-                            <input type="date" id="ordersToDate" class="form-control" style="font-size:12px; padding:4px 8px; width:auto;" onchange="renderOrders()">
-                        </div>
-                    </div>
-                </div>
-                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; border-top:1px solid #f1f5f9; padding-top:8px;">
-                    <div style="flex:1; min-width:240px;">
-                        <input type="text" class="form-control" id="ordersSearchInput" placeholder="🔍 Search Invoice #, Customer, Phone, or Item Name..." oninput="renderOrders()" style="font-size:13px; padding:6px 12px; width:100%;">
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <label style="font-size:12px; font-weight:700; color:#555; margin:0;">Payment:</label>
-                        <select id="ordersPaymentFilter" class="form-control" style="font-size:12px; padding:4px 10px; width:auto; font-weight:600;" onchange="renderOrders()">
-                            <option value="ALL">All Payments</option>
-                            <option value="CASH">CASH</option>
-                            <option value="CREDIT">CREDIT (DUE)</option>
-                            <option value="PARTIAL">PARTIAL</option>
-                            <option value="BANK">BANK TRANSFER</option>
-                            <option value="CARD">CARD</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- KPI Cards -->
             <div class="dash-grid" style="margin-bottom:16px;">
                 <div class="dash-card" style="border-top:3px solid #ff9900;">
-                    <div class="label"><i class="fas fa-receipt"></i> Filtered Invoices</div>
+                    <div class="label"><i class="fas fa-receipt"></i> Total Invoices</div>
                     <div class="value" id="ordersTotalCount">0</div>
                 </div>
                 <div class="dash-card" style="border-top:3px solid #067d62;">
-                    <div class="label"><i class="fas fa-coins"></i> Total Sales Volume</div>
+                    <div class="label"><i class="fas fa-coins"></i> Total Sales</div>
                     <div class="value" id="ordersTotalVolume" style="color:#067d62;">LKR 0.00</div>
                 </div>
-                <div class="dash-card" style="border-top:3px solid #10b981;">
-                    <div class="label"><i class="fas fa-money-bill"></i> Cash Sales Total</div>
-                    <div class="value" id="ordersCashVolume" style="color:#10b981;">LKR 0.00</div>
-                </div>
-                <div class="dash-card" style="border-top:3px solid #dc2626;">
-                    <div class="label"><i class="fas fa-user-clock"></i> Credit (Due) Total</div>
-                    <div class="value" id="ordersCreditVolume" style="color:#dc2626;">LKR 0.00</div>
+                <div class="dash-card" style="border-top:3px solid #0066c0;">
+                    <div class="label"><i class="fas fa-hand-holding-dollar"></i> Cash vs Credit</div>
+                    <div class="value" id="ordersTenderSplit" style="color:#0066c0; font-size:16px;">0 Cash | 0 Credit</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <h3><i class="fas fa-list-check"></i> Invoices Log</h3>
+                    <h3><i class="fas fa-list-check"></i> Sales History</h3>
                 </div>
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
                                 <th>Invoice ID</th>
-                                <th>Date & Time</th>
-                                <th>Location</th>
                                 <th>Customer</th>
                                 <th>Items</th>
                                 <th>Payment</th>
                                 <th>Status</th>
-                                <th class="text-right">Net Total</th>
-                                <th class="text-right">Actions</th>
+                                <th class="text-right">Total</th>
+                                <th class="text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody id="ordersTable">
-                            <tr><td colspan="9" style="text-align:center; color:#999; padding:30px 0;">No sales invoices found</td></tr>
+                            <tr><td colspan="7" style="text-align:center; color:#999; padding:30px 0;">No sales invoices</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
+        <!-- ============================================================ -->
         <!--  4. SERVICES                                                 -->
         <!-- ============================================================ -->
         <div class="page" id="page-services">
@@ -2572,116 +2363,13 @@
             </div>
         </div>
 
-        
-        <!-- ============================================================ -->
-        <!--  SPOILAGE & DAMAGE AUDIT PAGE (හානි සහ නරක්වීම් විගණනය)       -->
-        <!-- ============================================================ -->
-        <div class="page" id="page-spoilage">
-            <div class="page-header">
-                <div>
-                    <h1>Spoilage & Damage Audit <span class="sub">| හානිවීම්, බිඳීම් සහ නරක්වීම් විගණන ලේඛනය</span></h1>
-                </div>
-                <div class="actions">
-                    <button class="btn btn-primary" onclick="openWasteModal()"><i class="fas fa-plus"></i> Record Spoilage / Damage</button>
-                    <button class="btn btn-secondary" onclick="printSpoilageStatement()" title="Print Spoilage Statement / Save as PDF"><i class="fas fa-print"></i> Print Statement (PDF)</button>
-                    <button class="btn btn-secondary" style="background:#107c41; color:#fff; border-color:#107c41; font-weight:700;" onclick="exportSpoilageExcel()" title="Export Spoilage Log to Excel (.xlsx)"><i class="fas fa-file-excel"></i> Export Excel</button>
-                </div>
-            </div>
-
-            <!-- Spoilage KPI Summary Cards -->
-            <div class="dash-grid" style="margin-bottom:16px;">
-                <div class="dash-card" style="border-top:3px solid #dc2626;">
-                    <div class="label"><i class="fas fa-trash-can"></i> Total Damaged Units</div>
-                    <div class="value" id="spoilageTotalUnitsStat" style="color:#dc2626;">0 units</div>
-                </div>
-                <div class="dash-card" style="border-top:3px solid #b91c1c;">
-                    <div class="label"><i class="fas fa-money-bill-wave"></i> Total Valuation Loss</div>
-                    <div class="value" id="spoilageTotalLossStat" style="color:#b91c1c;">LKR 0.00</div>
-                </div>
-                <div class="dash-card" style="border-top:3px solid #ea580c;">
-                    <div class="label"><i class="fas fa-egg"></i> Egg Breakage Loss</div>
-                    <div class="value" id="spoilageEggLossStat" style="color:#ea580c;">LKR 0.00</div>
-                </div>
-                <div class="dash-card" style="border-top:3px solid #64748b;">
-                    <div class="label"><i class="fas fa-clipboard-list"></i> Total Spoilage Records</div>
-                    <div class="value" id="spoilageRecordsCountStat" style="color:#334155;">0</div>
-                </div>
-            </div>
-
-            <!-- Filters Bar -->
-            <div style="background:#fff; border:1px solid #d5d9d9; border-radius:8px; padding:10px 14px; margin-bottom:14px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
-                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        <span style="font-size:12px; font-weight:800; color:#555;"><i class="fas fa-filter"></i> Date Preset:</span>
-                        <button class="btn btn-secondary btn-sm date-preset-pill active" id="spoilPresetAll" onclick="setSpoilageDatePreset('ALL')">All History</button>
-                        <button class="btn btn-secondary btn-sm date-preset-pill" id="spoilPresetToday" onclick="setSpoilageDatePreset('TODAY')">Today</button>
-                        <button class="btn btn-secondary btn-sm date-preset-pill" id="spoilPresetYesterday" onclick="setSpoilageDatePreset('YESTERDAY')">Yesterday</button>
-                        <button class="btn btn-secondary btn-sm date-preset-pill" id="spoilPresetWeek" onclick="setSpoilageDatePreset('WEEK')">This Week</button>
-                        <button class="btn btn-secondary btn-sm date-preset-pill" id="spoilPresetMonth" onclick="setSpoilageDatePreset('MONTH')">This Month</button>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <span style="font-size:11px; font-weight:700; color:#666;">From:</span>
-                            <input type="date" id="spoilageFromDate" class="form-control" style="font-size:12px; padding:4px 8px; width:auto;" onchange="renderSpoilagePage()">
-                        </div>
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <span style="font-size:11px; font-weight:700; color:#666;">To:</span>
-                            <input type="date" id="spoilageToDate" class="form-control" style="font-size:12px; padding:4px 8px; width:auto;" onchange="renderSpoilagePage()">
-                        </div>
-                    </div>
-                </div>
-                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; border-top:1px solid #f1f5f9; padding-top:8px;">
-                    <div style="flex:1; min-width:240px;">
-                        <input type="text" class="form-control" id="spoilageSearchInput" placeholder="🔍 Search product name, egg breakage, reason, notes..." oninput="renderSpoilagePage()" style="font-size:13px; padding:6px 12px; width:100%;">
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <label style="font-size:12px; font-weight:700; color:#555; margin:0;"><i class="fas fa-warehouse"></i> Location:</label>
-                        <select id="spoilageLocationFilter" class="form-control" style="font-size:12px; padding:4px 10px; width:auto; font-weight:600;" onchange="renderSpoilagePage()">
-                            <option value="ALL">All Locations</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spoilage Table -->
-            <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-trash-can" style="color:#dc2626;"></i> Spoilage & Damage Audit Registry</h3>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Record ID</th>
-                                <th>Date</th>
-                                <th>Product Name</th>
-                                <th>Branch / Location</th>
-                                <th class="text-right">Damaged Qty</th>
-                                <th class="text-right">Unit Cost</th>
-                                <th class="text-right">Total Loss</th>
-                                <th>Reason / Category</th>
-                                <th>Remarks / Notes</th>
-                                <th class="text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="spoilageTable">
-                            <tr><td colspan="10" style="text-align:center; color:#999; padding:30px 0;">No spoilage or damage records found</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
         <div class="page" id="page-inventory">
             <div class="page-header">
                 <div>
-                    <h1>Stock <span class="sub">| Multi-Location Inventory & Catalog</span></h1>
+                    <h1>Stock <span class="sub">| Multi-Location Inventory</span></h1>
                 </div>
                 <div class="actions">
                     <button class="btn btn-primary" onclick="openModal('inventoryModal')"><i class="fas fa-plus"></i> Add Product</button>
-                    <button class="btn btn-secondary" onclick="printInventoryValuationStatement()" title="Print Inventory Valuation Statement / PDF"><i class="fas fa-print"></i> Valuation Statement</button>
-                    <button class="btn btn-secondary" style="background:#107c41; color:#fff; border-color:#107c41; font-weight:700;" onclick="exportStockExcel()" title="Export Stock Catalog to Excel (.xlsx)"><i class="fas fa-file-excel"></i> Export Excel</button>
-                    <button class="btn btn-secondary" onclick="openWasteModal()" style="color:#dc2626; border-color:#fca5a5;" title="Record Spoilage, Damage or Waste"><i class="fas fa-trash-can"></i> Spoilage / Waste</button>
                     <button class="btn btn-secondary" onclick="document.getElementById('excelFileInput').click()">
                         <i class="fas fa-file-excel" style="color:#067d62;"></i> Import Excel
                     </button>
@@ -2710,20 +2398,10 @@
             </div>
 
             <div class="card">
-                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                        <h3><i class="fas fa-warehouse"></i> Stock Catalog</h3>
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <label style="font-size:12px; font-weight:700; color:#555; margin:0;"><i class="fas fa-location-dot" style="color:#0066c0;"></i> Location:</label>
-                            <select id="stockLocationFilter" class="form-control" style="font-size:12px; padding:4px 10px; width:auto; font-weight:700;" onchange="renderInventory()">
-                                <option value="ALL">All Locations Combined</option>
-                            </select>
-                        </div>
-                    </div>
-                    <input type="text" class="form-control" id="inventorySearch" placeholder="🔍 Search item name, brand, SKU..." oninput="renderInventory()" style="max-width:280px; padding:6px 12px; font-size:13px;">
+                <div class="card-header">
+                    <h3><i class="fas fa-warehouse"></i> Stock Catalog</h3>
+                    <input type="text" class="form-control" id="inventorySearch" placeholder="Search..." oninput="renderInventory()" style="max-width:280px; padding:6px 12px; font-size:13px;">
                 </div>
-                <!-- Location Summary KPI Cards -->
-                <div id="stockLocationKPICards" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:8px; padding:10px 14px; background:#f8fafc; border-bottom:1px solid #e2e8f0;"></div>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -2733,10 +2411,10 @@
                                 <th>Category</th>
                                 <th class="text-right">Cost</th>
                                 <th class="text-right">Price</th>
-                                <th>Location Breakdown</th>
-                                <th class="text-right">Total Units</th>
-                                <th class="text-right">Valuation @ Cost</th>
-                                <th class="text-right">Actions</th>
+                                <th class="text-right">Stock</th>
+                                <th>Warranty</th>
+                                <th>Status</th>
+                                <th class="text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody id="inventoryTable">
@@ -2747,6 +2425,7 @@
             </div>
         </div>
 
+        <!-- ============================================================ -->
         <!--  10. BANKING                                                  -->
         <!-- ============================================================ -->
         <div class="page" id="page-payments">
@@ -5106,177 +4785,6 @@
         </div>
     </div>
 
-    
-    <!-- Legacy Debt / Credit Add Modal -->
-    <div class="modal-overlay" id="creditAddModal">
-        <div class="modal" style="max-width:520px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-hand-holding-dollar" style="color:#ff9900;"></i> Record New / Legacy Debt (පැරණි ණය ඇතුළත් කිරීම)</h3>
-                <button class="modal-close" onclick="closeModal('creditAddModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Customer Name *</label>
-                    <input type="text" class="form-control" id="legacyDebtCustomer" list="legacyCustomerDatalist" placeholder="Select or type customer name...">
-                    <datalist id="legacyCustomerDatalist"></datalist>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="text" class="form-control" id="legacyDebtPhone" placeholder="0771234567">
-                    </div>
-                    <div class="form-group">
-                        <label>Branch / Location</label>
-                        <select class="form-control" id="legacyDebtLocation"></select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Debt Date *</label>
-                        <input type="date" class="form-control" id="legacyDebtDate">
-                    </div>
-                    <div class="form-group">
-                        <label>Debt Amount (LKR) *</label>
-                        <input type="number" class="form-control" id="legacyDebtAmount" placeholder="0.00" style="font-size:16px; font-weight:800; color:#dc2626;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Description / Reference</label>
-                    <input type="text" class="form-control" id="legacyDebtDesc" placeholder="e.g. Opening Balance prior to POS installation / Manual Ledger Book">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('creditAddModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="submitLegacyDebt()"><i class="fas fa-check"></i> Save Legacy Debt</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Debt Collection Modal -->
-    <div class="modal-overlay" id="creditCollectModal">
-        <div class="modal" style="max-width:520px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-hand-holding-dollar" style="color:#067d62;"></i> Collect Customer Debt (ණය අයකර ගැනීම)</h3>
-                <button class="modal-close" onclick="closeModal('creditCollectModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Select Debtor / Customer *</label>
-                    <select class="form-control" id="collectDebtCustomerSelect" onchange="onCollectDebtCustomerChange(this.value)">
-                        <option value="">-- Select Customer --</option>
-                    </select>
-                </div>
-                <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:12px; font-weight:700; color:#991b1b;">Current Outstanding Due:</span>
-                    <span id="collectDebtCurrentDue" style="font-size:16px; font-weight:900; color:#dc2626;">LKR 0.00</span>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Collection Amount (LKR) *</label>
-                        <input type="number" class="form-control" id="collectDebtAmount" placeholder="0.00" style="font-size:16px; font-weight:800; color:#067d62;">
-                    </div>
-                    <div class="form-group">
-                        <label>Payment Method</label>
-                        <select class="form-control" id="collectDebtMethod" onchange="onCollectDebtMethodChange(this.value)">
-                            <option value="CASH">Cash in Drawer</option>
-                            <option value="BANK">Bank Transfer / Deposit</option>
-                            <option value="CHEQUE">Cheque</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" id="collectDebtBankRow" style="display:none;">
-                    <label>Deposit To Bank Account</label>
-                    <select class="form-control" id="collectDebtBankSelect"></select>
-                </div>
-                <div class="form-row" id="collectDebtChequeRow" style="display:none;">
-                    <div class="form-group">
-                        <label>Cheque Number</label>
-                        <input type="text" class="form-control" id="collectDebtChequeNo" placeholder="CHQ-123456">
-                    </div>
-                    <div class="form-group">
-                        <label>Cheque Realization Date</label>
-                        <input type="date" class="form-control" id="collectDebtChequeDate">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Receipt Note / Reference</label>
-                    <input type="text" class="form-control" id="collectDebtNotes" placeholder="e.g. Receipt #5021 / Partial Payment">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('creditCollectModal')">Cancel</button>
-                <button class="btn btn-success" onclick="submitCollectDebt()"><i class="fas fa-check"></i> Complete Collection</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Spoilage & Damage Modal -->
-    <div class="modal-overlay" id="spoilageModal">
-        <div class="modal" style="max-width:540px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-trash-can" style="color:#dc2626;"></i> Record Spoilage & Damage (හානි/නරක්වීම්)</h3>
-                <button class="modal-close" onclick="closeModal('spoilageModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Choose Product *</label>
-                    <select class="form-control" id="spoilageProductSelect" onchange="onSpoilageProductChange(this.value)">
-                        <option value="">-- Choose Product --</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Branch / Location *</label>
-                        <select class="form-control" id="spoilageLocationSelect" onchange="onSpoilageLocationChange()"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Current Stock in Location</label>
-                        <input type="text" class="form-control" id="spoilageAvailableStock" readonly style="font-weight:800; background:#f8fafc;">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Quantity Damaged / Spoiled *</label>
-                        <input type="number" class="form-control" id="spoilageQty" placeholder="0" min="1" oninput="calcSpoilageLoss()" style="font-size:15px; font-weight:800;">
-                    </div>
-                    <div class="form-group">
-                        <label>Unit Cost (LKR)</label>
-                        <input type="number" class="form-control" id="spoilageUnitCost" readonly style="font-weight:700;">
-                    </div>
-                </div>
-                <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:12px; font-weight:700; color:#991b1b;">Total Valuation Loss:</span>
-                    <span id="spoilageTotalLossDisplay" style="font-size:15px; font-weight:900; color:#dc2626;">LKR 0.00</span>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Date *</label>
-                        <input type="date" class="form-control" id="spoilageDate">
-                    </div>
-                    <div class="form-group">
-                        <label>Damage Reason / Type</label>
-                        <select class="form-control" id="spoilageReason">
-                            <option value="Expired / Spoiled">Expired / Spoiled (කල් ඉකුත් වූ)</option>
-                            <option value="Broken / Egg Breakage">Breakage / Egg Breakage (බිඳී ගිය)</option>
-                            <option value="Transit Damage">Transit Damage (ප්‍රවාහන හානි)</option>
-                            <option value="Water / Moisture Damage">Water / Moisture Damage</option>
-                            <option value="Handling Damage">Handling Damage (ගබඩා හානි)</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Remarks / Notes</label>
-                    <input type="text" class="form-control" id="spoilageNotes" placeholder="e.g. 5 eggs broken in crate #2">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('spoilageModal')">Cancel</button>
-                <button class="btn btn-danger" onclick="submitSpoilageRecord()"><i class="fas fa-trash-can"></i> Deduct & Record Loss</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -6801,7 +6309,7 @@
 
     var rolePermissions = {
         'admin': {
-            pages: ['dashboard', 'pos', 'orders', 'locations', 'inventory', 'spoilage', 'services', 'appointments', 
+            pages: ['dashboard', 'pos', 'orders', 'locations', 'inventory', 'services', 'appointments', 
                     'grn', 'suppliers', 'workbench', 'payments', 'customers', 'expenses', 
                     'credit', 'revenue', 'accounting', 'reports', 'settings', 'subscription', 'manual'],
             name: 'Admin',
@@ -6809,7 +6317,7 @@
             color: '#ff9900'
         },
         'manager': {
-            pages: ['dashboard', 'pos', 'orders', 'locations', 'inventory', 'spoilage', 'customers', 'reports', 'payments', 'expenses', 'workbench', 'credit', 'manual'],
+            pages: ['dashboard', 'pos', 'orders', 'locations', 'inventory', 'customers', 'reports', 'payments', 'expenses', 'workbench', 'credit', 'manual'],
             name: 'Manager',
             icon: 'fa-user-tie',
             color: '#0066c0'
@@ -7208,7 +6716,6 @@
         else if (page === 'suppliers') renderSuppliers();
         else if (page === 'workbench') renderWorkbench();
         else if (page === 'inventory') renderInventory();
-        else if (page === 'spoilage') renderSpoilagePage();
         else if (page === 'payments') renderPayments();
         else if (page === 'expenses') renderExpenses();
         else if (page === 'revenue') renderRevenue();
@@ -7729,7 +7236,7 @@
     }
 
     function renderDashboard() {
-        console.log('🔄 Rendering Executive Dashboard & Net Profit Engine...');
+        console.log('🔄 Rendering Dashboard...');
         populateDashboardLocationFilter();
         var filterLoc = document.getElementById('dashLocationFilter')?.value || 'ALL';
         
@@ -7738,80 +7245,55 @@
         
         if (filterLoc === 'ALL') {
             stockValue = (data.inventory || []).reduce(function(sum, item) {
-                return sum + (((item && item.cost) || 0) * (item.totalStock !== undefined ? item.totalStock : (item.stock || 0)));
+                return sum + (((item && item.cost) || 0) * (item.totalStock || item.stock || 0));
             }, 0);
             lowStockCount = (data.inventory || []).filter(function(item) {
-                return (item.totalStock !== undefined ? item.totalStock : (item.stock || 0)) <= 3;
+                return (item.totalStock || item.stock || 0) <= 3;
             }).length;
         } else {
             stockValue = (data.inventory || []).reduce(function(sum, item) {
-                var q = (item.locationStock && typeof item.locationStock[filterLoc] === 'number') ? item.locationStock[filterLoc] : 0;
-                return sum + (((item && item.cost) || 0) * q);
+                return sum + (((item && item.cost) || 0) * ((item.locationStock && item.locationStock[filterLoc]) || 0));
             }, 0);
             lowStockCount = (data.inventory || []).filter(function(item) {
-                var q = (item.locationStock && typeof item.locationStock[filterLoc] === 'number') ? item.locationStock[filterLoc] : 0;
-                return q <= 3 && q > 0;
+                return ((item.locationStock && item.locationStock[filterLoc]) || 0) <= 3 && ((item.locationStock && item.locationStock[filterLoc]) || 0) > 0;
             }).length;
         }
         
-        var todayStr = getToday();
-        var now = new Date();
-
-        var weekStart = new Date();
-        weekStart.setDate(now.getDate() - 7);
-        var weekStartStr = getLocalDateString(weekStart);
-
-        var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        var monthStartStr = getLocalDateString(monthStart);
-
-        var yearStart = new Date(now.getFullYear(), 0, 1);
-        var yearStartStr = getLocalDateString(yearStart);
-
+        var today = new Date();
+        var todayStr = today.toISOString().split('T')[0];
+        
         var bills = (data.posBills || []).filter(function(b) {
             if (filterLoc !== 'ALL' && b.locationId && b.locationId !== filterLoc) return false;
             return true;
         });
-
-        function getPeriodStats(startDate, endDate) {
-            var pBills = bills.filter(function(b) {
-                var d = getOrderDate(b);
-                if (startDate && d < startDate) return false;
-                if (endDate && d > endDate) return false;
-                return true;
-            });
-            var rev = pBills.reduce(function(s, b) { return s + (b.total || 0); }, 0);
-            var cogs = pBills.reduce(function(s, b) { return s + (b.cost || 0); }, 0);
-
-            var pExp = (data.expenses || []).filter(function(e) {
-                if (filterLoc !== 'ALL' && e.locationId && e.locationId !== filterLoc) return false;
-                var d = (e.date || '').substring(0, 10);
-                if (startDate && d < startDate) return false;
-                if (endDate && d > endDate) return false;
-                return true;
-            }).reduce(function(s, e) { return s + (e.amount || 0); }, 0);
-
-            var profit = rev - cogs - pExp;
-            return { revenue: rev, cogs: cogs, expenses: pExp, profit: profit };
-        }
-
-        var todayStats = getPeriodStats(todayStr, todayStr);
-        var weekStats = getPeriodStats(weekStartStr, todayStr);
-        var monthStats = getPeriodStats(monthStartStr, todayStr);
-        var yearStats = getPeriodStats(yearStartStr, todayStr);
-
-        var totalCredits = (data.credits || []).reduce(function(sum, c) { return sum + (c.due || 0); }, 0);
-        var totalSupplierDue = (data.suppliers || []).reduce(function(sum, s) { return sum + (s.balance || 0); }, 0);
-
-        if (document.getElementById('coreStatTodayProfit')) document.getElementById('coreStatTodayProfit').textContent = 'Rs. ' + todayStats.profit.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        if (document.getElementById('coreStatWeekProfit')) document.getElementById('coreStatWeekProfit').textContent = 'Rs. ' + weekStats.profit.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        if (document.getElementById('coreStatMonthProfit')) document.getElementById('coreStatMonthProfit').textContent = 'Rs. ' + monthStats.profit.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        if (document.getElementById('coreStatYearProfit')) document.getElementById('coreStatYearProfit').textContent = 'Rs. ' + yearStats.profit.toLocaleString('en-US', { minimumFractionDigits: 2 });
-
-        if (document.getElementById('coreStatTodayExpense')) document.getElementById('coreStatTodayExpense').textContent = 'Rs. ' + todayStats.expenses.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        if (document.getElementById('coreStatWeekExpense')) document.getElementById('coreStatWeekExpense').textContent = 'Rs. ' + weekStats.expenses.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        if (document.getElementById('coreStatMonthExpense')) document.getElementById('coreStatMonthExpense').textContent = 'Rs. ' + monthStats.expenses.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        if (document.getElementById('coreStatYearExpense')) document.getElementById('coreStatYearExpense').textContent = 'Rs. ' + yearStats.expenses.toLocaleString('en-US', { minimumFractionDigits: 2 });
-
+        
+        var todaySales = bills.filter(function(b) {
+            var billDate = (b.date || '').substring(0, 10);
+            return billDate === todayStr;
+        }).reduce(function(sum, b) {
+            return sum + (b.total || 0);
+        }, 0);
+        
+        var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        var monthStartStr = monthStart.toISOString().split('T')[0];
+        var monthSales = bills.filter(function(b) {
+            var billDate = (b.date || '').substring(0, 10);
+            return billDate >= monthStartStr;
+        }).reduce(function(sum, b) {
+            return sum + (b.total || 0);
+        }, 0);
+        
+        var totalExpenses = (data.expenses || []).filter(function(e) {
+            if (filterLoc !== 'ALL' && e.locationId && e.locationId !== filterLoc) return false;
+            return true;
+        }).reduce(function(sum, e) {
+            return sum + (e.amount || 0);
+        }, 0);
+        
+        var totalCredits = (data.credits || []).reduce(function(sum, c) {
+            return sum + (c.due || 0);
+        }, 0);
+        
         if (document.getElementById('kpiStockVal')) document.getElementById('kpiStockVal').textContent = 'LKR ' + stockValue.toLocaleString('en-US', { minimumFractionDigits: 2 });
         if (document.getElementById('kpiStockSub')) {
             if (filterLoc === 'ALL') {
@@ -7822,19 +7304,23 @@
             }
         }
         if (document.getElementById('kpiLowStockVal')) document.getElementById('kpiLowStockVal').textContent = lowStockCount;
-        if (document.getElementById('kpiTodaySalesVal')) document.getElementById('kpiTodaySalesVal').textContent = 'LKR ' + todayStats.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        if (document.getElementById('kpiMonthSalesVal')) document.getElementById('kpiMonthSalesVal').textContent = 'LKR ' + monthStats.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        if (document.getElementById('kpiTodaySalesVal')) document.getElementById('kpiTodaySalesVal').textContent = 'LKR ' + todaySales.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        if (document.getElementById('kpiMonthSalesVal')) document.getElementById('kpiMonthSalesVal').textContent = 'LKR ' + monthSales.toLocaleString('en-US', { minimumFractionDigits: 2 });
         if (document.getElementById('kpiCustDueVal')) document.getElementById('kpiCustDueVal').textContent = 'LKR ' + totalCredits.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        if (document.getElementById('kpiSuppDueVal')) document.getElementById('kpiSuppDueVal').textContent = 'LKR ' + totalSupplierDue.toLocaleString('en-US', { minimumFractionDigits: 2 });
-
+        
+        var profit = todaySales - totalExpenses;
+        if (document.getElementById('coreStatTodayProfit')) document.getElementById('coreStatTodayProfit').textContent = 'Rs. ' + (profit > 0 ? profit.toFixed(2) : '0.00');
+        if (document.getElementById('coreStatTodayExpense')) document.getElementById('coreStatTodayExpense').textContent = 'Rs. ' + totalExpenses.toFixed(2);
+        
         var drawerCash = bills.filter(function(b) {
             return b.tender === 'CASH';
-        }).reduce(function(sum, b) { return sum + (b.total || 0); }, 0) - (data.expenses || []).reduce(function(s, e) { return s + (e.amount || 0); }, 0);
+        }).reduce(function(sum, b) {
+            return sum + (b.total || 0);
+        }, 0) - totalExpenses;
         if (document.getElementById('kpiCashFlowVal')) document.getElementById('kpiCashFlowVal').textContent = 'LKR ' + drawerCash.toLocaleString('en-US', { minimumFractionDigits: 2 });
-
+        
         if (typeof renderDashboardCharts === 'function') renderDashboardCharts();
-        if (typeof updatePosLiveSalesBar === 'function') updatePosLiveSalesBar();
-        if (typeof populateGRNProductDatalist === 'function') populateGRNProductDatalist();
+        console.log('✅ Dashboard Updated - Stock: LKR', stockValue, '| Month Sales: LKR', monthSales, '| Filter:', filterLoc);
     }
 
     function renderDashboardCharts() {

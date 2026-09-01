@@ -1,0 +1,23 @@
+{
+    "name": "COURIER PRO — Next-Gen Courier Management",
+    "short_name": "COURIER PRO",
+    "description": "Enterprise Courier Management System & Barcode Tracking Platform for Tharindu Senanayake",
+    "start_url": "/clients/tharindusenanayake/index.html",
+    "scope": "/clients/tharindusenanayake/",
+    "display": "standalone",
+    "background_color": "#131921",
+    "theme_color": "#00d4ff",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "/clients/tharindusenanayake/assets/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/clients/tharindusenanayake/assets/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

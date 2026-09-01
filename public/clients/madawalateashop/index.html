@@ -4155,7 +4155,7 @@
             if (planVal) planVal.textContent = (sub.plan || 'TRIAL').toUpperCase();
 
             const expVal = document.getElementById('expiryValue');
-            if (expVal) expVal.textContent = (sub.expireDate || '2026-08-31') + ' 12:00 PM';
+            if (expVal) expVal.textContent = (sub.expireDate || '2026-10-01') + ' 12:00 PM';
 
             const feeTxt = document.getElementById('subFeeText');
             if (feeTxt) feeTxt.textContent = 'Rs. ' + (sub.monthlyFee || 1000).toLocaleString();
@@ -4176,7 +4176,7 @@
             if (trialCreds) trialCreds.textContent = sub.smsBalance || 300;
 
             const trialEnds = document.getElementById('trialSmsEnds');
-            if (trialEnds) trialEnds.textContent = (sub.expireDate || '2026-08-31') + ', 12:00:00 PM (Noon)';
+            if (trialEnds) trialEnds.textContent = (sub.expireDate || '2026-10-01') + ', 12:00:00 PM (Noon)';
 
             const smsHeaderInput = document.getElementById('smsHeaderInput');
             if (smsHeaderInput && sub.smsHeader) smsHeaderInput.value = sub.smsHeader;
@@ -4349,30 +4349,29 @@
                 subListenerUnsub = db.collection('system_clients').doc('madawalateashop').onSnapshot((doc) => {
                     if (doc && doc.exists) {
                         const data = doc.data() || {};
-                        const activePlan = (data.package || data.plan || 'TRIAL').toUpperCase();
+                        const activePlan = (data.package || data.plan || 'PRO').toUpperCase();
                         const activeStatus = data.status || (activePlan === 'PRO' ? 'active' : 'trial');
                         currentSubscription.plan = activePlan;
                         currentSubscription.status = activeStatus;
-                        currentSubscription.startDate = data.startDate || '2026-08-24';
-                        currentSubscription.expireDate = data.expiryDate || data.expireDate || '2026-08-31';
+                        currentSubscription.startDate = data.startDate || '2026-09-01';
+                        currentSubscription.expireDate = data.expiryDate || data.expireDate || '2026-10-01';
                         currentSubscription.monthlyFee = data.monthlyFee || 1000;
                         currentSubscription.smsBalance = data.smsCredits !== undefined ? data.smsCredits : (data.smsBalance || 300);
                         currentSubscription.smsHeader = data.smsHeader || 'MADAWALA';
                     } else {
-                        // Setup 2 days left trial expiration
-                        const expStr = '2026-08-31';
-
                         const clientPayload = {
                             clientId: 'madawalateashop',
                             businessName: 'MADAWALA TEA SHOP',
-                            ownerName: 'Darshana Madawala',
+                            ownerName: 'DARSHANA MADAWALA',
                             email: 'darshanamadawala80@gmail.com',
-                            phone: '0771234567',
+                            phone: '0778933264',
                             businessType: 'credit_ledger',
-                            plan: 'TRIAL',
-                            status: 'trial',
-                            startDate: '2026-08-24',
-                            expireDate: expStr,
+                            plan: 'PRO',
+                            package: 'PRO',
+                            status: 'active',
+                            startDate: '2026-09-01',
+                            expireDate: '2026-10-01',
+                            expiryDate: '2026-10-01',
                             monthlyFee: 1000,
                             smsBalance: 300,
                             smsHeader: 'MADAWALA',
@@ -4381,10 +4380,10 @@
                         };
                         db.collection('system_clients').doc('madawalateashop').set(clientPayload, { merge: true });
 
-                        currentSubscription.plan = 'TRIAL';
-                        currentSubscription.status = 'trial';
-                        currentSubscription.startDate = '2026-08-24';
-                        currentSubscription.expireDate = expStr;
+                        currentSubscription.plan = 'PRO';
+                        currentSubscription.status = 'active';
+                        currentSubscription.startDate = '2026-09-01';
+                        currentSubscription.expireDate = '2026-10-01';
                         currentSubscription.monthlyFee = 1000;
                     }
                     

@@ -5256,10 +5256,10 @@
             const now = new Date();
 
             if (subDoc.exists) {
-                const subData = subDoc.data();
-                const expDateStr = subData.expiryDate || subData.expireDate || data.subscription.expireDate;
-                const regDateStr = subData.registeredAt || subData.startDate || data.subscription.startDate;
-                const activePlan = (subData.package || subData.plan || 'TRIAL').toUpperCase();
+                const subData = subDoc.data() || {};
+                const expDateStr = subData.expiryDate || subData.expireDate || '2026-10-01';
+                const regDateStr = subData.registeredAt || subData.startDate || '2026-09-01';
+                const activePlan = (subData.package || subData.plan || 'PRO').toUpperCase();
                 const activeStatus = subData.status || (activePlan === 'PRO' ? 'active' : 'trial');
 
                 data.subscription = {
@@ -5271,6 +5271,29 @@
                     monthlyFee: Number(subData.monthlyFee) || 1000,
                     smsBalance: Number(subData.smsCredits !== undefined ? subData.smsCredits : subData.smsBalance) || 300
                 };
+            } else {
+                await firebase.firestore().collection('system_clients').doc('chisathifamily').set({
+                    businessName: 'CHISATHI FAMILY PRODUCTS',
+                    ownerEmail: 'chisathifamily@gmail.com',
+                    ownerName: 'Chisathi Family',
+                    package: 'PRO',
+                    plan: 'PRO',
+                    status: 'active',
+                    startDate: '2026-09-01',
+                    registeredAt: '2026-09-01',
+                    expiryDate: '2026-10-01',
+                    expireDate: '2026-10-01',
+                    monthlyFee: 1000,
+                    smsCredits: 300,
+                    allowedEmails: ['chisathifamily@gmail.com', 'shashinthakumara@gmail.com', 'biz.sirimal@gmail.com'],
+                    workspacePath: '/clients/chisathifamily/',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                data.subscription.plan = 'PRO';
+                data.subscription.status = 'ACTIVE';
+                data.subscription.startDate = '2026-09-01';
+                data.subscription.expireDate = '2026-10-01';
             }
 
             // Real-time listener for instant admin extensions
@@ -5280,7 +5303,7 @@
                         const subData = doc.data() || {};
                         const expDateStr = subData.expiryDate || subData.expireDate || data.subscription.expireDate;
                         const regDateStr = subData.registeredAt || subData.startDate || data.subscription.startDate;
-                        const activePlan = (subData.package || subData.plan || 'TRIAL').toUpperCase();
+                        const activePlan = (subData.package || subData.plan || 'PRO').toUpperCase();
                         const activeStatus = subData.status || (activePlan === 'PRO' ? 'active' : 'trial');
 
                         data.subscription = {
@@ -5297,29 +5320,6 @@
                         updateBadges();
                     }
                 });
-            } else {
-                const startStr = now.toISOString().split('T')[0];
-                const expObj = new Date(now);
-                expObj.setDate(expObj.getDate() + 7);
-                const expStr = expObj.toISOString().split('T')[0];
-
-                await firebase.firestore().collection('system_clients').doc('chisathifamily').set({
-                    businessName: 'CHISATHI FAMILY PRODUCTS',
-                    ownerEmail: 'shashinthakumara@gmail.com',
-                    ownerName: 'Chisathi Family',
-                    package: 'TRIAL',
-                    status: 'trial',
-                    registeredAt: startStr,
-                    expiryDate: expStr,
-                    monthlyFee: 1000,
-                    smsCredits: 300,
-                    allowedEmails: ['shashinthakumara@gmail.com', 'biz.sirimal@gmail.com'],
-                    workspacePath: '/clients/chisathifamily/',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-
-                data.subscription.startDate = startStr;
-                data.subscription.expireDate = expStr;
             }
 
             const clientDoc = await firebase.firestore().collection('clients').doc('chisathifamily').get();
@@ -12046,17 +12046,17 @@
     function getSubscriptionStatus() {
         const sub = data.subscription || {};
         const now = new Date();
-        const start = sub.startDate || '2026-08-26';
-        const exp = new Date(sub.expireDate || '2026-09-02');
+        const start = sub.startDate || '2026-09-01';
+        const exp = new Date(sub.expireDate || '2026-10-01');
         const diffMs = exp.getTime() - now.getTime();
         const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
         const isExpired = diffMs <= 0 || sub.status === 'suspended' || sub.status === 'expired';
 
         return {
-            plan: (sub.plan || 'TRIAL').toUpperCase(),
+            plan: (sub.plan || 'PRO').toUpperCase(),
             status: isExpired ? 'EXPIRED' : ((sub.plan || '').toUpperCase() === 'TRIAL' ? 'TRIAL' : 'ACTIVE'),
             startDate: start,
-            expireDate: sub.expireDate || '2026-09-02',
+            expireDate: sub.expireDate || '2026-10-01',
             daysLeft: daysLeft,
             isExpired: isExpired,
             smsBalance: sub.smsBalance || 300,
